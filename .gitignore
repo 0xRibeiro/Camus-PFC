@@ -1,0 +1,17 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Environment variables
+.env
+
+# Python
+**/__pycache__/
+**/.venv/
