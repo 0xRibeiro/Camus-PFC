@@ -1,7 +1,7 @@
 [project]
-name = "template-backend"
+name = "camus-backend"
 version = "0.1.0"
-description = "Base de backend (FastAPI + core + domain usuario) pra começar projetos novos"
+description = "backend fastapi do Camus"
 requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.5",
