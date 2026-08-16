@@ -10,6 +10,7 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 
+
 # registra cada model q implementa Base para que o Alembic possa gerar as migrations automaticamente
 from app.domains.usuario.model import Usuario  
 from app.domains.aquario.model import Aquario
