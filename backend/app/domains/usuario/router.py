@@ -6,7 +6,7 @@ from app.core.database import get_async_session
 from app.core.security import criar_access_token
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.schema import UsuarioRead, UsuarioCreate, UsuarioUpdate
-from app.domains.usuario.service import criar_usuario, autenticar, current_active_user, atualizar_usuario, deletar_usuario, buscar_usuario, verificar_permissao
+from app.domains.usuario.service import criar_usuario, autenticar, current_active_user, atualizar_usuario, deletar_usuario, buscar_usuario
 
 router = APIRouter()
 

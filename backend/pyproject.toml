@@ -6,7 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.5",
     "email-validator>=2.3.0",
-    "fastapi>=0.140.7",
+    "fastapi[standard]>=0.141.1",
     "fastapi-pagination>=0.15.16",
     "psycopg[binary]>=3.3.4",
     "pwdlib[argon2]>=0.3.0",
