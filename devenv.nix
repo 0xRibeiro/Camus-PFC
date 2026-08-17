@@ -2,6 +2,14 @@
 
 {
 
+  languages.javascript = {
+    enable = true;
+    directory = "web";
+    bun.enable = true;
+  };
+
+  languages.typescript.enable = true;
+
   languages.python = {
     enable = true;
     venv.enable = true;
@@ -13,12 +21,6 @@
   };
 
 
-  # https://devenv.sh/packages/
-  packages = with pkgs; [
-
-    ];
-
-
   # https://devenv.sh/services/
   services.postgres = {
     enable = true;
@@ -28,10 +30,9 @@
      ];
   };
 
-  scripts.pgup.exec = ''
-  port=$(awk '/^port/ {print $3}' "$PGDATA/postgresql.conf")
-  echo "export PGPORT=$port"
-  '';
+  services.redis.enable = true;
+
+  services.influxdb.enable = true;
 
 
   # https://devenv.sh/basics/
