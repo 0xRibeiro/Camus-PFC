@@ -2,7 +2,7 @@
 
 <!-- MODELO PROJETO EM ANDAMENTO -->
 <h1 align="center"> 
-	🚧 Camus - Em contrução 🚧
+	🐟 Camus - Em contrução 🐟
 </h1>
 
 
@@ -20,7 +20,7 @@
 
 
 <!-- MODELO DESCRIÇÃO SOBRE O PROJETO: -->
-## 💻 Sobre o projeto
+## 🐟 Sobre o projeto
 
 <!-- EXPLICA O MOTIVO DO PROJETO -->
 Camus é um projeto criado para a conclusão da nossa graduação em Engenharia de Software. ele é um projeto que integra IoT e desnevolvimento de software para construção de um SUMP inteligente com um app mobile para aprendizado e ensino sobre oceanografia limnologia e controle do sump em seus aquarios e microcosmos de estudo.
@@ -32,7 +32,7 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 <!-- ---------------------------------------------------------------------- -->
 
 <!-- MODELO FUNCIONALIDADES: -->
-## ⚙️ Funcionalidades
+## 🐡 Funcionalidades
 
 <!-- EXEMPLO DE FUNCIONALIDADES: -->
 - [x] Se o usuário não enviar mensagens dentro de 1 minuto o chat deve responder uma mensagem automaticamente.
@@ -43,7 +43,7 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 <!-- ---------------------------------------------------------------------- -->
 
 <!-- EXEMPLO DE LAYOUT: -->
-## 🎨 Layout
+## 🐧 Layout
 
 ### Widget
 
@@ -56,7 +56,7 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 
 <!-- ---------------------------------------------------------------------- -->
 
-## 🚀 Como executar o projeto
+## 🦈 Como executar o projeto
 
 Esse projeto usa [devenv](https://devenv.sh) (Nix) pra gerenciar o ambiente de desenvolvimento inteiro: Python, Node/bun, Postgres, Redis e InfluxDB sobem juntos, sem precisar instalar nada disso manualmente.
 
@@ -110,7 +110,7 @@ Além disto é bom ter um editor para trabalhar com o código como [VSCode](http
 
 <!-- ---------------------------------------------------------------------- -->
 
-## 🛠 Tecnologias
+## 🎣 Tecnologias
 
 As seguintes ferramentas estao sendo usadas na construção do projeto:
 
@@ -138,17 +138,6 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 - [InfluxDB](https://www.influxdata.com/)
 
 ---
-
 <!-- ---------------------------------------------------------------------- -->
 
-
-<!-- MODELO DE AUTOR-->
-## 🦸 Autor
-
----
-
-<!-- ---------------------------------------------------------------------- -->
-
-<!-- MODELO DE LICENÇA -->
-## 📝 Licença
 
