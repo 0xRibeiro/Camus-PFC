@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer
 from pwdlib import PasswordHash
 
 from app.core.config import settings
@@ -11,7 +11,7 @@ password_hash = PasswordHash.recommended()
 
 
 # Cria uma instância do OAuth2PasswordBearer, que é usada para extrair o token JWT do cabeçalho Authorization das requisições.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+bearer_scheme = HTTPBearer()
 
 # Função para gerar o hash da senha fornecida.
 def criar_hash(password: str) -> str:

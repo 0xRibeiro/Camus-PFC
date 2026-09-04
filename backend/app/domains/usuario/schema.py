@@ -1,5 +1,8 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+class UsuarioLogin(BaseModel):
+    username: str
+    password: str
 
 
 class UsuarioRead(BaseModel):

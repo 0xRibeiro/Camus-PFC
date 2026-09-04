@@ -1,9 +1,10 @@
 from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.core.exceptions import AcessoNegadoError, ConflitoError, NaoAutorizadoError, NaoEncontradoError
-from app.core.security import decodificar_access_token, criar_hash, oauth2_scheme, verificar_password
+from app.core.security import decodificar_access_token, criar_hash, bearer_scheme, verificar_password
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import UsuarioCreate, UsuarioUpdate
@@ -66,10 +67,10 @@ async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
 
 # Descobre quem é o usuário dono do token da requisição.
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_async_session),
 ) -> Usuario:
-    user_id = decodificar_access_token(token)
+    user_id = decodificar_access_token(credentials.credentials)
     if user_id is None:
         raise NaoAutorizadoError("credenciais inválidas")
 
