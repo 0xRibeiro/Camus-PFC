@@ -16,3 +16,6 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.51",
     "uvicorn[standard]>=0.51.0",
 ]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
