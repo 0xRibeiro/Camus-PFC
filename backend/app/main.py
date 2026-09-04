@@ -15,3 +15,5 @@ add_pagination(app)
 async def health():
     return {"status": "ok"}
 
+
+## Teste de commits.
