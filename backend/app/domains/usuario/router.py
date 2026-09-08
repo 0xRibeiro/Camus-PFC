@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
-from app.core.security import criar_access_token
+from app.core.security import criar_access_token, criar_refresh_token
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.schema import UsuarioLogin, UsuarioRead, UsuarioCreate, UsuarioUpdate
 from app.domains.usuario.service import criar_usuario, autenticar, current_active_user, atualizar_usuario, deletar_usuario, buscar_usuario
@@ -35,8 +35,13 @@ async def login(
     db: AsyncSession = Depends(get_async_session),
 ) -> dict:
     user = await autenticar(db, credentials.username, credentials.password)
-    token = criar_access_token(str(user.id))
-    return {"access_token": token, "token_type": "bearer"}
+    access_token = criar_access_token(str(user.id))
+    refresh_token = await criar_refresh_token(str(user.id))
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
 ### rotas usuario
