@@ -6,8 +6,10 @@ class Settings(BaseSettings):
     model_config =  {"env_file": ".env"} 
 
     database_url: str
+    redis_url: str
     jwt_secret: str
-    jwt_lifetime_seconds: int = 3600
+    jwt_lifetime_seconds: int = 900
+    refresh_token_lifetime_seconds: int = 604800
     debug: bool = False
 
 
