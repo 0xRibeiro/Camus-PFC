@@ -14,6 +14,7 @@ from app.core.database import Base
 # registra cada model q implementa Base para que o Alembic possa gerar as migrations automaticamente
 from app.domains.usuario.model import Usuario  
 from app.domains.aquario.model import Aquario
+from app.domains.trilha.model import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
