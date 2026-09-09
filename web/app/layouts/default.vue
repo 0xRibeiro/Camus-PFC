@@ -1,13 +1,3 @@
-<script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
-
-const open = ref(true)
-
-const items: NavigationMenuItem[] = [
-  { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
-]
-</script>
-
 <template>
   <div class="flex flex-1">
     <USidebar
@@ -17,7 +7,7 @@ const items: NavigationMenuItem[] = [
       :ui="{
         container: 'h-full',
         inner: 'bg-elevated/25 divide-transparent',
-        body: 'py-0'
+        body: 'py-0',
       }"
     >
       <template #header>
@@ -51,3 +41,14 @@ const items: NavigationMenuItem[] = [
     </div>
   </div>
 </template>
+
+
+<script setup lang="ts">
+import type { NavigationMenuItem } from '@nuxt/ui'
+
+const open = ref(true)
+
+const items: NavigationMenuItem[] = [
+  { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
+]
+</script>
