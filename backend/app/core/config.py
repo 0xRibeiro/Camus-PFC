@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_lifetime_seconds: int = 900
     refresh_token_lifetime_seconds: int = 604800
+    cors_origins: list[str] = ["http://localhost:3000"]
     debug: bool = False
 
 
