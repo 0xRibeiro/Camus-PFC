@@ -7,18 +7,12 @@ from app.core.database import Base
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    username: Mapped[str] = mapped_column(
-        String(50))
-    
-    email: Mapped[str | None] = mapped_column(
-        String(100), unique=True, nullable=True)
-    
-    hashed_password: Mapped[str] = mapped_column(
-        String(1024), nullable=False)
+    username: Mapped[str] = mapped_column(String(50))
 
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, default=True)
+    email: Mapped[str | None] = mapped_column(String(100), unique=True, nullable=True)
 
+    hashed_password: Mapped[str] = mapped_column(String(1024), nullable=False)
+
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)

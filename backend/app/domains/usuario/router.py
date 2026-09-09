@@ -1,17 +1,28 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.core.security import criar_access_token, criar_refresh_token
 from app.domains.usuario.model import Usuario
-from app.domains.usuario.schema import UsuarioLogin, UsuarioRead, UsuarioCreate, UsuarioUpdate
-from app.domains.usuario.service import criar_usuario, autenticar, current_active_user, atualizar_usuario, deletar_usuario, buscar_usuario
+from app.domains.usuario.schema import (
+    UsuarioCreate,
+    UsuarioLogin,
+    UsuarioRead,
+    UsuarioUpdate,
+)
+from app.domains.usuario.service import (
+    atualizar_usuario,
+    autenticar,
+    criar_usuario,
+    current_active_user,
+    deletar_usuario,
+)
 
 router = APIRouter()
 
 
 ### rotas auth
+
 
 @router.post(
     "/auth/register",
@@ -46,6 +57,7 @@ async def login(
 
 ### rotas usuario
 
+
 # rota /me: retorna o usuário logado, atualiza ou deleta ele mesmo.
 @router.get(
     "/usuarios/me",
@@ -79,4 +91,3 @@ async def delete_me(
     db: AsyncSession = Depends(get_async_session),
 ) -> None:
     await deletar_usuario(db, user)
-

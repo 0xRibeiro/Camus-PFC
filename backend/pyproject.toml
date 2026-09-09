@@ -20,3 +20,11 @@ dependencies = [
 
 [tool.basedpyright]
 typeCheckingMode = "standard"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.6",
+]

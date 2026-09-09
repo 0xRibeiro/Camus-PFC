@@ -28,17 +28,16 @@ class BaseRepository(Generic[ModelType]):
 
     # Cria um novo objeto no banco de dados com os campos fornecidos em kwargs(argumentos nomeados dinamicamente por dicionario)
     async def criar(self, **kwargs) -> ModelType:
-        obj = self.model(**kwargs) # Cria a instância do modelo com os dados fornecidos
+        obj = self.model(**kwargs)  # Cria a instância do modelo com os dados fornecidos
         self.db.add(obj)
         await self.db.commit()
         await self.db.refresh(obj)
         return obj
 
-
     # Atualiza um objeto existente com os dados fornecidos
     async def atualizar(self, obj: ModelType, data: dict) -> ModelType:
         for field, value in data.items():
-            setattr(obj, field, value) 
+            setattr(obj, field, value)
         await self.db.commit()
         await self.db.refresh(obj)
         return obj

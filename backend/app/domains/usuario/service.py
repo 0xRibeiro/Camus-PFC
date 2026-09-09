@@ -3,8 +3,17 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
-from app.core.exceptions import AcessoNegadoError, ConflitoError, NaoAutorizadoError, NaoEncontradoError
-from app.core.security import decodificar_access_token, criar_hash, bearer_scheme, verificar_password
+from app.core.exceptions import (
+    ConflitoError,
+    NaoAutorizadoError,
+    NaoEncontradoError,
+)
+from app.core.security import (
+    bearer_scheme,
+    criar_hash,
+    decodificar_access_token,
+    verificar_password,
+)
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import UsuarioCreate, UsuarioUpdate
@@ -47,9 +56,7 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
 
 # Aplica mudanças parciais num usuário que já existe.
 async def atualizar_usuario(
-    db: AsyncSession,
-    user: Usuario, 
-    data: UsuarioUpdate
+    db: AsyncSession, user: Usuario, data: UsuarioUpdate
 ) -> Usuario:
     update_data = data.model_dump(exclude_unset=True)
 
@@ -86,5 +93,3 @@ def current_active_user(user: Usuario = Depends(get_current_user)) -> Usuario:
     if not user.is_active:
         raise NaoAutorizadoError("usuário inativo")
     return user
-
-

@@ -1,9 +1,9 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # Lê essas variáveis do arquivo .env pelo nome.
-    model_config =  {"env_file": ".env"} 
+    model_config = {"env_file": ".env"}
 
     database_url: str
     redis_url: str

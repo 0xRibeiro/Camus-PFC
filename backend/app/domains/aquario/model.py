@@ -7,13 +7,8 @@ from app.core.database import Base
 class Aquario(Base):
     __tablename__ = "aquarios"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    nome: Mapped[str] = mapped_column(
-        String(50))
-    
+    nome: Mapped[str] = mapped_column(String(50))
+
     litros: Mapped[int | None] = mapped_column(nullable=True)
-
-    
-

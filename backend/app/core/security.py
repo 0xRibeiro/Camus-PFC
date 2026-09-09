@@ -15,9 +15,11 @@ password_hash = PasswordHash.recommended()
 # cria uma instância do OAuth2PasswordBearer, que é usada para extrair o token JWT do cabeçalho Authorization das requisições.
 bearer_scheme = HTTPBearer()
 
+
 # função para gerar o hash da senha fornecida.
 def criar_hash(password: str) -> str:
     return password_hash.hash(password)
+
 
 # verifica se a senha fornecida corresponde ao hash armazenado.
 def verificar_password(password: str, hashed_password: str) -> bool:
@@ -26,24 +28,26 @@ def verificar_password(password: str, hashed_password: str) -> bool:
 
 # o que vai dentro do "sub" do token, sempre vai ser o id do usuário
 def criar_access_token(subject: str) -> str:
-    
-    expires_at = datetime.now(timezone.utc) + timedelta(seconds=settings.jwt_lifetime_seconds)
-    
-    payload = {
-        "sub": subject, 
-        "exp": expires_at
-        }
-    
+
+    expires_at = datetime.now(timezone.utc) + timedelta(
+        seconds=settings.jwt_lifetime_seconds
+    )
+
+    payload = {"sub": subject, "exp": expires_at}
+
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
 
 
 # cria o refrash token com o id do usuario e tempo de expiracao automatioc vindo das settings
 async def criar_refresh_token(subject: str) -> str:
-    token = secrets.token_urlsafe(32) # token string limpa para url
-    await redis_client.set(f"refresh:{token}", subject, ex=settings.refresh_token_lifetime_seconds)
+    token = secrets.token_urlsafe(32)  # token string limpa para url
+    await redis_client.set(
+        f"refresh:{token}", subject, ex=settings.refresh_token_lifetime_seconds
+    )
     return token
 
-# busca o refresh token e retorna 
+
+# busca o refresh token e retorna
 async def validar_refresh_token(token: str) -> str | None:
     subject = await redis_client.get(f"refresh:{token}")
     if subject is None:

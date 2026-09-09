@@ -8,5 +8,7 @@ class UsuarioRepository(BaseRepository[Usuario]):
     model = Usuario
 
     async def buscar_por_username(self, username: str) -> Usuario | None:
-        result = await self.db.execute(select(Usuario).where(Usuario.username == username))
+        result = await self.db.execute(
+            select(Usuario).where(Usuario.username == username)
+        )
         return result.scalar_one_or_none()

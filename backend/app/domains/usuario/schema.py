@@ -1,12 +1,12 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+
 class UsuarioLogin(BaseModel):
     username: str
     password: str
 
 
 class UsuarioRead(BaseModel):
-    
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -25,6 +25,3 @@ class UsuarioUpdate(BaseModel):
     username: str | None = None
     email: EmailStr | None = None
     password: str | None = None
-
-
-
