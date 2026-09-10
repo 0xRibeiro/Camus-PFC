@@ -17,6 +17,19 @@ wheels = [
 ]
 
 [[package]]
+name = "alembic-postgresql-enum"
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alembic" },
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/63/cf/b5147b926441e7cdc12f306465dac488ff22364b1467a09a5d43743b8cfc/alembic_postgresql_enum-1.10.0.tar.gz", hash = "sha256:ea23481de3d6a00d68d369f92a46ff4fa27b2575e39c583145f1e23ea9c7511d", size = 18557, upload-time = "2026-02-23T16:15:04.148Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/8a/4db3821584824ac68df00a6ca27331d3f41f40105f22a8dc1b30b1ec83af/alembic_postgresql_enum-1.10.0-py3-none-any.whl", hash = "sha256:39297cb5dc0e71a3e08df1feeab9ffcc1b6aac0be02bf578748d74c442cd3fbf", size = 27774, upload-time = "2026-02-23T16:15:02.789Z" },
+]
+
+[[package]]
 name = "annotated-doc"
 version = "0.0.5"
 source = { registry = "https://pypi.org/simple" }
@@ -95,9 +108,9 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
+    { name = "alembic-postgresql-enum" },
     { name = "email-validator" },
     { name = "fastapi", extra = ["standard"] },
-    { name = "fastapi-pagination" },
     { name = "fastcrud" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pwdlib", extra = ["argon2"] },
@@ -117,9 +130,9 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.18.5" },
+    { name = "alembic-postgresql-enum", specifier = ">=1.10.0" },
     { name = "email-validator", specifier = ">=2.3.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.141.1" },
-    { name = "fastapi-pagination", specifier = ">=0.15.16" },
     { name = "fastcrud", specifier = ">=0.22.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.3.0" },
@@ -321,20 +334,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/00/dc/63aaf9913f455e39a7027c27140edd887a87d47d65ac43532d77a51718e5/fastapi_cloud_cli-0.23.0.tar.gz", hash = "sha256:840895bb8d14309aeffc905e0dcd1334d18c6f5da54b735413a8f1cb385e581e", size = 95295, upload-time = "2026-07-28T14:03:33.463Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/86/96/7e9aba6fabce3cb05f320abeef5b81efd5134823ae85d1a517872cb83cbc/fastapi_cloud_cli-0.23.0-py3-none-any.whl", hash = "sha256:1cd2ffa56e92e92c1fc63acc426c214dd928cbeed2a4c7c6a9a5fc85ea73de16", size = 78058, upload-time = "2026-07-28T14:03:34.386Z" },
-]
-
-[[package]]
-name = "fastapi-pagination"
-version = "0.15.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "fastapi" },
-    { name = "pydantic" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/42/65/9c2f1c324fa7a83b328b024c45e70471007b165a1d56ab237fe0e574e36f/fastapi_pagination-0.15.16.tar.gz", hash = "sha256:739a4e904729dc01e03ce95e260ed9be050d48a3659be8463e5c4fcdd0cf25b0", size = 614997, upload-time = "2026-07-28T18:41:07.421Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/d1/9725ec62421dcfe430d874cba9f82c0288baee0c4b7dd8aa8dcca2b0394e/fastapi_pagination-0.15.16-py3-none-any.whl", hash = "sha256:86dc73620812d47c297a7b8baca4eba2bac5d3f1d73aa75dc6e3bb12c0b803f7", size = 65991, upload-time = "2026-07-28T18:41:06.076Z" },
 ]
 
 [[package]]
