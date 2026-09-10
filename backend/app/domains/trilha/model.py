@@ -19,6 +19,8 @@ class Trilha(Base):
 
     titulo: Mapped[str] = mapped_column(String(100))
 
+    foto: Mapped[str | None] = mapped_column(String(500))
+
     descricao: Mapped[str | None] = mapped_column(Text)
 
     is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha

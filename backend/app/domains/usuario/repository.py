@@ -20,9 +20,7 @@ class UsuarioRepository:
         return resultado.scalar_one_or_none()
 
     async def buscar_por_email(self, email: str) -> Usuario | None:
-        resultado = await self.db.execute(
-            select(Usuario).where(Usuario.email == email)
-        )
+        resultado = await self.db.execute(select(Usuario).where(Usuario.email == email))
         return resultado.scalar_one_or_none()
 
     async def listar(self) -> list[Usuario]:

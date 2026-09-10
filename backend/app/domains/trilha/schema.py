@@ -7,6 +7,7 @@ from app.domains.trilha.model import ConteudoTipo
 class TrilhaCreate(BaseModel):
     titulo: str
     descricao: str | None = None
+    foto: str | None = None
 
 
 class TrilhaRead(BaseModel):

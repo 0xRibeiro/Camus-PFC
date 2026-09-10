@@ -70,8 +70,8 @@ async def criar_staff(db: AsyncSession, data: UsuarioStaffCreate) -> Usuario:
 
 
 # mesma msg pros dois erros pra n vazar se o user existe ou n
-async def autenticar(db: AsyncSession, username: str, password: str) -> Usuario:
-    user = await UsuarioRepository(db).buscar_por_username(username)
+async def autenticar(db: AsyncSession, email: str, password: str) -> Usuario:
+    user = await UsuarioRepository(db).buscar_por_email(email)
     if user is None or not verificar_password(password, user.hashed_password):
         raise UnauthorizedException("credenciais inválidas")
     return user

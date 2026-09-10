@@ -5,7 +5,7 @@ from app.domains.usuario.model import RoleUsuario
 ###### auth: entrada do login e formato dos tokens
 
 class UsuarioLogin(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 

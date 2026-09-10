@@ -39,7 +39,7 @@ async def login(
     credentials: UsuarioLogin,
     db: AsyncSession = Depends(get_async_session),
 ) -> TokenPair:
-    user = await service.autenticar(db, credentials.username, credentials.password)
+    user = await service.autenticar(db, credentials.email, credentials.password)
     return await service.emitir_tokens(user)
 
 
