@@ -98,6 +98,7 @@ dependencies = [
     { name = "email-validator" },
     { name = "fastapi", extra = ["standard"] },
     { name = "fastapi-pagination" },
+    { name = "fastcrud" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pwdlib", extra = ["argon2"] },
     { name = "pydantic-settings" },
@@ -119,6 +120,7 @@ requires-dist = [
     { name = "email-validator", specifier = ">=2.3.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.141.1" },
     { name = "fastapi-pagination", specifier = ">=0.15.16" },
+    { name = "fastcrud", specifier = ">=0.22.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.3.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
@@ -373,6 +375,21 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/83/18/7a7c15657a3da5569b26fc51cde6a80f8d84cb54b3b1aea6d74a103db4ad/fastar-0.11.0-cp314-cp314t-win32.whl", hash = "sha256:5744551bc67c6fc6581cbd0e34a0fd6e2cd0bd30b43e94b1c3119cf35064b162", size = 453601, upload-time = "2026-04-13T17:11:53.726Z" },
     { url = "https://files.pythonhosted.org/packages/6d/d8/331b59a6de279f3ad75c10c02c40a12f21d64a437d9c3d6f1af2dcbd7a76/fastar-0.11.0-cp314-cp314t-win_amd64.whl", hash = "sha256:f4ce44e3b56c47cf38244b98d29f269b259740a580c47a2552efa5b96a5458fb", size = 486436, upload-time = "2026-04-13T17:11:40.089Z" },
     { url = "https://files.pythonhosted.org/packages/6b/fd/5390ec4f49100f3ecb9968a392f9e6d039f1e3fe0ecd28443716ff01e589/fastar-0.11.0-cp314-cp314t-win_arm64.whl", hash = "sha256:76c1359314355eafbc6989f20fb1ad565a3d10200117923b9da765a17e2f6f11", size = 461049, upload-time = "2026-04-13T17:11:25.918Z" },
+]
+
+[[package]]
+name = "fastcrud"
+version = "0.22.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "pydantic" },
+    { name = "sqlalchemy" },
+    { name = "sqlalchemy-utils" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e4/06/5ef9131152b98d1d914067389a3334cebe21b1db4505e232cc6f2a6392cb/fastcrud-0.22.3.tar.gz", hash = "sha256:d8ebe74bf07352c5260698fec7bd40f0a1c09b8f189c6d57d157f04ef86bc09a", size = 103271, upload-time = "2026-06-21T03:53:59.231Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/ac/23eed29a3ff360e5f07f84fe61f409360341e839e15838e2aa823a782846/fastcrud-0.22.3-py3-none-any.whl", hash = "sha256:8ea2cb20ab111ae37793cfc0c88592dbed4700ef6ebebfcb6ef161582df780da", size = 136899, upload-time = "2026-06-21T03:53:57.911Z" },
 ]
 
 [[package]]
@@ -952,6 +969,18 @@ wheels = [
 [package.optional-dependencies]
 asyncio = [
     { name = "greenlet" },
+]
+
+[[package]]
+name = "sqlalchemy-utils"
+version = "0.41.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4d/bf/abfd5474cdd89ddd36dbbde9c6efba16bfa7f5448913eba946fed14729da/SQLAlchemy-Utils-0.41.2.tar.gz", hash = "sha256:bc599c8c3b3319e53ce6c5c3c471120bd325d0071fb6f38a10e924e3d07b9990", size = 138017, upload-time = "2024-03-24T15:17:28.196Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/f0/dc4757b83ac1ab853cf222df8535ed73973e0c203d983982ba7b8bc60508/SQLAlchemy_Utils-0.41.2-py3-none-any.whl", hash = "sha256:85cf3842da2bf060760f955f8467b87983fb2e30f1764fd0e24a48307dc8ec6e", size = 93083, upload-time = "2024-03-24T15:17:24.533Z" },
 ]
 
 [[package]]

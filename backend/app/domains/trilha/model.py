@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
 
+# enum dos tipos q um conteudo pode ter, vira enum no BD tbm
 class ConteudoTipo(enum.Enum):
     video = "video"
     artigo = "artigo"
@@ -20,7 +21,7 @@ class Trilha(Base):
 
     descricao: Mapped[str | None] = mapped_column(Text)
 
-    is_active: Mapped[bool] = mapped_column(default=False)
+    is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha
 
 
 class Modulo(Base):

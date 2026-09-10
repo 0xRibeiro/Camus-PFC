@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 
 class ErroBase(Exception):
@@ -34,4 +35,11 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=err.status_code,
             content={"detail": err.detail},
             headers=err.headers,
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def integrity_handler(request: Request, err: IntegrityError):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "dados inválidos"},
         )

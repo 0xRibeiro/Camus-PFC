@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict
 from app.domains.trilha.model import ConteudoTipo
 
 
+###### schemas de trilha
 class TrilhaCreate(BaseModel):
     titulo: str
     descricao: str | None = None
@@ -23,8 +24,11 @@ class TrilhaUpdate(BaseModel):
     is_active: bool | None = None
 
 
+###### schemas de modulo de uma trilha
 class ModuloCreate(BaseModel):
+    trilha_id: int
     titulo: str
+    ordem: int
 
 
 class ModuloRead(BaseModel):
@@ -40,9 +44,12 @@ class ModuloUpdate(BaseModel):
     titulo: str | None = None
 
 
+###### schemas de conteudos de um modulo
 class ConteudoCreate(BaseModel):
+    modulo_id: int
     titulo: str
     tipo: ConteudoTipo
+    ordem: int
     video_url: str | None = None
     artigo_texto: str | None = None
 
@@ -65,7 +72,10 @@ class ConteudoUpdate(BaseModel):
     artigo_texto: str | None = None
 
 
+###### schemas de questao de um conteudo quiz
 class QuestaoCreate(BaseModel):
+    conteudo_id: int
+    ordem: int
     enunciado: str
 
 
@@ -82,7 +92,9 @@ class QuestaoUpdate(BaseModel):
     enunciado: str | None = None
 
 
+###### schemas de alternativas de uma questao
 class AlternativaCreate(BaseModel):
+    questao_id: int
     texto: str
     correta: bool = False
 
