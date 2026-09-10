@@ -38,6 +38,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh */
+        post: operations["refresh_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usuarios/me": {
         parameters: {
             query?: never;
@@ -57,6 +91,43 @@ export interface paths {
         patch: operations["update_me_usuarios_me_patch"];
         trace?: never;
     };
+    "/admin/usuarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Usuarios */
+        get: operations["listar_usuarios_admin_usuarios_get"];
+        put?: never;
+        /** Criar Staff */
+        post: operations["criar_staff_admin_usuarios_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/usuarios/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Usuario */
+        get: operations["obter_usuario_admin_usuarios__user_id__get"];
+        put?: never;
+        post?: never;
+        /** Deletar Usuario */
+        delete: operations["deletar_usuario_admin_usuarios__user_id__delete"];
+        options?: never;
+        head?: never;
+        /** Atualizar Staff */
+        patch: operations["atualizar_staff_admin_usuarios__user_id__patch"];
+        trace?: never;
+    };
     "/trilhas": {
         parameters: {
             query?: never;
@@ -64,182 +135,322 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Listar Trilhas */
-        get: operations["listar_trilhas_trilhas_get"];
+        /**
+         * Trilha Read Multi
+         * @description Read multiple Trilha rows from the database.
+         *
+         *     **Pagination Options:**
+         *     - Use `page` & `itemsPerPage` for paginated results
+         *     - Use `offset` & `limit` for specific ranges
+         *
+         *     **Sorting:**
+         *     - Use `sort` parameter to sort results by one or more fields
+         *     - Format: `field1,-field2` (comma-separated, `-` prefix for descending)
+         *     - Examples: `name` (ascending), `-age` (descending), `name,-age` (mixed)
+         *
+         *     **Response Format:**
+         *     - Returns paginated response when using page/itemsPerPage
+         *     - Returns simple list response when using offset/limit
+         */
+        get: operations["trilha_read_multi_trilhas_get"];
         put?: never;
-        /** Criar Trilha */
-        post: operations["criar_trilha_trilhas_post"];
+        /**
+         * Trilha Create
+         * @description Create a new Trilha row in the database.
+         */
+        post: operations["trilha_create_trilhas_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/trilhas/{trilha_id}": {
+    "/trilhas/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Obter Trilha */
-        get: operations["obter_trilha_trilhas__trilha_id__get"];
+        /**
+         * Trilha Read
+         * @description Read a single Trilha row from the database by its primary keys: ['id'].
+         */
+        get: operations["trilha_read_trilhas__id__get"];
         put?: never;
         post?: never;
-        /** Deletar Trilha */
-        delete: operations["deletar_trilha_trilhas__trilha_id__delete"];
+        /**
+         * Trilha Delete
+         * @description Delete a Trilha row from the database by its primary keys: ['id'].
+         */
+        delete: operations["trilha_delete_trilhas__id__delete"];
         options?: never;
         head?: never;
-        /** Atualizar Trilha */
-        patch: operations["atualizar_trilha_trilhas__trilha_id__patch"];
+        /**
+         * Trilha Update
+         * @description Update an existing Trilha row in the database by its primary keys: ['id'].
+         */
+        patch: operations["trilha_update_trilhas__id__patch"];
         trace?: never;
     };
-    "/trilhas/{trilha_id}/modulos": {
+    "/modulos": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar Modulos */
-        get: operations["listar_modulos_trilhas__trilha_id__modulos_get"];
+        /**
+         * Modulo Read Multi
+         * @description Read multiple Modulo rows from the database.
+         *
+         *     **Pagination Options:**
+         *     - Use `page` & `itemsPerPage` for paginated results
+         *     - Use `offset` & `limit` for specific ranges
+         *
+         *     **Sorting:**
+         *     - Use `sort` parameter to sort results by one or more fields
+         *     - Format: `field1,-field2` (comma-separated, `-` prefix for descending)
+         *     - Examples: `name` (ascending), `-age` (descending), `name,-age` (mixed)
+         *
+         *     **Response Format:**
+         *     - Returns paginated response when using page/itemsPerPage
+         *     - Returns simple list response when using offset/limit
+         */
+        get: operations["modulo_read_multi_modulos_get"];
         put?: never;
-        /** Criar Modulo */
-        post: operations["criar_modulo_trilhas__trilha_id__modulos_post"];
+        /**
+         * Modulo Create
+         * @description Create a new Modulo row in the database.
+         */
+        post: operations["modulo_create_modulos_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/modulos/{modulo_id}": {
+    "/modulos/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Obter Modulo */
-        get: operations["obter_modulo_modulos__modulo_id__get"];
+        /**
+         * Modulo Read
+         * @description Read a single Modulo row from the database by its primary keys: ['id'].
+         */
+        get: operations["modulo_read_modulos__id__get"];
         put?: never;
         post?: never;
-        /** Deletar Modulo */
-        delete: operations["deletar_modulo_modulos__modulo_id__delete"];
+        /**
+         * Modulo Delete
+         * @description Delete a Modulo row from the database by its primary keys: ['id'].
+         */
+        delete: operations["modulo_delete_modulos__id__delete"];
         options?: never;
         head?: never;
-        /** Atualizar Modulo */
-        patch: operations["atualizar_modulo_modulos__modulo_id__patch"];
+        /**
+         * Modulo Update
+         * @description Update an existing Modulo row in the database by its primary keys: ['id'].
+         */
+        patch: operations["modulo_update_modulos__id__patch"];
         trace?: never;
     };
-    "/modulos/{modulo_id}/conteudos": {
+    "/conteudos": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar Conteudos */
-        get: operations["listar_conteudos_modulos__modulo_id__conteudos_get"];
+        /**
+         * Conteudo Read Multi
+         * @description Read multiple Conteudo rows from the database.
+         *
+         *     **Pagination Options:**
+         *     - Use `page` & `itemsPerPage` for paginated results
+         *     - Use `offset` & `limit` for specific ranges
+         *
+         *     **Sorting:**
+         *     - Use `sort` parameter to sort results by one or more fields
+         *     - Format: `field1,-field2` (comma-separated, `-` prefix for descending)
+         *     - Examples: `name` (ascending), `-age` (descending), `name,-age` (mixed)
+         *
+         *     **Response Format:**
+         *     - Returns paginated response when using page/itemsPerPage
+         *     - Returns simple list response when using offset/limit
+         */
+        get: operations["conteudo_read_multi_conteudos_get"];
         put?: never;
-        /** Criar Conteudo */
-        post: operations["criar_conteudo_modulos__modulo_id__conteudos_post"];
+        /**
+         * Conteudo Create
+         * @description Create a new Conteudo row in the database.
+         */
+        post: operations["conteudo_create_conteudos_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/conteudos/{conteudo_id}": {
+    "/conteudos/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Obter Conteudo */
-        get: operations["obter_conteudo_conteudos__conteudo_id__get"];
+        /**
+         * Conteudo Read
+         * @description Read a single Conteudo row from the database by its primary keys: ['id'].
+         */
+        get: operations["conteudo_read_conteudos__id__get"];
         put?: never;
         post?: never;
-        /** Deletar Conteudo */
-        delete: operations["deletar_conteudo_conteudos__conteudo_id__delete"];
+        /**
+         * Conteudo Delete
+         * @description Delete a Conteudo row from the database by its primary keys: ['id'].
+         */
+        delete: operations["conteudo_delete_conteudos__id__delete"];
         options?: never;
         head?: never;
-        /** Atualizar Conteudo */
-        patch: operations["atualizar_conteudo_conteudos__conteudo_id__patch"];
+        /**
+         * Conteudo Update
+         * @description Update an existing Conteudo row in the database by its primary keys: ['id'].
+         */
+        patch: operations["conteudo_update_conteudos__id__patch"];
         trace?: never;
     };
-    "/conteudos/{conteudo_id}/questoes": {
+    "/questoes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar Questoes */
-        get: operations["listar_questoes_conteudos__conteudo_id__questoes_get"];
+        /**
+         * Questao Read Multi
+         * @description Read multiple Questao rows from the database.
+         *
+         *     **Pagination Options:**
+         *     - Use `page` & `itemsPerPage` for paginated results
+         *     - Use `offset` & `limit` for specific ranges
+         *
+         *     **Sorting:**
+         *     - Use `sort` parameter to sort results by one or more fields
+         *     - Format: `field1,-field2` (comma-separated, `-` prefix for descending)
+         *     - Examples: `name` (ascending), `-age` (descending), `name,-age` (mixed)
+         *
+         *     **Response Format:**
+         *     - Returns paginated response when using page/itemsPerPage
+         *     - Returns simple list response when using offset/limit
+         */
+        get: operations["questao_read_multi_questoes_get"];
         put?: never;
-        /** Criar Questao */
-        post: operations["criar_questao_conteudos__conteudo_id__questoes_post"];
+        /**
+         * Questao Create
+         * @description Create a new Questao row in the database.
+         */
+        post: operations["questao_create_questoes_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/questoes/{questao_id}": {
+    "/questoes/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Obter Questao */
-        get: operations["obter_questao_questoes__questao_id__get"];
+        /**
+         * Questao Read
+         * @description Read a single Questao row from the database by its primary keys: ['id'].
+         */
+        get: operations["questao_read_questoes__id__get"];
         put?: never;
         post?: never;
-        /** Deletar Questao */
-        delete: operations["deletar_questao_questoes__questao_id__delete"];
+        /**
+         * Questao Delete
+         * @description Delete a Questao row from the database by its primary keys: ['id'].
+         */
+        delete: operations["questao_delete_questoes__id__delete"];
         options?: never;
         head?: never;
-        /** Atualizar Questao */
-        patch: operations["atualizar_questao_questoes__questao_id__patch"];
+        /**
+         * Questao Update
+         * @description Update an existing Questao row in the database by its primary keys: ['id'].
+         */
+        patch: operations["questao_update_questoes__id__patch"];
         trace?: never;
     };
-    "/questoes/{questao_id}/alternativas": {
+    "/alternativas": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar Alternativas */
-        get: operations["listar_alternativas_questoes__questao_id__alternativas_get"];
+        /**
+         * Alternativa Read Multi
+         * @description Read multiple Alternativa rows from the database.
+         *
+         *     **Pagination Options:**
+         *     - Use `page` & `itemsPerPage` for paginated results
+         *     - Use `offset` & `limit` for specific ranges
+         *
+         *     **Sorting:**
+         *     - Use `sort` parameter to sort results by one or more fields
+         *     - Format: `field1,-field2` (comma-separated, `-` prefix for descending)
+         *     - Examples: `name` (ascending), `-age` (descending), `name,-age` (mixed)
+         *
+         *     **Response Format:**
+         *     - Returns paginated response when using page/itemsPerPage
+         *     - Returns simple list response when using offset/limit
+         */
+        get: operations["alternativa_read_multi_alternativas_get"];
         put?: never;
-        /** Criar Alternativa */
-        post: operations["criar_alternativa_questoes__questao_id__alternativas_post"];
+        /**
+         * Alternativa Create
+         * @description Create a new Alternativa row in the database.
+         */
+        post: operations["alternativa_create_alternativas_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/alternativas/{alternativa_id}": {
+    "/alternativas/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Obter Alternativa */
-        get: operations["obter_alternativa_alternativas__alternativa_id__get"];
+        /**
+         * Alternativa Read
+         * @description Read a single Alternativa row from the database by its primary keys: ['id'].
+         */
+        get: operations["alternativa_read_alternativas__id__get"];
         put?: never;
         post?: never;
-        /** Deletar Alternativa */
-        delete: operations["deletar_alternativa_alternativas__alternativa_id__delete"];
+        /**
+         * Alternativa Delete
+         * @description Delete a Alternativa row from the database by its primary keys: ['id'].
+         */
+        delete: operations["alternativa_delete_alternativas__id__delete"];
         options?: never;
         head?: never;
-        /** Atualizar Alternativa */
-        patch: operations["atualizar_alternativa_alternativas__alternativa_id__patch"];
+        /**
+         * Alternativa Update
+         * @description Update an existing Alternativa row in the database by its primary keys: ['id'].
+         */
+        patch: operations["alternativa_update_alternativas__id__patch"];
         trace?: never;
     };
     "/health": {
@@ -265,6 +476,8 @@ export interface components {
     schemas: {
         /** AlternativaCreate */
         AlternativaCreate: {
+            /** Questao Id */
+            questao_id: number;
             /** Texto */
             texto: string;
             /**
@@ -293,9 +506,13 @@ export interface components {
         };
         /** ConteudoCreate */
         ConteudoCreate: {
+            /** Modulo Id */
+            modulo_id: number;
             /** Titulo */
             titulo: string;
             tipo: components["schemas"]["ConteudoTipo"];
+            /** Ordem */
+            ordem: number;
             /** Video Url */
             video_url?: string | null;
             /** Artigo Texto */
@@ -338,8 +555,12 @@ export interface components {
         };
         /** ModuloCreate */
         ModuloCreate: {
+            /** Trilha Id */
+            trilha_id: number;
             /** Titulo */
             titulo: string;
+            /** Ordem */
+            ordem: number;
         };
         /** ModuloRead */
         ModuloRead: {
@@ -357,21 +578,12 @@ export interface components {
             /** Titulo */
             titulo?: string | null;
         };
-        /** Page[TrilhaRead] */
-        Page_TrilhaRead_: {
-            /** Items */
-            items: components["schemas"]["TrilhaRead"][];
-            /** Total */
-            total: number;
-            /** Page */
-            page: number;
-            /** Size */
-            size: number;
-            /** Pages */
-            pages: number;
-        };
         /** QuestaoCreate */
         QuestaoCreate: {
+            /** Conteudo Id */
+            conteudo_id: number;
+            /** Ordem */
+            ordem: number;
             /** Enunciado */
             enunciado: string;
         };
@@ -390,6 +602,28 @@ export interface components {
         QuestaoUpdate: {
             /** Enunciado */
             enunciado?: string | null;
+        };
+        /** RefreshInput */
+        RefreshInput: {
+            /** Refresh Token */
+            refresh_token: string;
+        };
+        /**
+         * RoleUsuario
+         * @enum {string}
+         */
+        RoleUsuario: "aluno" | "author" | "admin";
+        /** TokenPair */
+        TokenPair: {
+            /** Access Token */
+            access_token: string;
+            /** Refresh Token */
+            refresh_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
         };
         /** TrilhaCreate */
         TrilhaCreate: {
@@ -418,12 +652,27 @@ export interface components {
             /** Is Active */
             is_active?: boolean | null;
         };
+        /** UsuarioAdminUpdate */
+        UsuarioAdminUpdate: {
+            /** Username */
+            username?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Password */
+            password?: string | null;
+            role?: components["schemas"]["RoleUsuario"] | null;
+            /** Is Active */
+            is_active?: boolean | null;
+        };
         /** UsuarioCreate */
         UsuarioCreate: {
             /** Username */
             username: string;
-            /** Email */
-            email?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
             /** Password */
             password: string;
         };
@@ -440,10 +689,27 @@ export interface components {
             id: number;
             /** Username */
             username: string;
-            /** Email */
-            email?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
             /** Is Active */
             is_active: boolean;
+            role: components["schemas"]["RoleUsuario"];
+        };
+        /** UsuarioStaffCreate */
+        UsuarioStaffCreate: {
+            /** Username */
+            username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            role: components["schemas"]["RoleUsuario"];
         };
         /** UsuarioUpdate */
         UsuarioUpdate: {
@@ -466,6 +732,96 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** DynamicListResponse */
+        fastcrud__core__pagination__DynamicListResponse__1: {
+            /** Data */
+            data: components["schemas"]["TrilhaRead"][];
+        };
+        /** DynamicListResponse */
+        fastcrud__core__pagination__DynamicListResponse__2: {
+            /** Data */
+            data: components["schemas"]["ModuloRead"][];
+        };
+        /** DynamicListResponse */
+        fastcrud__core__pagination__DynamicListResponse__3: {
+            /** Data */
+            data: components["schemas"]["ConteudoRead"][];
+        };
+        /** DynamicListResponse */
+        fastcrud__core__pagination__DynamicListResponse__4: {
+            /** Data */
+            data: components["schemas"]["QuestaoRead"][];
+        };
+        /** DynamicListResponse */
+        fastcrud__core__pagination__DynamicListResponse__5: {
+            /** Data */
+            data: components["schemas"]["AlternativaRead"][];
+        };
+        /** DynamicPaginatedResponse */
+        fastcrud__core__pagination__DynamicPaginatedResponse__1: {
+            /** Data */
+            data: components["schemas"]["TrilhaRead"][];
+            /** Total Count */
+            total_count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Page */
+            page?: number | null;
+            /** Items Per Page */
+            items_per_page?: number | null;
+        };
+        /** DynamicPaginatedResponse */
+        fastcrud__core__pagination__DynamicPaginatedResponse__2: {
+            /** Data */
+            data: components["schemas"]["ModuloRead"][];
+            /** Total Count */
+            total_count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Page */
+            page?: number | null;
+            /** Items Per Page */
+            items_per_page?: number | null;
+        };
+        /** DynamicPaginatedResponse */
+        fastcrud__core__pagination__DynamicPaginatedResponse__3: {
+            /** Data */
+            data: components["schemas"]["ConteudoRead"][];
+            /** Total Count */
+            total_count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Page */
+            page?: number | null;
+            /** Items Per Page */
+            items_per_page?: number | null;
+        };
+        /** DynamicPaginatedResponse */
+        fastcrud__core__pagination__DynamicPaginatedResponse__4: {
+            /** Data */
+            data: components["schemas"]["QuestaoRead"][];
+            /** Total Count */
+            total_count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Page */
+            page?: number | null;
+            /** Items Per Page */
+            items_per_page?: number | null;
+        };
+        /** DynamicPaginatedResponse */
+        fastcrud__core__pagination__DynamicPaginatedResponse__5: {
+            /** Data */
+            data: components["schemas"]["AlternativaRead"][];
+            /** Total Count */
+            total_count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Page */
+            page?: number | null;
+            /** Items Per Page */
+            items_per_page?: number | null;
         };
     };
     responses: never;
@@ -528,10 +884,72 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["TokenPair"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenPair"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -615,14 +1033,9 @@ export interface operations {
             };
         };
     };
-    listar_trilhas_trilhas_get: {
+    listar_usuarios_admin_usuarios_get: {
         parameters: {
-            query?: {
-                /** @description Page number */
-                page?: number;
-                /** @description Page size */
-                size?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -635,21 +1048,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Page_TrilhaRead_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["UsuarioRead"][];
                 };
             };
         };
     };
-    criar_trilha_trilhas_post: {
+    criar_staff_admin_usuarios_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -658,7 +1062,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TrilhaCreate"];
+                "application/json": components["schemas"]["UsuarioStaffCreate"];
             };
         };
         responses: {
@@ -668,7 +1072,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TrilhaRead"];
+                    "application/json": components["schemas"]["UsuarioRead"];
                 };
             };
             /** @description Validation Error */
@@ -682,12 +1086,12 @@ export interface operations {
             };
         };
     };
-    obter_trilha_trilhas__trilha_id__get: {
+    obter_usuario_admin_usuarios__user_id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                trilha_id: number;
+                user_id: number;
             };
             cookie?: never;
         };
@@ -699,7 +1103,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TrilhaRead"];
+                    "application/json": components["schemas"]["UsuarioRead"];
                 };
             };
             /** @description Validation Error */
@@ -713,12 +1117,12 @@ export interface operations {
             };
         };
     };
-    deletar_trilha_trilhas__trilha_id__delete: {
+    deletar_usuario_admin_usuarios__user_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                trilha_id: number;
+                user_id: number;
             };
             cookie?: never;
         };
@@ -742,12 +1146,177 @@ export interface operations {
             };
         };
     };
-    atualizar_trilha_trilhas__trilha_id__patch: {
+    atualizar_staff_admin_usuarios__user_id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                trilha_id: number;
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UsuarioAdminUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trilha_read_multi_trilhas_get: {
+        parameters: {
+            query?: {
+                offset?: number | null;
+                limit?: number | null;
+                page?: number | null;
+                itemsPerPage?: number | null;
+                sort?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["fastcrud__core__pagination__DynamicPaginatedResponse__1"] | components["schemas"]["fastcrud__core__pagination__DynamicListResponse__1"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trilha_create_trilhas_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrilhaCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trilha_read_trilhas__id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrilhaRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trilha_delete_trilhas__id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    trilha_update_trilhas__id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
             };
             cookie?: never;
         };
@@ -763,7 +1332,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TrilhaRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -777,13 +1346,18 @@ export interface operations {
             };
         };
     };
-    listar_modulos_trilhas__trilha_id__modulos_get: {
+    modulo_read_multi_modulos_get: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                trilha_id: number;
+            query?: {
+                offset?: number | null;
+                limit?: number | null;
+                page?: number | null;
+                itemsPerPage?: number | null;
+                sort?: string | null;
+                trilha_id?: number;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -794,7 +1368,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ModuloRead"][];
+                    "application/json": components["schemas"]["fastcrud__core__pagination__DynamicPaginatedResponse__2"] | components["schemas"]["fastcrud__core__pagination__DynamicListResponse__2"];
                 };
             };
             /** @description Validation Error */
@@ -808,13 +1382,11 @@ export interface operations {
             };
         };
     };
-    criar_modulo_trilhas__trilha_id__modulos_post: {
+    modulo_create_modulos_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                trilha_id: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -824,12 +1396,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ModuloRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -843,12 +1415,12 @@ export interface operations {
             };
         };
     };
-    obter_modulo_modulos__modulo_id__get: {
+    modulo_read_modulos__id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                modulo_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -874,23 +1446,25 @@ export interface operations {
             };
         };
     };
-    deletar_modulo_modulos__modulo_id__delete: {
+    modulo_delete_modulos__id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                modulo_id: number;
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
@@ -903,12 +1477,12 @@ export interface operations {
             };
         };
     };
-    atualizar_modulo_modulos__modulo_id__patch: {
+    modulo_update_modulos__id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                modulo_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -924,7 +1498,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ModuloRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -938,13 +1512,18 @@ export interface operations {
             };
         };
     };
-    listar_conteudos_modulos__modulo_id__conteudos_get: {
+    conteudo_read_multi_conteudos_get: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                modulo_id: number;
+            query?: {
+                offset?: number | null;
+                limit?: number | null;
+                page?: number | null;
+                itemsPerPage?: number | null;
+                sort?: string | null;
+                modulo_id?: number;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -955,7 +1534,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConteudoRead"][];
+                    "application/json": components["schemas"]["fastcrud__core__pagination__DynamicPaginatedResponse__3"] | components["schemas"]["fastcrud__core__pagination__DynamicListResponse__3"];
                 };
             };
             /** @description Validation Error */
@@ -969,13 +1548,11 @@ export interface operations {
             };
         };
     };
-    criar_conteudo_modulos__modulo_id__conteudos_post: {
+    conteudo_create_conteudos_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                modulo_id: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -985,12 +1562,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConteudoRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1004,12 +1581,12 @@ export interface operations {
             };
         };
     };
-    obter_conteudo_conteudos__conteudo_id__get: {
+    conteudo_read_conteudos__id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                conteudo_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1035,23 +1612,25 @@ export interface operations {
             };
         };
     };
-    deletar_conteudo_conteudos__conteudo_id__delete: {
+    conteudo_delete_conteudos__id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                conteudo_id: number;
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
@@ -1064,12 +1643,12 @@ export interface operations {
             };
         };
     };
-    atualizar_conteudo_conteudos__conteudo_id__patch: {
+    conteudo_update_conteudos__id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                conteudo_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1085,7 +1664,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConteudoRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1099,13 +1678,18 @@ export interface operations {
             };
         };
     };
-    listar_questoes_conteudos__conteudo_id__questoes_get: {
+    questao_read_multi_questoes_get: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                conteudo_id: number;
+            query?: {
+                offset?: number | null;
+                limit?: number | null;
+                page?: number | null;
+                itemsPerPage?: number | null;
+                sort?: string | null;
+                conteudo_id?: number;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1116,7 +1700,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QuestaoRead"][];
+                    "application/json": components["schemas"]["fastcrud__core__pagination__DynamicPaginatedResponse__4"] | components["schemas"]["fastcrud__core__pagination__DynamicListResponse__4"];
                 };
             };
             /** @description Validation Error */
@@ -1130,13 +1714,11 @@ export interface operations {
             };
         };
     };
-    criar_questao_conteudos__conteudo_id__questoes_post: {
+    questao_create_questoes_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                conteudo_id: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -1146,12 +1728,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QuestaoRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1165,12 +1747,12 @@ export interface operations {
             };
         };
     };
-    obter_questao_questoes__questao_id__get: {
+    questao_read_questoes__id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                questao_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1196,23 +1778,25 @@ export interface operations {
             };
         };
     };
-    deletar_questao_questoes__questao_id__delete: {
+    questao_delete_questoes__id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                questao_id: number;
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
@@ -1225,12 +1809,12 @@ export interface operations {
             };
         };
     };
-    atualizar_questao_questoes__questao_id__patch: {
+    questao_update_questoes__id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                questao_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1246,7 +1830,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QuestaoRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1260,13 +1844,18 @@ export interface operations {
             };
         };
     };
-    listar_alternativas_questoes__questao_id__alternativas_get: {
+    alternativa_read_multi_alternativas_get: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                questao_id: number;
+            query?: {
+                offset?: number | null;
+                limit?: number | null;
+                page?: number | null;
+                itemsPerPage?: number | null;
+                sort?: string | null;
+                questao_id?: number;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1277,7 +1866,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlternativaRead"][];
+                    "application/json": components["schemas"]["fastcrud__core__pagination__DynamicPaginatedResponse__5"] | components["schemas"]["fastcrud__core__pagination__DynamicListResponse__5"];
                 };
             };
             /** @description Validation Error */
@@ -1291,13 +1880,11 @@ export interface operations {
             };
         };
     };
-    criar_alternativa_questoes__questao_id__alternativas_post: {
+    alternativa_create_alternativas_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                questao_id: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -1307,12 +1894,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlternativaRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -1326,12 +1913,12 @@ export interface operations {
             };
         };
     };
-    obter_alternativa_alternativas__alternativa_id__get: {
+    alternativa_read_alternativas__id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                alternativa_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1357,23 +1944,25 @@ export interface operations {
             };
         };
     };
-    deletar_alternativa_alternativas__alternativa_id__delete: {
+    alternativa_delete_alternativas__id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                alternativa_id: number;
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
@@ -1386,12 +1975,12 @@ export interface operations {
             };
         };
     };
-    atualizar_alternativa_alternativas__alternativa_id__patch: {
+    alternativa_update_alternativas__id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                alternativa_id: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1407,7 +1996,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlternativaRead"];
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
