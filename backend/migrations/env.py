@@ -1,19 +1,19 @@
 import asyncio
 from logging.config import fileConfig
 
+import alembic_postgresql_enum  
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
 from app.core.config import settings
 from app.core.database import Base
 
-
-# registra cada model q implementa Base para que o Alembic possa gerar as migrations automaticamente
-from app.domains.usuario.model import Usuario  
-from app.domains.aquario.model import Aquario
+# importar os models registra as tabelas no Base.metadata
+import app.domains.aquario.model
+import app.domains.trilha.model
+import app.domains.usuario.model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

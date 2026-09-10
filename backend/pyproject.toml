@@ -7,7 +7,6 @@ dependencies = [
     "alembic>=1.18.5",
     "email-validator>=2.3.0",
     "fastapi[standard]>=0.141.1",
-    "fastapi-pagination>=0.15.16",
     "psycopg[binary]>=3.3.4",
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.14.2",
@@ -15,4 +14,22 @@ dependencies = [
     "python-multipart>=0.0.32",
     "sqlalchemy[asyncio]>=2.0.51",
     "uvicorn[standard]>=0.51.0",
+    "redis>=8.1.0",
+    "fastcrud>=0.22.3",
+    "alembic-postgresql-enum>=1.10.0",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+
+[tool.ruff]
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.6",
 ]

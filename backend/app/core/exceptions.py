@@ -1,37 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 
-class ErroBase(Exception):
-    status_code: int = 400
-    headers: dict | None = None
-
-    def __init__(self, detail: str):
-        self.detail = detail
-        super().__init__(detail)
-
-
-class NaoEncontradoError(ErroBase):
-    status_code = 404
-
-
-class ConflitoError(ErroBase):
-    status_code = 400
-
-
-class NaoAutorizadoError(ErroBase):
-    status_code = 401
-
-
-class AcessoNegadoError(ErroBase):
-    status_code = 403
-
-
+# pega erro de constraint do bancoe devolve 400 em vez do 500 
 def register_exception_handlers(app: FastAPI) -> None:
-    @app.exception_handler(ErroBase)
-    async def erro_base_handler(request: Request, err: ErroBase):
+    @app.exception_handler(IntegrityError)
+    async def integrity_handler(request: Request, err: IntegrityError):
         return JSONResponse(
-            status_code=err.status_code,
-            content={"detail": err.detail},
-            headers=err.headers,
+            status_code=400,
+            content={"detail": "dados inválidos"},
         )
