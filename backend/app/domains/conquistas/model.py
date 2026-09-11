@@ -1,12 +1,11 @@
-from sqlalchemy import String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
 
-# inicialmente pensei nesses atributos para a conquista. Usando a
-# apenas a lógica de desbloquada ser true ou false, impede a implementação
-# da barra de progresso na conquista. mas podemos incrementar isso depois
+# inicialmente pensei nesses atributos para a conquista. a tabela
+# intermediária determina qual usuário possui qual conquista.
 class Conquista(Base):
 	__tablename__ = "conquistas"
 
@@ -14,6 +13,7 @@ class Conquista(Base):
 
 	titulo: Mapped[str] = mapped_column(String(100))
 
-	descricao: Mapped[str | None] = mapped_column(String(200))
+	descricao: Mapped[str | None] = mapped_column(Text)
 
-	desbloquada: Mapped[bool] = mapped_column(default=False)
+	# guarda o link da imagem do achievement
+	imagem_dir: Mapped[str] = mapped_column(Text)
