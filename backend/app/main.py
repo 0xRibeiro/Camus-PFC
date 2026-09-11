@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Gardiencor Hub API", lifespan=lifespan)
+app = FastAPI(title="Projeto Camus - API", lifespan=lifespan)
 
 # libera o front pra chamar a api (CORS)
 app.add_middleware(
