@@ -631,6 +631,8 @@ export interface components {
             titulo: string;
             /** Descricao */
             descricao?: string | null;
+            /** Foto */
+            foto?: string | null;
         };
         /** TrilhaRead */
         TrilhaRead: {
@@ -678,8 +680,11 @@ export interface components {
         };
         /** UsuarioLogin */
         UsuarioLogin: {
-            /** Username */
-            username: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
             /** Password */
             password: string;
         };
