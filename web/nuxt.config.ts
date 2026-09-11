@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@nuxt/eslint', '@vueuse/nuxt'],
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  ui: {
+    // array de nome das cores semanticas q as adicionais sao definidas no web/app/app.config.ts
+    theme: {
+      colors: ['primary', 'secondary', 'tertiary', 'quaternary', 'info', 'success', 'warning', 'error'],
+    },
+  },
   runtimeConfig: {
     public: {
       apiBase: 'http://localhost:8000',
