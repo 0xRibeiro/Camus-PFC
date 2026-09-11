@@ -1,13 +1,13 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.domains.trilha.model import ConteudoTipo
 
 
 ###### schemas de trilha
 class TrilhaCreate(BaseModel):
-    titulo: str
+    titulo: str = Field(..., min_length=1, max_length=100)
     descricao: str | None = None
-    foto: str | None = None
+    foto: str | None = Field(default=None, max_length=500)
 
 
 class TrilhaRead(BaseModel):
@@ -20,7 +20,7 @@ class TrilhaRead(BaseModel):
 
 
 class TrilhaUpdate(BaseModel):
-    titulo: str | None = None
+    titulo: str | None = Field(default=None, min_length=1, max_length=100)
     descricao: str | None = None
     is_active: bool | None = None
 
@@ -28,8 +28,8 @@ class TrilhaUpdate(BaseModel):
 ###### schemas de modulo de uma trilha
 class ModuloCreate(BaseModel):
     trilha_id: int
-    titulo: str
-    ordem: int
+    titulo: str = Field(..., min_length=1, max_length=50)
+    ordem: int = Field(..., ge=0)
 
 
 class ModuloRead(BaseModel):
@@ -42,16 +42,16 @@ class ModuloRead(BaseModel):
 
 
 class ModuloUpdate(BaseModel):
-    titulo: str | None = None
+    titulo: str | None = Field(default=None, min_length=1, max_length=50)
 
 
 ###### schemas de conteudos de um modulo
 class ConteudoCreate(BaseModel):
     modulo_id: int
-    titulo: str
+    titulo: str = Field(..., min_length=1, max_length=100)
     tipo: ConteudoTipo
-    ordem: int
-    video_url: str | None = None
+    ordem: int = Field(..., ge=0)
+    video_url: str | None = Field(default=None, max_length=500)
     artigo_texto: str | None = None
 
 
@@ -68,16 +68,16 @@ class ConteudoRead(BaseModel):
 
 
 class ConteudoUpdate(BaseModel):
-    titulo: str | None = None
-    video_url: str | None = None
+    titulo: str | None = Field(default=None, min_length=1, max_length=100)
+    video_url: str | None = Field(default=None, max_length=500)
     artigo_texto: str | None = None
 
 
 ###### schemas de questao de um conteudo quiz
 class QuestaoCreate(BaseModel):
     conteudo_id: int
-    ordem: int
-    enunciado: str
+    ordem: int = Field(..., ge=0)
+    enunciado: str = Field(..., min_length=1)
 
 
 class QuestaoRead(BaseModel):

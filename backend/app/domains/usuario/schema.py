@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.domains.usuario.model import RoleUsuario
 
@@ -12,7 +12,6 @@ class UsuarioLogin(BaseModel):
 class TokenPair(BaseModel):  # resposta do login e do refresh
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
 
 
 class RefreshInput(BaseModel):  # body do /auth/refresh e /auth/logout
@@ -32,29 +31,29 @@ class UsuarioRead(BaseModel):
 
 
 class UsuarioCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr = Field(..., max_length=100)
+    password: str = Field(..., min_length=8, max_length=128)
 
 
 class UsuarioUpdate(BaseModel):
-    username: str | None = None
-    email: EmailStr | None = None
-    password: str | None = None
+    username: str | None = Field(default=None, min_length=3, max_length=50)
+    email: EmailStr | None = Field(default=None, max_length=100)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
 ###### schemas usados so pelo admin (tem role/is_active q o usuario normal n mexe)
 
 class UsuarioStaffCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role: RoleUsuario
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr = Field(..., max_length=100)
+    password: str = Field(..., min_length=8, max_length=128)
+    role: RoleUsuario = Field(..., description="author ou admin")
 
 
 class UsuarioAdminUpdate(BaseModel):
-    username: str | None = None
-    email: EmailStr | None = None
-    password: str | None = None
+    username: str | None = Field(default=None, min_length=3, max_length=50)
+    email: EmailStr | None = Field(default=None, max_length=100)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
     role: RoleUsuario | None = None
     is_active: bool | None = None
