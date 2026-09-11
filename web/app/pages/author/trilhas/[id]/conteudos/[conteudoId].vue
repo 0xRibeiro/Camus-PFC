@@ -1,0 +1,1 @@
+pagina de editar o conteudo de um conteudo do tipo artigo ou quiz

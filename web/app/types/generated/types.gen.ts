@@ -130,6 +130,10 @@ export type ConteudoUpdate = {
      */
     titulo?: string | null;
     /**
+     * Ordem
+     */
+    ordem?: number | null;
+    /**
      * Video Url
      */
     video_url?: string | null;
@@ -197,6 +201,10 @@ export type ModuloUpdate = {
      * Titulo
      */
     titulo?: string | null;
+    /**
+     * Ordem
+     */
+    ordem?: number | null;
 };
 
 /**
@@ -313,6 +321,10 @@ export type TrilhaRead = {
      */
     descricao?: string | null;
     /**
+     * Foto
+     */
+    foto?: string | null;
+    /**
      * Is Active
      */
     is_active: boolean;
@@ -330,6 +342,10 @@ export type TrilhaUpdate = {
      * Descricao
      */
     descricao?: string | null;
+    /**
+     * Foto
+     */
+    foto?: string | null;
     /**
      * Is Active
      */

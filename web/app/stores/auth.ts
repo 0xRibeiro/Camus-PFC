@@ -7,7 +7,10 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!accessToken.value)
-  const role = computed(() => user.value?.role ?? null) // ?. evita erro se user for null
+  const role = computed(() => {
+    if (!user.value) return null
+    return user.value.role
+  })
 
   // busca os dados do usuario logado
   async function fetchMe() {
@@ -40,6 +43,20 @@ export const useAuthStore = defineStore('auth', () => {
   // null = ninguem renovando agora.
   let renovacaoEmAndamento: Promise<void> | null = null
 
+  async function fazerRenovacao(refreshTokenAtual: string) {
+    const api = useApi()
+    const tokens = await api('/auth/refresh', {
+      method: 'POST',
+      body: { refresh_token: refreshTokenAtual },
+    })
+    accessToken.value = tokens.access_token
+    refreshToken.value = tokens.refresh_token
+  }
+
+  function limparRenovacao() {
+    renovacaoEmAndamento = null
+  }
+
   async function refresh() {
     // const separada pra n resetar
     const currentRefreshToken = refreshToken.value
@@ -49,18 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     // so comeca chamada nova se n tiver nenhum em andamento
     if (!renovacaoEmAndamento) {
-      // funcao criada e chamada na hora (os () no final), pra já disparar a chamada
-      renovacaoEmAndamento = (async () => {
-        const api = useApi()
-        const tokens = await api('/auth/refresh', {
-          method: 'POST',
-          body: { refresh_token: currentRefreshToken },
-        })
-        accessToken.value = tokens.access_token
-        refreshToken.value = tokens.refresh_token
-      })().finally(() => {
-        renovacaoEmAndamento = null // libera pra proxima chamada
-      })
+      renovacaoEmAndamento = fazerRenovacao(currentRefreshToken)
+      renovacaoEmAndamento.finally(limparRenovacao)
     }
 
     return renovacaoEmAndamento

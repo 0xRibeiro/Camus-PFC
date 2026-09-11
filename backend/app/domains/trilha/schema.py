@@ -16,12 +16,14 @@ class TrilhaRead(BaseModel):
     id: int
     titulo: str
     descricao: str | None = None
+    foto: str | None = None
     is_active: bool
 
 
 class TrilhaUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     descricao: str | None = None
+    foto: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
 
 
@@ -43,6 +45,7 @@ class ModuloRead(BaseModel):
 
 class ModuloUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=50)
+    ordem: int | None = Field(default=None, ge=0)
 
 
 ###### schemas de conteudos de um modulo
@@ -69,6 +72,7 @@ class ConteudoRead(BaseModel):
 
 class ConteudoUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
+    ordem: int | None = Field(default=None, ge=0)
     video_url: str | None = Field(default=None, max_length=500)
     artigo_texto: str | None = None
 
