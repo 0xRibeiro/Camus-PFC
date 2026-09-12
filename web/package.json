@@ -10,21 +10,25 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "types:api": "openapi-typescript http://localhost:8000/openapi.json -o app/types/api.d.ts"
+    "types:api": "openapi-ts"
   },
   "dependencies": {
     "@nuxt/ui": "^4.11.1",
+    "@pinia/nuxt": "^1.0.2",
     "@vueuse/core": "^14.4.0",
     "@vueuse/nuxt": "^14.4.0",
     "nuxt": "^4.5.2",
+    "pinia": "^4.0.3",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.41",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "zod": "^4.6.2"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@nuxt/eslint": "^1.17.0",
     "eslint": "^10.10.0",
-    "openapi-typescript": "^7.13.0",
     "typescript": "6"
   }
 }
