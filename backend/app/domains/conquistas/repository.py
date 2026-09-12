@@ -14,4 +14,9 @@ class ConquistaRepository:
     async def listar(self) -> list[Conquista]:
         resultado = await self.db.execute(select(Conquista).order_by(Conquista.id))
         return list(resultado.scalars().all())
-    
+
+    async def salvar(self, conquista: Conquista) -> Conquista:
+        self.db.add(conquista)
+        await self.db.commit()
+        await self.db.refresh(conquista) 
+        return conquista
