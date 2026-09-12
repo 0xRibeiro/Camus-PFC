@@ -14,13 +14,15 @@ from app.domains.trilha.router import (
 )
 from app.domains.usuario.router import admin_router as usuario_admin_router
 from app.domains.usuario.router import router as usuario_router
-from app.seed import seed_admin
+from app.seed import seed_admin, seed_conquistas
 
 
 # lifespan roda no startup, aqui só usamos pra seed admin
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await seed_admin()
+    # testando a criação de conquistas
+    await seed_conquistas()
     yield
 
 

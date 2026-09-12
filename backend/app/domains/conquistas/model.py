@@ -19,17 +19,17 @@ class Conquista(Base):
 	# guarda o link da imagem do achievement
 	imagem_dir: Mapped[str] = mapped_column(Text)
 
-	usuarios_que_possuem: Mapped[list[model.Usuario]] = relationship(
-		secondary="conquista_adquirida",
-		back_populates="conquistas_adquiridas"
+	usuarios_que_possuem: Mapped[list["model.Usuario"]] = relationship(
+		secondary="associacao_conquista_usuario",
+		back_populates="minhas_conquistas"
 	)
 
 
 # Tabela many-to-many bi direcional para vincular usuário com conquista.
 # se formos guardar outras informações futuramente, da pra transformer
 # em um association object.
-conquista_adquirida = Table(
-	"conquista_adquirida",
+associacao_conquista_usuario = Table(
+	"associacao_conquista_usuario",
 	Base.metadata,
 	Column("conquista_id", Integer, ForeignKey("conquistas.id"), primary_key=True),
 	Column("usuario_id", Integer, ForeignKey("usuarios.id"), primary_key=True)

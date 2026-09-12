@@ -28,7 +28,7 @@ class Usuario(Base):
 
     role: Mapped[RoleUsuario] = mapped_column(default=RoleUsuario.aluno)  # default aluno se n definir
 
-    conquistas_adquiridas: Mapped[list["model.Conquista"]] =relationship(
-            secondary="conquista_adquirida",
-            back_populates="usuarios_que_possuem",
+    minhas_conquistas: Mapped[list["model.Conquista"]] = relationship(
+        secondary="associacao_conquista_usuario",
+        back_populates="usuarios_que_possuem",
     )
