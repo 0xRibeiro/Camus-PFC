@@ -35,6 +35,7 @@ class Modulo(Base):
     titulo: Mapped[str] = mapped_column(String(50))
 
     ordem: Mapped[int] = mapped_column()
+    
 
 
 class Conteudo(Base):
@@ -48,6 +49,8 @@ class Conteudo(Base):
     tipo: Mapped[ConteudoTipo] = mapped_column()
 
     ordem: Mapped[int] = mapped_column()
+
+    pontos: Mapped[int] = mapped_column(default=0)
 
     video_url: Mapped[str | None] = mapped_column(String(500))
 
