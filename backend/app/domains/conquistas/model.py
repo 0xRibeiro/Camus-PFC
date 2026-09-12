@@ -1,8 +1,8 @@
-from sqlalchemy import Boolean, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-from app.domains.usuario import usuario
+from app.domains.usuario import model
 
 
 # inicialmente pensei nesses atributos para a conquista. a tabela
@@ -19,28 +19,18 @@ class Conquista(Base):
 	# guarda o link da imagem do achievement
 	imagem_dir: Mapped[str] = mapped_column(Text)
 
-
-# Tabela associativa para vincular usuário com conquista.
-# feita no ambiente virtual github, conferir se funcionou
-# no devenv assim que possivel.
-class ConquistaAdquiria(Base):
-	__tablename__ = 'conquista_adquirida'
-    id = Column(Integer, primary_key=True, index=True)
-    conquistaId = Column(Integer, ForeignKey('Item.id'))
-    usuarioId = Column(Integer, ForeignKey('Usuario.id'))
-	desbloqueada = Column(Boolean)
+	usuarios_que_possuem: Mapped[list[model.Usuario]] = relationship(
+		secondary="conquista_adquirida",
+		back_populates="conquistas_adquiridas"
+	)
 
 
-class ItemDetail(Base):
-    __tablename__ = 'ItemDetail'
-    id = Column(Integer, primary_key=True, index=True)
-    itemId = Column(Integer, ForeignKey('Item.id'))
-    detailId = Column(Integer, ForeignKey('Detail.id'))
-    endDate = Column(Date)
-
-class ConquistaAdquirida(Base):
-	__tablename__= "conquista_adquirida"
-
-	id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-
-	id_usuario[int] = mapped_column(fo)
+# Tabela many-to-many bi direcional para vincular usuário com conquista.
+# se formos guardar outras informações futuramente, da pra transformer
+# em um association object.
+conquista_adquirida = Table(
+	"conquista_adquirida",
+	Base.metadata,
+	Column("conquista_id", Integer, ForeignKey("conquistas.id"), primary_key=True),
+	Column("usuario_id", Integer, ForeignKey("usuarios.id"), primary_key=True)
+)
