@@ -12,13 +12,11 @@ class ConquistaRead(BaseModel):
 	id: int
 	titulo: str
 	descricao: str | None = None
-	desbloquada: bool
 
 
 class ConquistaUpdate(BaseModel):
 	titulo: str | None = None
 	descricao: str | None = None
-	desbloquada: bool | None = None
 
 
 # abaixo são os schemas da tabela associativa. não tenho certeza se é necessário
