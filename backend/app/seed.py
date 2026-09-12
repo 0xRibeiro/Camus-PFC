@@ -40,3 +40,28 @@ async def seed_conquistas() -> None:
             descricao="Mude a cor do site",
             imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10"
         ))
+
+        await repo.salvar(
+            Conquista(
+                titulo="Conquista teste 1 - Visitar pagina de conquistas",
+                descricao="Acesse a página de conquistas",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+            )
+        )
+
+        await repo.salvar(
+            Conquista(
+                titulo="Conquista teste 2 - Exploradorando as trilhas",
+                descricao="Visualize uma trilha",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+            )
+        )
+
+        await repo.salvar(
+            Conquista(
+                titulo="Conquista teste 3 - Leitor",
+                descricao="Abra um conteúdo",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+            )
+        )
+        
