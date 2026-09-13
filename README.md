@@ -8,14 +8,15 @@
 
 <!-- MODELO MENU DE NAVEGAÇÃO -->
 <p align="center">
- <a href="#-sobre-o-projeto">Sobre</a> •
- <a href="#-funcionalidades">Funcionalidades</a> •
- <a href="#-layout">Layout</a> • 
- <a href="#-como-executar-o-projeto">Como executar</a> • 
- <a href="#-tecnologias">Tecnologias</a> • 
- <a href="#-autor">Autor</a> • 
- <a href="#user-content--licença">Licença</a>
+  <a href="#-sobre-o-projeto">Sobre</a> • 
+  <a href="#-funcionalidades">Funcionalidades</a> • 
+  <a href="#-layout">Layout</a> • 
+  <a href="#-como-executar-o-projeto">Como executar</a> • 
+  <a href="#-tecnologias">Tecnologias</a> 
 </p>
+
+
+
 
 
 
@@ -35,8 +36,13 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 ## 🐡 Funcionalidades
 
 <!-- EXEMPLO DE FUNCIONALIDADES: -->
-- [x] Se o usuário não enviar mensagens dentro de 1 minuto o chat deve responder uma mensagem automaticamente.
-- [x]
+- [x] Usuarios staff podem gerenciar conteudos de ensino no app atraves de trilhas e modulos
+- [x] Usuarios alunos podem ganhar conquistas e visualiizar elas em seus perfis podendo acumular e obter conquistas atraves de acoes
+- [ ] Editor de texto estilo notion para conteudos de artigo
+- [ ] visualizador de video integrado para consumo de videos do youtube
+- [ ] gerador de quiz para diferentes tipos de questionarios
+- [ ] sistema de pontuacao e ranking entre usuarios
+- [ ] 
 
 ---
 
@@ -45,12 +51,16 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 <!-- EXEMPLO DE LAYOUT: -->
 ## 🐧 Layout
 
-### Widget
+### telas de gerenciamento de conteudo
 
 <!-- AQUI VOCÊ PASSA O CAMINHO DA IMAGEM -->
-![Mobile1]()<br>
-![Mobile2]()<br>
-![Mobile3]()
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/cc6630cf-ca22-485d-bcea-9e237335da9d" />
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/b77b5f9b-9c9e-45e2-b3e9-7a9aa24066fc" />
+
+### tela de conquistas do usuario
+<img width="400"  alt="image" src="https://github.com/user-attachments/assets/5ae06523-abbe-4885-bbbe-6c1b36b83536" />
+
+
 
 ---
 
@@ -58,9 +68,18 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 
 ## 🦈 Como executar o projeto
 
+### Pré-requisitos
+
+Antes de começar, você vai precisar ter instalado em sua máquina:
+[Git](https://git-scm.com) e [Nix + devenv](https://devenv.sh/getting-started/).
+Além disto é bom ter um editor para trabalhar com o código como [VSCode](https://code.visualstudio.com/).
+
+---
+
 Esse projeto usa [devenv](https://devenv.sh) (Nix) pra gerenciar o ambiente de desenvolvimento inteiro: Python, Node/bun, Postgres, Redis e InfluxDB sobem juntos, sem precisar instalar nada disso manualmente.
 
 **1 - Instalar o Nix e o devenv**, seguindo o guia oficial: [devenv.sh/getting-started](https://devenv.sh/getting-started/)
+
 
 **2 - Clonar o projeto e entrar na pasta**
 ```bash
@@ -74,39 +93,28 @@ devenv shell
 # ou, se você usa direnv:
 direnv allow
 ```
-
-**4 - Subir os serviços** (Postgres, Redis, InfluxDB)
-```bash
-devenv up
-```
-
-**5 - Configurar o backend**
+**4 - Configurar o backend**
 ```bash
 cp backend/.env.example backend/.env
 # depois, preencha os valores em backend/.env
 ```
 
-**6 - Rodar o backend**
+**5 - Subir tudo** (Postgres, Redis, InfluxDB, backend e frontend)
 ```bash
-cd backend
-uvicorn app.main:app --reload
+devenv up
 ```
 
-**7 - Rodar o web (Nuxt)**
-```bash
-cd web
-bun run dev
-```
+**6 - Acessar o projeto**
+- Front-end: http://localhost:3000
+- Back-end: http://localhost:8000/docs
+  
+  ou outras portas caso vc ja tiver com essas ocupadas (o devenv up gerencia automaticamente e é exibido no terminal)
 
 <!-- ---------------------------------------------------------------------- -->
 
-### Pré-requisitos
-
-Antes de começar, você vai precisar ter instalado em sua máquina:
-[Git](https://git-scm.com) e [Nix + devenv](https://devenv.sh/getting-started/).
-Além disto é bom ter um editor para trabalhar com o código como [VSCode](https://code.visualstudio.com/).
 
 ---
+
 
 <!-- ---------------------------------------------------------------------- -->
 
@@ -116,7 +124,7 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 
 #### **Ambiente de desenvolvimento**
 
-- **[devenv](https://devenv.sh)** (Nix) — Python, JS/bun, Postgres, Redis e InfluxDB gerenciados juntos
+- **[devenv](https://devenv.sh)** (Nix) — Python/UV, TS/bun, Postgres, Redis e InfluxDB gerenciados juntos
 
 #### **Back-End** ([FastAPI](https://fastapi.tiangolo.com/) / Python)
 
@@ -126,8 +134,6 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 #### **Front-End Web** ([Nuxt](https://nuxt.com/) / Vue / TypeScript)
 
 - [bun](https://bun.sh/)
-
-#### **Mobile** ([Flutter](https://flutter.dev/) / Dart)
 
 #### **Firmware / IoT** (C++ / [Arduino](https://www.arduino.cc/))
 
