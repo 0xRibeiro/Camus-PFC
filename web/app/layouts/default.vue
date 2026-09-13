@@ -70,14 +70,61 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { useConquistasStore } from '~/stores/conquistas'
 
 const open = ref(true)
 const auth = useAuthStore()
+const conquistas = useConquistasStore()
+const colorMode = useColorMode()
+const route = useRoute()
+
+// da linha 82 até a 118 são os codigos que concedem as conquistas atuais
+// aqui usei o watch por se tratar de cnquistas que tratam apenas
+// de comportamentos do site. quando as features de ensino estiverem
+// prontas, esse comportamento vai mudar.
+watch(
+  () => colorMode.preference,
+  async (newPreference, oldPreference) => {
+    if (!oldPreference || newPreference === oldPreference || !auth.isAuthenticated) return
+
+    await conquistas.desbloquearConquista(1).catch(() => {})
+  },
+)
+
+watch(
+  () => [open.value, auth.isAuthenticated] as const,
+  async ([isOpen, isAuthenticated]) => {
+    if (isOpen || !isAuthenticated) return
+
+    await conquistas.desbloquearConquista(2).catch(() => {})
+  },
+)
+
+watch(
+  () => [route.path, auth.isAuthenticated] as const,
+  async ([path, isAuthenticated]) => {
+    if (path !== '/' || !isAuthenticated) return
+
+    await conquistas.desbloquearConquista(3).catch(() => {})
+  },
+  { immediate: true },
+)
+
+watch(
+  () => [route.path, auth.isAuthenticated] as const,
+  async ([path, isAuthenticated]) => {
+    if (path !== '/conquistas/segredo' || !isAuthenticated) return
+
+    await conquistas.desbloquearConquista(4).catch(() => {})
+  },
+  { immediate: true },
+)
 
 // computed pq precisa recalcular se o auth.role mudar (login/logout, por ex)
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
+    { label: 'Conquistas', icon: 'i-lucide-trophy', to: 'conquistas' },
   ]
 
   if (auth.role === 'admin') {
