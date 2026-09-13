@@ -27,7 +27,7 @@ async def seed_admin() -> None:
         )
 
 
-# Método teste para gerar conquistas hardcoded.
+# Método para gerar conquistas hardcoded.
 async def seed_conquistas() -> None:
     
     async with async_session_maker() as db:
@@ -36,32 +36,32 @@ async def seed_conquistas() -> None:
             return
 
         await repo.salvar(Conquista(
-            titulo="Primeira Conquista",
+            titulo="Cores",
             descricao="Mude a cor do site",
             imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10"
         ))
 
         await repo.salvar(
             Conquista(
-                titulo="Conquista teste 1 - Visitar pagina de conquistas",
-                descricao="Acesse a página de conquistas",
-                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+                titulo="Saide side bar",
+                descricao="Esconda a side bar",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7SKfR0OHIEYKM9Be5q_0D7bG97II1M0OOZ_jADPXwkQ&s=10",
             )
         )
 
         await repo.salvar(
             Conquista(
-                titulo="Conquista teste 2 - Exploradorando as trilhas",
-                descricao="Visualize uma trilha",
-                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+                titulo="Trilhas",
+                descricao="Abra a tela das trilhas",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBrpmgqAZxgreX7GhSF0cqXOUH_U33YeLP8UonKRE3fA&s=10",
             )
         )
 
         await repo.salvar(
             Conquista(
-                titulo="Conquista teste 3 - Leitor",
-                descricao="Abra um conteúdo",
-                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQlGmYfDo0sQajoEu2Uaa_9FuPzcBLsXjpPJ4r56H83w&s=10",
+                titulo="Segredo",
+                descricao="Desbloqueie a conquista secreta",
+                imagem_dir="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0ilZIq8sNacLk1IzNijBSoe1-QJVHvP13WDJ5iTwS6Q&s=10",
             )
         )
         
