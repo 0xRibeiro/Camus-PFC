@@ -11,6 +11,14 @@
           <UInput v-model="formState.titulo" class="w-full" />
         </UFormField>
 
+        <UFormField name="descricao" label="Descrição">
+          <UTextarea v-model="formState.descricao" class="w-full" />
+        </UFormField>
+
+        <UFormField name="tag" label="Tag">
+          <USelect v-model="formState.tag" :items="tagOptions" placeholder="Selecione uma tag" class="w-full" />
+        </UFormField>
+
         <UFormField name="foto" label="Link da imagem">
           <UInput v-model="formState.foto" placeholder="https://..." class="w-full" />
         </UFormField>
@@ -58,8 +66,15 @@ const props = defineProps<{
 // esse componente n sabe chamar a api - ele so valida o formulario e "entrega"
 // os dados prontos pro pai, que e quem realmente faz o POST/PATCH
 const emit = defineEmits<{
-  submit: [dados: { titulo: string, foto?: string | null, is_active: boolean }]
+  submit: [dados: { titulo: string, descricao?: string | null, tag?: string | null, foto?: string | null, is_active: boolean }]
 }>()
+
+type TagOption = { label: string, value: string, chip: { color: CorTagTrilha } }
+
+const tagOptions: TagOption[] = []
+for (const item of TRILHA_TAGS) {
+  tagOptions.push({ label: item.label, value: item.value, chip: { color: item.color } })
+}
 
 // --- schema de validacao ---
 // zTrilhaCreate e gerado automaticamente a partir do schema TrilhaCreate do back
@@ -69,35 +84,44 @@ const emit = defineEmits<{
 // do schema gerado (ele tem mais campos, tipo descricao, que a gente n usa nesse
 // formulario) - assim a validacao desses 2 campos continua vindo do back,
 // sem eu duplicar a regra (tipo "minimo 3 caracteres") escrevendo ela de novo aqui
-const formSchema = zTrilhaCreate.pick({ titulo: true, foto: true })
+const formSchema = zTrilhaCreate.pick({ titulo: true, descricao: true, tag: true, foto: true })
 
 // esse e o estado real do formulario - o que a pessoa ta digitando agora.
 // diferente da prop "trilha" (que so muda quando o pai manda um valor novo),
 // isso aqui muda a cada letra digitada
-const formState = reactive({ titulo: '', foto: '', is_active: true })
+const formState = reactive({ titulo: '', descricao: '', tag: undefined as string | undefined, foto: '', is_active: true })
 
-// sempre que a prop "trilha" mudar (o pai abriu o modal pra outra trilha, ou
-// pra criar uma nova), a gente reseta o formulario com os dados certos.
-// { immediate: true } faz isso rodar tambem na primeira vez que o componente
-// aparece, n so quando muda depois
-watch(() => props.trilha, (trilha) => {
-  if (trilha) {
-    formState.titulo = trilha.titulo
-    formState.foto = trilha.foto ?? ''
-    formState.is_active = trilha.is_active
+watch(open, (isOpen) => {
+  if (!isOpen) return
+
+  if (props.trilha) {
+    formState.titulo = props.trilha.titulo
+
+    if (props.trilha.descricao) formState.descricao = props.trilha.descricao
+    else formState.descricao = ''
+
+    if (props.trilha.tag) formState.tag = props.trilha.tag
+    else formState.tag = undefined
+
+    formState.foto = props.trilha.foto ?? ''
+    formState.is_active = props.trilha.is_active
   }
   else {
     formState.titulo = ''
+    formState.descricao = ''
+    formState.tag = undefined
     formState.foto = ''
     formState.is_active = true
   }
-}, { immediate: true })
+})
 
 // o UForm ja validou tudo (bateu com o formSchema) antes de chamar isso -
 // aqui a gente so repassa os dados validados pro pai via emit
-function onSubmit(event: FormSubmitEvent<{ titulo: string, foto?: string | null }>) {
+function onSubmit(event: FormSubmitEvent<{ titulo: string, descricao?: string | null, tag?: string | null, foto?: string | null }>) {
   emit('submit', {
     titulo: event.data.titulo,
+    descricao: event.data.descricao,
+    tag: event.data.tag,
     foto: event.data.foto,
     is_active: formState.is_active,
   })

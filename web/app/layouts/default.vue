@@ -77,11 +77,15 @@ const auth = useAuthStore()
 // computed pq precisa recalcular se o auth.role mudar (login/logout, por ex)
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
+    // exibe pra todos
   ]
 
   if (auth.role === 'admin') {
     lista.push({ label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' })
+  }
+
+  if (auth.role === 'admin' || auth.role === 'author') {
+    lista.push({ label: 'Gerenciar Trilhas', icon: 'i-lucide-square-text', to: '/author/trilhas' })
   }
 
   return lista

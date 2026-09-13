@@ -23,6 +23,8 @@ class Trilha(Base):
 
     descricao: Mapped[str | None] = mapped_column(Text)
 
+    tag: Mapped[str | None] = mapped_column(String(50))
+
     is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha
 
 

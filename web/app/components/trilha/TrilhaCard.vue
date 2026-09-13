@@ -17,6 +17,15 @@
           {{ trilha.is_active ? 'ATIVA' : 'DESATIVADA' }}
         </div>
 
+        <UBadge
+          v-if="trilha.tag"
+          :label="infoDaTagTrilha(trilha.tag).label"
+          :color="infoDaTagTrilha(trilha.tag).color"
+          variant="soft"
+          size="sm"
+          class="w-fit"
+        />
+
         <p class="font-semibold">
           {{ trilha.titulo }}
         </p>
