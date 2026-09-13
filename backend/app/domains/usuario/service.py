@@ -6,6 +6,7 @@ from fastcrud.exceptions.http_exceptions import (
     NotFoundException,
     UnauthorizedException,
 )
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
@@ -19,6 +20,7 @@ from app.core.security import (
     validar_refresh_token,
     verificar_password,
 )
+from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
@@ -141,6 +143,41 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
 
 async def listar_usuarios(db: AsyncSession) -> list[Usuario]:
     return await UsuarioRepository(db).listar()
+
+
+async def listar_conquistas_usuario(db: AsyncSession, user_id: int):
+    return await UsuarioRepository(db).listar_conquistas(user_id)
+
+# metodo faz algumas checagens para não dar conquistas não existentes
+# ou duplicadas
+async def conceder_conquista(
+    db: AsyncSession,
+    user_id: int,
+    conquista_id: int,
+) -> Conquista | None:
+    conquista = await db.get(Conquista, conquista_id)
+
+    if conquista is None:
+        return None
+
+    existente = await db.scalar(
+        select(associacao_conquista_usuario.c.conquista_id).where(
+            associacao_conquista_usuario.c.usuario_id == user_id,
+            associacao_conquista_usuario.c.conquista_id == conquista.id,
+        )
+    )
+
+    if existente is not None:
+        return None
+
+    await db.execute(
+        associacao_conquista_usuario.insert().values(
+            usuario_id=user_id,
+            conquista_id=conquista.id,
+        )
+    )
+    await db.commit()
+    return conquista
 
 
 ###### edicao
