@@ -16,12 +16,29 @@
       </UBadge>
     </div>
 
-    <UInput
-      v-model="busca"
-      icon="i-lucide-search"
-      placeholder="Buscar trilha..."
-      class="w-full mb-4"
-    />
+    <div class="flex gap-3 mb-4">
+      <UInput
+        v-model="busca"
+        icon="i-lucide-search"
+        placeholder="Buscar trilha..."
+        class="w-full"
+      />
+
+      <USelect
+        v-model="tagFiltro"
+        :items="tagFiltroOptions"
+        placeholder="Filtrar por tag"
+        class="w-48"
+      />
+
+      <UButton
+        v-if="tagFiltro"
+        icon="i-lucide-x"
+        color="neutral"
+        variant="ghost"
+        @click="tagFiltro = ''"
+      />
+    </div>
 
     <!-- spinner enquanto busca as trilhas -->
     <div v-if="loading" class="flex justify-center py-12">
@@ -37,7 +54,7 @@
       @edit e @delete sao o caminho contrario: eventos vindo DE DENTRO do componente
       pra fora. o TrilhaCard n sabe abrir modal nem chamar api - ele so avisa
       "cliquei em editar" ou "cliquei em excluir", e aqui na pagina a gente decide
-      o que fazer com esse aviso (abrirEditar / onDelete)
+      o que fazer com esse aviso (abrirEditar / abrirExcluir)
     -->
     <UPageGrid v-else>
       <TrilhaCard
@@ -47,7 +64,7 @@
         :modulos-count="contarModulos(trilha.id)"
         :conteudos-count="contarConteudos(trilha.id)"
         @edit="abrirEditar(trilha)"
-        @delete="onDelete(trilha)"
+        @delete="abrirExcluir(trilha)"
       />
 
       <UButton
@@ -77,6 +94,18 @@
       :saving="saving"
       @submit="onSubmitForm"
     />
+
+    <UModal
+      v-model:open="showDeleteModal"
+      title="Excluir trilha"
+      :description="descricaoExclusao"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer="{ close }">
+        <UButton label="Cancelar" color="neutral" variant="outline" @click="close" />
+        <UButton label="Excluir" color="error" :loading="excluindo" @click="confirmarExclusao" />
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -97,11 +126,27 @@ const loading = ref(true)
 
 const busca = ref('')
 
+const tagFiltro = ref('')
+
+const tagFiltroOptions: { label: string, value: string, chip: { color: CorTagTrilha } }[] = []
+for (const item of TRILHA_TAGS) {
+  tagFiltroOptions.push({ label: item.label, value: item.value, chip: { color: item.color } })
+}
+
 // computed recalcula sozinho toda vez que "trilhas" ou "busca" mudam
 const trilhasFiltradas = computed(() => {
   const resultado: TrilhaRead[] = []
   for (const trilha of trilhas.value) {
-    if (trilha.titulo.toLowerCase().includes(busca.value.toLowerCase())) {
+    const buscaLower = busca.value.toLowerCase()
+
+    let descricao = ''
+    if (trilha.descricao) descricao = trilha.descricao
+
+    const bateBusca = trilha.titulo.toLowerCase().includes(buscaLower)
+      || descricao.toLowerCase().includes(buscaLower)
+    const bateTag = !tagFiltro.value || trilha.tag === tagFiltro.value
+
+    if (bateBusca && bateTag) {
       resultado.push(trilha)
     }
   }
@@ -168,24 +213,42 @@ async function fetchTrilhas() {
 // busca assim que a pagina abre
 onMounted(fetchTrilhas)
 
-async function onDelete(trilha: TrilhaRead) {
-  // apaga em cascata no back: leva modulo e conteudo junto, por isso confirma antes
-  const confirmado = confirm(`Excluir a trilha "${trilha.titulo}"? Isso apaga todos os módulos e conteúdos dela também.`)
-  if (!confirmado) return
+const showDeleteModal = ref(false)
+const excluindo = ref(false)
+const trilhaParaExcluir = ref<TrilhaRead | null>(null)
 
+const descricaoExclusao = computed(() => {
+  if (!trilhaParaExcluir.value) return ''
+  return `Excluir a trilha "${trilhaParaExcluir.value.titulo}"? Isso apaga todos os módulos e conteúdos dela também.`
+})
+
+function abrirExcluir(trilha: TrilhaRead) {
+  trilhaParaExcluir.value = trilha
+  showDeleteModal.value = true
+}
+
+async function confirmarExclusao() {
+  if (!trilhaParaExcluir.value) return
+
+  excluindo.value = true
   try {
     const api = useApi()
-    await api(`/trilhas/${trilha.id}`, { method: 'DELETE' })
+    await api(`/trilhas/${trilhaParaExcluir.value.id}`, { method: 'DELETE' })
 
     // monta a lista de novo, sem a trilha excluida
     const restantes: TrilhaRead[] = []
     for (const t of trilhas.value) {
-      if (t.id !== trilha.id) restantes.push(t)
+      if (t.id !== trilhaParaExcluir.value.id) restantes.push(t)
     }
     trilhas.value = restantes
+
+    showDeleteModal.value = false
   }
   catch {
     toast.add({ title: 'Não foi possível excluir a trilha', color: 'error' })
+  }
+  finally {
+    excluindo.value = false
   }
 }
 
@@ -208,7 +271,7 @@ function abrirEditar(trilha: TrilhaRead) {
 // isso aqui roda quando o TrilhaFormModal emite "submit" - o formulario ja foi
 // validado la dentro do componente, aqui a gente so decide POST (criar) ou PATCH
 // (editar) e atualiza a lista local, sem precisar buscar tudo do back de novo
-async function onSubmitForm(dados: { titulo: string, foto?: string | null, is_active: boolean }) {
+async function onSubmitForm(dados: { titulo: string, descricao?: string | null, tag?: string | null, foto?: string | null, is_active: boolean }) {
   saving.value = true
   try {
     const api = useApi()
@@ -230,7 +293,7 @@ async function onSubmitForm(dados: { titulo: string, foto?: string | null, is_ac
     else {
       // is_active n existe no TrilhaCreate do back (toda trilha nasce inativa),
       // entao monta o corpo do POST so com o que ele aceita
-      const dadosCriacao = { titulo: dados.titulo, foto: dados.foto }
+      const dadosCriacao = { titulo: dados.titulo, descricao: dados.descricao, tag: dados.tag, foto: dados.foto }
       const nova = await api('/trilhas', { method: 'POST', body: dadosCriacao })
       trilhas.value.push(nova)
     }

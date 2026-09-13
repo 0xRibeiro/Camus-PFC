@@ -8,6 +8,7 @@ class TrilhaCreate(BaseModel):
     titulo: str = Field(..., min_length=1, max_length=100)
     descricao: str | None = None
     foto: str | None = Field(default=None, max_length=500)
+    tag: str | None = Field(default=None, max_length=50)
 
 
 class TrilhaRead(BaseModel):
@@ -17,6 +18,7 @@ class TrilhaRead(BaseModel):
     titulo: str
     descricao: str | None = None
     foto: str | None = None
+    tag: str | None = None
     is_active: bool
 
 
@@ -24,6 +26,7 @@ class TrilhaUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     descricao: str | None = None
     foto: str | None = Field(default=None, max_length=500)
+    tag: str | None = Field(default=None, max_length=50)
     is_active: bool | None = None
 
 
