@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
 from app.domains.usuario.model import Usuario
 
 
@@ -38,3 +39,20 @@ class UsuarioRepository:
     async def deletar(self, user: Usuario) -> None:
         await self.db.delete(user)
         await self.db.commit()
+
+    # esse metódo usa a tabela de associação para buscar todas as
+    # conquistas que o usuario tem. antes eu queria fazer um desses
+    # no repository da conquista para mostrar quais usuarios tem cada,
+    # mas conclui que não tem necessidade. Só se no futuro fizermos
+    # estatiscas nas conquistas.
+    async def listar_conquistas(self, user_id: int) -> list[Conquista]:
+        resultado = await self.db.execute(
+            select(Conquista)
+            .join(
+                associacao_conquista_usuario,
+                associacao_conquista_usuario.c.conquista_id == Conquista.id,
+            )
+            .where(associacao_conquista_usuario.c.usuario_id == user_id)
+            .order_by(Conquista.id)
+        )
+        return list(resultado.scalars().all())

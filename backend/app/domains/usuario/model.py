@@ -1,7 +1,7 @@
 import enum
 
 from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -26,3 +26,8 @@ class Usuario(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     role: Mapped[RoleUsuario] = mapped_column(default=RoleUsuario.aluno)  # default aluno se n definir
+
+    minhas_conquistas = relationship(
+        "Conquista",
+        secondary="associacao_conquista_usuario"
+    )

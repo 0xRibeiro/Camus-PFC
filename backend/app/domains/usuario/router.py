@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
+from app.domains.conquistas.schema import ConquistaRead
 from app.domains.usuario import service
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
@@ -64,6 +65,33 @@ async def logout(data: RefreshInput) -> None:
 @router.get("/usuarios/me", response_model=UsuarioRead, tags=["usuarios"])
 async def read_me(user: Usuario = Depends(service.get_current_user)) -> Usuario:
     return user
+
+
+@router.get(
+    "/usuarios/me/conquistas",
+    response_model=list[ConquistaRead],
+    tags=["conquistas"],
+)
+async def listar_minhas_conquistas(
+    user: Usuario = Depends(service.get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    return await service.listar_conquistas_usuario(db, user.id)
+
+
+# essa rota recebede o id da conquista desbloqueada, retirando
+# a necessidade de criar uma rota pra cada uma.
+@router.post(
+    "/usuarios/me/conquistas/{conquista_id}",
+    response_model=ConquistaRead | None,
+    tags=["conquistas"],
+)
+async def desbloquear_conquista(
+    conquista_id: int,
+    user: Usuario = Depends(service.get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    return await service.conceder_conquista(db, user.id, conquista_id)
 
 
 @router.patch("/usuarios/me", response_model=UsuarioRead, tags=["usuarios"])

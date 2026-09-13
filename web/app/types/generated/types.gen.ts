@@ -59,6 +59,64 @@ export type AlternativaUpdate = {
 };
 
 /**
+ * ConquistaCreate
+ */
+export type ConquistaCreate = {
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Descricao
+     */
+    descricao?: string | null;
+    /**
+     * Imagem Dir
+     */
+    imagem_dir?: string | null;
+};
+
+/**
+ * ConquistaRead
+ */
+export type ConquistaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Descricao
+     */
+    descricao?: string | null;
+    /**
+     * Imagem Dir
+     */
+    imagem_dir?: string | null;
+};
+
+/**
+ * ConquistaUpdate
+ */
+export type ConquistaUpdate = {
+    /**
+     * Titulo
+     */
+    titulo?: string | null;
+    /**
+     * Descricao
+     */
+    descricao?: string | null;
+    /**
+     * Imagem Dir
+     */
+    imagem_dir?: string | null;
+};
+
+/**
  * ConteudoCreate
  */
 export type ConteudoCreate = {
@@ -549,7 +607,7 @@ export type FastcrudCorePaginationDynamicListResponse3 = {
     /**
      * Data
      */
-    data: Array<ConteudoRead>;
+    data: Array<ConquistaRead>;
 };
 
 /**
@@ -559,13 +617,23 @@ export type FastcrudCorePaginationDynamicListResponse4 = {
     /**
      * Data
      */
-    data: Array<QuestaoRead>;
+    data: Array<ConteudoRead>;
 };
 
 /**
  * DynamicListResponse
  */
 export type FastcrudCorePaginationDynamicListResponse5 = {
+    /**
+     * Data
+     */
+    data: Array<QuestaoRead>;
+};
+
+/**
+ * DynamicListResponse
+ */
+export type FastcrudCorePaginationDynamicListResponse6 = {
     /**
      * Data
      */
@@ -631,7 +699,7 @@ export type FastcrudCorePaginationDynamicPaginatedResponse3 = {
     /**
      * Data
      */
-    data: Array<ConteudoRead>;
+    data: Array<ConquistaRead>;
     /**
      * Total Count
      */
@@ -657,7 +725,7 @@ export type FastcrudCorePaginationDynamicPaginatedResponse4 = {
     /**
      * Data
      */
-    data: Array<QuestaoRead>;
+    data: Array<ConteudoRead>;
     /**
      * Total Count
      */
@@ -680,6 +748,32 @@ export type FastcrudCorePaginationDynamicPaginatedResponse4 = {
  * DynamicPaginatedResponse
  */
 export type FastcrudCorePaginationDynamicPaginatedResponse5 = {
+    /**
+     * Data
+     */
+    data: Array<QuestaoRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
+export type FastcrudCorePaginationDynamicPaginatedResponse6 = {
     /**
      * Data
      */
@@ -858,6 +952,24 @@ export type UpdateMeUsuariosMePatchResponses = {
 };
 
 export type UpdateMeUsuariosMePatchResponse = UpdateMeUsuariosMePatchResponses[keyof UpdateMeUsuariosMePatchResponses];
+
+export type ReadMyAchievementsUsuariosMeConquistasGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/conquistas';
+};
+
+export type ReadMyAchievementsUsuariosMeConquistasGetResponses = {
+    /**
+     * Response Read My Achievements Usuarios Me Conquistas Get
+     *
+     * Successful Response
+     */
+    200: Array<ConquistaRead>;
+};
+
+export type ReadMyAchievementsUsuariosMeConquistasGetResponse = ReadMyAchievementsUsuariosMeConquistasGetResponses[keyof ReadMyAchievementsUsuariosMeConquistasGetResponses];
 
 export type ListarUsuariosAdminUsuariosGetData = {
     body?: never;
@@ -1310,6 +1422,163 @@ export type ModuloUpdateModulosIdPatchResponses = {
     200: unknown;
 };
 
+export type ConquistaReadMultiConquistasGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+    };
+    url: '/conquistas';
+};
+
+export type ConquistaReadMultiConquistasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConquistaReadMultiConquistasGetError = ConquistaReadMultiConquistasGetErrors[keyof ConquistaReadMultiConquistasGetErrors];
+
+export type ConquistaReadMultiConquistasGetResponses = {
+    /**
+     * Response Conquista Read Multi Conquistas Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse3 | FastcrudCorePaginationDynamicListResponse3;
+};
+
+export type ConquistaReadMultiConquistasGetResponse = ConquistaReadMultiConquistasGetResponses[keyof ConquistaReadMultiConquistasGetResponses];
+
+export type ConquistaCreateConquistasPostData = {
+    body: ConquistaCreate;
+    path?: never;
+    query?: never;
+    url: '/conquistas';
+};
+
+export type ConquistaCreateConquistasPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConquistaCreateConquistasPostError = ConquistaCreateConquistasPostErrors[keyof ConquistaCreateConquistasPostErrors];
+
+export type ConquistaCreateConquistasPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ConquistaDeleteConquistasIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/conquistas/{id}';
+};
+
+export type ConquistaDeleteConquistasIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConquistaDeleteConquistasIdDeleteError = ConquistaDeleteConquistasIdDeleteErrors[keyof ConquistaDeleteConquistasIdDeleteErrors];
+
+export type ConquistaDeleteConquistasIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ConquistaReadConquistasIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/conquistas/{id}';
+};
+
+export type ConquistaReadConquistasIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConquistaReadConquistasIdGetError = ConquistaReadConquistasIdGetErrors[keyof ConquistaReadConquistasIdGetErrors];
+
+export type ConquistaReadConquistasIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConquistaRead;
+};
+
+export type ConquistaReadConquistasIdGetResponse = ConquistaReadConquistasIdGetResponses[keyof ConquistaReadConquistasIdGetResponses];
+
+export type ConquistaUpdateConquistasIdPatchData = {
+    body: ConquistaUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/conquistas/{id}';
+};
+
+export type ConquistaUpdateConquistasIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConquistaUpdateConquistasIdPatchError = ConquistaUpdateConquistasIdPatchErrors[keyof ConquistaUpdateConquistasIdPatchErrors];
+
+export type ConquistaUpdateConquistasIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type ConteudoReadMultiConteudosGetData = {
     body?: never;
     path?: never;
@@ -1357,7 +1626,7 @@ export type ConteudoReadMultiConteudosGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse3 | FastcrudCorePaginationDynamicListResponse3;
+    200: FastcrudCorePaginationDynamicPaginatedResponse4 | FastcrudCorePaginationDynamicListResponse4;
 };
 
 export type ConteudoReadMultiConteudosGetResponse = ConteudoReadMultiConteudosGetResponses[keyof ConteudoReadMultiConteudosGetResponses];
@@ -1518,7 +1787,7 @@ export type QuestaoReadMultiQuestoesGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse4 | FastcrudCorePaginationDynamicListResponse4;
+    200: FastcrudCorePaginationDynamicPaginatedResponse5 | FastcrudCorePaginationDynamicListResponse5;
 };
 
 export type QuestaoReadMultiQuestoesGetResponse = QuestaoReadMultiQuestoesGetResponses[keyof QuestaoReadMultiQuestoesGetResponses];
@@ -1679,7 +1948,7 @@ export type AlternativaReadMultiAlternativasGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse5 | FastcrudCorePaginationDynamicListResponse5;
+    200: FastcrudCorePaginationDynamicPaginatedResponse6 | FastcrudCorePaginationDynamicListResponse6;
 };
 
 export type AlternativaReadMultiAlternativasGetResponse = AlternativaReadMultiAlternativasGetResponses[keyof AlternativaReadMultiAlternativasGetResponses];

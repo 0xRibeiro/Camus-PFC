@@ -30,6 +30,34 @@ export const zAlternativaUpdate = z.object({
 });
 
 /**
+ * ConquistaCreate
+ */
+export const zConquistaCreate = z.object({
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    imagem_dir: z.string().nullish()
+});
+
+/**
+ * ConquistaRead
+ */
+export const zConquistaRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    imagem_dir: z.string().nullish()
+});
+
+/**
+ * ConquistaUpdate
+ */
+export const zConquistaUpdate = z.object({
+    titulo: z.string().nullish(),
+    descricao: z.string().nullish(),
+    imagem_dir: z.string().nullish()
+});
+
+/**
  * ConteudoTipo
  */
 export const zConteudoTipo = z.enum([
@@ -280,20 +308,27 @@ export const zFastcrudCorePaginationDynamicListResponse2 = z.object({
  * DynamicListResponse
  */
 export const zFastcrudCorePaginationDynamicListResponse3 = z.object({
-    data: z.array(zConteudoRead)
+    data: z.array(zConquistaRead)
 });
 
 /**
  * DynamicListResponse
  */
 export const zFastcrudCorePaginationDynamicListResponse4 = z.object({
-    data: z.array(zQuestaoRead)
+    data: z.array(zConteudoRead)
 });
 
 /**
  * DynamicListResponse
  */
 export const zFastcrudCorePaginationDynamicListResponse5 = z.object({
+    data: z.array(zQuestaoRead)
+});
+
+/**
+ * DynamicListResponse
+ */
+export const zFastcrudCorePaginationDynamicListResponse6 = z.object({
     data: z.array(zAlternativaRead)
 });
 
@@ -323,7 +358,7 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse2 = z.object({
  * DynamicPaginatedResponse
  */
 export const zFastcrudCorePaginationDynamicPaginatedResponse3 = z.object({
-    data: z.array(zConteudoRead),
+    data: z.array(zConquistaRead),
     total_count: z.int(),
     has_more: z.boolean(),
     page: z.int().nullish(),
@@ -334,7 +369,7 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse3 = z.object({
  * DynamicPaginatedResponse
  */
 export const zFastcrudCorePaginationDynamicPaginatedResponse4 = z.object({
-    data: z.array(zQuestaoRead),
+    data: z.array(zConteudoRead),
     total_count: z.int(),
     has_more: z.boolean(),
     page: z.int().nullish(),
@@ -345,6 +380,17 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse4 = z.object({
  * DynamicPaginatedResponse
  */
 export const zFastcrudCorePaginationDynamicPaginatedResponse5 = z.object({
+    data: z.array(zQuestaoRead),
+    total_count: z.int(),
+    has_more: z.boolean(),
+    page: z.int().nullish(),
+    items_per_page: z.int().nullish()
+});
+
+/**
+ * DynamicPaginatedResponse
+ */
+export const zFastcrudCorePaginationDynamicPaginatedResponse6 = z.object({
     data: z.array(zAlternativaRead),
     total_count: z.int(),
     has_more: z.boolean(),
@@ -396,6 +442,13 @@ export const zUpdateMeUsuariosMePatchBody = zUsuarioUpdate;
  * Successful Response
  */
 export const zUpdateMeUsuariosMePatchResponse = zUsuarioRead;
+
+/**
+ * Response Read My Achievements Usuarios Me Conquistas Get
+ *
+ * Successful Response
+ */
+export const zReadMyAchievementsUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
 
 /**
  * Response Listar Usuarios Admin Usuarios Get
@@ -519,6 +572,45 @@ export const zModuloUpdateModulosIdPatchPath = z.object({
     id: z.int()
 });
 
+export const zConquistaReadMultiConquistasGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish()
+});
+
+/**
+ * Response Conquista Read Multi Conquistas Get
+ *
+ * Successful Response
+ */
+export const zConquistaReadMultiConquistasGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse3,
+    zFastcrudCorePaginationDynamicListResponse3
+]);
+
+export const zConquistaCreateConquistasPostBody = zConquistaCreate;
+
+export const zConquistaDeleteConquistasIdDeletePath = z.object({
+    id: z.int()
+});
+
+export const zConquistaReadConquistasIdGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zConquistaReadConquistasIdGetResponse = zConquistaRead;
+
+export const zConquistaUpdateConquistasIdPatchBody = zConquistaUpdate;
+
+export const zConquistaUpdateConquistasIdPatchPath = z.object({
+    id: z.int()
+});
+
 export const zConteudoReadMultiConteudosGetQuery = z.object({
     offset: z.int().nullish(),
     limit: z.int().nullish(),
@@ -534,8 +626,8 @@ export const zConteudoReadMultiConteudosGetQuery = z.object({
  * Successful Response
  */
 export const zConteudoReadMultiConteudosGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse3,
-    zFastcrudCorePaginationDynamicListResponse3
+    zFastcrudCorePaginationDynamicPaginatedResponse4,
+    zFastcrudCorePaginationDynamicListResponse4
 ]);
 
 export const zConteudoCreateConteudosPostBody = zConteudoCreate;
@@ -574,8 +666,8 @@ export const zQuestaoReadMultiQuestoesGetQuery = z.object({
  * Successful Response
  */
 export const zQuestaoReadMultiQuestoesGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse4,
-    zFastcrudCorePaginationDynamicListResponse4
+    zFastcrudCorePaginationDynamicPaginatedResponse5,
+    zFastcrudCorePaginationDynamicListResponse5
 ]);
 
 export const zQuestaoCreateQuestoesPostBody = zQuestaoCreate;
@@ -614,8 +706,8 @@ export const zAlternativaReadMultiAlternativasGetQuery = z.object({
  * Successful Response
  */
 export const zAlternativaReadMultiAlternativasGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse5,
-    zFastcrudCorePaginationDynamicListResponse5
+    zFastcrudCorePaginationDynamicPaginatedResponse6,
+    zFastcrudCorePaginationDynamicListResponse6
 ]);
 
 export const zAlternativaCreateAlternativasPostBody = zAlternativaCreate;

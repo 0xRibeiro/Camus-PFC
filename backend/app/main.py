@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
+from app.domains.conquistas.router import conquista_router
 from app.domains.trilha.router import (
     alternativa_router,
     conteudo_router,
@@ -14,13 +15,15 @@ from app.domains.trilha.router import (
 )
 from app.domains.usuario.router import admin_router as usuario_admin_router
 from app.domains.usuario.router import router as usuario_router
-from app.seed import seed_admin
+from app.seed import seed_admin, seed_conquistas
 
 
 # lifespan roda no startup, aqui só usamos pra seed admin
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await seed_admin()
+    # testando a criação de conquistas
+    await seed_conquistas()
     yield
 
 
@@ -39,6 +42,7 @@ app.include_router(usuario_router)
 app.include_router(usuario_admin_router)
 app.include_router(trilha_router)
 app.include_router(modulo_router)
+app.include_router(conquista_router)
 app.include_router(conteudo_router)
 app.include_router(questao_router)
 app.include_router(alternativa_router)

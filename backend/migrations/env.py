@@ -18,6 +18,7 @@ from app.core.database import Base
 # importar os models registra as tabelas no Base.metadata
 import app.domains.aquario.model
 import app.domains.trilha.model
+import app.domains.conquistas.model
 import app.domains.usuario.model
 
 # this is the Alembic Config object, which provides
