@@ -1,8 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
-from app.domains.usuario import model
 
 
 # inicialmente pensei nesses atributos para a conquista. a tabela
@@ -19,13 +18,7 @@ class Conquista(Base):
 	# guarda o link da imagem do achievement
 	imagem_dir: Mapped[str] = mapped_column(Text)
 
-	usuarios_que_possuem: Mapped[list["model.Usuario"]] = relationship(
-		secondary="associacao_conquista_usuario",
-		back_populates="minhas_conquistas"
-	)
-
-
-# Tabela many-to-many bi direcional para vincular usuário com conquista.
+# Tabela many-to-many unidirecional (antes bi direcional mas deu problemas) para vincular usuário com conquista.
 # se formos guardar outras informações futuramente, da pra transformer
 # em um association object.
 associacao_conquista_usuario = Table(

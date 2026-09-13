@@ -4,7 +4,6 @@ from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-from app.domains.conquistas import model
 
 
 class RoleUsuario(enum.Enum):
@@ -28,7 +27,7 @@ class Usuario(Base):
 
     role: Mapped[RoleUsuario] = mapped_column(default=RoleUsuario.aluno)  # default aluno se n definir
 
-    minhas_conquistas: Mapped[list["model.Conquista"]] = relationship(
-        secondary="associacao_conquista_usuario",
-        back_populates="usuarios_que_possuem",
+    minhas_conquistas = relationship(
+        "Conquista",
+        secondary="associacao_conquista_usuario"
     )
