@@ -8,6 +8,7 @@ class TrilhaCreate(BaseModel):
     titulo: str = Field(..., min_length=1, max_length=100)
     descricao: str | None = None
     foto: str | None = Field(default=None, max_length=500)
+    tag: str | None = Field(default=None, max_length=50)
 
 
 class TrilhaRead(BaseModel):
@@ -17,6 +18,7 @@ class TrilhaRead(BaseModel):
     titulo: str
     descricao: str | None = None
     foto: str | None = None
+    tag: str | None = None
     is_active: bool
 
 
@@ -24,6 +26,7 @@ class TrilhaUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     descricao: str | None = None
     foto: str | None = Field(default=None, max_length=500)
+    tag: str | None = Field(default=None, max_length=50)
     is_active: bool | None = None
 
 
@@ -54,6 +57,7 @@ class ConteudoCreate(BaseModel):
     titulo: str = Field(..., min_length=1, max_length=100)
     tipo: ConteudoTipo
     ordem: int = Field(..., ge=0)
+    pontos: int = Field(..., ge=0)
     video_url: str | None = Field(default=None, max_length=500)
     artigo_texto: str | None = None
 
@@ -66,6 +70,7 @@ class ConteudoRead(BaseModel):
     titulo: str
     tipo: ConteudoTipo
     ordem: int
+    pontos: int
     video_url: str | None = None
     artigo_texto: str | None = None
 
@@ -73,6 +78,7 @@ class ConteudoRead(BaseModel):
 class ConteudoUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     ordem: int | None = Field(default=None, ge=0)
+    pontos: int | None = Field(default=None, ge=0)
     video_url: str | None = Field(default=None, max_length=500)
     artigo_texto: str | None = None
 

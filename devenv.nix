@@ -5,7 +5,10 @@
   languages.javascript = {
     enable = true;
     directory = "web";
-    bun.enable = true;
+    bun = {
+      enable = true;
+      install.enable = true;
+    };
   };
 
   languages.typescript.enable = true;

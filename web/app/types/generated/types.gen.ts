@@ -134,6 +134,10 @@ export type ConteudoCreate = {
      */
     ordem: number;
     /**
+     * Pontos
+     */
+    pontos: number;
+    /**
      * Video Url
      */
     video_url?: string | null;
@@ -165,6 +169,10 @@ export type ConteudoRead = {
      */
     ordem: number;
     /**
+     * Pontos
+     */
+    pontos: number;
+    /**
      * Video Url
      */
     video_url?: string | null;
@@ -191,6 +199,10 @@ export type ConteudoUpdate = {
      * Ordem
      */
     ordem?: number | null;
+    /**
+     * Pontos
+     */
+    pontos?: number | null;
     /**
      * Video Url
      */
@@ -360,6 +372,10 @@ export type TrilhaCreate = {
      * Foto
      */
     foto?: string | null;
+    /**
+     * Tag
+     */
+    tag?: string | null;
 };
 
 /**
@@ -383,6 +399,10 @@ export type TrilhaRead = {
      */
     foto?: string | null;
     /**
+     * Tag
+     */
+    tag?: string | null;
+    /**
      * Is Active
      */
     is_active: boolean;
@@ -404,6 +424,10 @@ export type TrilhaUpdate = {
      * Foto
      */
     foto?: string | null;
+    /**
+     * Tag
+     */
+    tag?: string | null;
     /**
      * Is Active
      */

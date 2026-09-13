@@ -1,5 +1,10 @@
 import asyncio
 from logging.config import fileConfig
+import asyncio
+import sys
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 import alembic_postgresql_enum  
 from alembic import context

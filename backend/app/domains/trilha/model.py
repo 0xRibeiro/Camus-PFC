@@ -23,6 +23,8 @@ class Trilha(Base):
 
     descricao: Mapped[str | None] = mapped_column(Text)
 
+    tag: Mapped[str | None] = mapped_column(String(50))
+
     is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha
 
 
@@ -35,6 +37,7 @@ class Modulo(Base):
     titulo: Mapped[str] = mapped_column(String(50))
 
     ordem: Mapped[int] = mapped_column()
+    
 
 
 class Conteudo(Base):
@@ -48,6 +51,8 @@ class Conteudo(Base):
     tipo: Mapped[ConteudoTipo] = mapped_column()
 
     ordem: Mapped[int] = mapped_column()
+
+    pontos: Mapped[int] = mapped_column(default=0)
 
     video_url: Mapped[str | None] = mapped_column(String(500))
 

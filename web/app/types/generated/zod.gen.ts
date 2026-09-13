@@ -74,6 +74,7 @@ export const zConteudoCreate = z.object({
     titulo: z.string().min(1).max(100),
     tipo: zConteudoTipo,
     ordem: z.int().gte(0),
+    pontos: z.int().gte(0),
     video_url: z.string().max(500).nullish(),
     artigo_texto: z.string().nullish()
 });
@@ -87,6 +88,7 @@ export const zConteudoRead = z.object({
     titulo: z.string(),
     tipo: zConteudoTipo,
     ordem: z.int(),
+    pontos: z.int(),
     video_url: z.string().nullish(),
     artigo_texto: z.string().nullish()
 });
@@ -97,6 +99,7 @@ export const zConteudoRead = z.object({
 export const zConteudoUpdate = z.object({
     titulo: z.string().min(1).max(100).nullish(),
     ordem: z.int().gte(0).nullish(),
+    pontos: z.int().gte(0).nullish(),
     video_url: z.string().max(500).nullish(),
     artigo_texto: z.string().nullish()
 });
@@ -184,7 +187,8 @@ export const zTokenPair = z.object({
 export const zTrilhaCreate = z.object({
     titulo: z.string().min(1).max(100),
     descricao: z.string().nullish(),
-    foto: z.string().max(500).nullish()
+    foto: z.string().max(500).nullish(),
+    tag: z.string().max(50).nullish()
 });
 
 /**
@@ -195,6 +199,7 @@ export const zTrilhaRead = z.object({
     titulo: z.string(),
     descricao: z.string().nullish(),
     foto: z.string().nullish(),
+    tag: z.string().nullish(),
     is_active: z.boolean()
 });
 
@@ -205,6 +210,7 @@ export const zTrilhaUpdate = z.object({
     titulo: z.string().min(1).max(100).nullish(),
     descricao: z.string().nullish(),
     foto: z.string().max(500).nullish(),
+    tag: z.string().max(50).nullish(),
     is_active: z.boolean().nullish()
 });
 

@@ -125,10 +125,15 @@ const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: 'conquistas' },
+    // exibe pra todos
   ]
 
   if (auth.role === 'admin') {
     lista.push({ label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' })
+  }
+
+  if (auth.role === 'admin' || auth.role === 'author') {
+    lista.push({ label: 'Gerenciar Trilhas', icon: 'i-lucide-square-text', to: '/author/trilhas' })
   }
 
   return lista
