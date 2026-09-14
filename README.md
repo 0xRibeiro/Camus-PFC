@@ -24,7 +24,7 @@
 ## 🐟 Sobre o projeto
 
 <!-- EXPLICA O MOTIVO DO PROJETO -->
-Camus é um projeto criado para a conclusão da nossa graduação em Engenharia de Software. ele é um projeto que integra IoT e desnevolvimento de software para construção de um SUMP inteligente com um app mobile para aprendizado e ensino sobre oceanografia limnologia e controle do sump em seus aquarios e microcosmos de estudo.
+Camus é um projeto que auxilia no ensino de Oceanografia/Limnologia com foco em ambientes acadêmicos. Ele possui um sistema de trilhas de conteúdo para dividir os temas, cria grupos de estudo para maior coordenação entre os alunos e utiliza de IoT para disponibilizar dashboards de dados de microcosmos em tempo real
 
 
 <!-- LINHA DE DIVISÃO: -->
@@ -42,7 +42,6 @@ Camus é um projeto criado para a conclusão da nossa graduação em Engenharia 
 - [ ] visualizador de video integrado para consumo de videos do youtube
 - [ ] gerador de quiz para diferentes tipos de questionarios
 - [ ] sistema de pontuacao e ranking entre usuarios
-- [ ] 
 
 ---
 
@@ -104,7 +103,13 @@ cp backend/.env.example backend/.env
 devenv up
 ```
 
-**6 - Acessar o projeto**
+**6 - Rodar Migrations
+```bash
+cd backend
+alembic upgrade head
+```
+
+**7 - Acessar o projeto**
 - Front-end: http://localhost:3000
 - Back-end: http://localhost:8000/docs
   
