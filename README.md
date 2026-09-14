@@ -104,7 +104,13 @@ cp backend/.env.example backend/.env
 devenv up
 ```
 
-**6 - Acessar o projeto**
+**6 - Rodar Migrations
+```bash
+cd backend
+alembic upgrade head
+```
+
+**7 - Acessar o projeto**
 - Front-end: http://localhost:3000
 - Back-end: http://localhost:8000/docs
   
