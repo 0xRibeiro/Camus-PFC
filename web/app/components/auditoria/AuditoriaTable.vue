@@ -1,5 +1,9 @@
 <template>
   <UTable :data="logs" :columns="columns" :loading="loading" class="cursor-pointer" @select="abrirDetalhe">
+    <template #usuario_id-cell="{ row }">
+      {{ nomeDoUsuario(row.original.usuario_id) }}
+    </template>
+
     <template #acao-cell="{ row }">
       <UBadge :label="row.original.acao" :color="corDaAcao(row.original.acao)" variant="soft" />
     </template>
@@ -14,12 +18,27 @@
 
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { LogAuditoriaRead } from '~/types/generated'
+import type { LogAuditoriaRead, UsuarioRead } from '~/types/generated'
 
-defineProps<{
+const props = defineProps<{
   logs: LogAuditoriaRead[]
   loading: boolean
+  usuarios: UsuarioRead[]
 }>()
+
+function nomeDoUsuario(usuarioId: number | null) {
+  if (usuarioId === null) return '-'
+
+  let username: string | undefined
+  for (const usuario of props.usuarios) {
+    if (usuario.id === usuarioId) {
+      username = usuario.username
+      break
+    }
+  }
+
+  return `${usuarioId} - ${username ?? '?'}`
+}
 
 const columns: TableColumn<LogAuditoriaRead>[] = [
   { accessorKey: 'criado_em', header: 'Quando' },

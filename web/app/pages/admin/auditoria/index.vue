@@ -14,7 +14,7 @@
       </UFormField>
     </div>
 
-    <AuditoriaTable :logs="logs" :loading="loading" />
+    <AuditoriaTable :logs="logs" :loading="loading" :usuarios="usuarios" />
 
     <div class="flex justify-end gap-2 mt-4">
       <UButton
@@ -34,12 +34,21 @@
 </template>
 
 <script setup lang="ts">
-import type { LogAuditoriaRead } from '~/types/generated'
+import type { LogAuditoriaRead, UsuarioRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
 const logs = ref<LogAuditoriaRead[]>([])
 const loading = ref(true)
+
+const usuarios = ref<UsuarioRead[]>([])
+
+async function fetchUsuarios() {
+  const api = useApi()
+  usuarios.value = await api('/admin/usuarios')
+}
+
+onMounted(fetchUsuarios)
 
 const itensPorPagina = 10
 const pagina = ref(1)
