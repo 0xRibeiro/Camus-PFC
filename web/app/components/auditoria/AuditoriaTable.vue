@@ -1,5 +1,5 @@
 <template>
-  <UTable :data="logs" :columns="columns" :loading="loading">
+  <UTable :data="logs" :columns="columns" :loading="loading" class="cursor-pointer" @select="abrirDetalhe">
     <template #acao-cell="{ row }">
       <UBadge :label="row.original.acao" :color="corDaAcao(row.original.acao)" variant="soft" />
     </template>
@@ -8,6 +8,8 @@
       {{ formatarData(row.original.criado_em) }}
     </template>
   </UTable>
+
+  <AuditoriaDetalheModal v-model:open="modalAberto" :log="logSelecionado" />
 </template>
 
 <script setup lang="ts">
@@ -36,5 +38,13 @@ function corDaAcao(acao: string) {
 
 function formatarData(valor: string) {
   return new Date(valor).toLocaleString('pt-BR')
+}
+
+const modalAberto = ref(false)
+const logSelecionado = ref<LogAuditoriaRead | null>(null)
+
+function abrirDetalhe(_event: Event, row: { original: LogAuditoriaRead }) {
+  logSelecionado.value = row.original
+  modalAberto.value = true
 }
 </script>

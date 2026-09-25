@@ -121,12 +121,13 @@ async def get_current_user(
     if subject is None:
         raise UnauthorizedException("credenciais inválidas")
 
+    # seta antes de qualquer query nessa sessao, pq a primeira query ja
+    # comeca a transacao e dispara o after_begin que le essa contextvar
+    usuario_atual_id.set(int(subject))
+
     user = await UsuarioRepository(db).buscar(int(subject))
     if user is None or not user.is_active:
         raise UnauthorizedException("credenciais inválidas")
-
-    # so seta aqui pq so agora confirmamos que o usuario existe e ta ativo
-    usuario_atual_id.set(user.id)
 
     # marca presenca: chave some sozinha se o usuario ficar sem
     # fazer request pelo tempo de vida do access token
