@@ -17,6 +17,7 @@ from app.core.security import (
     criar_refresh_token,
     decodificar_access_token,
     revogar_refresh_token,
+    usuario_atual_id,
     validar_refresh_token,
     verificar_password,
 )
@@ -109,7 +110,7 @@ async def logout(refresh_token: str) -> None:
 ###### quem ta logado / RBAC
 
 
-# dependency: le o token do header, devolve o usuario dono dele
+# dependency: le o token do header, devolve o usuario dono dele alem de marcar quem esta logado.
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_async_session),
@@ -121,6 +122,9 @@ async def get_current_user(
     user = await UsuarioRepository(db).buscar(int(subject))
     if user is None or not user.is_active:
         raise UnauthorizedException("credenciais inválidas")
+
+    # so seta aqui pq so agora confirmamos que o usuario existe e ta ativo
+    usuario_atual_id.set(user.id)
     return user
 
 

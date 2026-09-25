@@ -1,4 +1,5 @@
 import secrets
+from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -7,6 +8,9 @@ from pwdlib import PasswordHash
 
 from app.core.config import settings
 from app.core.redis import redis_client
+
+# guarda o id do usuario logado por request.
+usuario_atual_id: ContextVar[int | None] = ContextVar("usuario_atual_id", default=None)
 
 # cria uma instância do hash de senha com o algoritmo recomendado. (argon2id é o atual)
 password_hash = PasswordHash.recommended()
