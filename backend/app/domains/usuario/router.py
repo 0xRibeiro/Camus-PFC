@@ -133,6 +133,13 @@ async def listar_usuarios(
     return await service.listar_usuarios(db)
 
 
+@admin_router.get("/online", response_model=list[UsuarioRead])
+async def listar_usuarios_online(
+    db: AsyncSession = Depends(get_async_session),
+) -> list[Usuario]:
+    return await service.listar_usuarios_online(db)
+
+
 @admin_router.get("/{user_id}", response_model=UsuarioRead)
 async def obter_usuario(
     user_id: int,

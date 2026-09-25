@@ -5,6 +5,11 @@ export type ClientOptions = {
 };
 
 /**
+ * AcaoAuditoria
+ */
+export type AcaoAuditoria = 'create' | 'update' | 'delete';
+
+/**
  * AlternativaCreate
  */
 export type AlternativaCreate = {
@@ -221,6 +226,39 @@ export type HttpValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * LogAuditoriaRead
+ */
+export type LogAuditoriaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Usuario Id
+     */
+    usuario_id: number | null;
+    acao: AcaoAuditoria;
+    /**
+     * Entidade
+     */
+    entidade: string;
+    /**
+     * Entidade Id
+     */
+    entidade_id: number;
+    /**
+     * Alteracoes
+     */
+    alteracoes: {
+        [key: string]: unknown;
+    };
+    /**
+     * Criado Em
+     */
+    criado_em: string;
 };
 
 /**
@@ -953,23 +991,55 @@ export type UpdateMeUsuariosMePatchResponses = {
 
 export type UpdateMeUsuariosMePatchResponse = UpdateMeUsuariosMePatchResponses[keyof UpdateMeUsuariosMePatchResponses];
 
-export type ReadMyAchievementsUsuariosMeConquistasGetData = {
+export type ListarMinhasConquistasUsuariosMeConquistasGetData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/usuarios/me/conquistas';
 };
 
-export type ReadMyAchievementsUsuariosMeConquistasGetResponses = {
+export type ListarMinhasConquistasUsuariosMeConquistasGetResponses = {
     /**
-     * Response Read My Achievements Usuarios Me Conquistas Get
+     * Response Listar Minhas Conquistas Usuarios Me Conquistas Get
      *
      * Successful Response
      */
     200: Array<ConquistaRead>;
 };
 
-export type ReadMyAchievementsUsuariosMeConquistasGetResponse = ReadMyAchievementsUsuariosMeConquistasGetResponses[keyof ReadMyAchievementsUsuariosMeConquistasGetResponses];
+export type ListarMinhasConquistasUsuariosMeConquistasGetResponse = ListarMinhasConquistasUsuariosMeConquistasGetResponses[keyof ListarMinhasConquistasUsuariosMeConquistasGetResponses];
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostData = {
+    body?: never;
+    path: {
+        /**
+         * Conquista Id
+         */
+        conquista_id: number;
+    };
+    query?: never;
+    url: '/usuarios/me/conquistas/{conquista_id}';
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostError = DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors[keyof DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors];
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses = {
+    /**
+     * Response Desbloquear Conquista Usuarios Me Conquistas  Conquista Id  Post
+     *
+     * Successful Response
+     */
+    200: ConquistaRead | null;
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses[keyof DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses];
 
 export type ListarUsuariosAdminUsuariosGetData = {
     body?: never;
@@ -1013,6 +1083,24 @@ export type CriarStaffAdminUsuariosPostResponses = {
 };
 
 export type CriarStaffAdminUsuariosPostResponse = CriarStaffAdminUsuariosPostResponses[keyof CriarStaffAdminUsuariosPostResponses];
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/usuarios/online';
+};
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponses = {
+    /**
+     * Response Listar Usuarios Online Admin Usuarios Online Get
+     *
+     * Successful Response
+     */
+    200: Array<UsuarioRead>;
+};
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponse = ListarUsuariosOnlineAdminUsuariosOnlineGetResponses[keyof ListarUsuariosOnlineAdminUsuariosOnlineGetResponses];
 
 export type DeletarUsuarioAdminUsuariosUserIdDeleteData = {
     body?: never;
@@ -2061,6 +2149,54 @@ export type AlternativaUpdateAlternativasIdPatchResponses = {
      */
     200: unknown;
 };
+
+export type ListarLogsAdminAuditoriaGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limite
+         */
+        limite?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Entidade
+         */
+        entidade?: string | null;
+        /**
+         * Entidade Id
+         */
+        entidade_id?: number | null;
+        /**
+         * Usuario Id
+         */
+        usuario_id?: number | null;
+    };
+    url: '/admin/auditoria';
+};
+
+export type ListarLogsAdminAuditoriaGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarLogsAdminAuditoriaGetError = ListarLogsAdminAuditoriaGetErrors[keyof ListarLogsAdminAuditoriaGetErrors];
+
+export type ListarLogsAdminAuditoriaGetResponses = {
+    /**
+     * Response Listar Logs Admin Auditoria Get
+     *
+     * Successful Response
+     */
+    200: Array<LogAuditoriaRead>;
+};
+
+export type ListarLogsAdminAuditoriaGetResponse = ListarLogsAdminAuditoriaGetResponses[keyof ListarLogsAdminAuditoriaGetResponses];
 
 export type HealthHealthGetData = {
     body?: never;

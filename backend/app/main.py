@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
+from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.trilha.router import (
     alternativa_router,
@@ -46,6 +47,7 @@ app.include_router(conquista_router)
 app.include_router(conteudo_router)
 app.include_router(questao_router)
 app.include_router(alternativa_router)
+app.include_router(auditoria_router)
 register_exception_handlers(app)
 
 

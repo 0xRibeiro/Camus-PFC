@@ -4,6 +4,8 @@
       Usuários
     </h1>
 
+    <UsuarioOnlineList :usuarios="usuariosOnline" :loading="loadingOnline" />
+
     <!-- form de cadastro, so author/admin (aluno se cadastra sozinho por /auth/register) -->
     <UCard class="mb-6">
       <template #header>
@@ -62,6 +64,18 @@ async function fetchUsuarios() {
 
 // busca assim que a pagina abre
 onMounted(fetchUsuarios)
+
+const usuariosOnline = ref<UsuarioRead[]>([])
+const loadingOnline = ref(true)
+
+async function fetchUsuariosOnline() {
+  loadingOnline.value = true
+  const api = useApi()
+  usuariosOnline.value = await api('/admin/usuarios/online')
+  loadingOnline.value = false
+}
+
+onMounted(fetchUsuariosOnline)
 
 // define quais colunas a UTable desenha e o nome de cada uma. accessorKey tem
 // que bater com o nome do campo la no UsuarioRead (username, email, role, is_active)

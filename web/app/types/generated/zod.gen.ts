@@ -3,6 +3,15 @@
 import * as z from 'zod';
 
 /**
+ * AcaoAuditoria
+ */
+export const zAcaoAuditoria = z.enum([
+    'create',
+    'update',
+    'delete'
+]);
+
+/**
  * AlternativaCreate
  */
 export const zAlternativaCreate = z.object({
@@ -102,6 +111,19 @@ export const zConteudoUpdate = z.object({
     pontos: z.int().gte(0).nullish(),
     video_url: z.string().max(500).nullish(),
     artigo_texto: z.string().nullish()
+});
+
+/**
+ * LogAuditoriaRead
+ */
+export const zLogAuditoriaRead = z.object({
+    id: z.int(),
+    usuario_id: z.int().nullable(),
+    acao: zAcaoAuditoria,
+    entidade: z.string(),
+    entidade_id: z.int(),
+    alteracoes: z.record(z.string(), z.unknown()),
+    criado_em: z.iso.datetime()
 });
 
 /**
@@ -444,11 +466,22 @@ export const zUpdateMeUsuariosMePatchBody = zUsuarioUpdate;
 export const zUpdateMeUsuariosMePatchResponse = zUsuarioRead;
 
 /**
- * Response Read My Achievements Usuarios Me Conquistas Get
+ * Response Listar Minhas Conquistas Usuarios Me Conquistas Get
  *
  * Successful Response
  */
-export const zReadMyAchievementsUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+
+export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.object({
+    conquista_id: z.int()
+});
+
+/**
+ * Response Desbloquear Conquista Usuarios Me Conquistas  Conquista Id  Post
+ *
+ * Successful Response
+ */
+export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = zConquistaRead.nullable();
 
 /**
  * Response Listar Usuarios Admin Usuarios Get
@@ -463,6 +496,13 @@ export const zCriarStaffAdminUsuariosPostBody = zUsuarioStaffCreate;
  * Successful Response
  */
 export const zCriarStaffAdminUsuariosPostResponse = zUsuarioRead;
+
+/**
+ * Response Listar Usuarios Online Admin Usuarios Online Get
+ *
+ * Successful Response
+ */
+export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioRead);
 
 export const zDeletarUsuarioAdminUsuariosUserIdDeletePath = z.object({
     user_id: z.int()
@@ -730,3 +770,18 @@ export const zAlternativaUpdateAlternativasIdPatchBody = zAlternativaUpdate;
 export const zAlternativaUpdateAlternativasIdPatchPath = z.object({
     id: z.int()
 });
+
+export const zListarLogsAdminAuditoriaGetQuery = z.object({
+    limite: z.int().optional().default(50),
+    offset: z.int().optional().default(0),
+    entidade: z.string().nullish(),
+    entidade_id: z.int().nullish(),
+    usuario_id: z.int().nullish()
+});
+
+/**
+ * Response Listar Logs Admin Auditoria Get
+ *
+ * Successful Response
+ */
+export const zListarLogsAdminAuditoriaGetResponse = z.array(zLogAuditoriaRead);
