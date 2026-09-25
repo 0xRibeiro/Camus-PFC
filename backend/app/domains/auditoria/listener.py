@@ -1,9 +1,21 @@
+import enum
+from datetime import datetime
+
 from sqlalchemy import event, insert
 from sqlalchemy.orm.attributes import get_history
 
 from app.core.database import Base
 from app.core.security import usuario_atual_id
 from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
+
+
+# colunas em tabelas q tiver enum e datetime nao entram no JSON sem isso
+def serializar(valor):
+    if isinstance(valor, enum.Enum):
+        return valor.value
+    if isinstance(valor, datetime):
+        return valor.isoformat()
+    return valor
 
 
 # usa a mesma connection do flush em andamento, entao fica na mesma
@@ -34,7 +46,10 @@ def id_da_instancia(target):
 def log_insert(mapper, connection, target):
     alteracoes = {}
     for coluna in mapper.columns:
-        alteracoes[coluna.key] = {"antigo": None, "novo": getattr(target, coluna.key)}
+        alteracoes[coluna.key] = {
+            "antigo": None,
+            "novo": serializar(getattr(target, coluna.key)),
+        }
 
     inserir_log(
         connection, AcaoAuditoria.create, target.__tablename__,
@@ -60,7 +75,10 @@ def log_update(mapper, connection, target):
         if historico.added:
             novo = historico.added[0]
 
-        alteracoes[coluna.key] = {"antigo": antigo, "novo": novo}
+        alteracoes[coluna.key] = {
+            "antigo": serializar(antigo),
+            "novo": serializar(novo),
+        }
 
     inserir_log(
         connection, AcaoAuditoria.update, target.__tablename__,
@@ -74,7 +92,10 @@ def log_update(mapper, connection, target):
 def log_delete(mapper, connection, target):
     alteracoes = {}
     for coluna in mapper.columns:
-        alteracoes[coluna.key] = {"antigo": getattr(target, coluna.key), "novo": None}
+        alteracoes[coluna.key] = {
+            "antigo": serializar(getattr(target, coluna.key)),
+            "novo": None,
+        }
 
     inserir_log(
         connection, AcaoAuditoria.delete, target.__tablename__,
