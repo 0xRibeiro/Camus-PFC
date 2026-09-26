@@ -1,12 +1,13 @@
 <template>
   <div class="max-w-3xl mx-auto px-4 py-10">
     <UButton
+      
       icon="i-lucide-arrow-left"
       label="Voltar"
       color="neutral"
       variant="link"
       class="px-0 mb-6"
-      @click="router.back()"
+      @click="voltar"
     />
 
     <h1 class="text-2xl font-bold mb-1">
@@ -156,5 +157,18 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false })
-const router = useRouter()
+
+const route = useRoute()
+
+function voltar() {
+  if (route.query.from === 'register') {
+    return navigateTo('/register')
+  }
+
+  if (route.query.from === 'aceite') {
+    return navigateTo('/aceite-termos')
+  }
+
+  return navigateTo('/login')
+}
 </script>

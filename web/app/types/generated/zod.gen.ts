@@ -445,11 +445,22 @@ export const zUpdateMeUsuariosMePatchBody = zUsuarioUpdate;
 export const zUpdateMeUsuariosMePatchResponse = zUsuarioRead;
 
 /**
- * Response Read My Achievements Usuarios Me Conquistas Get
+ * Response Listar Minhas Conquistas Usuarios Me Conquistas Get
  *
  * Successful Response
  */
-export const zReadMyAchievementsUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+
+export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.object({
+    conquista_id: z.int()
+});
+
+/**
+ * Response Desbloquear Conquista Usuarios Me Conquistas  Conquista Id  Post
+ *
+ * Successful Response
+ */
+export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = zConquistaRead.nullable();
 
 /**
  * Response Listar Usuarios Admin Usuarios Get

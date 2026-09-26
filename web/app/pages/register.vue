@@ -16,21 +16,21 @@
               <template #label>
                 <span>
                   Li e concordo com os
-                  <ULink
-                    to="/termos-de-uso"
-                    class="text-primary font-medium"
+                  <NuxtLink
+                    to="/termos-de-uso?from=register"
+                    class="text-primary font-medium hover:underline"
                     @click.stop
                   >
                     Termos de Uso
-                  </ULink>
+                  </NuxtLink>
                   e estou ciente da
-                  <ULink
-                    to="/politica-de-privacidade"
-                    class="text-primary font-medium"
+                  <NuxtLink
+                    to="/politica-de-privacidade?from=register"
+                    class="text-primary font-medium hover:underline"
                     @click.stop
                   >
                     Política de Privacidade
-                  </ULink>.
+                  </NuxtLink>.
                 </span>
               </template>
             </UCheckbox>

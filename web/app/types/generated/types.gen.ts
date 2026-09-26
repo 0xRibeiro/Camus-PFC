@@ -473,6 +473,12 @@ export type UsuarioCreate = {
      * Password
      */
     password: string;
+    /**
+     * Aceitou Termos
+     *
+     * Usuário deve aceitar os Termos de Uso
+     */
+    aceitou_termos: boolean;
 };
 
 /**
@@ -953,23 +959,83 @@ export type UpdateMeUsuariosMePatchResponses = {
 
 export type UpdateMeUsuariosMePatchResponse = UpdateMeUsuariosMePatchResponses[keyof UpdateMeUsuariosMePatchResponses];
 
-export type ReadMyAchievementsUsuariosMeConquistasGetData = {
+export type VerificarMeuAceiteUsuariosMeAceiteTermosGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type VerificarMeuAceiteUsuariosMeAceiteTermosGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ListarMinhasConquistasUsuariosMeConquistasGetData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/usuarios/me/conquistas';
 };
 
-export type ReadMyAchievementsUsuariosMeConquistasGetResponses = {
+export type ListarMinhasConquistasUsuariosMeConquistasGetResponses = {
     /**
-     * Response Read My Achievements Usuarios Me Conquistas Get
+     * Response Listar Minhas Conquistas Usuarios Me Conquistas Get
      *
      * Successful Response
      */
     200: Array<ConquistaRead>;
 };
 
-export type ReadMyAchievementsUsuariosMeConquistasGetResponse = ReadMyAchievementsUsuariosMeConquistasGetResponses[keyof ReadMyAchievementsUsuariosMeConquistasGetResponses];
+export type ListarMinhasConquistasUsuariosMeConquistasGetResponse = ListarMinhasConquistasUsuariosMeConquistasGetResponses[keyof ListarMinhasConquistasUsuariosMeConquistasGetResponses];
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostData = {
+    body?: never;
+    path: {
+        /**
+         * Conquista Id
+         */
+        conquista_id: number;
+    };
+    query?: never;
+    url: '/usuarios/me/conquistas/{conquista_id}';
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostError = DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors[keyof DesbloquearConquistaUsuariosMeConquistasConquistaIdPostErrors];
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses = {
+    /**
+     * Response Desbloquear Conquista Usuarios Me Conquistas  Conquista Id  Post
+     *
+     * Successful Response
+     */
+    200: ConquistaRead | null;
+};
+
+export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses[keyof DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponses];
 
 export type ListarUsuariosAdminUsuariosGetData = {
     body?: never;

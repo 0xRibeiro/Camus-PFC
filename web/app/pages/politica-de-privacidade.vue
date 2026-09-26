@@ -6,7 +6,7 @@
       color="neutral"
       variant="link"
       class="px-0 mb-6"
-      @click="router.back()"
+      @click="voltar"
     />
 
     <h1 class="text-2xl font-bold mb-1">
@@ -153,5 +153,15 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false })
-const router = useRouter()
+
+const route = useRoute()
+
+function voltar() {
+  if (route.query.from === 'register') {
+    return navigateTo('/register')
+  }
+
+  return navigateTo('/aceite-termos')
+}
 </script>
+

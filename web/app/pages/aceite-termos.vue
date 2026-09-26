@@ -14,23 +14,21 @@
         </div>
 
         <div class="space-y-2">
-          <ULink
-            to="/termos-de-uso"
-            target="_blank"
-            class="text-primary font-medium"
+          <NuxtLink
+            to="/termos-de-uso?from=aceite"
+            class="text-primary font-medium hover:underline"
           >
             Ler os Termos de Uso
-          </ULink>
+          </NuxtLink>
 
           <br>
 
-          <ULink
-            to="/politica-de-privacidade"
-            target="_blank"
-            class="text-primary font-medium"
+          <NuxtLink
+            to="/politica-de-privacidade?from=aceite"
+            class="text-primary font-medium hover:underline"
           >
             Ler a Política de Privacidade
-          </ULink>
+          </NuxtLink>
         </div>
 
         <UCheckbox
@@ -38,14 +36,25 @@
           label="Li e aceito os Termos de Uso e a Política de Privacidade."
         />
 
-        <UButton
-          :loading="loading"
-          :disabled="!aceito"
-          block
-          @click="confirmarAceite"
-        >
-          Aceitar e continuar
-        </UButton>
+        <div class="space-y-2">
+          <UButton
+            :loading="loading"
+            :disabled="!aceito"
+            block
+            @click="confirmarAceite"
+          >
+            Aceitar e continuar
+          </UButton>
+
+          <UButton
+            block
+            color="neutral"
+            variant="outline"
+            @click="voltarParaLogin"
+          >
+            Voltar para o login
+          </UButton>
+        </div>
       </div>
     </UPageCard>
   </div>
@@ -61,6 +70,11 @@ const toast = useToast()
 
 const aceito = ref(false)
 const loading = ref(false)
+
+function voltarParaLogin() {
+  auth.logout()
+  return navigateTo('/login')
+}
 
 async function confirmarAceite() {
   if (!aceito.value) {
