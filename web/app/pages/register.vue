@@ -1,6 +1,5 @@
 <template>
   <div class="flex min-h-dvh items-center justify-center">
-    <!-- mesma estrutura da tela de login: UPageCard + UAuthForm, so troca os campos -->
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="schema"
@@ -12,10 +11,40 @@
         @submit="onSubmit"
       >
         <template #footer>
-          Já tem conta? <ULink
-            to="/login"
-            class="text-primary font-medium"
-          >Entrar</ULink>.
+          <div class="space-y-3">
+            <UCheckbox v-model="aceitouTermos">
+              <template #label>
+                <span>
+                  Li e concordo com os
+                  <ULink
+                    to="/termos-de-uso"
+                    class="text-primary font-medium"
+                    @click.stop
+                  >
+                    Termos de Uso
+                  </ULink>
+                  e estou ciente da
+                  <ULink
+                    to="/politica-de-privacidade"
+                    class="text-primary font-medium"
+                    @click.stop
+                  >
+                    Política de Privacidade
+                  </ULink>.
+                </span>
+              </template>
+            </UCheckbox>
+
+            <div>
+              Já tem conta?
+              <ULink
+                to="/login"
+                class="text-primary font-medium"
+              >
+                Entrar
+              </ULink>.
+            </div>
+          </div>
         </template>
       </UAuthForm>
     </UPageCard>
@@ -24,7 +53,7 @@
 
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
-import type { z } from 'zod'
+import { z } from 'zod'
 import { zUsuarioCreate } from '~/types/generated/zod.gen'
 
 definePageMeta({ layout: false })
@@ -32,23 +61,59 @@ definePageMeta({ layout: false })
 const auth = useAuthStore()
 const toast = useToast()
 const loading = ref(false)
+const aceitouTermos = ref(false)
 
-// schema gerado do back, sem mexer em nada. mensagem pt-br ja vem do plugin zod-locale
-const schema = zUsuarioCreate
+const schema = z.object({
+  username: zUsuarioCreate.shape.username,
+  email: zUsuarioCreate.shape.email,
+  password: zUsuarioCreate.shape.password,
+})
 
 type Schema = z.output<typeof schema>
 
 const fields: AuthFormField[] = [
-  { name: 'username', type: 'text', label: 'Usuário', placeholder: 'seu_usuario', required: true },
-  { name: 'email', type: 'email', label: 'Email', placeholder: 'seu@email.com', required: true },
-  { name: 'password', type: 'password', label: 'Senha', placeholder: 'Sua senha', required: true },
+  {
+    name: 'username',
+    type: 'text',
+    label: 'Usuário',
+    placeholder: 'seu_usuario',
+    required: true,
+  },
+  {
+    name: 'email',
+    type: 'email',
+    label: 'Email',
+    placeholder: 'seu@email.com',
+    required: true,
+  },
+  {
+    name: 'password',
+    type: 'password',
+    label: 'Senha',
+    placeholder: 'Sua senha',
+    required: true,
+  },
 ]
 
-// na store ja cria a conta E loga em seguida
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  if (!aceitouTermos.value) {
+    toast.add({
+      title: 'Aceite necessário',
+      description:
+        'Você precisa aceitar os Termos de Uso e a Política de Privacidade.',
+      color: 'error',
+    })
+    return
+  }
+
   loading.value = true
+
   try {
-    await auth.register(payload.data)
+    await auth.register({
+      ...payload.data,
+      aceitou_termos: aceitouTermos.value,
+    })
+
     await navigateTo('/')
   }
   catch {

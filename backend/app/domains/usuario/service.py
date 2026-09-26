@@ -21,7 +21,7 @@ from app.core.security import (
     verificar_password,
 )
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
-from app.domains.usuario.model import RoleUsuario, Usuario
+from app.domains.usuario.model import AceiteTermos, RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
     TokenPair,
@@ -31,23 +31,67 @@ from app.domains.usuario.schema import (
     UsuarioUpdate,
 )
 
+TERMOS_VERSAO_ATUAL = "2026-09-25"
+PRIVACIDADE_VERSAO_ATUAL = "2026-09-25"
+
+
+async def verificar_aceite_termos(
+    db: AsyncSession,
+    user_id: int,
+) -> bool:
+    aceite = await db.scalar(
+        select(AceiteTermos).where(
+            AceiteTermos.usuario_id == user_id,
+            AceiteTermos.termos_versao == TERMOS_VERSAO_ATUAL,
+            AceiteTermos.privacidade_versao == PRIVACIDADE_VERSAO_ATUAL,
+        )
+    )
+
+    return aceite is not None
+
+async def registrar_aceite_termos(
+    db: AsyncSession,
+    user: Usuario,
+) -> AceiteTermos:
+    aceite = AceiteTermos(
+        usuario_id=user.id,
+        termos_versao=TERMOS_VERSAO_ATUAL,
+        privacidade_versao=PRIVACIDADE_VERSAO_ATUAL,
+    )
+
+    db.add(aceite)
+    await db.commit()
+    await db.refresh(aceite)
+
+    return aceite
+
 ###### cadastro
 
 
 # auto-cadastro publico. role sempre aluno, o cliente n escolhe
 async def criar_aluno(db: AsyncSession, data: UsuarioCreate) -> Usuario:
     repo = UsuarioRepository(db)
+
     if await repo.buscar_por_username(data.username) is not None:
         raise DuplicateValueException("username já existe")
+
     if await repo.buscar_por_email(data.email) is not None:
         raise DuplicateValueException("email já existe")
 
     user = Usuario(
         username=data.username,
         email=data.email,
-        hashed_password=criar_hash(data.password),  # nunca guarda senha crua
+        hashed_password=criar_hash(data.password),
         role=RoleUsuario.aluno,
     )
+
+    user.aceites_termos.append(
+        AceiteTermos(
+            termos_versao=TERMOS_VERSAO_ATUAL,
+            privacidade_versao=PRIVACIDADE_VERSAO_ATUAL,
+        )
+    )
+
     return await repo.salvar(user)
 
 

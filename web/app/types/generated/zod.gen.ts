@@ -231,7 +231,8 @@ export const zUsuarioAdminUpdate = z.object({
 export const zUsuarioCreate = z.object({
     username: z.string().min(3).max(50),
     email: z.email().max(100),
-    password: z.string().min(8).max(128)
+    password: z.string().min(8).max(128),
+    aceitou_termos: z.boolean()
 });
 
 /**

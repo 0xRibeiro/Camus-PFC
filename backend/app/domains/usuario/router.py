@@ -67,6 +67,35 @@ async def read_me(user: Usuario = Depends(service.get_current_user)) -> Usuario:
     return user
 
 
+@router.get("/usuarios/me/aceite-termos", tags=["usuarios"])
+async def verificar_meu_aceite(
+    user: Usuario = Depends(service.get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    aceitou = await service.verificar_aceite_termos(db, user.id)
+
+    return {
+        "aceitou": aceitou,
+        "termos_versao": service.TERMOS_VERSAO_ATUAL,
+        "privacidade_versao": service.PRIVACIDADE_VERSAO_ATUAL,
+    }
+
+@router.post("/usuarios/me/aceite-termos", tags=["usuarios"])
+async def registrar_meu_aceite(
+    user: Usuario = Depends(service.get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    aceite = await service.registrar_aceite_termos(db, user)
+
+    return {
+        "id": aceite.id,
+        "usuario_id": aceite.usuario_id,
+        "termos_versao": aceite.termos_versao,
+        "privacidade_versao": aceite.privacidade_versao,
+        "aceito_em": aceite.aceito_em,
+    }
+
+
 @router.get(
     "/usuarios/me/conquistas",
     response_model=list[ConquistaRead],

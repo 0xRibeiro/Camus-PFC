@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.domains.usuario.model import RoleUsuario
 
@@ -34,13 +34,23 @@ class UsuarioCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr = Field(..., max_length=100)
     password: str = Field(..., min_length=8, max_length=128)
+    aceitou_termos: bool = Field(..., description="Usuário deve aceitar os Termos de Uso")
+    
+    @field_validator("aceitou_termos")
+    @classmethod
+    def exige_aceite(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError(
+                "É necessário aceitar os Termos de Uso e a Política de Privacidade"
+            )
+        return v
 
 
 class UsuarioUpdate(BaseModel):
     username: str | None = Field(default=None, min_length=3, max_length=50)
     email: EmailStr | None = Field(default=None, max_length=100)
     password: str | None = Field(default=None, min_length=8, max_length=128)
-
+    
 
 ###### schemas usados so pelo admin (tem role/is_active q o usuario normal n mexe)
 

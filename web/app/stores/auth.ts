@@ -5,7 +5,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UsuarioRead | null>(null) // null = ninguem logado ainda
   const accessToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
-
+  const aceiteTermos = ref<boolean | null>(null)
   const isAuthenticated = computed(() => !!accessToken.value)
   const role = computed(() => {
     if (!user.value) return null
@@ -17,19 +17,28 @@ export const useAuthStore = defineStore('auth', () => {
     const api = useApi()
     user.value = await api('/usuarios/me')
   }
+  async function fetchAceiteTermos() {
+    const api = useApi()
 
+    const resposta = await api('/usuarios/me/aceite-termos')
+
+    aceiteTermos.value = resposta.aceitou
+  }
   // login so devolve token, entao busca o usuario dps
   async function login(credentials: UsuarioLogin) {
-    const api = useApi()
-    const tokens = await api('/auth/login', {
-      method: 'POST',
-      body: credentials,
-    })
-    accessToken.value = tokens.access_token
-    refreshToken.value = tokens.refresh_token
-    await fetchMe()
-  }
+  const api = useApi()
 
+  const tokens = await api('/auth/login', {
+    method: 'POST',
+    body: credentials,
+  })
+
+  accessToken.value = tokens.access_token
+  refreshToken.value = tokens.refresh_token
+
+  await fetchMe()
+  await fetchAceiteTermos()
+}
   // registro n devolve token, entao loga logo em seguida com os msm dados
   async function register(data: UsuarioCreate) {
     const api = useApi()
@@ -86,9 +95,23 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     accessToken.value = null
     refreshToken.value = null
+    aceiteTermos.value = null
   }
 
-  return { user, accessToken, refreshToken, isAuthenticated, role, login, register, fetchMe, refresh, logout }
+  return {
+  user,
+  accessToken,
+  refreshToken,
+  aceiteTermos,
+  isAuthenticated,
+  role,
+  login,
+  register,
+  fetchMe,
+  fetchAceiteTermos,
+  refresh,
+  logout,
+}
 }, {
   persist: {
     storage: sessionStorage,
