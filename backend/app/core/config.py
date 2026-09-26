@@ -17,5 +17,11 @@ class Settings(BaseSettings):
     admin_password: str | None = None
     debug: bool = False
 
+    # smtp do gmail
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str
+    smtp_password: str  # senha de app 
+
 
 settings = Settings()
