@@ -6,7 +6,9 @@ from app.domains.conquistas.schema import ConquistaRead
 from app.domains.usuario import service
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
+    ForgotPasswordInput,
     RefreshInput,
+    ResetPasswordInput,
     TokenPair,
     UsuarioAdminUpdate,
     UsuarioCreate,
@@ -55,6 +57,30 @@ async def refresh(
 @router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT, tags=["auth"])
 async def logout(data: RefreshInput) -> None:
     await service.logout(data.refresh_token)
+
+
+@router.post(
+    "/auth/forgot-password",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["auth"],
+)
+async def forgot_password(
+    data: ForgotPasswordInput,
+    db: AsyncSession = Depends(get_async_session),
+) -> None:
+    await service.solicitar_reset_senha(db, data.email)
+
+
+@router.post(
+    "/auth/reset-password",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["auth"],
+)
+async def reset_password(
+    data: ResetPasswordInput,
+    db: AsyncSession = Depends(get_async_session),
+) -> None:
+    await service.redefinir_senha(db, data.email, data.code, data.password)
 
 
 ### usuario

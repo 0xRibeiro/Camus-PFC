@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
-import type { z } from 'zod'
+import { z } from 'zod'
 import { zUsuarioCreate } from '~/types/generated/zod.gen'
 
 definePageMeta({ layout: false })
@@ -33,22 +33,28 @@ const auth = useAuthStore()
 const toast = useToast()
 const loading = ref(false)
 
-// schema gerado do back, sem mexer em nada. mensagem pt-br ja vem do plugin zod-locale
-const schema = zUsuarioCreate
+const schema = zUsuarioCreate.extend({
+  password_confirm: z.string(),
+}).refine(data => data.password === data.password_confirm, {
+  message: 'As senhas não coincidem',
+  path: ['password_confirm'],
+})
 
 type Schema = z.output<typeof schema>
 
 const fields: AuthFormField[] = [
   { name: 'username', type: 'text', label: 'Usuário', placeholder: 'seu_usuario', required: true },
   { name: 'email', type: 'email', label: 'Email', placeholder: 'seu@email.com', required: true },
-  { name: 'password', type: 'password', label: 'Senha', placeholder: 'Sua senha', required: true },
+  { name: 'password', type: 'password', label: 'Senha', placeholder: 'Sua senha', required: true, hint: 'Mín. 8 caracteres' },
+  { name: 'password_confirm', type: 'password', label: 'Repetir senha', placeholder: 'Repita sua senha', required: true },
 ]
 
 // na store ja cria a conta E loga em seguida
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
   loading.value = true
+  const { password_confirm, ...usuario } = payload.data
   try {
-    await auth.register(payload.data)
+    await auth.register(usuario)
     await navigateTo('/')
   }
   catch {

@@ -15,10 +15,16 @@
       >
         <template #footer>
           <!-- ULink = link do nuxt ui, troca de rota sem recarregar a pagina -->
-          Não tem conta? <ULink
+          <ULink
             to="/register"
             class="text-primary font-medium"
           >Cadastre-se</ULink>.
+          <br>
+          <br>
+          <ULink
+            to="/recuperar-senha"
+            class="text-primary font-medium"
+          >Esqueci minha senha</ULink>.
         </template>
       </UAuthForm>
     </UPageCard>
