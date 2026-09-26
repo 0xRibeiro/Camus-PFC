@@ -219,6 +219,16 @@ export type ConteudoUpdate = {
 };
 
 /**
+ * ForgotPasswordInput
+ */
+export type ForgotPasswordInput = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -373,6 +383,24 @@ export type RefreshInput = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * ResetPasswordInput
+ */
+export type ResetPasswordInput = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Password
+     */
+    password: string;
 };
 
 /**
@@ -933,6 +961,56 @@ export type LogoutAuthLogoutPostResponses = {
 };
 
 export type LogoutAuthLogoutPostResponse = LogoutAuthLogoutPostResponses[keyof LogoutAuthLogoutPostResponses];
+
+export type ForgotPasswordAuthForgotPasswordPostData = {
+    body: ForgotPasswordInput;
+    path?: never;
+    query?: never;
+    url: '/auth/forgot-password';
+};
+
+export type ForgotPasswordAuthForgotPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ForgotPasswordAuthForgotPasswordPostError = ForgotPasswordAuthForgotPasswordPostErrors[keyof ForgotPasswordAuthForgotPasswordPostErrors];
+
+export type ForgotPasswordAuthForgotPasswordPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ForgotPasswordAuthForgotPasswordPostResponse = ForgotPasswordAuthForgotPasswordPostResponses[keyof ForgotPasswordAuthForgotPasswordPostResponses];
+
+export type ResetPasswordAuthResetPasswordPostData = {
+    body: ResetPasswordInput;
+    path?: never;
+    query?: never;
+    url: '/auth/reset-password';
+};
+
+export type ResetPasswordAuthResetPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetPasswordAuthResetPasswordPostError = ResetPasswordAuthResetPasswordPostErrors[keyof ResetPasswordAuthResetPasswordPostErrors];
+
+export type ResetPasswordAuthResetPasswordPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ResetPasswordAuthResetPasswordPostResponse = ResetPasswordAuthResetPasswordPostResponses[keyof ResetPasswordAuthResetPasswordPostResponses];
 
 export type DeleteMeUsuariosMeDeleteData = {
     body?: never;

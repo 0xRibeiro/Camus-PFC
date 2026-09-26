@@ -114,6 +114,13 @@ export const zConteudoUpdate = z.object({
 });
 
 /**
+ * ForgotPasswordInput
+ */
+export const zForgotPasswordInput = z.object({
+    email: z.email()
+});
+
+/**
  * LogAuditoriaRead
  */
 export const zLogAuditoriaRead = z.object({
@@ -184,6 +191,15 @@ export const zQuestaoUpdate = z.object({
  */
 export const zRefreshInput = z.object({
     refresh_token: z.string()
+});
+
+/**
+ * ResetPasswordInput
+ */
+export const zResetPasswordInput = z.object({
+    email: z.email(),
+    code: z.string(),
+    password: z.string().min(8).max(128)
 });
 
 /**
@@ -447,6 +463,20 @@ export const zLogoutAuthLogoutPostBody = zRefreshInput;
  * Successful Response
  */
 export const zLogoutAuthLogoutPostResponse = z.void();
+
+export const zForgotPasswordAuthForgotPasswordPostBody = zForgotPasswordInput;
+
+/**
+ * Successful Response
+ */
+export const zForgotPasswordAuthForgotPasswordPostResponse = z.void();
+
+export const zResetPasswordAuthResetPasswordPostBody = zResetPasswordInput;
+
+/**
+ * Successful Response
+ */
+export const zResetPasswordAuthResetPasswordPostResponse = z.void();
 
 /**
  * Successful Response
