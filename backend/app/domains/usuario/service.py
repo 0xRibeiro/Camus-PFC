@@ -11,15 +11,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_async_session
+from app.core.email import enviar_email
 from app.core.redis import redis_client
 from app.core.security import (
     bearer_scheme,
     criar_access_token,
+    criar_codigo_reset,
     criar_hash,
     criar_refresh_token,
     decodificar_access_token,
+    revogar_codigo_reset,
     revogar_refresh_token,
     usuario_atual_id,
+    validar_codigo_reset,
     validar_refresh_token,
     verificar_password,
 )
@@ -107,6 +111,36 @@ async def renovar_tokens(db: AsyncSession, refresh_token: str) -> TokenPair:
 
 async def logout(refresh_token: str) -> None:
     await revogar_refresh_token(refresh_token)
+
+
+###### recuperacao de senha
+
+
+# nao revela se o email existe ou nao, so manda o codigo se existir
+async def solicitar_reset_senha(db: AsyncSession, email: str) -> None:
+    user = await UsuarioRepository(db).buscar_por_email(email)
+    if user is None:
+        return
+
+    codigo = await criar_codigo_reset(email)
+    await enviar_email(
+        email,
+        "Recuperação de senha - Camus",
+        f"Seu código de recuperação é {codigo}. Ele expira em 15 minutos.",
+    )
+
+
+async def redefinir_senha(db: AsyncSession, email: str, codigo: str, nova_senha: str) -> None:
+    if not await validar_codigo_reset(email, codigo):
+        raise UnauthorizedException("código inválido ou expirado")
+
+    user = await UsuarioRepository(db).buscar_por_email(email)
+    if user is None:
+        raise UnauthorizedException("código inválido ou expirado")
+
+    user.hashed_password = criar_hash(nova_senha)
+    await UsuarioRepository(db).salvar(user)
+    await revogar_codigo_reset(email)
 
 
 ###### quem ta logado / RBAC

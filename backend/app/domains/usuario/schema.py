@@ -18,6 +18,16 @@ class RefreshInput(BaseModel):  # body do /auth/refresh e /auth/logout
     refresh_token: str
 
 
+class ForgotPasswordInput(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordInput(BaseModel):  
+    email: EmailStr
+    code: str
+    password: str = Field(..., min_length=8, max_length=128)
+
+
 ###### schemas de usuario
 
 class UsuarioRead(BaseModel):
