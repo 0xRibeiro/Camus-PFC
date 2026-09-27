@@ -124,8 +124,8 @@ watch(
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
-    { label: 'Coleção', icon: 'i-lucide-fish', to: '/Colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
-    { label: 'Conquistas', icon: 'i-lucide-trophy', to: 'conquistas' },
+    { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
+    { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     // exibe pra todos
   ]
 
