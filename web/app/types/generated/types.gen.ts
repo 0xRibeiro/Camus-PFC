@@ -5,6 +5,11 @@ export type ClientOptions = {
 };
 
 /**
+ * AcaoAuditoria
+ */
+export type AcaoAuditoria = 'create' | 'update' | 'delete';
+
+/**
  * AlternativaCreate
  */
 export type AlternativaCreate = {
@@ -214,6 +219,16 @@ export type ConteudoUpdate = {
 };
 
 /**
+ * ForgotPasswordInput
+ */
+export type ForgotPasswordInput = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -221,6 +236,39 @@ export type HttpValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * LogAuditoriaRead
+ */
+export type LogAuditoriaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Usuario Id
+     */
+    usuario_id: number | null;
+    acao: AcaoAuditoria;
+    /**
+     * Entidade
+     */
+    entidade: string;
+    /**
+     * Entidade Id
+     */
+    entidade_id: number;
+    /**
+     * Alteracoes
+     */
+    alteracoes: {
+        [key: string]: unknown;
+    };
+    /**
+     * Criado Em
+     */
+    criado_em: string;
 };
 
 /**
@@ -335,6 +383,24 @@ export type RefreshInput = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * ResetPasswordInput
+ */
+export type ResetPasswordInput = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Password
+     */
+    password: string;
 };
 
 /**
@@ -902,6 +968,56 @@ export type LogoutAuthLogoutPostResponses = {
 
 export type LogoutAuthLogoutPostResponse = LogoutAuthLogoutPostResponses[keyof LogoutAuthLogoutPostResponses];
 
+export type ForgotPasswordAuthForgotPasswordPostData = {
+    body: ForgotPasswordInput;
+    path?: never;
+    query?: never;
+    url: '/auth/forgot-password';
+};
+
+export type ForgotPasswordAuthForgotPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ForgotPasswordAuthForgotPasswordPostError = ForgotPasswordAuthForgotPasswordPostErrors[keyof ForgotPasswordAuthForgotPasswordPostErrors];
+
+export type ForgotPasswordAuthForgotPasswordPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ForgotPasswordAuthForgotPasswordPostResponse = ForgotPasswordAuthForgotPasswordPostResponses[keyof ForgotPasswordAuthForgotPasswordPostResponses];
+
+export type ResetPasswordAuthResetPasswordPostData = {
+    body: ResetPasswordInput;
+    path?: never;
+    query?: never;
+    url: '/auth/reset-password';
+};
+
+export type ResetPasswordAuthResetPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetPasswordAuthResetPasswordPostError = ResetPasswordAuthResetPasswordPostErrors[keyof ResetPasswordAuthResetPasswordPostErrors];
+
+export type ResetPasswordAuthResetPasswordPostResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ResetPasswordAuthResetPasswordPostResponse = ResetPasswordAuthResetPasswordPostResponses[keyof ResetPasswordAuthResetPasswordPostResponses];
+
 export type DeleteMeUsuariosMeDeleteData = {
     body?: never;
     path?: never;
@@ -1079,6 +1195,24 @@ export type CriarStaffAdminUsuariosPostResponses = {
 };
 
 export type CriarStaffAdminUsuariosPostResponse = CriarStaffAdminUsuariosPostResponses[keyof CriarStaffAdminUsuariosPostResponses];
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/usuarios/online';
+};
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponses = {
+    /**
+     * Response Listar Usuarios Online Admin Usuarios Online Get
+     *
+     * Successful Response
+     */
+    200: Array<UsuarioRead>;
+};
+
+export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponse = ListarUsuariosOnlineAdminUsuariosOnlineGetResponses[keyof ListarUsuariosOnlineAdminUsuariosOnlineGetResponses];
 
 export type DeletarUsuarioAdminUsuariosUserIdDeleteData = {
     body?: never;
@@ -2127,6 +2261,54 @@ export type AlternativaUpdateAlternativasIdPatchResponses = {
      */
     200: unknown;
 };
+
+export type ListarLogsAdminAuditoriaGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limite
+         */
+        limite?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Entidade
+         */
+        entidade?: string | null;
+        /**
+         * Entidade Id
+         */
+        entidade_id?: number | null;
+        /**
+         * Usuario Id
+         */
+        usuario_id?: number | null;
+    };
+    url: '/admin/auditoria';
+};
+
+export type ListarLogsAdminAuditoriaGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarLogsAdminAuditoriaGetError = ListarLogsAdminAuditoriaGetErrors[keyof ListarLogsAdminAuditoriaGetErrors];
+
+export type ListarLogsAdminAuditoriaGetResponses = {
+    /**
+     * Response Listar Logs Admin Auditoria Get
+     *
+     * Successful Response
+     */
+    200: Array<LogAuditoriaRead>;
+};
+
+export type ListarLogsAdminAuditoriaGetResponse = ListarLogsAdminAuditoriaGetResponses[keyof ListarLogsAdminAuditoriaGetResponses];
 
 export type HealthHealthGetData = {
     body?: never;

@@ -28,6 +28,10 @@ class UsuarioRepository:
         resultado = await self.db.execute(select(Usuario).order_by(Usuario.id))
         return list(resultado.scalars().all())
 
+    async def buscar_varios(self, ids: list[int]) -> list[Usuario]:
+        resultado = await self.db.execute(select(Usuario).where(Usuario.id.in_(ids)))
+        return list(resultado.scalars().all())
+
     # serve pra criar e editar: add num objeto novo insere, num existente
     # so marca e o commit salva as mudancas
     async def salvar(self, user: Usuario) -> Usuario:

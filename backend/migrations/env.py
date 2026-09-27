@@ -20,6 +20,7 @@ import app.domains.aquario.model
 import app.domains.trilha.model
 import app.domains.conquistas.model
 import app.domains.usuario.model
+import app.domains.auditoria.model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

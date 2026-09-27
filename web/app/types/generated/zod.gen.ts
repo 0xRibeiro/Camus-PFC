@@ -3,6 +3,15 @@
 import * as z from 'zod';
 
 /**
+ * AcaoAuditoria
+ */
+export const zAcaoAuditoria = z.enum([
+    'create',
+    'update',
+    'delete'
+]);
+
+/**
  * AlternativaCreate
  */
 export const zAlternativaCreate = z.object({
@@ -105,6 +114,26 @@ export const zConteudoUpdate = z.object({
 });
 
 /**
+ * ForgotPasswordInput
+ */
+export const zForgotPasswordInput = z.object({
+    email: z.email()
+});
+
+/**
+ * LogAuditoriaRead
+ */
+export const zLogAuditoriaRead = z.object({
+    id: z.int(),
+    usuario_id: z.int().nullable(),
+    acao: zAcaoAuditoria,
+    entidade: z.string(),
+    entidade_id: z.int(),
+    alteracoes: z.record(z.string(), z.unknown()),
+    criado_em: z.iso.datetime()
+});
+
+/**
  * ModuloCreate
  */
 export const zModuloCreate = z.object({
@@ -162,6 +191,15 @@ export const zQuestaoUpdate = z.object({
  */
 export const zRefreshInput = z.object({
     refresh_token: z.string()
+});
+
+/**
+ * ResetPasswordInput
+ */
+export const zResetPasswordInput = z.object({
+    email: z.email(),
+    code: z.string(),
+    password: z.string().min(8).max(128)
 });
 
 /**
@@ -427,6 +465,20 @@ export const zLogoutAuthLogoutPostBody = zRefreshInput;
  */
 export const zLogoutAuthLogoutPostResponse = z.void();
 
+export const zForgotPasswordAuthForgotPasswordPostBody = zForgotPasswordInput;
+
+/**
+ * Successful Response
+ */
+export const zForgotPasswordAuthForgotPasswordPostResponse = z.void();
+
+export const zResetPasswordAuthResetPasswordPostBody = zResetPasswordInput;
+
+/**
+ * Successful Response
+ */
+export const zResetPasswordAuthResetPasswordPostResponse = z.void();
+
 /**
  * Successful Response
  */
@@ -475,6 +527,13 @@ export const zCriarStaffAdminUsuariosPostBody = zUsuarioStaffCreate;
  * Successful Response
  */
 export const zCriarStaffAdminUsuariosPostResponse = zUsuarioRead;
+
+/**
+ * Response Listar Usuarios Online Admin Usuarios Online Get
+ *
+ * Successful Response
+ */
+export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioRead);
 
 export const zDeletarUsuarioAdminUsuariosUserIdDeletePath = z.object({
     user_id: z.int()
@@ -742,3 +801,18 @@ export const zAlternativaUpdateAlternativasIdPatchBody = zAlternativaUpdate;
 export const zAlternativaUpdateAlternativasIdPatchPath = z.object({
     id: z.int()
 });
+
+export const zListarLogsAdminAuditoriaGetQuery = z.object({
+    limite: z.int().optional().default(50),
+    offset: z.int().optional().default(0),
+    entidade: z.string().nullish(),
+    entidade_id: z.int().nullish(),
+    usuario_id: z.int().nullish()
+});
+
+/**
+ * Response Listar Logs Admin Auditoria Get
+ *
+ * Successful Response
+ */
+export const zListarLogsAdminAuditoriaGetResponse = z.array(zLogAuditoriaRead);

@@ -9,14 +9,21 @@ from fastcrud.exceptions.http_exceptions import (
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_async_session
+from app.core.email import enviar_email
+from app.core.redis import redis_client
 from app.core.security import (
     bearer_scheme,
     criar_access_token,
+    criar_codigo_reset,
     criar_hash,
     criar_refresh_token,
     decodificar_access_token,
+    revogar_codigo_reset,
     revogar_refresh_token,
+    usuario_atual_id,
+    validar_codigo_reset,
     validar_refresh_token,
     verificar_password,
 )
@@ -150,10 +157,40 @@ async def logout(refresh_token: str) -> None:
     await revogar_refresh_token(refresh_token)
 
 
+###### recuperacao de senha
+
+
+# nao revela se o email existe ou nao, so manda o codigo se existir
+async def solicitar_reset_senha(db: AsyncSession, email: str) -> None:
+    user = await UsuarioRepository(db).buscar_por_email(email)
+    if user is None:
+        return
+
+    codigo = await criar_codigo_reset(email)
+    await enviar_email(
+        email,
+        "Recuperação de senha - Camus",
+        f"Seu código de recuperação é {codigo}. Ele expira em 15 minutos.",
+    )
+
+
+async def redefinir_senha(db: AsyncSession, email: str, codigo: str, nova_senha: str) -> None:
+    if not await validar_codigo_reset(email, codigo):
+        raise UnauthorizedException("código inválido ou expirado")
+
+    user = await UsuarioRepository(db).buscar_por_email(email)
+    if user is None:
+        raise UnauthorizedException("código inválido ou expirado")
+
+    user.hashed_password = criar_hash(nova_senha)
+    await UsuarioRepository(db).salvar(user)
+    await revogar_codigo_reset(email)
+
+
 ###### quem ta logado / RBAC
 
 
-# dependency: le o token do header, devolve o usuario dono dele
+# dependency: le o token do header, devolve o usuario dono dele alem de marcar quem esta logado.
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_async_session),
@@ -162,9 +199,17 @@ async def get_current_user(
     if subject is None:
         raise UnauthorizedException("credenciais inválidas")
 
+    # seta antes de qualquer query nessa sessao, pq a primeira query ja
+    # comeca a transacao e dispara o after_begin que le essa contextvar
+    usuario_atual_id.set(int(subject))
+
     user = await UsuarioRepository(db).buscar(int(subject))
     if user is None or not user.is_active:
         raise UnauthorizedException("credenciais inválidas")
+
+    # marca presenca: chave some sozinha se o usuario ficar sem
+    # fazer request pelo tempo de vida do access token
+    await redis_client.set(f"online:{user.id}", "true", ex=settings.jwt_lifetime_seconds)
     return user
 
 
@@ -187,6 +232,21 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
 
 async def listar_usuarios(db: AsyncSession) -> list[Usuario]:
     return await UsuarioRepository(db).listar()
+
+
+# varre as chaves online:<id> no redis sem travar ele (scan_iter em vez de keys)
+async def ids_usuarios_online() -> list[int]:
+    ids = []
+    async for chave in redis_client.scan_iter(match="online:*"):
+        id_usuario = chave.split(":")[1]
+        ids.append(int(id_usuario))
+
+    return ids
+
+
+async def listar_usuarios_online(db: AsyncSession) -> list[Usuario]:
+    ids = await ids_usuarios_online()
+    return await UsuarioRepository(db).buscar_varios(ids)
 
 
 async def listar_conquistas_usuario(db: AsyncSession, user_id: int):

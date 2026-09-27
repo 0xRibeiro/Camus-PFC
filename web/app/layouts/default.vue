@@ -124,12 +124,14 @@ watch(
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
+    { label: 'Coleção', icon: 'i-lucide-fish', to: '/Colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: 'conquistas' },
     // exibe pra todos
   ]
 
   if (auth.role === 'admin') {
     lista.push({ label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' })
+    lista.push({ label: 'Auditoria', icon: 'i-lucide-history', to: '/admin/auditoria' })
   }
 
   if (auth.role === 'admin' || auth.role === 'author') {

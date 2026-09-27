@@ -32,7 +32,10 @@
      ];
   };
 
-  services.redis.enable = true;
+  services.redis = {
+    enable = true;
+    port = 6379;
+  };
 
   services.influxdb.enable = true;
 

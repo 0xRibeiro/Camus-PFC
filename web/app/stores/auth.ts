@@ -1,4 +1,4 @@
-import type { UsuarioCreate, UsuarioLogin, UsuarioRead } from '~/types/generated'
+import type { ForgotPasswordInput, ResetPasswordInput, UsuarioCreate, UsuarioLogin, UsuarioRead } from '~/types/generated'
 
 // store de auth, guarda quem ta logado e os tokens
 export const useAuthStore = defineStore('auth', () => {
@@ -47,6 +47,24 @@ export const useAuthStore = defineStore('auth', () => {
       body: data,
     })
     await login({ email: data.email, password: data.password })
+  }
+
+  // manda o codigo de recuperacao pro email
+  async function forgotPassword(data: ForgotPasswordInput) {
+    const api = useApi()
+    await api('/auth/forgot-password', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  // troca a senha usando o codigo recebido por email
+  async function resetPassword(data: ResetPasswordInput) {
+    const api = useApi()
+    await api('/auth/reset-password', {
+      method: 'POST',
+      body: data,
+    })
   }
 
   // null = ninguem renovando agora.
@@ -107,6 +125,8 @@ export const useAuthStore = defineStore('auth', () => {
   role,
   login,
   register,
+  forgotPassword,
+  resetPassword,
   fetchMe,
   fetchAceiteTermos,
   refresh,

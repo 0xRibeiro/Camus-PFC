@@ -1,4 +1,5 @@
 import secrets
+from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -7,6 +8,9 @@ from pwdlib import PasswordHash
 
 from app.core.config import settings
 from app.core.redis import redis_client
+
+# guarda o id do usuario logado por request.
+usuario_atual_id: ContextVar[int | None] = ContextVar("usuario_atual_id", default=None)
 
 # cria uma instância do hash de senha com o algoritmo recomendado. (argon2id é o atual)
 password_hash = PasswordHash.recommended()
@@ -58,6 +62,22 @@ async def validar_refresh_token(token: str) -> str | None:
 
 async def revogar_refresh_token(token: str) -> None:
     await redis_client.delete(f"refresh:{token}")
+
+
+# codigo numerico de 6 digitos pra recuperacao de senha, guardado no redis por email
+async def criar_codigo_reset(email: str) -> str:
+    codigo = f"{secrets.randbelow(1_000_000):06d}"
+    await redis_client.set(f"reset:{email}", codigo, ex=900)  # 15 min
+    return codigo
+
+
+async def validar_codigo_reset(email: str, codigo: str) -> bool:
+    valor = await redis_client.get(f"reset:{email}")
+    return valor == codigo
+
+
+async def revogar_codigo_reset(email: str) -> None:
+    await redis_client.delete(f"reset:{email}")
 
 
 # Retorna o "sub" (id do usuário como string) se o token for válido

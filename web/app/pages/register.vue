@@ -63,10 +63,11 @@ const toast = useToast()
 const loading = ref(false)
 const aceitouTermos = ref(false)
 
-const schema = z.object({
-  username: zUsuarioCreate.shape.username,
-  email: zUsuarioCreate.shape.email,
-  password: zUsuarioCreate.shape.password,
+const schema = zUsuarioCreate.extend({
+  password_confirm: z.string(),
+}).refine(data => data.password === data.password_confirm, {
+  message: 'As senhas não coincidem',
+  path: ['password_confirm'],
 })
 
 type Schema = z.output<typeof schema>
@@ -93,6 +94,13 @@ const fields: AuthFormField[] = [
     placeholder: 'Sua senha',
     required: true,
   },
+  {
+    name: 'password_confirm',
+    type: 'password', 
+    label: 'Repetir Senha',
+    placeholder: 'Repita sua senha',
+    required: true,
+  },
 ]
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
@@ -108,12 +116,14 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
   loading.value = true
 
+  const { password_confirm, ...usuario } = payload.data
+
   try {
     await auth.register({
-      ...payload.data,
+      ...usuario,
       aceitou_termos: aceitouTermos.value,
     })
-
+    
     await navigateTo('/')
   }
   catch {
