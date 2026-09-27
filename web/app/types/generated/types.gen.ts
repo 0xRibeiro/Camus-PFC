@@ -539,6 +539,12 @@ export type UsuarioCreate = {
      * Password
      */
     password: string;
+    /**
+     * Aceitou Termos
+     *
+     * Usuário deve aceitar os Termos de Uso
+     */
+    aceitou_termos: boolean;
 };
 
 /**
@@ -1068,6 +1074,34 @@ export type UpdateMeUsuariosMePatchResponses = {
 };
 
 export type UpdateMeUsuariosMePatchResponse = UpdateMeUsuariosMePatchResponses[keyof UpdateMeUsuariosMePatchResponses];
+
+export type VerificarMeuAceiteUsuariosMeAceiteTermosGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type VerificarMeuAceiteUsuariosMeAceiteTermosGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListarMinhasConquistasUsuariosMeConquistasGetData = {
     body?: never;

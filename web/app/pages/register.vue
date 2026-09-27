@@ -1,6 +1,5 @@
 <template>
   <div class="flex min-h-dvh items-center justify-center">
-    <!-- mesma estrutura da tela de login: UPageCard + UAuthForm, so troca os campos -->
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="schema"
@@ -12,10 +11,40 @@
         @submit="onSubmit"
       >
         <template #footer>
-          Já tem conta? <ULink
-            to="/login"
-            class="text-primary font-medium"
-          >Entrar</ULink>.
+          <div class="space-y-3">
+            <UCheckbox v-model="aceitouTermos">
+              <template #label>
+                <span>
+                  Li e concordo com os
+                  <NuxtLink
+                    to="/termos-de-uso?from=register"
+                    class="text-primary font-medium hover:underline"
+                    @click.stop
+                  >
+                    Termos de Uso
+                  </NuxtLink>
+                  e estou ciente da
+                  <NuxtLink
+                    to="/politica-de-privacidade?from=register"
+                    class="text-primary font-medium hover:underline"
+                    @click.stop
+                  >
+                    Política de Privacidade
+                  </NuxtLink>.
+                </span>
+              </template>
+            </UCheckbox>
+
+            <div>
+              Já tem conta?
+              <ULink
+                to="/login"
+                class="text-primary font-medium"
+              >
+                Entrar
+              </ULink>.
+            </div>
+          </div>
         </template>
       </UAuthForm>
     </UPageCard>
@@ -32,6 +61,7 @@ definePageMeta({ layout: false })
 const auth = useAuthStore()
 const toast = useToast()
 const loading = ref(false)
+const aceitouTermos = ref(false)
 
 const schema = zUsuarioCreate.extend({
   password_confirm: z.string(),
@@ -43,18 +73,57 @@ const schema = zUsuarioCreate.extend({
 type Schema = z.output<typeof schema>
 
 const fields: AuthFormField[] = [
-  { name: 'username', type: 'text', label: 'Usuário', placeholder: 'seu_usuario', required: true },
-  { name: 'email', type: 'email', label: 'Email', placeholder: 'seu@email.com', required: true },
-  { name: 'password', type: 'password', label: 'Senha', placeholder: 'Sua senha', required: true, hint: 'Mín. 8 caracteres' },
-  { name: 'password_confirm', type: 'password', label: 'Repetir senha', placeholder: 'Repita sua senha', required: true },
+  {
+    name: 'username',
+    type: 'text',
+    label: 'Usuário',
+    placeholder: 'seu_usuario',
+    required: true,
+  },
+  {
+    name: 'email',
+    type: 'email',
+    label: 'Email',
+    placeholder: 'seu@email.com',
+    required: true,
+  },
+  {
+    name: 'password',
+    type: 'password',
+    label: 'Senha',
+    placeholder: 'Sua senha',
+    required: true,
+  },
+  {
+    name: 'password_confirm',
+    type: 'password', 
+    label: 'Repetir Senha',
+    placeholder: 'Repita sua senha',
+    required: true,
+  },
 ]
 
-// na store ja cria a conta E loga em seguida
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  if (!aceitouTermos.value) {
+    toast.add({
+      title: 'Aceite necessário',
+      description:
+        'Você precisa aceitar os Termos de Uso e a Política de Privacidade.',
+      color: 'error',
+    })
+    return
+  }
+
   loading.value = true
+
   const { password_confirm, ...usuario } = payload.data
+
   try {
-    await auth.register(usuario)
+    await auth.register({
+      ...usuario,
+      aceitou_termos: aceitouTermos.value,
+    })
+    
     await navigateTo('/')
   }
   catch {

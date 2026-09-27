@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000',
+      apiBase: 'http://localhost:8001',
       inatBase: 'https://api.inaturalist.org/v1',
     },
   },
