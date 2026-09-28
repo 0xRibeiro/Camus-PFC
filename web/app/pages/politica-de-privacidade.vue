@@ -155,13 +155,17 @@
 definePageMeta({ layout: false })
 
 const route = useRoute()
+const auth = useAuthStore()
 
 function voltar() {
   if (route.query.from === 'register') {
     return navigateTo('/register')
   }
 
+  if (auth.isAuthenticated) {
+    return navigateTo('/')
+  }
+
   return navigateTo('/aceite-termos')
 }
 </script>
-

@@ -126,6 +126,8 @@ const items = computed<NavigationMenuItem[]>(() => {
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
+    { label: 'Termos de Uso', icon: 'i-lucide-file-text', to: '/termos-de-uso' },
+    { label: 'Política de Privacidade', icon: 'i-lucide-shield-check', to: '/politica-de-privacidade' },
     // exibe pra todos
   ]
 
