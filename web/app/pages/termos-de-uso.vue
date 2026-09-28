@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-3xl mx-auto px-4 py-10">
     <UButton
-      
+
       icon="i-lucide-arrow-left"
       label="Voltar"
       color="neutral"
@@ -97,7 +97,10 @@
     </p>
     <p class="text-sm leading-relaxed mb-4">
       O tratamento de dados pessoais é detalhado na
-      <ULink to="/politica-de-privacidade" class="text-primary font-medium">Política de Privacidade</ULink>.
+      <ULink
+        to="/politica-de-privacidade"
+        class="text-primary font-medium"
+      >Política de Privacidade</ULink>.
     </p>
 
     <h2 class="text-lg font-semibold mt-8 mb-2">
@@ -147,11 +150,6 @@
       Dúvidas sobre estes Termos poderão ser encaminhadas ao canal de contato disponibilizado
       pelo projeto.
     </p>
-
-    <p class="text-xs text-muted mt-10 border-t border-default pt-4">
-      Este documento faz parte da documentação acadêmica do projeto Camus. Para utilização
-      pública ou comercial, recomenda-se revisão jurídica.
-    </p>
   </div>
 </template>
 
@@ -159,6 +157,7 @@
 definePageMeta({ layout: false })
 
 const route = useRoute()
+const auth = useAuthStore()
 
 function voltar() {
   if (route.query.from === 'register') {
@@ -167,6 +166,10 @@ function voltar() {
 
   if (route.query.from === 'aceite') {
     return navigateTo('/aceite-termos')
+  }
+
+  if (auth.isAuthenticated) {
+    return navigateTo('/')
   }
 
   return navigateTo('/login')

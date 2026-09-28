@@ -63,7 +63,9 @@ const toast = useToast()
 const loading = ref(false)
 const aceitouTermos = ref(false)
 
-const schema = zUsuarioCreate.extend({
+// tive que omitir os termos para resolver o problema do cadastro, mas eles ainda estão validados
+// depois precisamos decidir se ele fica ou não no schema.
+const schema = zUsuarioCreate.omit({ aceitou_termos: true }).extend({
   password_confirm: z.string(),
 }).refine(data => data.password === data.password_confirm, {
   message: 'As senhas não coincidem',
@@ -96,7 +98,7 @@ const fields: AuthFormField[] = [
   },
   {
     name: 'password_confirm',
-    type: 'password', 
+    type: 'password',
     label: 'Repetir Senha',
     placeholder: 'Repita sua senha',
     required: true,
@@ -123,7 +125,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       ...usuario,
       aceitou_termos: aceitouTermos.value,
     })
-    
+
     await navigateTo('/')
   }
   catch {
