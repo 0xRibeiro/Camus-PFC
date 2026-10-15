@@ -35,7 +35,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "--cov=app --cov-report=term-missing"
+addopts = "--import-mode=importlib --cov=app --cov-report=term-missing"
 
 [dependency-groups]
 dev = [
