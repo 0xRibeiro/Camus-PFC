@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
-from app.domains.usuario.model import Usuario
+from app.domains.usuario.model import AceiteTermos, Usuario
 
 
 # so as queries do usuario. a lib fastcrud n serve aqui pq o create precisa
@@ -60,3 +60,29 @@ class UsuarioRepository:
             .order_by(Conquista.id)
         )
         return list(resultado.scalars().all())
+
+
+    ## trouxe o metodo igual foi feito no repository de conquistas.
+    async def verificou_aceite_termos(
+        self,
+        user_id: int,
+        termos_versao: str,
+        privacidade_versao: str,
+    ) -> bool:
+        aceite = await self.db.scalar(
+            select(AceiteTermos).where(
+                AceiteTermos.usuario_id == user_id,
+                AceiteTermos.termos_versao == termos_versao,
+                AceiteTermos.privacidade_versao == privacidade_versao,
+            )
+        )
+        return aceite is not None
+
+    async def registrar_aceite_termos(
+        self,
+        aceite: AceiteTermos,
+    ) -> AceiteTermos:
+        self.db.add(aceite)
+        await self.db.commit()
+        await self.db.refresh(aceite)
+        return aceite
