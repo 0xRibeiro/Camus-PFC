@@ -18,3 +18,7 @@ devenv.local.yaml
 
 # ide 
 .vscode/
+
+
+# testes
+.coverage
