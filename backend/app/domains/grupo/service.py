@@ -10,7 +10,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.redis import redis_client
 from app.domains.grupo.model import Grupo
 from app.domains.grupo.repository import GrupoRepository
-from app.domains.grupo.schema import ConviteRead, GrupoCreate, GrupoEntrar
+from app.domains.grupo.schema import (
+    ConviteRead,
+    GrupoCreate,
+    GrupoEntrar,
+    MembroGrupoRead,
+)
 from app.domains.usuario.model import Usuario
 
 # está com esse tempo por enquanto.
@@ -81,3 +86,14 @@ async def entrar_grupo(db: AsyncSession, data: GrupoEntrar, usuario: Usuario) ->
 
     await repo.adicionar_participante(grupo.id, usuario.id)
     return grupo
+
+
+async def listar_membros(db: AsyncSession, grupo_id: int, usuario: Usuario) -> list[MembroGrupoRead]:
+    # verifica a participação antes de permitir consultar os membros
+    grupo = await buscar_grupo(db, grupo_id, usuario)
+    membros = await GrupoRepository(db).listar_membros(grupo.id)
+
+    return [
+        MembroGrupoRead(id=membro.id, username=membro.username, papel="dono" if membro.id == grupo.id_dono else "membro")
+        for membro in membros
+    ]

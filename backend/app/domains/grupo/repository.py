@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.grupo.model import Grupo, Participacao
+from app.domains.usuario.model import Usuario
 
 
 class GrupoRepository:
@@ -40,3 +41,10 @@ class GrupoRepository:
         await self.db.commit()
         await self.db.refresh(participacao)
         return participacao
+
+
+    # como o dono sempre é o primeiro da lista, da pra ordenar por username e o dono sempre ficara no topo.
+    async def listar_membros(self, grupo_id: int) -> list[Usuario]:
+        resultado = await self.db.execute(select(Usuario).join(Participacao, Participacao.id_usuario == Usuario.id)
+        .where(Participacao.id_grupo == grupo_id).order_by(Usuario.username, Usuario.id))
+        return list(resultado.scalars().all())

@@ -4,7 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from app.domains.grupo import service
 from app.domains.grupo.model import Grupo
-from app.domains.grupo.schema import ConviteRead, GrupoCreate, GrupoEntrar, GrupoRead
+from app.domains.grupo.schema import (
+    ConviteRead,
+    GrupoCreate,
+    GrupoEntrar,
+    GrupoRead,
+    MembroGrupoRead,
+)
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.service import get_current_user
 
@@ -44,3 +50,12 @@ async def buscar_grupo(grupo_id: int, db: AsyncSession = Depends(get_async_sessi
 async def gerar_convite(grupo_id: int, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> ConviteRead:
     return await service.gerar_convite(db, grupo_id, usuario)
+
+# novas rotas abaixo
+
+
+# rota 6 = lista os membros de certo grupo, retornando 200. qualquer membro pode ver os outros.
+@router.get("/{grupo_id}/membros", response_model=list[MembroGrupoRead])
+async def listar_membros(grupo_id: int, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> list[MembroGrupoRead]:
+    return await service.listar_membros(db, grupo_id, usuario)
