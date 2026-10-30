@@ -11,7 +11,10 @@
       @click="voltarParaTrilhas"
     />
 
-    <div v-if="trilha" class="flex items-start justify-between mb-6">
+    <div
+      v-if="trilha"
+      class="flex items-start justify-between mb-6"
+    >
       <div>
         <p class="text-xs font-medium text-muted uppercase tracking-wide">
           Jornada
@@ -25,18 +28,37 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <UBadge color="neutral" variant="soft" size="lg">
+        <UBadge
+          color="neutral"
+          variant="soft"
+          size="lg"
+        >
           {{ modulos.length }} módulo{{ modulos.length === 1 ? '' : 's' }}
         </UBadge>
-        <UBadge color="neutral" variant="soft" size="lg">
+        <UBadge
+          color="neutral"
+          variant="soft"
+          size="lg"
+        >
           {{ totalConteudos }} conteúdo{{ totalConteudos === 1 ? '' : 's' }}
         </UBadge>
-        <UButton icon="i-lucide-plus" label="Módulo" color="primary" @click="abrirCriarModulo" />
+        <UButton
+          icon="i-lucide-plus"
+          label="Módulo"
+          color="primary"
+          @click="abrirCriarModulo"
+        />
       </div>
     </div>
 
-    <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
+    <div
+      v-if="loading"
+      class="flex justify-center py-12"
+    >
+      <UIcon
+        name="i-lucide-loader-circle"
+        class="size-6 animate-spin"
+      />
     </div>
 
     <!-- arrasta os MODULOS (nao os conteudos, isso ficou so no nivel modulo
@@ -73,10 +95,20 @@
 
           <div class="flex items-center gap-1">
             <UButton
-              icon="i-lucide-plus" size="xs" color="neutral" variant="ghost" label="Conteúdo"
+              icon="i-lucide-plus"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              label="Conteúdo"
               @click="abrirCriarConteudo(modulo)"
             />
-            <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" @click="onDeleteModulo(modulo)" />
+            <UButton
+              icon="i-lucide-trash-2"
+              size="xs"
+              color="error"
+              variant="ghost"
+              @click="onDeleteModulo(modulo)"
+            />
           </div>
         </div>
 
@@ -88,7 +120,10 @@
           >
             <div class="flex items-center gap-3">
               <div class="flex items-center justify-center size-8 rounded-full bg-primary-50 shrink-0">
-                <UIcon :name="tiposInfo[conteudo.tipo].icon" class="size-4 text-primary-600" />
+                <UIcon
+                  :name="tiposInfo[conteudo.tipo].icon"
+                  class="size-4 text-primary-600"
+                />
               </div>
               <div>
                 <p class="text-sm font-medium">
@@ -96,7 +131,10 @@
                 </p>
                 <p class="text-xs text-muted">
                   {{ conteudo.pontos }} pts
-                  <span v-if="conteudo.tipo === 'video' && !conteudo.video_url" class="text-warning">
+                  <span
+                    v-if="conteudo.tipo === 'video' && !conteudo.video_url"
+                    class="text-warning"
+                  >
                     · sem link ainda
                   </span>
                 </p>
@@ -116,40 +154,75 @@
                 </span>
               </div>
 
-              <UButton icon="i-lucide-pencil" size="xs" color="neutral" variant="ghost" @click="abrirEditarConteudo(conteudo)" />
+              <UButton
+                icon="i-lucide-pencil"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                @click="abrirEditarConteudo(conteudo)"
+              />
               <UButton
                 v-if="conteudo.tipo === 'video'"
                 :icon="conteudo.video_url ? 'i-lucide-play' : 'i-lucide-link'"
-                size="xs" color="neutral" variant="ghost"
+                size="xs"
+                color="neutral"
+                variant="ghost"
                 @click="abrirLinkVideo(conteudo)"
               />
-              <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" @click="onDeleteConteudo(conteudo)" />
+              <UButton
+                icon="i-lucide-trash-2"
+                size="xs"
+                color="error"
+                variant="ghost"
+                @click="onDeleteConteudo(conteudo)"
+              />
             </div>
           </div>
         </div>
 
-        <p v-if="contarConteudos(modulo.id) === 0" class="px-4 py-6 text-sm text-muted text-center">
+        <p
+          v-if="contarConteudos(modulo.id) === 0"
+          class="px-4 py-6 text-sm text-muted text-center"
+        >
           Nenhum conteúdo neste módulo ainda.
         </p>
       </div>
     </VueDraggable>
 
-    <p v-if="!loading && modulos.length === 0" class="text-sm text-muted text-center py-12">
+    <p
+      v-if="!loading && modulos.length === 0"
+      class="text-sm text-muted text-center py-12"
+    >
       Nenhum módulo cadastrado. Clique em "Módulo" para começar a jornada.
     </p>
 
     <!-- criar modulo -->
-    <UModal v-model:open="showModuloModal" title="Novo módulo">
+    <UModal
+      v-model:open="showModuloModal"
+      title="Novo módulo"
+    >
       <template #body>
         <div class="space-y-4">
           <UFormField label="Título do módulo">
-            <UInput v-model="formModulo.titulo" placeholder="Ex: Módulo 1" class="w-full" />
+            <UInput
+              v-model="formModulo.titulo"
+              placeholder="Ex: Módulo 1"
+              class="w-full"
+            />
           </UFormField>
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showModuloModal = false" />
             <UButton
-              color="primary" label="Criar" :loading="savingModulo"
-              :disabled="!formModulo.titulo.trim()" @click="onSubmitModulo"
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showModuloModal = false"
+            />
+            <UButton
+              color="primary"
+              label="Criar"
+              :loading="savingModulo"
+              :disabled="!formModulo.titulo.trim()"
+              @click="onSubmitModulo"
             />
           </div>
         </div>
@@ -158,10 +231,16 @@
 
     <!-- criar ou editar conteudo, mesmo modal, so muda o titulo/botao e
     esconde o seletor de tipo quando ta editando (n da pra trocar o tipo depois) -->
-    <UModal v-model:open="showConteudoModal" :title="modoConteudoModal === 'criar' ? 'Novo conteúdo' : 'Editar conteúdo'">
+    <UModal
+      v-model:open="showConteudoModal"
+      :title="modoConteudoModal === 'criar' ? 'Novo conteúdo' : 'Editar conteúdo'"
+    >
       <template #body>
         <div class="space-y-4">
-          <UFormField v-if="modoConteudoModal === 'criar'" label="Tipo">
+          <UFormField
+            v-if="modoConteudoModal === 'criar'"
+            label="Tipo"
+          >
             <div class="flex gap-2">
               <UButton
                 label="Vídeo"
@@ -169,21 +248,46 @@
                 :variant="formConteudo.tipo === 'video' ? 'solid' : 'outline'"
                 @click="formConteudo.tipo = 'video'"
               />
-              <UButton label="Artigo" color="neutral" variant="outline" disabled title="Em breve" />
-              <UButton label="Quiz" color="neutral" variant="outline" disabled title="Em breve" />
+              <UButton
+                label="Artigo"
+                color="neutral"
+                variant="outline"
+                disabled
+                title="Em breve"
+              />
+              <UButton
+                label="Quiz"
+                color="neutral"
+                variant="outline"
+                disabled
+                title="Em breve"
+              />
             </div>
           </UFormField>
 
           <UFormField label="Título">
-            <UInput v-model="formConteudo.titulo" placeholder="Ex: Salinidade: o que é e como medir" class="w-full" />
+            <UInput
+              v-model="formConteudo.titulo"
+              placeholder="Ex: Salinidade: o que é e como medir"
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField label="Pontos">
-            <UInputNumber v-model="formConteudo.pontos" :min="0" class="w-full" />
+            <UInputNumber
+              v-model="formConteudo.pontos"
+              :min="0"
+              class="w-full"
+            />
           </UFormField>
 
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showConteudoModal = false" />
+            <UButton
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showConteudoModal = false"
+            />
             <UButton
               color="primary"
               :label="modoConteudoModal === 'criar' ? 'Criar' : 'Salvar'"
@@ -197,31 +301,53 @@
     </UModal>
 
     <!-- colar e editar link do youtube -->
-    <UModal v-model:open="showVideoModal" title="Link do vídeo">
+    <UModal
+      v-model:open="showVideoModal"
+      title="Link do vídeo"
+    >
       <template #body>
         <div class="space-y-4">
           <UFormField label="URL do YouTube">
-            <UInput v-model="formVideoUrl" placeholder="https://www.youtube.com/watch?v=..." class="w-full" />
-            <p v-if="formVideoUrl && !youtubeIdPreview" class="text-xs text-error mt-1">
+            <UInput
+              v-model="formVideoUrl"
+              placeholder="https://www.youtube.com/watch?v=..."
+              class="w-full"
+            />
+            <p
+              v-if="formVideoUrl && !youtubeIdPreview"
+              class="text-xs text-error mt-1"
+            >
               Não parece ser um link válido do YouTube.
             </p>
           </UFormField>
 
           <!-- se o link for valido, o video ja toca aqui antes de salvar -->
-          <div v-if="youtubeIdPreview" class="aspect-video rounded-lg overflow-hidden border border-default">
+          <div
+            v-if="youtubeIdPreview"
+            class="aspect-video rounded-lg overflow-hidden border border-default"
+          >
             <iframe
               :src="`https://www.youtube.com/embed/${youtubeIdPreview}`"
-              class="w-full h-full" frameborder="0"
+              class="w-full h-full"
+              frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen
             />
           </div>
 
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showVideoModal = false" />
             <UButton
-              color="primary" label="Salvar" :loading="savingVideo"
-              :disabled="!youtubeIdPreview" @click="onSubmitVideoUrl"
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showVideoModal = false"
+            />
+            <UButton
+              color="primary"
+              label="Salvar"
+              :loading="savingVideo"
+              :disabled="!youtubeIdPreview"
+              @click="onSubmitVideoUrl"
             />
           </div>
         </div>

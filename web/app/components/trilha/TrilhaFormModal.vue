@@ -4,30 +4,69 @@
     é exatamente o mesmo mecanismo que a gente usa no nosso proprio componente
     (explico embaixo no script, no defineModel). aqui a gente so repassa pra frente
   -->
-  <UModal v-model:open="open" :title="trilha ? 'Editar trilha' : 'Nova trilha'">
+  <UModal
+    v-model:open="open"
+    :title="trilha ? 'Editar trilha' : 'Nova trilha'"
+  >
     <template #body>
-      <UForm :schema="formSchema" :state="formState" class="space-y-4" @submit="onSubmit">
-        <UFormField name="titulo" label="Título">
-          <UInput v-model="formState.titulo" class="w-full" />
+      <UForm
+        :schema="formSchema"
+        :state="formState"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
+        <UFormField
+          name="titulo"
+          label="Título"
+        >
+          <UInput
+            v-model="formState.titulo"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField name="descricao" label="Descrição">
-          <UTextarea v-model="formState.descricao" class="w-full" />
+        <UFormField
+          name="descricao"
+          label="Descrição"
+        >
+          <UTextarea
+            v-model="formState.descricao"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField name="tag" label="Tag">
-          <USelect v-model="formState.tag" :items="tagOptions" placeholder="Selecione uma tag" class="w-full" />
+        <UFormField
+          name="tag"
+          label="Tag"
+        >
+          <USelect
+            v-model="formState.tag"
+            :items="tagOptions"
+            placeholder="Selecione uma tag"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField name="foto" label="Link da imagem">
-          <UInput v-model="formState.foto" placeholder="https://..." class="w-full" />
+        <UFormField
+          name="foto"
+          label="Link da imagem"
+        >
+          <UInput
+            v-model="formState.foto"
+            placeholder="https://..."
+            class="w-full"
+          />
         </UFormField>
 
         <!-- preview da imagem, mesmo componente usado no card da listagem -->
         <TrilhaImagem :src="formState.foto" />
 
         <!-- toggle de ativo so faz sentido editando: trilha nova sempre nasce inativa no back -->
-        <UFormField v-if="trilha" name="is_active" label="Trilha ativa">
+        <UFormField
+          v-if="trilha"
+          name="is_active"
+          label="Trilha ativa"
+        >
           <USwitch v-model="formState.is_active" />
         </UFormField>
 

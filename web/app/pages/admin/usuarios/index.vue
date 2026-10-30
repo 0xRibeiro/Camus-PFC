@@ -4,7 +4,10 @@
       Usuários
     </h1>
 
-    <UsuarioOnlineList :usuarios="usuariosOnline" :loading="loadingOnline" />
+    <UsuarioOnlineList
+      :usuarios="usuariosOnline"
+      :loading="loadingOnline"
+    />
 
     <!-- form de cadastro, so author/admin (aluno se cadastra sozinho por /auth/register) -->
     <UCard class="mb-6">
@@ -14,29 +17,64 @@
         </p>
       </template>
 
-      <UForm :schema="schema" :state="formState" class="flex flex-wrap items-end gap-3" @submit="onCreate">
-        <UFormField name="username" label="Usuário">
+      <UForm
+        :schema="schema"
+        :state="formState"
+        class="flex flex-wrap items-end gap-3"
+        @submit="onCreate"
+      >
+        <UFormField
+          name="username"
+          label="Usuário"
+        >
           <UInput v-model="formState.username" />
         </UFormField>
 
-        <UFormField name="email" label="Email">
-          <UInput v-model="formState.email" type="email" />
+        <UFormField
+          name="email"
+          label="Email"
+        >
+          <UInput
+            v-model="formState.email"
+            type="email"
+          />
         </UFormField>
 
-        <UFormField name="password" label="Senha">
-          <UInput v-model="formState.password" type="password" />
+        <UFormField
+          name="password"
+          label="Senha"
+        >
+          <UInput
+            v-model="formState.password"
+            type="password"
+          />
         </UFormField>
 
-        <UFormField name="role" label="Papel">
-          <USelect v-model="formState.role" :items="roleOptions" class="w-32" />
+        <UFormField
+          name="role"
+          label="Papel"
+        >
+          <USelect
+            v-model="formState.role"
+            :items="roleOptions"
+            class="w-32"
+          />
         </UFormField>
 
-        <UButton type="submit" label="Cadastrar" :loading="creating" />
+        <UButton
+          type="submit"
+          label="Cadastrar"
+          :loading="creating"
+        />
       </UForm>
     </UCard>
 
     <!-- UTable = tabela pronta do nuxt ui, so precisa de data + columns -->
-    <UTable :data="usuarios" :columns="columns" :loading="loading" />
+    <UTable
+      :data="usuarios"
+      :columns="columns"
+      :loading="loading"
+    />
   </div>
 </template>
 

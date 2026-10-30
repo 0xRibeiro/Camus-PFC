@@ -1,8 +1,14 @@
 <template>
   <UCard>
     <!-- imagem + status + titulo + descricao, tudo dentro do link pra edicao -->
-    <NuxtLink :to="`/author/trilhas/${trilha.id}`" class="block">
-      <TrilhaImagem :src="trilha.foto" :alt="trilha.titulo" />
+    <NuxtLink
+      :to="`/author/trilhas/${trilha.id}`"
+      class="block"
+    >
+      <TrilhaImagem
+        :src="trilha.foto"
+        :alt="trilha.titulo"
+      />
 
       <div class="mt-3 space-y-1">
         <!-- bolinha + texto: verde quando ativa, cinza quando desativada -->
@@ -29,7 +35,10 @@
         <p class="font-semibold">
           {{ trilha.titulo }}
         </p>
-        <p v-if="trilha.descricao" class="text-sm text-muted line-clamp-2">
+        <p
+          v-if="trilha.descricao"
+          class="text-sm text-muted line-clamp-2"
+        >
           {{ trilha.descricao }}
         </p>
       </div>
@@ -39,7 +48,10 @@
     <template #footer>
       <div class="flex items-center justify-between">
         <span class="flex items-center gap-1 text-xs text-muted">
-          <UIcon name="i-lucide-layers" class="size-4" />
+          <UIcon
+            name="i-lucide-layers"
+            class="size-4"
+          />
           {{ modulosCount }} módulo{{ modulosCount === 1 ? '' : 's' }}
           · {{ conteudosCount }} conteúdo{{ conteudosCount === 1 ? '' : 's' }}
         </span>
