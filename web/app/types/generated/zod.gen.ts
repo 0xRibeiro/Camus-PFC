@@ -114,10 +114,41 @@ export const zConteudoUpdate = z.object({
 });
 
 /**
+ * ConviteRead
+ */
+export const zConviteRead = z.object({
+    convite: z.string(),
+    expira_em_segundos: z.int()
+});
+
+/**
  * ForgotPasswordInput
  */
 export const zForgotPasswordInput = z.object({
     email: z.email()
+});
+
+/**
+ * GrupoCreate
+ */
+export const zGrupoCreate = z.object({
+    nome: z.string().min(1).max(50)
+});
+
+/**
+ * GrupoEntrar
+ */
+export const zGrupoEntrar = z.object({
+    convite: z.string().length(12)
+});
+
+/**
+ * GrupoRead
+ */
+export const zGrupoRead = z.object({
+    id: z.int(),
+    nome: z.string(),
+    id_dono: z.int()
 });
 
 /**
@@ -816,3 +847,42 @@ export const zListarLogsAdminAuditoriaGetQuery = z.object({
  * Successful Response
  */
 export const zListarLogsAdminAuditoriaGetResponse = z.array(zLogAuditoriaRead);
+
+/**
+ * Response Listar Grupos Grupos Get
+ *
+ * Successful Response
+ */
+export const zListarGruposGruposGetResponse = z.array(zGrupoRead);
+
+export const zCriarGrupoGruposPostBody = zGrupoCreate;
+
+/**
+ * Successful Response
+ */
+export const zCriarGrupoGruposPostResponse = zGrupoRead;
+
+export const zEntrarGrupoGruposEntrarPostBody = zGrupoEntrar;
+
+/**
+ * Successful Response
+ */
+export const zEntrarGrupoGruposEntrarPostResponse = zGrupoRead;
+
+export const zBuscarGrupoGruposGrupoIdGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarGrupoGruposGrupoIdGetResponse = zGrupoRead;
+
+export const zGerarConviteGruposGrupoIdConvitesPostPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zGerarConviteGruposGrupoIdConvitesPostResponse = zConviteRead;

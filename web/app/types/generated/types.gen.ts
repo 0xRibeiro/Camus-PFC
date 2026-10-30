@@ -219,6 +219,20 @@ export type ConteudoUpdate = {
 };
 
 /**
+ * ConviteRead
+ */
+export type ConviteRead = {
+    /**
+     * Convite
+     */
+    convite: string;
+    /**
+     * Expira Em Segundos
+     */
+    expira_em_segundos: number;
+};
+
+/**
  * ForgotPasswordInput
  */
 export type ForgotPasswordInput = {
@@ -226,6 +240,44 @@ export type ForgotPasswordInput = {
      * Email
      */
     email: string;
+};
+
+/**
+ * GrupoCreate
+ */
+export type GrupoCreate = {
+    /**
+     * Nome
+     */
+    nome: string;
+};
+
+/**
+ * GrupoEntrar
+ */
+export type GrupoEntrar = {
+    /**
+     * Convite
+     */
+    convite: string;
+};
+
+/**
+ * GrupoRead
+ */
+export type GrupoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Id Dono
+     */
+    id_dono: number;
 };
 
 /**
@@ -2309,6 +2361,134 @@ export type ListarLogsAdminAuditoriaGetResponses = {
 };
 
 export type ListarLogsAdminAuditoriaGetResponse = ListarLogsAdminAuditoriaGetResponses[keyof ListarLogsAdminAuditoriaGetResponses];
+
+export type ListarGruposGruposGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/grupos';
+};
+
+export type ListarGruposGruposGetResponses = {
+    /**
+     * Response Listar Grupos Grupos Get
+     *
+     * Successful Response
+     */
+    200: Array<GrupoRead>;
+};
+
+export type ListarGruposGruposGetResponse = ListarGruposGruposGetResponses[keyof ListarGruposGruposGetResponses];
+
+export type CriarGrupoGruposPostData = {
+    body: GrupoCreate;
+    path?: never;
+    query?: never;
+    url: '/grupos';
+};
+
+export type CriarGrupoGruposPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CriarGrupoGruposPostError = CriarGrupoGruposPostErrors[keyof CriarGrupoGruposPostErrors];
+
+export type CriarGrupoGruposPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GrupoRead;
+};
+
+export type CriarGrupoGruposPostResponse = CriarGrupoGruposPostResponses[keyof CriarGrupoGruposPostResponses];
+
+export type EntrarGrupoGruposEntrarPostData = {
+    body: GrupoEntrar;
+    path?: never;
+    query?: never;
+    url: '/grupos/entrar';
+};
+
+export type EntrarGrupoGruposEntrarPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EntrarGrupoGruposEntrarPostError = EntrarGrupoGruposEntrarPostErrors[keyof EntrarGrupoGruposEntrarPostErrors];
+
+export type EntrarGrupoGruposEntrarPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrupoRead;
+};
+
+export type EntrarGrupoGruposEntrarPostResponse = EntrarGrupoGruposEntrarPostResponses[keyof EntrarGrupoGruposEntrarPostResponses];
+
+export type BuscarGrupoGruposGrupoIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}';
+};
+
+export type BuscarGrupoGruposGrupoIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarGrupoGruposGrupoIdGetError = BuscarGrupoGruposGrupoIdGetErrors[keyof BuscarGrupoGruposGrupoIdGetErrors];
+
+export type BuscarGrupoGruposGrupoIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrupoRead;
+};
+
+export type BuscarGrupoGruposGrupoIdGetResponse = BuscarGrupoGruposGrupoIdGetResponses[keyof BuscarGrupoGruposGrupoIdGetResponses];
+
+export type GerarConviteGruposGrupoIdConvitesPostData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/convites';
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostError = GerarConviteGruposGrupoIdConvitesPostErrors[keyof GerarConviteGruposGrupoIdConvitesPostErrors];
+
+export type GerarConviteGruposGrupoIdConvitesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ConviteRead;
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostResponse = GerarConviteGruposGrupoIdConvitesPostResponses[keyof GerarConviteGruposGrupoIdConvitesPostResponses];
 
 export type HealthHealthGetData = {
     body?: never;
