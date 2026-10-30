@@ -324,6 +324,24 @@ export type LogAuditoriaRead = {
 };
 
 /**
+ * MembroGrupoRead
+ */
+export type MembroGrupoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Papel
+     */
+    papel: 'dono' | 'membro';
+};
+
+/**
  * ModuloCreate
  */
 export type ModuloCreate = {
@@ -2489,6 +2507,38 @@ export type GerarConviteGruposGrupoIdConvitesPostResponses = {
 };
 
 export type GerarConviteGruposGrupoIdConvitesPostResponse = GerarConviteGruposGrupoIdConvitesPostResponses[keyof GerarConviteGruposGrupoIdConvitesPostResponses];
+
+export type ListarMembrosGruposGrupoIdMembrosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/membros';
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetError = ListarMembrosGruposGrupoIdMembrosGetErrors[keyof ListarMembrosGruposGrupoIdMembrosGetErrors];
+
+export type ListarMembrosGruposGrupoIdMembrosGetResponses = {
+    /**
+     * Response Listar Membros Grupos  Grupo Id  Membros Get
+     *
+     * Successful Response
+     */
+    200: Array<MembroGrupoRead>;
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetResponse = ListarMembrosGruposGrupoIdMembrosGetResponses[keyof ListarMembrosGruposGrupoIdMembrosGetResponses];
 
 export type HealthHealthGetData = {
     body?: never;

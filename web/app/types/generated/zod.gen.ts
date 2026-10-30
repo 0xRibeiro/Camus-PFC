@@ -165,6 +165,15 @@ export const zLogAuditoriaRead = z.object({
 });
 
 /**
+ * MembroGrupoRead
+ */
+export const zMembroGrupoRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    papel: z.enum(['dono', 'membro'])
+});
+
+/**
  * ModuloCreate
  */
 export const zModuloCreate = z.object({
@@ -886,3 +895,14 @@ export const zGerarConviteGruposGrupoIdConvitesPostPath = z.object({
  * Successful Response
  */
 export const zGerarConviteGruposGrupoIdConvitesPostResponse = zConviteRead;
+
+export const zListarMembrosGruposGrupoIdMembrosGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Membros Grupos  Grupo Id  Membros Get
+ *
+ * Successful Response
+ */
+export const zListarMembrosGruposGrupoIdMembrosGetResponse = z.array(zMembroGrupoRead);
