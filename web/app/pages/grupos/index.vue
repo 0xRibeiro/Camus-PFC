@@ -124,6 +124,14 @@
             {{ grupo.id_dono === auth.user?.id ? 'Dono' : 'Participante' }}
           </UBadge>
         </div>
+        <template #footer>
+          <UButton
+            label="Abrir grupo"
+            :to="`/grupos/${grupo.id}`"
+            color="neutral"
+            variant="outline"
+          />
+        </template>
       </UCard>
     </UPageGrid>
   </div>
