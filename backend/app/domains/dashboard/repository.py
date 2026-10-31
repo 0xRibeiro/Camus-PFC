@@ -29,7 +29,7 @@ class DashboardRepository:
 
     async def contar_cadastros_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
     # usa apenas a parte da data para agrupar os registros
-        dia = cast(LogAuditoria.criado_em, Date)
+        dia = cast(func.timezone("America/Sao_Paulo", func.timezone("UTC", LogAuditoria.criado_em)), Date)
 
         # query bem especifica só pra contar os cadastros acontecidos no dia utilizando dados da auditoria.
         resultado = await self.db.execute(select(dia, func.count()).where(LogAuditoria.entidade == "usuarios",
@@ -49,5 +49,4 @@ class DashboardRepository:
 
     # pegando a data direto do postgres pra garantir que seja a mesma pra todos os cálculos.
     async def buscar_data_atual(self) -> date:
-        resultado = await self.db.execute(select(func.current_date()))
-        return resultado.scalar_one()
+        return (await self.db.execute(select(cast(func.timezone("America/Sao_Paulo", func.now()), Date)))).scalar_one()

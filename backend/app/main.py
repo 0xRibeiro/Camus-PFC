@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
+from app.domains.dashboard.router import router as dashboard_router
 from app.domains.grupo.router import router as grupo_router
 from app.domains.trilha.router import (
     alternativa_router,
@@ -47,6 +48,7 @@ app.include_router(modulo_router)
 app.include_router(conquista_router)
 app.include_router(conteudo_router)
 app.include_router(questao_router)
+app.include_router(dashboard_router)
 app.include_router(alternativa_router)
 app.include_router(auditoria_router)
 app.include_router(grupo_router)
