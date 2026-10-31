@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
         <h1 class="text-xl font-semibold">
           Dashboard
@@ -11,14 +11,25 @@
         </p>
       </div>
 
-      <UButton
-        label="Atualizar"
-        icon="i-lucide-refresh-cw"
-        color="neutral"
-        variant="outline"
-        :loading="loading"
-        @click="fetchDashboard"
-      />
+      <div class="flex flex-wrap items-end gap-3">
+        <UFormField label="Período dos cadastros">
+          <USelect
+            v-model="dias"
+            :items="periodos"
+            :disabled="loading"
+            class="w-44"
+          />
+        </UFormField>
+
+        <UButton
+          label="Atualizar"
+          icon="i-lucide-refresh-cw"
+          color="neutral"
+          variant="outline"
+          :loading="loading"
+          @click="fetchDashboard"
+        />
+      </div>
     </div>
 
     <div
@@ -52,7 +63,14 @@
       class="space-y-6"
     >
       <DashboardNumeros :dados="dados" />
-      <DashboardCadastros :cadastros="dados.cadastros_por_dia" />
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <DashboardCadastros
+          :cadastros="dados.cadastros_por_dia"
+          class="xl:col-span-2"
+        />
+        <DashboardConquistas :conquistas="dados.conquistas_por_quantidade" />
+      </div>
     </div>
   </div>
 </template>
@@ -61,7 +79,6 @@
 import { FetchError } from 'ofetch'
 import type { DashboardRead } from '~/types/generated'
 
-// permite o acesso à página apenas para administradores
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
 const api = useApi()
@@ -69,12 +86,20 @@ const dados = ref<DashboardRead | null>(null)
 const loading = ref(true)
 const erro = ref('')
 
+const dias = ref(30)
+
+const periodos = [
+  { label: 'Últimos 7 dias', value: 7 },
+  { label: 'Últimos 30 dias', value: 30 },
+  { label: 'Últimos 90 dias', value: 90 },
+]
+
 async function fetchDashboard() {
   loading.value = true
   erro.value = ''
 
   try {
-    dados.value = await api('/admin/dashboard')
+    dados.value = await api('/admin/dashboard', { query: { dias: dias.value } })
   }
   catch (error) {
     erro.value = 'Não foi possível carregar a dashboard'
@@ -88,5 +113,9 @@ async function fetchDashboard() {
   }
 }
 
+// consulta novamente quando o período selecionado mudar
+watch(dias, fetchDashboard)
+
+// primeira consulta ao abrir a página
 onMounted(fetchDashboard)
 </script>
