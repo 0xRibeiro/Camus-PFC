@@ -135,6 +135,7 @@ const items = computed<NavigationMenuItem[]>(() => {
   if (auth.role === 'admin') {
     lista.push({ label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' })
     lista.push({ label: 'Auditoria', icon: 'i-lucide-history', to: '/admin/auditoria' })
+    lista.push({ label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin/dashboard' })
   }
 
   if (auth.role === 'admin' || auth.role === 'author') {
