@@ -191,33 +191,34 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'role' }) // só da acesso pra usuário autenticado
+import { useConquistasStore } from '~/stores/conquistas'
 
-// utiliza dois dos tamanhos fornecidos pela api nas iamgens, o medium na listagem e o square na parte dos detalhes do peixe.
+definePageMeta({ middleware: 'role' })
+
+// tamanhos utilizados nas imagens da listagem e dos detalhes
 interface FotosPeixe {
   medium_url?: string
   square_url?: string
 }
 
-// guarda as informações principais do peixe retornadas pela API
+// informações principais do peixe retornadas pela API
 interface Peixe {
   id: number
   name: string
   preferred_common_name?: string
   rank?: string
   observations_count?: number
-  wikipedia_url?: string // a pagina da wikipedia serve para dar informações adicionais que eu acreditava que a
-  // iNaturalist fornecia, mas ela foca apenas em imagens e observações.
+  wikipedia_url?: string
   default_photo?: FotosPeixe
 }
 
-// interface que recebe uma lista de objetos peixe da iNaturalis. Ela é não obrigatoria porque
-// algumas pesquisas podem retornar nada.
 interface RespostaTaxa {
   results?: Peixe[]
 }
 
-const inat = useInat() // usa o metodo das composables pra requisição na API
+const inat = useInat()
+const conquistas = useConquistasStore()
+
 const busca = ref('')
 const peixes = ref<Peixe[]>([])
 const peixeSelecionado = ref<Peixe | null>(null)
@@ -238,8 +239,7 @@ async function buscarPeixes() {
         q: termo,
         taxon_id: 47178,
         rank: 'species',
-        per_page: 20, // por enquanto mostra apenas os 20 primeiros resultados, mas na proxima sprint quero fazer
-        // um sistema de paginas para mostrar mais. o Nuxt tem um component perfeito para isso, vou testar depois.
+        per_page: 20,
         order: 'desc',
         order_by: 'observations_count',
       },
@@ -253,9 +253,17 @@ async function buscarPeixes() {
   }
 
   carregando.value = false
+
+  // conquista 6: pesquisar e encontrar pelo menos uma espécie
+  if (peixes.value.length > 0) {
+    await conquistas.desbloquearConquista(6).catch(() => {})
+  }
 }
 
-function selecionarPeixe(peixe: Peixe) {
+async function selecionarPeixe(peixe: Peixe) {
   peixeSelecionado.value = peixe
+
+  // conquista 7: selecionar uma espécie para consultar seus detalhes
+  await conquistas.desbloquearConquista(7).catch(() => {})
 }
 </script>
