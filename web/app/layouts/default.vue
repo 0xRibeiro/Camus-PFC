@@ -25,7 +25,7 @@
 
       <template #footer>
         <div class="flex flex-col gap-1 w-full">
-          <!-- UColorModeButton = ja vem pronto do nuxt ui, alterna claro/escuro sozinho -->
+          <!-- alterna entre os temas do site -->
           <UColorModeButton />
 
           <div
@@ -38,6 +38,7 @@
               :avatar="{ text: auth.user.username.charAt(0).toUpperCase() }"
               class="min-w-0 flex-1"
             />
+
             <UButton
               icon="i-lucide-log-out"
               color="neutral"
@@ -78,58 +79,55 @@ const conquistas = useConquistasStore()
 const colorMode = useColorMode()
 const route = useRoute()
 
-// da linha 82 até a 118 são os codigos que concedem as conquistas atuais
-// aqui usei o watch por se tratar de cnquistas que tratam apenas
-// de comportamentos do site. quando as features de ensino estiverem
-// prontas, esse comportamento vai mudar.
+// conquista 1: trocar o tema do site
 watch(
   () => colorMode.preference,
-  async (newPreference, oldPreference) => {
-    if (!oldPreference || newPreference === oldPreference || !auth.isAuthenticated) return
+  async (novoTema, temaAnterior) => {
+    if (!temaAnterior || novoTema === temaAnterior || !auth.isAuthenticated) return
 
     await conquistas.desbloquearConquista(1).catch(() => {})
   },
 )
 
+// conquista 2: esconder o menu lateral
 watch(
   () => [open.value, auth.isAuthenticated] as const,
-  async ([isOpen, isAuthenticated]) => {
-    if (isOpen || !isAuthenticated) return
+  async ([menuAberto, autenticado]) => {
+    if (menuAberto || !autenticado) return
 
     await conquistas.desbloquearConquista(2).catch(() => {})
   },
 )
 
+// conquistas obtidas ao visitar determinadas páginas
+const conquistasPorPagina: Record<string, number> = {
+  '/termos-de-uso': 3,
+  '/conquistas/segredo': 4,
+  '/colecao': 5,
+}
+
 watch(
   () => [route.path, auth.isAuthenticated] as const,
-  async ([path, isAuthenticated]) => {
-    if (path !== '/' || !isAuthenticated) return
+  async ([caminho, autenticado]) => {
+    if (!autenticado) return
 
-    await conquistas.desbloquearConquista(3).catch(() => {})
+    const conquistaId = conquistasPorPagina[caminho]
+    if (conquistaId === undefined) return
+
+    await conquistas.desbloquearConquista(conquistaId).catch(() => {})
   },
   { immediate: true },
 )
 
-watch(
-  () => [route.path, auth.isAuthenticated] as const,
-  async ([path, isAuthenticated]) => {
-    if (path !== '/conquistas/segredo' || !isAuthenticated) return
-
-    await conquistas.desbloquearConquista(4).catch(() => {})
-  },
-  { immediate: true },
-)
-
-// computed pq precisa recalcular se o auth.role mudar (login/logout, por ex)
+// recalcula os itens do menu quando o papel do usuário mudar
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
-    { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
+    { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
     { label: 'Termos de Uso', icon: 'i-lucide-file-text', to: '/termos-de-uso' },
     { label: 'Política de Privacidade', icon: 'i-lucide-shield-check', to: '/politica-de-privacidade' },
-    // exibe pra todos
   ]
 
   if (auth.role === 'admin') {
