@@ -10,7 +10,7 @@ from app.domains.usuario.repository import UsuarioRepository
 CONQUISTAS = [
     (1, "Cores do mar", "Troque o tema do site."),
     (2, "Horizonte aberto", "Esconda o menu lateral."),
-    (3, "Trilhando Novos Caminhos", "Acesse a página de trilhas."),
+    (3, "Conhecendo as regras", "Leia os Termos de Uso."),
     (4, "Segredo das profundezas", "Encontre a página secreta."),
     (5, "Explorador marinho", "Visite a coleção de peixes."),
     (6, "Pesquisador do iNaturalist", "Faça uma pesquisa na coleção que encontre ao menos uma espécie."),
