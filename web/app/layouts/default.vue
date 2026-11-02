@@ -101,7 +101,6 @@ watch(
 
 // conquistas obtidas ao visitar determinadas páginas
 const conquistasPorPagina: Record<string, number> = {
-  '/termos-de-uso': 3,
   '/conquistas/segredo': 4,
   '/colecao': 5,
 }
