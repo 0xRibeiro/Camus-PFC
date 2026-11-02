@@ -39,6 +39,14 @@ export const zAlternativaUpdate = z.object({
 });
 
 /**
+ * CadastroDiaRead
+ */
+export const zCadastroDiaRead = z.object({
+    data: z.iso.date(),
+    quantidade: z.int()
+});
+
+/**
  * ConquistaCreate
  */
 export const zConquistaCreate = z.object({
@@ -55,6 +63,15 @@ export const zConquistaRead = z.object({
     titulo: z.string(),
     descricao: z.string().nullish(),
     imagem_dir: z.string().nullish()
+});
+
+/**
+ * ConquistaResumoRead
+ */
+export const zConquistaResumoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    quantidade: z.int()
 });
 
 /**
@@ -119,6 +136,18 @@ export const zConteudoUpdate = z.object({
 export const zConviteRead = z.object({
     convite: z.string(),
     expira_em_segundos: z.int()
+});
+
+/**
+ * DashboardRead
+ */
+export const zDashboardRead = z.object({
+    total_usuarios: z.int(),
+    total_grupos: z.int(),
+    total_conquistas_concedidas: z.int(),
+    total_trilhas: z.int(),
+    cadastros_por_dia: z.array(zCadastroDiaRead),
+    conquistas_por_quantidade: z.array(zConquistaResumoRead)
 });
 
 /**
@@ -801,6 +830,15 @@ export const zQuestaoUpdateQuestoesIdPatchBody = zQuestaoUpdate;
 export const zQuestaoUpdateQuestoesIdPatchPath = z.object({
     id: z.int()
 });
+
+export const zObterDashboardAdminDashboardGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(30)
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardAdminDashboardGetResponse = zDashboardRead;
 
 export const zAlternativaReadMultiAlternativasGetQuery = z.object({
     offset: z.int().nullish(),

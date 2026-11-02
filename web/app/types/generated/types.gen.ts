@@ -64,6 +64,20 @@ export type AlternativaUpdate = {
 };
 
 /**
+ * CadastroDiaRead
+ */
+export type CadastroDiaRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+};
+
+/**
  * ConquistaCreate
  */
 export type ConquistaCreate = {
@@ -101,6 +115,24 @@ export type ConquistaRead = {
      * Imagem Dir
      */
     imagem_dir?: string | null;
+};
+
+/**
+ * ConquistaResumoRead
+ */
+export type ConquistaResumoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
 };
 
 /**
@@ -230,6 +262,36 @@ export type ConviteRead = {
      * Expira Em Segundos
      */
     expira_em_segundos: number;
+};
+
+/**
+ * DashboardRead
+ */
+export type DashboardRead = {
+    /**
+     * Total Usuarios
+     */
+    total_usuarios: number;
+    /**
+     * Total Grupos
+     */
+    total_grupos: number;
+    /**
+     * Total Conquistas Concedidas
+     */
+    total_conquistas_concedidas: number;
+    /**
+     * Total Trilhas
+     */
+    total_trilhas: number;
+    /**
+     * Cadastros Por Dia
+     */
+    cadastros_por_dia: Array<CadastroDiaRead>;
+    /**
+     * Conquistas Por Quantidade
+     */
+    conquistas_por_quantidade: Array<ConquistaResumoRead>;
 };
 
 /**
@@ -2170,6 +2232,36 @@ export type QuestaoUpdateQuestoesIdPatchResponses = {
      */
     200: unknown;
 };
+
+export type ObterDashboardAdminDashboardGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Dias
+         */
+        dias?: number;
+    };
+    url: '/admin/dashboard';
+};
+
+export type ObterDashboardAdminDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardAdminDashboardGetError = ObterDashboardAdminDashboardGetErrors[keyof ObterDashboardAdminDashboardGetErrors];
+
+export type ObterDashboardAdminDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardRead;
+};
+
+export type ObterDashboardAdminDashboardGetResponse = ObterDashboardAdminDashboardGetResponses[keyof ObterDashboardAdminDashboardGetResponses];
 
 export type AlternativaReadMultiAlternativasGetData = {
     body?: never;
