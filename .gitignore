@@ -22,3 +22,6 @@ devenv.local.yaml
 
 # testes
 .coverage
+
+# imagens enviadas pelo author
+backend/uploads/
