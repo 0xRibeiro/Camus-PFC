@@ -154,10 +154,20 @@
 </template>
 
 <script setup lang="ts">
+import { useConquistasStore } from '~/stores/conquistas'
+
 definePageMeta({ layout: false })
 
 const route = useRoute()
 const auth = useAuthStore()
+const conquistas = useConquistasStore()
+
+// desbloqueia somente se o usuario estiver conectado
+onMounted(async () => {
+  if (!auth.isAuthenticated) return
+
+  await conquistas.desbloquearConquista(3).catch(() => {})
+})
 
 function voltar() {
   if (route.query.from === 'register') {

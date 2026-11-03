@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-dvh items-center justify-center p-4">
+  <div class="flex flex-1 items-center justify-center p-4">
     <UPageCard class="w-full max-w-2xl">
       <div class="space-y-6">
         <div>
