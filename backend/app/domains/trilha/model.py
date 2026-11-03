@@ -1,6 +1,7 @@
 import enum
 
 from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -54,9 +55,11 @@ class Conteudo(Base):
 
     pontos: Mapped[int] = mapped_column(default=0)
 
+    versao: Mapped[int] = mapped_column(default=1)
+
     video_url: Mapped[str | None] = mapped_column(String(500))
 
-    artigo_texto: Mapped[str | None] = mapped_column(Text)
+    artigo_conteudo: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class Questao(Base):
