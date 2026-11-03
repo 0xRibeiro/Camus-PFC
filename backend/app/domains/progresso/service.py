@@ -7,15 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import OrigemLancamento
 from app.domains.pontuacao.service import registrar_lancamento, total_ganho_na_origem
-from app.domains.progresso.model import ConclusaoConteudo
+from app.domains.progresso.model import ConclusaoConteudo, TentativaQuiz
 from app.domains.progresso.repository import ProgressoRepository
 from app.domains.progresso.schema import (
     AlternativaAlunoRead,
     ConclusaoRead,
     ConteudoAlunoRead,
     ConteudoStatusRead,
+    CorrecaoQuestaoRead,
     ModuloAlunoRead,
     QuestaoAlunoRead,
+    RespostaQuizCreate,
+    ResultadoQuizRead,
     TrilhaAlunoRead,
     TrilhaResumoRead,
 )
@@ -347,3 +350,84 @@ async def concluir_conteudo(
     await salvar_conclusao(repo, usuario, conteudo, conclusao)
 
     return ConclusaoRead(xp_ganho=xp_ganho)
+
+
+###### responder quiz
+# corrige no servidor comparando a escolhida com a correta de cada questao
+async def corrigir_quiz(
+    repo: ProgressoRepository, conteudo_id: int, data: RespostaQuizCreate
+) -> list[CorrecaoQuestaoRead]:
+    questoes = await repo.listar_questoes(conteudo_id)
+    if len(questoes) == 0:
+        raise BadRequestException("Esse quiz ainda não tem questões")
+
+    questao_ids = []
+    for questao in questoes:
+        questao_ids.append(questao.id)
+
+    correta_por_questao = {}
+    for alternativa in await repo.listar_alternativas(questao_ids):
+        if alternativa.correta:
+            correta_por_questao[alternativa.questao_id] = alternativa.id
+
+    correcao = []
+    for questao in questoes:
+        escolhida = data.respostas.get(questao.id)
+        correta = correta_por_questao.get(questao.id)
+
+        correcao.append(
+            CorrecaoQuestaoRead(
+                questao_id=questao.id,
+                alternativa_escolhida_id=escolhida,
+                alternativa_correta_id=correta,
+                acertou=escolhida is not None and escolhida == correta,
+            )
+        )
+
+    return correcao
+
+
+async def responder_quiz(
+    db: AsyncSession, conteudo_id: int, usuario: Usuario, data: RespostaQuizCreate
+) -> ResultadoQuizRead:
+    repo = ProgressoRepository(db)
+    conteudo, sequencia, conclusao = await buscar_conteudo_liberado(
+        repo, conteudo_id, usuario
+    )
+
+    if conteudo.tipo != ConteudoTipo.quiz:
+        raise BadRequestException("Só quiz pode ser respondido")
+
+    correcao = await corrigir_quiz(repo, conteudo.id, data)
+
+    acertos = 0
+    for item in correcao:
+        if item.acertou:
+            acertos += 1
+    total = len(correcao)
+
+    # toda tentativa fica salva msm sem ganhar xp
+    await repo.salvar_tentativa(
+        TentativaQuiz(
+            usuario_id=usuario.id,
+            conteudo_id=conteudo.id,
+            versao_conteudo=conteudo.versao,
+            respostas=data.respostas,
+            acertos=acertos,
+            total=total,
+        )
+    )
+
+    # refazer na msm versao so pra estudar n paga
+    xp_ganho = 0
+    if conclusao is None or conclusao.versao_conteudo != conteudo.versao:
+        valor_novo = conteudo.pontos * acertos // total
+        xp_ganho = await pagar_diferenca(db, usuario, conteudo, valor_novo)
+        await salvar_conclusao(repo, usuario, conteudo, conclusao)
+
+    return ResultadoQuizRead(
+        acertos=acertos,
+        total=total,
+        xp_ganho=xp_ganho,
+        correcao=correcao,
+    )

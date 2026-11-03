@@ -6,6 +6,8 @@ from app.domains.progresso import service
 from app.domains.progresso.schema import (
     ConclusaoRead,
     ConteudoAlunoRead,
+    RespostaQuizCreate,
+    ResultadoQuizRead,
     TrilhaAlunoRead,
     TrilhaResumoRead,
 )
@@ -50,3 +52,13 @@ async def concluir_conteudo(
     usuario: Usuario = Depends(get_current_user),
 ) -> ConclusaoRead:
     return await service.concluir_conteudo(db, conteudo_id, usuario)
+
+
+@router.post("/conteudos/{conteudo_id}/responder", response_model=ResultadoQuizRead)
+async def responder_quiz(
+    conteudo_id: int,
+    data: RespostaQuizCreate,
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> ResultadoQuizRead:
+    return await service.responder_quiz(db, conteudo_id, usuario, data)
