@@ -1,15 +1,18 @@
-from fastcrud.exceptions.http_exceptions import NotFoundException
+from fastcrud.exceptions.http_exceptions import ForbiddenException, NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.progresso.model import ConclusaoConteudo
 from app.domains.progresso.repository import ProgressoRepository
 from app.domains.progresso.schema import (
+    AlternativaAlunoRead,
+    ConteudoAlunoRead,
     ConteudoStatusRead,
     ModuloAlunoRead,
+    QuestaoAlunoRead,
     TrilhaAlunoRead,
     TrilhaResumoRead,
 )
-from app.domains.trilha.model import Conteudo, Modulo, Trilha
+from app.domains.trilha.model import Conteudo, ConteudoTipo, Modulo, Trilha
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 
@@ -178,4 +181,99 @@ async def buscar_trilha(
         total=total,
         progresso=calcular_porcentagem(concluidos, total),
         modulos=modulos_aluno,
+    )
+
+
+###### conteudo aberto pelo aluno
+# acha o conteudo e barra se ainda ta bloqueado, serve pra abrir concluir e responder
+async def buscar_conteudo_liberado(
+    repo: ProgressoRepository, conteudo_id: int, usuario: Usuario
+) -> tuple[Conteudo, list[Conteudo], ConclusaoConteudo | None]:
+    conteudo = await repo.buscar_conteudo(conteudo_id)
+    if conteudo is None:
+        raise NotFoundException("Conteúdo não encontrado")
+
+    modulo = await repo.buscar_modulo(conteudo.modulo_id)
+    if modulo is None:
+        raise NotFoundException("Conteúdo não encontrado")
+    await buscar_trilha_visivel(repo, modulo.trilha_id, usuario)
+
+    modulos, sequencia = await carregar_sequencia(repo, modulo.trilha_id)
+    conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
+    status = calcular_status(sequencia, conclusoes)
+
+    if not status[conteudo.id].liberado:
+        raise ForbiddenException("Conclua os conteúdos anteriores primeiro")
+
+    return conteudo, sequencia, conclusoes.get(conteudo.id)
+
+
+def buscar_proximo_id(sequencia: list[Conteudo], conteudo_id: int) -> int | None:
+    for indice in range(len(sequencia) - 1):
+        if sequencia[indice].id == conteudo_id:
+            return sequencia[indice + 1].id
+    return None
+
+
+# monta as questoes com as alternativas de cada uma sem o campo correta
+async def montar_questoes_aluno(
+    repo: ProgressoRepository, conteudo_id: int
+) -> list[QuestaoAlunoRead]:
+    questoes = await repo.listar_questoes(conteudo_id)
+
+    questao_ids = []
+    for questao in questoes:
+        questao_ids.append(questao.id)
+    alternativas = await repo.listar_alternativas(questao_ids)
+
+    questoes_aluno = []
+    for questao in questoes:
+        alternativas_da_questao = []
+        for alternativa in alternativas:
+            if alternativa.questao_id == questao.id:
+                alternativas_da_questao.append(
+                    AlternativaAlunoRead(id=alternativa.id, texto=alternativa.texto)
+                )
+
+        questoes_aluno.append(
+            QuestaoAlunoRead(
+                id=questao.id,
+                ordem=questao.ordem,
+                enunciado=questao.enunciado,
+                alternativas=alternativas_da_questao,
+            )
+        )
+
+    return questoes_aluno
+
+
+async def buscar_conteudo(
+    db: AsyncSession, conteudo_id: int, usuario: Usuario
+) -> ConteudoAlunoRead:
+    repo = ProgressoRepository(db)
+    conteudo, sequencia, conclusao = await buscar_conteudo_liberado(
+        repo, conteudo_id, usuario
+    )
+
+    questoes = []
+    if conteudo.tipo == ConteudoTipo.quiz:
+        questoes = await montar_questoes_aluno(repo, conteudo.id)
+
+    atualizado = False
+    if conclusao is not None and conteudo.versao > conclusao.versao_conteudo:
+        atualizado = True
+
+    return ConteudoAlunoRead(
+        id=conteudo.id,
+        modulo_id=conteudo.modulo_id,
+        titulo=conteudo.titulo,
+        tipo=conteudo.tipo,
+        pontos=conteudo.pontos,
+        versao=conteudo.versao,
+        video_url=conteudo.video_url,
+        artigo_conteudo=conteudo.artigo_conteudo,
+        questoes=questoes,
+        concluido=conclusao is not None,
+        atualizado=atualizado,
+        proximo_conteudo_id=buscar_proximo_id(sequencia, conteudo.id),
     )
