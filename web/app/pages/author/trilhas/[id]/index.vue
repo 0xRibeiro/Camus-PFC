@@ -294,6 +294,14 @@
             />
           </UFormField>
 
+          <!-- marcar ou mudar os pontos sobe a versao e quem ja concluiu pode refazer -->
+          <UCheckbox
+            v-if="modoConteudoModal === 'editar'"
+            v-model="formConteudo.alteracaoSignificativa"
+            label="Alteração significativa"
+            description="Avisa quem já concluiu que o conteúdo mudou. Mudar os pontos já conta como alteração."
+          />
+
           <div class="flex justify-end gap-2">
             <UButton
               color="neutral"
@@ -522,19 +530,19 @@ const savingConteudo = ref(false)
 const modoConteudoModal = ref<'criar' | 'editar'>('criar')
 const moduloAlvo = ref<ModuloRead | null>(null) // usado so no modo criar
 const conteudoEditando = ref<ConteudoRead | null>(null) // usado so no modo editar
-const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10 })
+const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10, alteracaoSignificativa: false })
 
 function abrirCriarConteudo(modulo: ModuloRead) {
   modoConteudoModal.value = 'criar'
   moduloAlvo.value = modulo
-  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10 })
+  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
 function abrirEditarConteudo(conteudo: ConteudoRead) {
   modoConteudoModal.value = 'editar'
   conteudoEditando.value = conteudo
-  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos })
+  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
@@ -566,14 +574,21 @@ async function onSubmitConteudoModal() {
     }
     else if (conteudoEditando.value) {
       const id = conteudoEditando.value.id
+
+      // versao sobe se marcou o checkbox ou se mudou os pontos
+      let versao = conteudoEditando.value.versao
+      if (formConteudo.alteracaoSignificativa || formConteudo.pontos !== conteudoEditando.value.pontos) {
+        versao += 1
+      }
+
       await api(`/conteudos/${id}`, {
         method: 'PATCH',
-        body: { titulo: formConteudo.titulo, pontos: formConteudo.pontos },
+        body: { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao },
       })
       // PATCH do fastcrud n devolve o item, entao atualiza local com o que ja temos
       for (const lista of [conteudos.value, conteudosPorModulo[conteudoEditando.value.modulo_id] ?? []]) {
         const alvo = lista.find(c => c.id === id)
-        if (alvo) Object.assign(alvo, { titulo: formConteudo.titulo, pontos: formConteudo.pontos })
+        if (alvo) Object.assign(alvo, { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao })
       }
     }
     showConteudoModal.value = false

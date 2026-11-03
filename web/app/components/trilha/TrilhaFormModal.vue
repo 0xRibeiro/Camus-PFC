@@ -49,13 +49,37 @@
 
         <UFormField
           name="foto"
-          label="Link da imagem"
+          label="Imagem"
         >
-          <UInput
-            v-model="formState.foto"
-            placeholder="https://..."
-            class="w-full"
-          />
+          <!-- da pra colar um link ou enviar um arquivo, os dois viram url no foto -->
+          <div class="flex gap-2">
+            <UInput
+              v-model="formState.foto"
+              placeholder="Cole um link ou envie um arquivo"
+              class="flex-1"
+            />
+            <input
+              ref="inputFoto"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              class="hidden"
+              @change="onEnviarFoto"
+            >
+            <UButton
+              icon="i-lucide-upload"
+              label="Enviar"
+              color="neutral"
+              variant="outline"
+              :loading="enviandoFoto"
+              @click="inputFoto?.click()"
+            />
+          </div>
+          <p
+            v-if="erroFoto"
+            class="text-xs text-error mt-1"
+          >
+            {{ erroFoto }}
+          </p>
         </UFormField>
 
         <!-- preview da imagem, mesmo componente usado no card da listagem -->
@@ -74,6 +98,7 @@
           type="submit"
           :label="trilha ? 'Salvar' : 'Criar'"
           :loading="saving"
+          :disabled="enviandoFoto"
         />
       </UForm>
     </template>
@@ -152,7 +177,32 @@ watch(open, (isOpen) => {
     formState.foto = ''
     formState.is_active = true
   }
+  erroFoto.value = null
 })
+
+// --- upload da foto ---
+// usa o mesmo envio generico do editor, so pega a url e joga no formState.foto
+const { enviarImagem, mensagemDeErro } = useUploadImagem()
+const inputFoto = useTemplateRef('inputFoto')
+const enviandoFoto = ref(false)
+const erroFoto = ref<string | null>(null)
+
+async function onEnviarFoto(event: Event) {
+  const input = event.target as HTMLInputElement
+  const arquivo = input.files?.[0]
+  if (!arquivo) return
+
+  enviandoFoto.value = true
+  erroFoto.value = null
+  try {
+    formState.foto = await enviarImagem(arquivo)
+  }
+  catch (e) {
+    erroFoto.value = mensagemDeErro(e)
+  }
+  enviandoFoto.value = false
+  input.value = '' // limpa pra conseguir escolher o msm arquivo dnv
+}
 
 // o UForm ja validou tudo (bateu com o formSchema) antes de chamar isso -
 // aqui a gente so repassa os dados validados pro pai via emit

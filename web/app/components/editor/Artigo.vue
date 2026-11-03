@@ -5,6 +5,7 @@ import { TaskList, TaskItem } from '@tiptap/extension-list'
 import { TableKit } from '@tiptap/extension-table'
 import { CellSelection } from '@tiptap/pm/tables'
 import { CodeBlockShiki } from 'tiptap-extension-code-block-shiki'
+import { EspecieInat } from '~/components/editor/EspecieInatExtension'
 import { ImageUpload } from '~/components/editor/ImageUploadExtension'
 
 // o JSON do artigo, quem usa o componente faz o v-model e salva
@@ -17,6 +18,12 @@ const customHandlers = {
     canExecute: (editor: Editor) => editor.can().insertContent({ type: 'imageUpload' }),
     execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'imageUpload' }),
     isActive: (editor: Editor) => editor.isActive('imageUpload'),
+    isDisabled: undefined,
+  },
+  especieInat: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'especieInat' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'especieInat' }),
+    isActive: (editor: Editor) => editor.isActive('especieInat'),
     isDisabled: undefined,
   },
   table: {
@@ -41,6 +48,7 @@ const extensions = computed(() => [
     },
   }),
   Emoji,
+  EspecieInat,
   ImageUpload,
   TableKit,
   TaskList,

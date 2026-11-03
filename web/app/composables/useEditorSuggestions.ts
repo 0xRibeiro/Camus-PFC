@@ -55,6 +55,10 @@ export function useEditorSuggestions<T extends EditorCustomHandlers>() {
     label: 'Image',
     icon: 'i-lucide-image',
   }, {
+    kind: 'especieInat',
+    label: 'Espécie (iNat)',
+    icon: 'i-lucide-fish',
+  }, {
     kind: 'table',
     label: 'Table',
     icon: 'i-lucide-table',

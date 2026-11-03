@@ -13,6 +13,7 @@ const conteudo = ref<ConteudoRead | null>(null)
 const artigo = ref<JSONContent>()
 const loading = ref(true)
 const salvandoArtigo = ref(false)
+const alteracaoSignificativa = ref(false)
 
 async function fetchConteudo() {
   loading.value = true
@@ -32,13 +33,21 @@ onMounted(fetchConteudo)
 /* salvar artigo */
 
 async function onSalvarArtigo() {
+  if (!conteudo.value) return
+
   salvandoArtigo.value = true
   try {
+    // marcou alteracao significativa entao sobe a versao
+    let versao = conteudo.value.versao
+    if (alteracaoSignificativa.value) versao += 1
+
     const api = useApi()
     await api(`/conteudos/${conteudoId}`, {
       method: 'PATCH',
-      body: { artigo_conteudo: artigo.value ?? null },
+      body: { artigo_conteudo: artigo.value ?? null, versao },
     })
+    conteudo.value.versao = versao
+    alteracaoSignificativa.value = false
     toast.add({ title: 'Artigo salvo', color: 'success' })
   }
   catch {
@@ -60,14 +69,22 @@ async function onSalvarArtigo() {
         :to="`/author/trilhas/${trilhaId}`"
       />
 
-      <UButton
+      <div
         v-if="conteudo?.tipo === 'artigo'"
-        icon="i-lucide-save"
-        label="Salvar"
-        color="primary"
-        :loading="salvandoArtigo"
-        @click="onSalvarArtigo"
-      />
+        class="flex items-center gap-4"
+      >
+        <UCheckbox
+          v-model="alteracaoSignificativa"
+          label="Alteração significativa"
+        />
+        <UButton
+          icon="i-lucide-save"
+          label="Salvar"
+          color="primary"
+          :loading="salvandoArtigo"
+          @click="onSalvarArtigo"
+        />
+      </div>
     </div>
 
     <div
@@ -96,12 +113,10 @@ async function onSalvarArtigo() {
         v-model="artigo"
       />
 
-      <p
+      <QuizMontador
         v-else-if="conteudo.tipo === 'quiz'"
-        class="text-sm text-muted text-center py-12"
-      >
-        Montador de quiz em construção.
-      </p>
+        :conteudo-id="conteudo.id"
+      />
     </template>
   </div>
 </template>
