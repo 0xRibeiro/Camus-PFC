@@ -6,7 +6,6 @@ from fastcrud.exceptions.http_exceptions import (
     NotFoundException,
     UnauthorizedException,
 )
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -27,7 +26,8 @@ from app.core.security import (
     validar_refresh_token,
     verificar_password,
 )
-from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
+from app.domains.conquistas.model import Conquista
+from app.domains.conquistas.repository import ConquistaRepository
 from app.domains.usuario.model import AceiteTermos, RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
@@ -46,15 +46,11 @@ async def verificar_aceite_termos(
     db: AsyncSession,
     user_id: int,
 ) -> bool:
-    aceite = await db.scalar(
-        select(AceiteTermos).where(
-            AceiteTermos.usuario_id == user_id,
-            AceiteTermos.termos_versao == TERMOS_VERSAO_ATUAL,
-            AceiteTermos.privacidade_versao == PRIVACIDADE_VERSAO_ATUAL,
-        )
+    return await UsuarioRepository(db).verificou_aceite_termos(
+        user_id,
+        TERMOS_VERSAO_ATUAL,
+        PRIVACIDADE_VERSAO_ATUAL,
     )
-
-    return aceite is not None
 
 async def registrar_aceite_termos(
     db: AsyncSession,
@@ -66,11 +62,7 @@ async def registrar_aceite_termos(
         privacidade_versao=PRIVACIDADE_VERSAO_ATUAL,
     )
 
-    db.add(aceite)
-    await db.commit()
-    await db.refresh(aceite)
-
-    return aceite
+    return await UsuarioRepository(db).registrar_aceite_termos(aceite)
 
 ###### cadastro
 
@@ -259,29 +251,7 @@ async def conceder_conquista(
     user_id: int,
     conquista_id: int,
 ) -> Conquista | None:
-    conquista = await db.get(Conquista, conquista_id)
-
-    if conquista is None:
-        return None
-
-    existente = await db.scalar(
-        select(associacao_conquista_usuario.c.conquista_id).where(
-            associacao_conquista_usuario.c.usuario_id == user_id,
-            associacao_conquista_usuario.c.conquista_id == conquista.id,
-        )
-    )
-
-    if existente is not None:
-        return None
-
-    await db.execute(
-        associacao_conquista_usuario.insert().values(
-            usuario_id=user_id,
-            conquista_id=conquista.id,
-        )
-    )
-    await db.commit()
-    return conquista
+    return await ConquistaRepository(db).conceder(user_id, conquista_id)
 
 
 ###### edicao

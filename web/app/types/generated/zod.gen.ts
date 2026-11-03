@@ -39,6 +39,14 @@ export const zAlternativaUpdate = z.object({
 });
 
 /**
+ * CadastroDiaRead
+ */
+export const zCadastroDiaRead = z.object({
+    data: z.iso.date(),
+    quantidade: z.int()
+});
+
+/**
  * ConquistaCreate
  */
 export const zConquistaCreate = z.object({
@@ -55,6 +63,15 @@ export const zConquistaRead = z.object({
     titulo: z.string(),
     descricao: z.string().nullish(),
     imagem_dir: z.string().nullish()
+});
+
+/**
+ * ConquistaResumoRead
+ */
+export const zConquistaResumoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    quantidade: z.int()
 });
 
 /**
@@ -114,10 +131,53 @@ export const zConteudoUpdate = z.object({
 });
 
 /**
+ * ConviteRead
+ */
+export const zConviteRead = z.object({
+    convite: z.string(),
+    expira_em_segundos: z.int()
+});
+
+/**
+ * DashboardRead
+ */
+export const zDashboardRead = z.object({
+    total_usuarios: z.int(),
+    total_grupos: z.int(),
+    total_conquistas_concedidas: z.int(),
+    total_trilhas: z.int(),
+    cadastros_por_dia: z.array(zCadastroDiaRead),
+    conquistas_por_quantidade: z.array(zConquistaResumoRead)
+});
+
+/**
  * ForgotPasswordInput
  */
 export const zForgotPasswordInput = z.object({
     email: z.email()
+});
+
+/**
+ * GrupoCreate
+ */
+export const zGrupoCreate = z.object({
+    nome: z.string().min(1).max(50)
+});
+
+/**
+ * GrupoEntrar
+ */
+export const zGrupoEntrar = z.object({
+    convite: z.string().length(12)
+});
+
+/**
+ * GrupoRead
+ */
+export const zGrupoRead = z.object({
+    id: z.int(),
+    nome: z.string(),
+    id_dono: z.int()
 });
 
 /**
@@ -131,6 +191,15 @@ export const zLogAuditoriaRead = z.object({
     entidade_id: z.int(),
     alteracoes: z.record(z.string(), z.unknown()),
     criado_em: z.iso.datetime()
+});
+
+/**
+ * MembroGrupoRead
+ */
+export const zMembroGrupoRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    papel: z.enum(['dono', 'membro'])
 });
 
 /**
@@ -762,6 +831,15 @@ export const zQuestaoUpdateQuestoesIdPatchPath = z.object({
     id: z.int()
 });
 
+export const zObterDashboardAdminDashboardGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(30)
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardAdminDashboardGetResponse = zDashboardRead;
+
 export const zAlternativaReadMultiAlternativasGetQuery = z.object({
     offset: z.int().nullish(),
     limit: z.int().nullish(),
@@ -816,3 +894,53 @@ export const zListarLogsAdminAuditoriaGetQuery = z.object({
  * Successful Response
  */
 export const zListarLogsAdminAuditoriaGetResponse = z.array(zLogAuditoriaRead);
+
+/**
+ * Response Listar Grupos Grupos Get
+ *
+ * Successful Response
+ */
+export const zListarGruposGruposGetResponse = z.array(zGrupoRead);
+
+export const zCriarGrupoGruposPostBody = zGrupoCreate;
+
+/**
+ * Successful Response
+ */
+export const zCriarGrupoGruposPostResponse = zGrupoRead;
+
+export const zEntrarGrupoGruposEntrarPostBody = zGrupoEntrar;
+
+/**
+ * Successful Response
+ */
+export const zEntrarGrupoGruposEntrarPostResponse = zGrupoRead;
+
+export const zBuscarGrupoGruposGrupoIdGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarGrupoGruposGrupoIdGetResponse = zGrupoRead;
+
+export const zGerarConviteGruposGrupoIdConvitesPostPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zGerarConviteGruposGrupoIdConvitesPostResponse = zConviteRead;
+
+export const zListarMembrosGruposGrupoIdMembrosGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Membros Grupos  Grupo Id  Membros Get
+ *
+ * Successful Response
+ */
+export const zListarMembrosGruposGrupoIdMembrosGetResponse = z.array(zMembroGrupoRead);

@@ -64,6 +64,20 @@ export type AlternativaUpdate = {
 };
 
 /**
+ * CadastroDiaRead
+ */
+export type CadastroDiaRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+};
+
+/**
  * ConquistaCreate
  */
 export type ConquistaCreate = {
@@ -101,6 +115,24 @@ export type ConquistaRead = {
      * Imagem Dir
      */
     imagem_dir?: string | null;
+};
+
+/**
+ * ConquistaResumoRead
+ */
+export type ConquistaResumoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
 };
 
 /**
@@ -219,6 +251,50 @@ export type ConteudoUpdate = {
 };
 
 /**
+ * ConviteRead
+ */
+export type ConviteRead = {
+    /**
+     * Convite
+     */
+    convite: string;
+    /**
+     * Expira Em Segundos
+     */
+    expira_em_segundos: number;
+};
+
+/**
+ * DashboardRead
+ */
+export type DashboardRead = {
+    /**
+     * Total Usuarios
+     */
+    total_usuarios: number;
+    /**
+     * Total Grupos
+     */
+    total_grupos: number;
+    /**
+     * Total Conquistas Concedidas
+     */
+    total_conquistas_concedidas: number;
+    /**
+     * Total Trilhas
+     */
+    total_trilhas: number;
+    /**
+     * Cadastros Por Dia
+     */
+    cadastros_por_dia: Array<CadastroDiaRead>;
+    /**
+     * Conquistas Por Quantidade
+     */
+    conquistas_por_quantidade: Array<ConquistaResumoRead>;
+};
+
+/**
  * ForgotPasswordInput
  */
 export type ForgotPasswordInput = {
@@ -226,6 +302,44 @@ export type ForgotPasswordInput = {
      * Email
      */
     email: string;
+};
+
+/**
+ * GrupoCreate
+ */
+export type GrupoCreate = {
+    /**
+     * Nome
+     */
+    nome: string;
+};
+
+/**
+ * GrupoEntrar
+ */
+export type GrupoEntrar = {
+    /**
+     * Convite
+     */
+    convite: string;
+};
+
+/**
+ * GrupoRead
+ */
+export type GrupoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Id Dono
+     */
+    id_dono: number;
 };
 
 /**
@@ -269,6 +383,24 @@ export type LogAuditoriaRead = {
      * Criado Em
      */
     criado_em: string;
+};
+
+/**
+ * MembroGrupoRead
+ */
+export type MembroGrupoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Papel
+     */
+    papel: 'dono' | 'membro';
 };
 
 /**
@@ -2101,6 +2233,36 @@ export type QuestaoUpdateQuestoesIdPatchResponses = {
     200: unknown;
 };
 
+export type ObterDashboardAdminDashboardGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Dias
+         */
+        dias?: number;
+    };
+    url: '/admin/dashboard';
+};
+
+export type ObterDashboardAdminDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardAdminDashboardGetError = ObterDashboardAdminDashboardGetErrors[keyof ObterDashboardAdminDashboardGetErrors];
+
+export type ObterDashboardAdminDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardRead;
+};
+
+export type ObterDashboardAdminDashboardGetResponse = ObterDashboardAdminDashboardGetResponses[keyof ObterDashboardAdminDashboardGetResponses];
+
 export type AlternativaReadMultiAlternativasGetData = {
     body?: never;
     path?: never;
@@ -2309,6 +2471,166 @@ export type ListarLogsAdminAuditoriaGetResponses = {
 };
 
 export type ListarLogsAdminAuditoriaGetResponse = ListarLogsAdminAuditoriaGetResponses[keyof ListarLogsAdminAuditoriaGetResponses];
+
+export type ListarGruposGruposGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/grupos';
+};
+
+export type ListarGruposGruposGetResponses = {
+    /**
+     * Response Listar Grupos Grupos Get
+     *
+     * Successful Response
+     */
+    200: Array<GrupoRead>;
+};
+
+export type ListarGruposGruposGetResponse = ListarGruposGruposGetResponses[keyof ListarGruposGruposGetResponses];
+
+export type CriarGrupoGruposPostData = {
+    body: GrupoCreate;
+    path?: never;
+    query?: never;
+    url: '/grupos';
+};
+
+export type CriarGrupoGruposPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CriarGrupoGruposPostError = CriarGrupoGruposPostErrors[keyof CriarGrupoGruposPostErrors];
+
+export type CriarGrupoGruposPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: GrupoRead;
+};
+
+export type CriarGrupoGruposPostResponse = CriarGrupoGruposPostResponses[keyof CriarGrupoGruposPostResponses];
+
+export type EntrarGrupoGruposEntrarPostData = {
+    body: GrupoEntrar;
+    path?: never;
+    query?: never;
+    url: '/grupos/entrar';
+};
+
+export type EntrarGrupoGruposEntrarPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EntrarGrupoGruposEntrarPostError = EntrarGrupoGruposEntrarPostErrors[keyof EntrarGrupoGruposEntrarPostErrors];
+
+export type EntrarGrupoGruposEntrarPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrupoRead;
+};
+
+export type EntrarGrupoGruposEntrarPostResponse = EntrarGrupoGruposEntrarPostResponses[keyof EntrarGrupoGruposEntrarPostResponses];
+
+export type BuscarGrupoGruposGrupoIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}';
+};
+
+export type BuscarGrupoGruposGrupoIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarGrupoGruposGrupoIdGetError = BuscarGrupoGruposGrupoIdGetErrors[keyof BuscarGrupoGruposGrupoIdGetErrors];
+
+export type BuscarGrupoGruposGrupoIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrupoRead;
+};
+
+export type BuscarGrupoGruposGrupoIdGetResponse = BuscarGrupoGruposGrupoIdGetResponses[keyof BuscarGrupoGruposGrupoIdGetResponses];
+
+export type GerarConviteGruposGrupoIdConvitesPostData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/convites';
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostError = GerarConviteGruposGrupoIdConvitesPostErrors[keyof GerarConviteGruposGrupoIdConvitesPostErrors];
+
+export type GerarConviteGruposGrupoIdConvitesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ConviteRead;
+};
+
+export type GerarConviteGruposGrupoIdConvitesPostResponse = GerarConviteGruposGrupoIdConvitesPostResponses[keyof GerarConviteGruposGrupoIdConvitesPostResponses];
+
+export type ListarMembrosGruposGrupoIdMembrosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/membros';
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetError = ListarMembrosGruposGrupoIdMembrosGetErrors[keyof ListarMembrosGruposGrupoIdMembrosGetErrors];
+
+export type ListarMembrosGruposGrupoIdMembrosGetResponses = {
+    /**
+     * Response Listar Membros Grupos  Grupo Id  Membros Get
+     *
+     * Successful Response
+     */
+    200: Array<MembroGrupoRead>;
+};
+
+export type ListarMembrosGruposGrupoIdMembrosGetResponse = ListarMembrosGruposGrupoIdMembrosGetResponses[keyof ListarMembrosGruposGrupoIdMembrosGetResponses];
 
 export type HealthHealthGetData = {
     body?: never;
