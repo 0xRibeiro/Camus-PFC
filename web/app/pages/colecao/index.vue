@@ -223,6 +223,7 @@
 
 <script setup lang="ts">
 import { useConquistasStore } from '~/stores/conquistas'
+import { TAXONS_COLECAO } from '~/utils/inaturalista'
 
 definePageMeta({ middleware: 'role' })
 
@@ -294,7 +295,7 @@ async function carregarPagina(paginaSolicitada: number) {
     const resposta = await inat<RespostaTaxa>('/taxa', {
       query: {
         q: termoPesquisado.value,
-        taxon_id: 47178,
+        taxon_id: TAXONS_COLECAO,
         rank: 'species',
         page: paginaSolicitada,
         per_page: itensPorPagina,
