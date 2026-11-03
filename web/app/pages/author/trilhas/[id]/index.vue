@@ -137,6 +137,12 @@
                   >
                     · sem link ainda
                   </span>
+                  <span
+                    v-if="conteudo.tipo === 'artigo' && !conteudo.artigo_conteudo"
+                    class="text-warning"
+                  >
+                    · sem texto ainda
+                  </span>
                 </p>
               </div>
             </div>
@@ -168,6 +174,15 @@
                 color="neutral"
                 variant="ghost"
                 @click="abrirLinkVideo(conteudo)"
+              />
+              <!-- artigo e quiz abrem a tela de edicao propria -->
+              <UButton
+                v-if="conteudo.tipo !== 'video'"
+                icon="i-lucide-file-pen-line"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :to="`/author/trilhas/${trilhaId}/conteudos/${conteudo.id}`"
               />
               <UButton
                 icon="i-lucide-trash-2"
@@ -250,17 +265,15 @@
               />
               <UButton
                 label="Artigo"
-                color="neutral"
-                variant="outline"
-                disabled
-                title="Em breve"
+                :color="formConteudo.tipo === 'artigo' ? 'primary' : 'neutral'"
+                :variant="formConteudo.tipo === 'artigo' ? 'solid' : 'outline'"
+                @click="formConteudo.tipo = 'artigo'"
               />
               <UButton
                 label="Quiz"
-                color="neutral"
-                variant="outline"
-                disabled
-                title="Em breve"
+                :color="formConteudo.tipo === 'quiz' ? 'primary' : 'neutral'"
+                :variant="formConteudo.tipo === 'quiz' ? 'solid' : 'outline'"
+                @click="formConteudo.tipo = 'quiz'"
               />
             </div>
           </UFormField>
@@ -376,7 +389,7 @@ function voltarParaTrilhas() {
 // pega o ID do video não importa o formato do link (normal, curto, embed, shorts)
 function extrairYoutubeId(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/)
-  return match ? match[1] : null
+  return match?.[1] ?? null
 }
 
 // dois helpers pra n repetir try/catch/ em toda chamada de api:
@@ -542,7 +555,14 @@ async function onSubmitConteudoModal() {
       })
       conteudos.value.push(novo)
       conteudosPorModulo[moduloAlvo.value.id] ??= []
-      conteudosPorModulo[moduloAlvo.value.id].push(novo)
+      conteudosPorModulo[moduloAlvo.value.id]?.push(novo)
+
+      // artigo e quiz ja abrem direto a tela de edicao depois de criar
+      if (novo.tipo !== 'video') {
+        showConteudoModal.value = false
+        await router.push(`/author/trilhas/${trilhaId}/conteudos/${novo.id}`)
+        return
+      }
     }
     else if (conteudoEditando.value) {
       const id = conteudoEditando.value.id

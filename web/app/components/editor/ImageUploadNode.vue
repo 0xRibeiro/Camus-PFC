@@ -4,21 +4,14 @@ import { NodeViewWrapper } from '@tiptap/vue-3'
 
 const props = defineProps<NodeViewProps>()
 
-const fileUploadRef = useTemplateRef('fileUploadRef')
-
 const error = ref<string | null>(null)
 const loading = ref(false)
 
-const { csrf, headerName } = useCsrf()
-const upload = useUpload('/api/upload', {
-  formKey: 'file',
-  multiple: false,
-  headers: { [headerName]: csrf },
-})
+const { enviarImagem, mensagemDeErro } = useUploadImagem()
 
-async function onFileChange() {
-  const target = fileUploadRef.value?.inputRef
-  if (!target) {
+// envia e troca o bloco de upload pela imagem com a url q voltou
+async function onFileChange(arquivo: File | null | undefined) {
+  if (!arquivo) {
     return
   }
 
@@ -26,7 +19,7 @@ async function onFileChange() {
   error.value = null
 
   try {
-    const result = await upload(target)
+    const url = await enviarImagem(arquivo)
 
     const pos = props.getPos()
     if (typeof pos !== 'number') {
@@ -37,11 +30,11 @@ async function onFileChange() {
       .chain()
       .focus()
       .deleteRange({ from: pos, to: pos + 1 })
-      .setImage({ src: result.url || `/images/${result.pathname}` })
+      .setImage({ src: url })
       .run()
   }
   catch (e) {
-    error.value = (e as Error & { data: { message: string } }).data.message || 'An unknown error occurred'
+    error.value = mensagemDeErro(e)
   }
   finally {
     loading.value = false
@@ -52,10 +45,9 @@ async function onFileChange() {
 <template>
   <NodeViewWrapper>
     <UFileUpload
-      ref="fileUploadRef"
-      accept="image/*"
-      label="Upload an image"
-      :description="error || 'SVG, PNG, JPG or GIF (max. 2MB)'"
+      accept="image/png,image/jpeg,image/webp,image/gif"
+      label="Enviar uma imagem"
+      :description="error || 'PNG, JPG, WEBP ou GIF (máx. 10 MB)'"
       :preview="false"
       class="min-h-48"
       :ui="{ description: error ? 'text-error' : '' }"

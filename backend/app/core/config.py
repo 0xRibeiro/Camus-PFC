@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     smtp_user: str
     smtp_password: str  # senha de app
 
-    # upload de imagem dos artigos
+    # upload de imagem generico (artigo, foto de trilha...)
     api_url: str = "http://localhost:8000"  # monta a url completa q volta pro front
     upload_dir: str = "uploads"
     upload_max_bytes: int = 10 * 1024 * 1024  # 10 MB
