@@ -61,10 +61,7 @@
           @click="open = !open"
         />
       </div>
-
-      <div class="flex-1 p-4">
-        <slot />
-      </div>
+      <slot />
     </div>
   </div>
 </template>
@@ -125,8 +122,6 @@ const items = computed<NavigationMenuItem[]>(() => {
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
-    { label: 'Termos de Uso', icon: 'i-lucide-file-text', to: '/termos-de-uso' },
-    { label: 'Política de Privacidade', icon: 'i-lucide-shield-check', to: '/politica-de-privacidade' },
   ]
 
   if (auth.role === 'admin') {

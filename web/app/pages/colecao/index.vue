@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-5xl space-y-6">
+  <div class="mx-auto w-full max-w-6xl space-y-6">
     <UPageHeader
       title="Coleção de peixes"
       description="Procure uma espécie no iNaturalist."
