@@ -9,6 +9,7 @@ from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.grupo.router import router as grupo_router
+from app.domains.pontuacao.router import router as pontuacao_router
 from app.domains.trilha.router import (
     alternativa_router,
     conteudo_router,
@@ -52,6 +53,7 @@ app.include_router(dashboard_router)
 app.include_router(alternativa_router)
 app.include_router(auditoria_router)
 app.include_router(grupo_router)
+app.include_router(pontuacao_router)
 register_exception_handlers(app)
 
 
