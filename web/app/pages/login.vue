@@ -1,6 +1,6 @@
 <template>
-  <div class="flex min-h-dvh items-center justify-center">
-    <!-- flex + items-center + justify-center = centraliza no meio. min-h-dvh = ocupa a altura da tela toda -->
+  <div class="flex flex-1 items-center justify-center">
+    <!-- flex + items-center + justify-center = centraliza no meio. flex-1 = ocupa a altura da tela necessaria -->
     <!-- UPageCard = card pronto do nuxt ui. w-full max-w-md = ocupa td a largura ate uns 448px no max -->
     <UPageCard class="w-full max-w-md">
       <!-- UAuthForm = form de login pronto: desenha os campos, valida com o schema, dispara @submit -->

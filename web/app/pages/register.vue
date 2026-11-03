@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-dvh items-center justify-center">
+  <div class="flex flex-1 items-center justify-center">
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="schema"
