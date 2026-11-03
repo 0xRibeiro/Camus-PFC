@@ -8,8 +8,10 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 
 
+# so diz q o aluno concluiu, o ponto fica no lancamento
 class ConclusaoConteudo(Base):
     __tablename__ = "conclusoes_conteudos"
+    # 1 linha por aluno e conteudo
     __table_args__ = (UniqueConstraint("usuario_id", "conteudo_id"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -18,7 +20,7 @@ class ConclusaoConteudo(Base):
         ForeignKey("usuarios.id", ondelete="CASCADE"), index=True
     )
 
-    conteudo_id: Mapped[int] = mapped_column()
+    conteudo_id: Mapped[int] = mapped_column()  # sem FK pro historico manter
 
     versao_conteudo: Mapped[int] = mapped_column()
 
@@ -27,6 +29,7 @@ class ConclusaoConteudo(Base):
     )
 
 
+# toda tentativa fica guardada, a nota e salva na hora pra n mudar se editarem o quiz
 class TentativaQuiz(Base):
     __tablename__ = "tentativas_quiz"
 
@@ -40,7 +43,7 @@ class TentativaQuiz(Base):
 
     versao_conteudo: Mapped[int] = mapped_column()
 
-    respostas: Mapped[dict] = mapped_column(JSONB)
+    respostas: Mapped[dict] = mapped_column(JSONB)  # {questao_id: alternativa_id}
 
     acertos: Mapped[int] = mapped_column()
 

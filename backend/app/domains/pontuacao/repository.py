@@ -30,10 +30,12 @@ class PontuacaoRepository:
                 LancamentoPontos.origem_id == origem_id,
             )
         )
+        # sum sem nenhuma linha volta None
         if total is None:
             return 0
         return total
 
+    # so xp global sem o de grupo
     async def somar_global(self, usuario_id: int) -> int:
         total = await self.db.scalar(
             select(func.sum(LancamentoPontos.pontos)).where(

@@ -16,6 +16,7 @@ async def registrar_lancamento(
     versao: int = 1,
     grupo_id: int | None = None,
 ) -> LancamentoPontos | None:
+    # so aluno ganha xp e n tem lancamento de 0
     if usuario.role != RoleUsuario.aluno or pontos <= 0:
         return None
 
@@ -29,6 +30,7 @@ async def registrar_lancamento(
         grupo_id=grupo_id,
     )
 
+    # o unique bloqueia pagar 2x a msm versao se chegar 2 requisicao junto
     try:
         return await repo.salvar(lancamento)
     except IntegrityError:
