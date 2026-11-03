@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from app.domains.progresso import service
 from app.domains.progresso.schema import (
+    ConclusaoRead,
     ConteudoAlunoRead,
     TrilhaAlunoRead,
     TrilhaResumoRead,
@@ -40,3 +41,12 @@ async def buscar_conteudo(
     usuario: Usuario = Depends(get_current_user),
 ) -> ConteudoAlunoRead:
     return await service.buscar_conteudo(db, conteudo_id, usuario)
+
+
+@router.post("/conteudos/{conteudo_id}/concluir", response_model=ConclusaoRead)
+async def concluir_conteudo(
+    conteudo_id: int,
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> ConclusaoRead:
+    return await service.concluir_conteudo(db, conteudo_id, usuario)

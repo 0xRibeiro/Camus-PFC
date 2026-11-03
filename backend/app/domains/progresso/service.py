@@ -1,10 +1,17 @@
-from fastcrud.exceptions.http_exceptions import ForbiddenException, NotFoundException
+from fastcrud.exceptions.http_exceptions import (
+    BadRequestException,
+    ForbiddenException,
+    NotFoundException,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.pontuacao.model import OrigemLancamento
+from app.domains.pontuacao.service import registrar_lancamento, total_ganho_na_origem
 from app.domains.progresso.model import ConclusaoConteudo
 from app.domains.progresso.repository import ProgressoRepository
 from app.domains.progresso.schema import (
     AlternativaAlunoRead,
+    ConclusaoRead,
     ConteudoAlunoRead,
     ConteudoStatusRead,
     ModuloAlunoRead,
@@ -277,3 +284,66 @@ async def buscar_conteudo(
         atualizado=atualizado,
         proximo_conteudo_id=buscar_proximo_id(sequencia, conteudo.id),
     )
+
+
+###### concluir e pagar xp
+# paga so oq falta pra chegar no valor novo, nunca tira ponto
+async def pagar_diferenca(
+    db: AsyncSession, usuario: Usuario, conteudo: Conteudo, valor_novo: int
+) -> int:
+    ja_ganho = await total_ganho_na_origem(
+        db, usuario, OrigemLancamento.conteudo, conteudo.id
+    )
+    diferenca = valor_novo - ja_ganho
+
+    lancamento = await registrar_lancamento(
+        db,
+        usuario,
+        OrigemLancamento.conteudo,
+        conteudo.id,
+        diferenca,
+        versao=conteudo.versao,
+    )
+    if lancamento is None:
+        return 0
+    return lancamento.pontos
+
+
+# cria a conclusao na 1 vez e nas proximas so atualiza a versao
+async def salvar_conclusao(
+    repo: ProgressoRepository,
+    usuario: Usuario,
+    conteudo: Conteudo,
+    conclusao: ConclusaoConteudo | None,
+) -> None:
+    if conclusao is None:
+        conclusao = ConclusaoConteudo(
+            usuario_id=usuario.id,
+            conteudo_id=conteudo.id,
+            versao_conteudo=conteudo.versao,
+        )
+    else:
+        conclusao.versao_conteudo = conteudo.versao
+
+    await repo.salvar_conclusao(conclusao)
+
+
+async def concluir_conteudo(
+    db: AsyncSession, conteudo_id: int, usuario: Usuario
+) -> ConclusaoRead:
+    repo = ProgressoRepository(db)
+    conteudo, sequencia, conclusao = await buscar_conteudo_liberado(
+        repo, conteudo_id, usuario
+    )
+
+    if conteudo.tipo == ConteudoTipo.quiz:
+        raise BadRequestException("Quiz é concluído respondendo as questões")
+
+    # ja concluiu essa versao entao n paga de novo
+    if conclusao is not None and conclusao.versao_conteudo == conteudo.versao:
+        return ConclusaoRead(xp_ganho=0)
+
+    xp_ganho = await pagar_diferenca(db, usuario, conteudo, conteudo.pontos)
+    await salvar_conclusao(repo, usuario, conteudo, conclusao)
+
+    return ConclusaoRead(xp_ganho=xp_ganho)
