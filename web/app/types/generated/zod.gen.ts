@@ -309,6 +309,7 @@ export const zLancamentoRead = z.object({
     id: z.int(),
     origem_tipo: zOrigemLancamento,
     origem_id: z.int(),
+    titulo: z.string().nullish(),
     versao: z.int(),
     pontos: z.int(),
     grupo_id: z.int().nullish(),

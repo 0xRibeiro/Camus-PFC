@@ -6,6 +6,11 @@ const props = defineProps<{
   conteudoId: number
 }>()
 
+// avisa a pagina q o quiz mudou no banco, ela decide se sobe a versao
+const emit = defineEmits<{
+  alterou: []
+}>()
+
 const toast = useToast()
 
 // estado local de cada pergunta, id null = ainda n foi pro banco
@@ -183,6 +188,7 @@ async function salvarPergunta(questao: QuestaoLocal, indice: number) {
 
     questao.alterada = false
     toast.add({ title: 'Pergunta salva', color: 'success' })
+    emit('alterou')
   }
   catch {
     toast.add({ title: 'Não foi possível salvar a pergunta', color: 'error' })
@@ -190,9 +196,22 @@ async function salvarPergunta(questao: QuestaoLocal, indice: number) {
   questao.salvando = false
 }
 
-async function excluirPergunta(questao: QuestaoLocal) {
-  if (!confirm('Excluir essa pergunta?')) return
+/* excluir pergunta com modal de confirmacao */
 
+const showDeleteModal = ref(false)
+const excluindo = ref(false)
+const questaoParaExcluir = ref<QuestaoLocal | null>(null)
+
+function pedirExclusao(questao: QuestaoLocal) {
+  questaoParaExcluir.value = questao
+  showDeleteModal.value = true
+}
+
+async function excluirPergunta() {
+  const questao = questaoParaExcluir.value
+  if (!questao) return
+
+  excluindo.value = true
   try {
     if (questao.id !== null) {
       const api = useApi()
@@ -200,10 +219,13 @@ async function excluirPergunta(questao: QuestaoLocal) {
     }
     questoes.value = questoes.value.filter(q => q.chave !== questao.chave)
     await salvarOrdem()
+    if (questao.id !== null) emit('alterou')
+    showDeleteModal.value = false
   }
   catch {
     toast.add({ title: 'Não foi possível excluir a pergunta', color: 'error' })
   }
+  excluindo.value = false
 }
 
 // depois de arrastar ou excluir, regrava a ordem das q ja tao no banco
@@ -290,7 +312,7 @@ async function salvarOrdem() {
               size="xs"
               color="error"
               variant="ghost"
-              @click="excluirPergunta(questao)"
+              @click="pedirExclusao(questao)"
             />
           </div>
 
@@ -355,5 +377,27 @@ async function salvarOrdem() {
         </div>
       </VueDraggable>
     </template>
+
+    <UModal
+      v-model:open="showDeleteModal"
+      title="Excluir pergunta"
+      description="Excluir essa pergunta e as alternativas dela?"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer="{ close }">
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Excluir"
+          color="error"
+          :loading="excluindo"
+          @click="excluirPergunta"
+        />
+      </template>
+    </UModal>
   </div>
 </template>

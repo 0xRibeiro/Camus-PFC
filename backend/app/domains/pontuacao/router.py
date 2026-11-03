@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.domains.pontuacao import service
-from app.domains.pontuacao.model import LancamentoPontos
 from app.domains.pontuacao.schema import LancamentoRead, XpRead
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.service import get_current_user
@@ -23,5 +22,5 @@ async def meu_xp(
 async def meu_extrato(
     db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user),
-) -> list[LancamentoPontos]:
+) -> list[LancamentoRead]:
     return await service.meu_extrato(db, usuario)

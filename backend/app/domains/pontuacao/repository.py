@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
+from app.domains.trilha.model import Conteudo
 
 
 class PontuacaoRepository:
@@ -54,3 +55,12 @@ class PontuacaoRepository:
             .order_by(LancamentoPontos.criado_em.desc())
         )
         return list(resultado.scalars().all())
+
+    async def listar_titulos_conteudos(self, conteudo_ids: list[int]) -> dict[int, str]:
+        resultado = await self.db.execute(
+            select(Conteudo.id, Conteudo.titulo).where(Conteudo.id.in_(conteudo_ids))
+        )
+        titulos = {}
+        for conteudo_id, titulo in resultado.all():
+            titulos[conteudo_id] = titulo
+        return titulos

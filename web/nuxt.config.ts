@@ -17,6 +17,24 @@ export default defineNuxtConfig({
     },
   },
   compatibilityDate: '2025-07-15',
+  vite: {
+    // o bun instalou versoes diferentes do prosemirror aninhadas, isso força todos a usar a da raiz
+    resolve: {
+      dedupe: ['prosemirror-model', 'prosemirror-state', 'prosemirror-transform', 'prosemirror-view'],
+    },
+    optimizeDeps: {
+      // o UEditor importa essas extensoes direto do node_modules, sem isso o prosemirror carrega 2x e o editor quebra
+      include: [
+        '@tiptap/starter-kit',
+        '@tiptap/extension-code',
+        '@tiptap/extension-horizontal-rule',
+        '@tiptap/extension-image',
+        '@tiptap/extension-mention',
+        '@tiptap/extension-placeholder',
+        '@tiptap/markdown',
+      ],
+    },
+  },
   eslint: {
     config: {
       stylistic: true,

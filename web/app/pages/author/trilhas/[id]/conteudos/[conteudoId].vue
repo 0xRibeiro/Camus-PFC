@@ -55,6 +55,25 @@ async function onSalvarArtigo() {
   }
   salvandoArtigo.value = false
 }
+
+/* quiz salva pergunta por pergunta */
+
+// o montador avisa qnd salvou ou excluiu algo, se ta marcado sobe a versao 1 vez
+async function onQuizAlterou() {
+  if (!conteudo.value || !alteracaoSignificativa.value) return
+
+  try {
+    const versao = conteudo.value.versao + 1
+    const api = useApi()
+    await api(`/conteudos/${conteudoId}`, { method: 'PATCH', body: { versao } })
+    conteudo.value.versao = versao
+    alteracaoSignificativa.value = false
+    toast.add({ title: 'Versão do quiz atualizada', color: 'success' })
+  }
+  catch {
+    toast.add({ title: 'Não foi possível atualizar a versão do quiz', color: 'error' })
+  }
+}
 </script>
 
 <template>
@@ -70,14 +89,16 @@ async function onSalvarArtigo() {
       />
 
       <div
-        v-if="conteudo?.tipo === 'artigo'"
+        v-if="conteudo"
         class="flex items-center gap-4"
       >
+        <!-- no quiz vale pro proximo salvar ou excluir de pergunta -->
         <UCheckbox
           v-model="alteracaoSignificativa"
           label="Alteração significativa"
         />
         <UButton
+          v-if="conteudo.tipo === 'artigo'"
           icon="i-lucide-save"
           label="Salvar"
           color="primary"
@@ -116,6 +137,7 @@ async function onSalvarArtigo() {
       <QuizMontador
         v-else-if="conteudo.tipo === 'quiz'"
         :conteudo-id="conteudo.id"
+        @alterou="onQuizAlterou"
       />
     </template>
   </div>

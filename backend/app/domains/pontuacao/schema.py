@@ -15,6 +15,8 @@ class LancamentoRead(BaseModel):
     id: int
     origem_tipo: OrigemLancamento
     origem_id: int
+    # titulo da origem, None se o conteudo foi excluido
+    titulo: str | None = None
     versao: int
     pontos: int
     grupo_id: int | None = None

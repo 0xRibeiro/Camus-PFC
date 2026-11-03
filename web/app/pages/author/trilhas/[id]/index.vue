@@ -356,6 +356,14 @@
             />
           </div>
 
+          <!-- so aparece trocando um link q ja existia, o 1 link n e alteracao -->
+          <UCheckbox
+            v-if="conteudoAlvo?.video_url"
+            v-model="alteracaoVideo"
+            label="Alteração significativa"
+            description="Avisa quem já concluiu que o vídeo mudou."
+          />
+
           <div class="flex justify-end gap-2">
             <UButton
               color="neutral"
@@ -372,6 +380,28 @@
             />
           </div>
         </div>
+      </template>
+    </UModal>
+
+    <UModal
+      v-model:open="showDeleteModal"
+      :title="exclusao?.titulo"
+      :description="exclusao?.descricao"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer="{ close }">
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Excluir"
+          color="error"
+          :loading="excluindo"
+          @click="confirmarExclusao"
+        />
       </template>
     </UModal>
   </div>
@@ -392,12 +422,6 @@ const toast = useToast()
 function voltarParaTrilhas() {
   if (window.history.length > 1) router.back()
   else router.push('/author/trilha')
-}
-
-// pega o ID do video não importa o formato do link (normal, curto, embed, shorts)
-function extrairYoutubeId(url: string): string | null {
-  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/)
-  return match?.[1] ?? null
 }
 
 // dois helpers pra n repetir try/catch/ em toda chamada de api:
@@ -511,16 +535,20 @@ async function onSubmitModulo() {
   })
 }
 
-async function onDeleteModulo(modulo: ModuloRead) {
-  if (!confirm(`Excluir o módulo "${modulo.titulo}"? Isso apaga os conteúdos dele também.`)) return
-  await comErro('Não foi possível excluir o módulo', async () => {
-    const api = useApi()
-    await api(`/modulos/${modulo.id}`, { method: 'DELETE' })
-    modulos.value = modulos.value.filter(m => m.id !== modulo.id)
-    conteudos.value = conteudos.value.filter(c => c.modulo_id !== modulo.id)
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete conteudosPorModulo[modulo.id]
-  })
+function onDeleteModulo(modulo: ModuloRead) {
+  pedirExclusao(
+    'Excluir módulo',
+    `Excluir o módulo "${modulo.titulo}"? Isso apaga os conteúdos dele também.`,
+    'Não foi possível excluir o módulo',
+    async () => {
+      const api = useApi()
+      await api(`/modulos/${modulo.id}`, { method: 'DELETE' })
+      modulos.value = modulos.value.filter(m => m.id !== modulo.id)
+      conteudos.value = conteudos.value.filter(c => c.modulo_id !== modulo.id)
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete conteudosPorModulo[modulo.id]
+    },
+  )
 }
 
 /* conteudo criar + editar no mesmo modal */
@@ -595,15 +623,37 @@ async function onSubmitConteudoModal() {
   })
 }
 
-async function onDeleteConteudo(conteudo: ConteudoRead) {
-  if (!confirm(`Excluir o conteúdo "${conteudo.titulo}"?`)) return
-  await comErro('Não foi possível excluir o conteúdo', async () => {
-    const api = useApi()
-    await api(`/conteudos/${conteudo.id}`, { method: 'DELETE' })
-    conteudos.value = conteudos.value.filter(c => c.id !== conteudo.id)
-    const lista = conteudosPorModulo[conteudo.modulo_id]
-    if (lista) conteudosPorModulo[conteudo.modulo_id] = lista.filter(c => c.id !== conteudo.id)
-  })
+function onDeleteConteudo(conteudo: ConteudoRead) {
+  pedirExclusao(
+    'Excluir conteúdo',
+    `Excluir o conteúdo "${conteudo.titulo}"?`,
+    'Não foi possível excluir o conteúdo',
+    async () => {
+      const api = useApi()
+      await api(`/conteudos/${conteudo.id}`, { method: 'DELETE' })
+      conteudos.value = conteudos.value.filter(c => c.id !== conteudo.id)
+      const lista = conteudosPorModulo[conteudo.modulo_id]
+      if (lista) conteudosPorModulo[conteudo.modulo_id] = lista.filter(c => c.id !== conteudo.id)
+    },
+  )
+}
+
+/* modal de excluir, serve pra modulo e conteudo */
+
+const showDeleteModal = ref(false)
+const excluindo = ref(false)
+// guarda o texto e oq fazer qnd confirmar
+const exclusao = ref<{ titulo: string, descricao: string, erro: string, excluir: () => Promise<void> } | null>(null)
+
+function pedirExclusao(titulo: string, descricao: string, erro: string, excluir: () => Promise<void>) {
+  exclusao.value = { titulo, descricao, erro, excluir }
+  showDeleteModal.value = true
+}
+
+async function confirmarExclusao() {
+  if (!exclusao.value) return
+  await salvando(excluindo, exclusao.value.erro, exclusao.value.excluir)
+  showDeleteModal.value = false
 }
 
 /* inserir link do video */
@@ -612,11 +662,13 @@ const showVideoModal = ref(false)
 const savingVideo = ref(false)
 const conteudoAlvo = ref<ConteudoRead | null>(null)
 const formVideoUrl = ref('')
+const alteracaoVideo = ref(false)
 const youtubeIdPreview = computed(() => extrairYoutubeId(formVideoUrl.value))
 
 function abrirLinkVideo(conteudo: ConteudoRead) {
   conteudoAlvo.value = conteudo
   formVideoUrl.value = conteudo.video_url ?? ''
+  alteracaoVideo.value = false
   showVideoModal.value = true
 }
 
@@ -625,13 +677,16 @@ async function onSubmitVideoUrl() {
   const id = conteudoAlvo.value.id
   const moduloId = conteudoAlvo.value.modulo_id
 
+  let versao = conteudoAlvo.value.versao
+  if (alteracaoVideo.value) versao += 1
+
   await salvando(savingVideo, 'Não foi possível salvar o link do vídeo', async () => {
     const api = useApi()
-    await api(`/conteudos/${id}`, { method: 'PATCH', body: { video_url: formVideoUrl.value } })
+    await api(`/conteudos/${id}`, { method: 'PATCH', body: { video_url: formVideoUrl.value, versao } })
 
     for (const lista of [conteudos.value, conteudosPorModulo[moduloId] ?? []]) {
       const alvo = lista.find(c => c.id === id)
-      if (alvo) alvo.video_url = formVideoUrl.value
+      if (alvo) Object.assign(alvo, { video_url: formVideoUrl.value, versao })
     }
     showVideoModal.value = false
   })

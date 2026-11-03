@@ -538,6 +538,10 @@ export type LancamentoRead = {
      */
     origem_id: number;
     /**
+     * Titulo
+     */
+    titulo?: string | null;
+    /**
      * Versao
      */
     versao: number;

@@ -123,7 +123,7 @@ watch(
 // computed pq precisa recalcular se o auth.role mudar (login/logout, por ex)
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
+    { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' }, // icone da coleção (tive que fazer a rota sem o "ç" e o "~" porque tava dando 404...)
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
