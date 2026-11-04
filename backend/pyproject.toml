@@ -2,7 +2,7 @@
 name = "camus-backend"
 version = "0.1.0"
 description = "backend fastapi do Camus"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.5",
     "email-validator>=2.3.0",
