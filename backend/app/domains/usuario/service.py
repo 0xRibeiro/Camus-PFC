@@ -1,4 +1,8 @@
+import secrets
+from datetime import datetime, timezone
+
 from fastapi import Depends
+
 from fastapi.security import HTTPAuthorizationCredentials
 from fastcrud.exceptions.http_exceptions import (
     DuplicateValueException,
@@ -288,5 +292,19 @@ async def atualizar_usuario_admin(
     return await UsuarioRepository(db).salvar(user)
 
 
+# soft delete: em vez de apagar a linha, sobrescreve os dados pessoais e marca
+# deletado_em. a conta fica inutilizavel (senha trocada por uma aleatoria que
+# ninguem sabe, is_active false) mas o registro continua no banco. o trigger
+# de auditoria pega isso como UPDATE e guarda o antes/depois no logs_auditoria,
+# entao fica provado que a conta existiu e quando foi encerrada
 async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
-    await UsuarioRepository(db).deletar(user)
+    if user.deletado_em is not None:
+        return  # ja tava deletado, n faz nada
+
+    user.username = f"usuario-excluido-{user.id}"
+    user.email = f"usuario-excluido-{user.id}@removido.camus"
+    user.hashed_password = criar_hash(secrets.token_urlsafe(32))
+    user.is_active = False
+    user.deletado_em = datetime.now(timezone.utc)
+
+    await UsuarioRepository(db).salvar(user)

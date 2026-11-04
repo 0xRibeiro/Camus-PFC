@@ -15,7 +15,7 @@ class UsuarioFactory(SQLAlchemyFactory[Usuario]):
     # o polyfactory precisa usa o faker pra regra combinada (email + minimo)
     email = Use(SQLAlchemyFactory.__faker__.email)
     hashed_password = criar_hash(SENHA_PADRAO)
-
+    deletado_em = None
 
 # gera o payload do cadastro (schema) ja passando nas validacoes do schema
 # aceitou_termos valor padrao em True pq o schema recusa False e o teste quebraria antes de ir no service

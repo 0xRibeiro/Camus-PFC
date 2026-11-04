@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.domains.usuario.model import RoleUsuario
@@ -38,6 +40,7 @@ class UsuarioRead(BaseModel):
     email: EmailStr
     is_active: bool
     role: RoleUsuario
+    deletado_em: datetime | None
 
 
 class UsuarioCreate(BaseModel):
