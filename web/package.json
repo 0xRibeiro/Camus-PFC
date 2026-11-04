@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -11,6 +12,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "types:api": "openapi-ts"
+  },
+  "engines": {
+    "node": "22.x"
   },
   "dependencies": {
     "@nuxt/ui": "4.12.0",
