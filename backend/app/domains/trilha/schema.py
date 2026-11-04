@@ -59,7 +59,7 @@ class ConteudoCreate(BaseModel):
     ordem: int = Field(..., ge=0)
     pontos: int = Field(..., ge=0)
     video_url: str | None = Field(default=None, max_length=500)
-    artigo_texto: str | None = None
+    artigo_conteudo: dict | None = None
 
 
 class ConteudoRead(BaseModel):
@@ -71,16 +71,18 @@ class ConteudoRead(BaseModel):
     tipo: ConteudoTipo
     ordem: int
     pontos: int
+    versao: int
     video_url: str | None = None
-    artigo_texto: str | None = None
+    artigo_conteudo: dict | None = None
 
 
 class ConteudoUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     ordem: int | None = Field(default=None, ge=0)
     pontos: int | None = Field(default=None, ge=0)
+    versao: int | None = Field(default=None, ge=1)
     video_url: str | None = Field(default=None, max_length=500)
-    artigo_texto: str | None = None
+    artigo_conteudo: dict | None = None
 
 
 ###### schemas de questao de um conteudo quiz
@@ -100,13 +102,14 @@ class QuestaoRead(BaseModel):
 
 
 class QuestaoUpdate(BaseModel):
-    enunciado: str | None = None
+    ordem: int | None = Field(default=None, ge=0)
+    enunciado: str | None = Field(default=None, min_length=1)
 
 
 ###### schemas de alternativas de uma questao
 class AlternativaCreate(BaseModel):
     questao_id: int
-    texto: str
+    texto: str = Field(..., min_length=1, max_length=200)
     correta: bool = False
 
 
@@ -120,5 +123,5 @@ class AlternativaRead(BaseModel):
 
 
 class AlternativaUpdate(BaseModel):
-    texto: str | None = None
+    texto: str | None = Field(default=None, min_length=1, max_length=200)
     correta: bool | None = None

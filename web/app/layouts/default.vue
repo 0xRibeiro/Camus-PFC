@@ -118,7 +118,7 @@ watch(
 // recalcula os itens do menu quando o papel do usuário mudar
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    { label: 'Trilhas', icon: 'i-lucide-route', to: '/author/trilhas' },
+    { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },

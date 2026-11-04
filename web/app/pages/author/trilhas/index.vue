@@ -11,7 +11,11 @@
         </p>
       </div>
 
-      <UBadge color="secondary" variant="soft" size="xl">
+      <UBadge
+        color="secondary"
+        variant="soft"
+        size="xl"
+      >
         {{ trilhas.length }} trilha{{ trilhas.length === 1 ? '' : 's' }}
       </UBadge>
     </div>
@@ -41,8 +45,14 @@
     </div>
 
     <!-- spinner enquanto busca as trilhas -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
+    <div
+      v-if="loading"
+      class="flex justify-center py-12"
+    >
+      <UIcon
+        name="i-lucide-loader-circle"
+        class="size-6 animate-spin"
+      />
     </div>
 
     <!--
@@ -102,8 +112,18 @@
       :ui="{ footer: 'justify-end' }"
     >
       <template #footer="{ close }">
-        <UButton label="Cancelar" color="neutral" variant="outline" @click="close" />
-        <UButton label="Excluir" color="error" :loading="excluindo" @click="confirmarExclusao" />
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Excluir"
+          color="error"
+          :loading="excluindo"
+          @click="confirmarExclusao"
+        />
       </template>
     </UModal>
   </div>
