@@ -1,1 +1,6 @@
-pagina de editar o conteudo de um conteudo do tipo artigo ou quiz
+<template>
+  <div>
+    <h1>Conteúdo</h1>
+    <p>da certoooo.</p>
+  </div>
+</template>
