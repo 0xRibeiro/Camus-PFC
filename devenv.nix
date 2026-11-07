@@ -13,6 +13,11 @@
 
   languages.typescript.enable = true;
 
+  packages = [
+    pkgs.platformio
+    pkgs.clang-tools
+  ];
+
   languages.python = {
     enable = true;
     venv.enable = true;
