@@ -15,6 +15,9 @@
       </template>
     </UPageHeader>
 
+    <!-- xp, extrato e progresso nas trilhas -->
+    <PontuacaoResumo />
+
     <!-- erro caso as conquistas nao carreguem -->
     <UAlert
       v-if="mensagem_de_erro"

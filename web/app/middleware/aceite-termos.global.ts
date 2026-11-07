@@ -7,8 +7,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Páginas públicas dos documentos
   if (
-    to.path === '/termos-de-uso' ||
-    to.path === '/politica-de-privacidade'
+
+    to.path === '/termos-de-uso'
+    || to.path === '/politica-de-privacidade'
   ) {
     return
   }
@@ -21,7 +22,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (auth.aceiteTermos === null) {
     try {
       await auth.fetchAceiteTermos()
-    } catch {
+    }
+    catch {
       return
     }
   }

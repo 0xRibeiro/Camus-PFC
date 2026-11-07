@@ -11,7 +11,10 @@
       @click="voltarParaTrilhas"
     />
 
-    <div v-if="trilha" class="flex items-start justify-between mb-6">
+    <div
+      v-if="trilha"
+      class="flex items-start justify-between mb-6"
+    >
       <div>
         <p class="text-xs font-medium text-muted uppercase tracking-wide">
           Jornada
@@ -25,18 +28,37 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <UBadge color="neutral" variant="soft" size="lg">
+        <UBadge
+          color="neutral"
+          variant="soft"
+          size="lg"
+        >
           {{ modulos.length }} módulo{{ modulos.length === 1 ? '' : 's' }}
         </UBadge>
-        <UBadge color="neutral" variant="soft" size="lg">
+        <UBadge
+          color="neutral"
+          variant="soft"
+          size="lg"
+        >
           {{ totalConteudos }} conteúdo{{ totalConteudos === 1 ? '' : 's' }}
         </UBadge>
-        <UButton icon="i-lucide-plus" label="Módulo" color="primary" @click="abrirCriarModulo" />
+        <UButton
+          icon="i-lucide-plus"
+          label="Módulo"
+          color="primary"
+          @click="abrirCriarModulo"
+        />
       </div>
     </div>
 
-    <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
+    <div
+      v-if="loading"
+      class="flex justify-center py-12"
+    >
+      <UIcon
+        name="i-lucide-loader-circle"
+        class="size-6 animate-spin"
+      />
     </div>
 
     <!-- arrasta os MODULOS (nao os conteudos, isso ficou so no nivel modulo
@@ -73,10 +95,20 @@
 
           <div class="flex items-center gap-1">
             <UButton
-              icon="i-lucide-plus" size="xs" color="neutral" variant="ghost" label="Conteúdo"
+              icon="i-lucide-plus"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              label="Conteúdo"
               @click="abrirCriarConteudo(modulo)"
             />
-            <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" @click="onDeleteModulo(modulo)" />
+            <UButton
+              icon="i-lucide-trash-2"
+              size="xs"
+              color="error"
+              variant="ghost"
+              @click="onDeleteModulo(modulo)"
+            />
           </div>
         </div>
 
@@ -88,7 +120,10 @@
           >
             <div class="flex items-center gap-3">
               <div class="flex items-center justify-center size-8 rounded-full bg-primary-50 shrink-0">
-                <UIcon :name="tiposInfo[conteudo.tipo].icon" class="size-4 text-primary-600" />
+                <UIcon
+                  :name="tiposInfo[conteudo.tipo].icon"
+                  class="size-4 text-primary-600"
+                />
               </div>
               <div>
                 <p class="text-sm font-medium">
@@ -96,8 +131,17 @@
                 </p>
                 <p class="text-xs text-muted">
                   {{ conteudo.pontos }} pts
-                  <span v-if="conteudo.tipo === 'video' && !conteudo.video_url" class="text-warning">
+                  <span
+                    v-if="conteudo.tipo === 'video' && !conteudo.video_url"
+                    class="text-warning"
+                  >
                     · sem link ainda
+                  </span>
+                  <span
+                    v-if="conteudo.tipo === 'artigo' && !conteudo.artigo_conteudo"
+                    class="text-warning"
+                  >
+                    · sem texto ainda
                   </span>
                 </p>
               </div>
@@ -116,40 +160,84 @@
                 </span>
               </div>
 
-              <UButton icon="i-lucide-pencil" size="xs" color="neutral" variant="ghost" @click="abrirEditarConteudo(conteudo)" />
+              <UButton
+                icon="i-lucide-pencil"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                @click="abrirEditarConteudo(conteudo)"
+              />
               <UButton
                 v-if="conteudo.tipo === 'video'"
                 :icon="conteudo.video_url ? 'i-lucide-play' : 'i-lucide-link'"
-                size="xs" color="neutral" variant="ghost"
+                size="xs"
+                color="neutral"
+                variant="ghost"
                 @click="abrirLinkVideo(conteudo)"
               />
-              <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" @click="onDeleteConteudo(conteudo)" />
+              <!-- artigo e quiz abrem a tela de edicao propria -->
+              <UButton
+                v-if="conteudo.tipo !== 'video'"
+                icon="i-lucide-file-pen-line"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :to="`/author/trilhas/${trilhaId}/conteudos/${conteudo.id}`"
+              />
+              <UButton
+                icon="i-lucide-trash-2"
+                size="xs"
+                color="error"
+                variant="ghost"
+                @click="onDeleteConteudo(conteudo)"
+              />
             </div>
           </div>
         </div>
 
-        <p v-if="contarConteudos(modulo.id) === 0" class="px-4 py-6 text-sm text-muted text-center">
+        <p
+          v-if="contarConteudos(modulo.id) === 0"
+          class="px-4 py-6 text-sm text-muted text-center"
+        >
           Nenhum conteúdo neste módulo ainda.
         </p>
       </div>
     </VueDraggable>
 
-    <p v-if="!loading && modulos.length === 0" class="text-sm text-muted text-center py-12">
+    <p
+      v-if="!loading && modulos.length === 0"
+      class="text-sm text-muted text-center py-12"
+    >
       Nenhum módulo cadastrado. Clique em "Módulo" para começar a jornada.
     </p>
 
     <!-- criar modulo -->
-    <UModal v-model:open="showModuloModal" title="Novo módulo">
+    <UModal
+      v-model:open="showModuloModal"
+      title="Novo módulo"
+    >
       <template #body>
         <div class="space-y-4">
           <UFormField label="Título do módulo">
-            <UInput v-model="formModulo.titulo" placeholder="Ex: Módulo 1" class="w-full" />
+            <UInput
+              v-model="formModulo.titulo"
+              placeholder="Ex: Módulo 1"
+              class="w-full"
+            />
           </UFormField>
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showModuloModal = false" />
             <UButton
-              color="primary" label="Criar" :loading="savingModulo"
-              :disabled="!formModulo.titulo.trim()" @click="onSubmitModulo"
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showModuloModal = false"
+            />
+            <UButton
+              color="primary"
+              label="Criar"
+              :loading="savingModulo"
+              :disabled="!formModulo.titulo.trim()"
+              @click="onSubmitModulo"
             />
           </div>
         </div>
@@ -158,10 +246,16 @@
 
     <!-- criar ou editar conteudo, mesmo modal, so muda o titulo/botao e
     esconde o seletor de tipo quando ta editando (n da pra trocar o tipo depois) -->
-    <UModal v-model:open="showConteudoModal" :title="modoConteudoModal === 'criar' ? 'Novo conteúdo' : 'Editar conteúdo'">
+    <UModal
+      v-model:open="showConteudoModal"
+      :title="modoConteudoModal === 'criar' ? 'Novo conteúdo' : 'Editar conteúdo'"
+    >
       <template #body>
         <div class="space-y-4">
-          <UFormField v-if="modoConteudoModal === 'criar'" label="Tipo">
+          <UFormField
+            v-if="modoConteudoModal === 'criar'"
+            label="Tipo"
+          >
             <div class="flex gap-2">
               <UButton
                 label="Vídeo"
@@ -169,21 +263,52 @@
                 :variant="formConteudo.tipo === 'video' ? 'solid' : 'outline'"
                 @click="formConteudo.tipo = 'video'"
               />
-              <UButton label="Artigo" color="neutral" variant="outline" disabled title="Em breve" />
-              <UButton label="Quiz" color="neutral" variant="outline" disabled title="Em breve" />
+              <UButton
+                label="Artigo"
+                :color="formConteudo.tipo === 'artigo' ? 'primary' : 'neutral'"
+                :variant="formConteudo.tipo === 'artigo' ? 'solid' : 'outline'"
+                @click="formConteudo.tipo = 'artigo'"
+              />
+              <UButton
+                label="Quiz"
+                :color="formConteudo.tipo === 'quiz' ? 'primary' : 'neutral'"
+                :variant="formConteudo.tipo === 'quiz' ? 'solid' : 'outline'"
+                @click="formConteudo.tipo = 'quiz'"
+              />
             </div>
           </UFormField>
 
           <UFormField label="Título">
-            <UInput v-model="formConteudo.titulo" placeholder="Ex: Salinidade: o que é e como medir" class="w-full" />
+            <UInput
+              v-model="formConteudo.titulo"
+              placeholder="Ex: Salinidade: o que é e como medir"
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField label="Pontos">
-            <UInputNumber v-model="formConteudo.pontos" :min="0" class="w-full" />
+            <UInputNumber
+              v-model="formConteudo.pontos"
+              :min="0"
+              class="w-full"
+            />
           </UFormField>
 
+          <!-- marcar ou mudar os pontos sobe a versao e quem ja concluiu pode refazer -->
+          <UCheckbox
+            v-if="modoConteudoModal === 'editar'"
+            v-model="formConteudo.alteracaoSignificativa"
+            label="Alteração significativa"
+            description="Avisa quem já concluiu que o conteúdo mudou. Mudar os pontos já conta como alteração."
+          />
+
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showConteudoModal = false" />
+            <UButton
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showConteudoModal = false"
+            />
             <UButton
               color="primary"
               :label="modoConteudoModal === 'criar' ? 'Criar' : 'Salvar'"
@@ -197,34 +322,86 @@
     </UModal>
 
     <!-- colar e editar link do youtube -->
-    <UModal v-model:open="showVideoModal" title="Link do vídeo">
+    <UModal
+      v-model:open="showVideoModal"
+      title="Link do vídeo"
+    >
       <template #body>
         <div class="space-y-4">
           <UFormField label="URL do YouTube">
-            <UInput v-model="formVideoUrl" placeholder="https://www.youtube.com/watch?v=..." class="w-full" />
-            <p v-if="formVideoUrl && !youtubeIdPreview" class="text-xs text-error mt-1">
+            <UInput
+              v-model="formVideoUrl"
+              placeholder="https://www.youtube.com/watch?v=..."
+              class="w-full"
+            />
+            <p
+              v-if="formVideoUrl && !youtubeIdPreview"
+              class="text-xs text-error mt-1"
+            >
               Não parece ser um link válido do YouTube.
             </p>
           </UFormField>
 
           <!-- se o link for valido, o video ja toca aqui antes de salvar -->
-          <div v-if="youtubeIdPreview" class="aspect-video rounded-lg overflow-hidden border border-default">
+          <div
+            v-if="youtubeIdPreview"
+            class="aspect-video rounded-lg overflow-hidden border border-default"
+          >
             <iframe
               :src="`https://www.youtube.com/embed/${youtubeIdPreview}`"
-              class="w-full h-full" frameborder="0"
+              class="w-full h-full"
+              frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen
             />
           </div>
 
+          <!-- so aparece trocando um link q ja existia, o 1 link n e alteracao -->
+          <UCheckbox
+            v-if="conteudoAlvo?.video_url"
+            v-model="alteracaoVideo"
+            label="Alteração significativa"
+            description="Avisa quem já concluiu que o vídeo mudou."
+          />
+
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancelar" @click="showVideoModal = false" />
             <UButton
-              color="primary" label="Salvar" :loading="savingVideo"
-              :disabled="!youtubeIdPreview" @click="onSubmitVideoUrl"
+              color="neutral"
+              variant="ghost"
+              label="Cancelar"
+              @click="showVideoModal = false"
+            />
+            <UButton
+              color="primary"
+              label="Salvar"
+              :loading="savingVideo"
+              :disabled="!youtubeIdPreview"
+              @click="onSubmitVideoUrl"
             />
           </div>
         </div>
+      </template>
+    </UModal>
+
+    <UModal
+      v-model:open="showDeleteModal"
+      :title="exclusao?.titulo"
+      :description="exclusao?.descricao"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer="{ close }">
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Excluir"
+          color="error"
+          :loading="excluindo"
+          @click="confirmarExclusao"
+        />
       </template>
     </UModal>
   </div>
@@ -245,12 +422,6 @@ const toast = useToast()
 function voltarParaTrilhas() {
   if (window.history.length > 1) router.back()
   else router.push('/author/trilha')
-}
-
-// pega o ID do video não importa o formato do link (normal, curto, embed, shorts)
-function extrairYoutubeId(url: string): string | null {
-  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/)
-  return match ? match[1] : null
 }
 
 // dois helpers pra n repetir try/catch/ em toda chamada de api:
@@ -364,16 +535,20 @@ async function onSubmitModulo() {
   })
 }
 
-async function onDeleteModulo(modulo: ModuloRead) {
-  if (!confirm(`Excluir o módulo "${modulo.titulo}"? Isso apaga os conteúdos dele também.`)) return
-  await comErro('Não foi possível excluir o módulo', async () => {
-    const api = useApi()
-    await api(`/modulos/${modulo.id}`, { method: 'DELETE' })
-    modulos.value = modulos.value.filter(m => m.id !== modulo.id)
-    conteudos.value = conteudos.value.filter(c => c.modulo_id !== modulo.id)
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete conteudosPorModulo[modulo.id]
-  })
+function onDeleteModulo(modulo: ModuloRead) {
+  pedirExclusao(
+    'Excluir módulo',
+    `Excluir o módulo "${modulo.titulo}"? Isso apaga os conteúdos dele também.`,
+    'Não foi possível excluir o módulo',
+    async () => {
+      const api = useApi()
+      await api(`/modulos/${modulo.id}`, { method: 'DELETE' })
+      modulos.value = modulos.value.filter(m => m.id !== modulo.id)
+      conteudos.value = conteudos.value.filter(c => c.modulo_id !== modulo.id)
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete conteudosPorModulo[modulo.id]
+    },
+  )
 }
 
 /* conteudo criar + editar no mesmo modal */
@@ -383,19 +558,19 @@ const savingConteudo = ref(false)
 const modoConteudoModal = ref<'criar' | 'editar'>('criar')
 const moduloAlvo = ref<ModuloRead | null>(null) // usado so no modo criar
 const conteudoEditando = ref<ConteudoRead | null>(null) // usado so no modo editar
-const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10 })
+const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10, alteracaoSignificativa: false })
 
 function abrirCriarConteudo(modulo: ModuloRead) {
   modoConteudoModal.value = 'criar'
   moduloAlvo.value = modulo
-  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10 })
+  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
 function abrirEditarConteudo(conteudo: ConteudoRead) {
   modoConteudoModal.value = 'editar'
   conteudoEditando.value = conteudo
-  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos })
+  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
@@ -416,33 +591,69 @@ async function onSubmitConteudoModal() {
       })
       conteudos.value.push(novo)
       conteudosPorModulo[moduloAlvo.value.id] ??= []
-      conteudosPorModulo[moduloAlvo.value.id].push(novo)
+      conteudosPorModulo[moduloAlvo.value.id]?.push(novo)
+
+      // artigo e quiz ja abrem direto a tela de edicao depois de criar
+      if (novo.tipo !== 'video') {
+        showConteudoModal.value = false
+        await router.push(`/author/trilhas/${trilhaId}/conteudos/${novo.id}`)
+        return
+      }
     }
     else if (conteudoEditando.value) {
       const id = conteudoEditando.value.id
+
+      // versao sobe se marcou o checkbox ou se mudou os pontos
+      let versao = conteudoEditando.value.versao
+      if (formConteudo.alteracaoSignificativa || formConteudo.pontos !== conteudoEditando.value.pontos) {
+        versao += 1
+      }
+
       await api(`/conteudos/${id}`, {
         method: 'PATCH',
-        body: { titulo: formConteudo.titulo, pontos: formConteudo.pontos },
+        body: { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao },
       })
       // PATCH do fastcrud n devolve o item, entao atualiza local com o que ja temos
       for (const lista of [conteudos.value, conteudosPorModulo[conteudoEditando.value.modulo_id] ?? []]) {
         const alvo = lista.find(c => c.id === id)
-        if (alvo) Object.assign(alvo, { titulo: formConteudo.titulo, pontos: formConteudo.pontos })
+        if (alvo) Object.assign(alvo, { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao })
       }
     }
     showConteudoModal.value = false
   })
 }
 
-async function onDeleteConteudo(conteudo: ConteudoRead) {
-  if (!confirm(`Excluir o conteúdo "${conteudo.titulo}"?`)) return
-  await comErro('Não foi possível excluir o conteúdo', async () => {
-    const api = useApi()
-    await api(`/conteudos/${conteudo.id}`, { method: 'DELETE' })
-    conteudos.value = conteudos.value.filter(c => c.id !== conteudo.id)
-    const lista = conteudosPorModulo[conteudo.modulo_id]
-    if (lista) conteudosPorModulo[conteudo.modulo_id] = lista.filter(c => c.id !== conteudo.id)
-  })
+function onDeleteConteudo(conteudo: ConteudoRead) {
+  pedirExclusao(
+    'Excluir conteúdo',
+    `Excluir o conteúdo "${conteudo.titulo}"?`,
+    'Não foi possível excluir o conteúdo',
+    async () => {
+      const api = useApi()
+      await api(`/conteudos/${conteudo.id}`, { method: 'DELETE' })
+      conteudos.value = conteudos.value.filter(c => c.id !== conteudo.id)
+      const lista = conteudosPorModulo[conteudo.modulo_id]
+      if (lista) conteudosPorModulo[conteudo.modulo_id] = lista.filter(c => c.id !== conteudo.id)
+    },
+  )
+}
+
+/* modal de excluir, serve pra modulo e conteudo */
+
+const showDeleteModal = ref(false)
+const excluindo = ref(false)
+// guarda o texto e oq fazer qnd confirmar
+const exclusao = ref<{ titulo: string, descricao: string, erro: string, excluir: () => Promise<void> } | null>(null)
+
+function pedirExclusao(titulo: string, descricao: string, erro: string, excluir: () => Promise<void>) {
+  exclusao.value = { titulo, descricao, erro, excluir }
+  showDeleteModal.value = true
+}
+
+async function confirmarExclusao() {
+  if (!exclusao.value) return
+  await salvando(excluindo, exclusao.value.erro, exclusao.value.excluir)
+  showDeleteModal.value = false
 }
 
 /* inserir link do video */
@@ -451,11 +662,13 @@ const showVideoModal = ref(false)
 const savingVideo = ref(false)
 const conteudoAlvo = ref<ConteudoRead | null>(null)
 const formVideoUrl = ref('')
+const alteracaoVideo = ref(false)
 const youtubeIdPreview = computed(() => extrairYoutubeId(formVideoUrl.value))
 
 function abrirLinkVideo(conteudo: ConteudoRead) {
   conteudoAlvo.value = conteudo
   formVideoUrl.value = conteudo.video_url ?? ''
+  alteracaoVideo.value = false
   showVideoModal.value = true
 }
 
@@ -464,13 +677,16 @@ async function onSubmitVideoUrl() {
   const id = conteudoAlvo.value.id
   const moduloId = conteudoAlvo.value.modulo_id
 
+  let versao = conteudoAlvo.value.versao
+  if (alteracaoVideo.value) versao += 1
+
   await salvando(savingVideo, 'Não foi possível salvar o link do vídeo', async () => {
     const api = useApi()
-    await api(`/conteudos/${id}`, { method: 'PATCH', body: { video_url: formVideoUrl.value } })
+    await api(`/conteudos/${id}`, { method: 'PATCH', body: { video_url: formVideoUrl.value, versao } })
 
     for (const lista of [conteudos.value, conteudosPorModulo[moduloId] ?? []]) {
       const alvo = lista.find(c => c.id === id)
-      if (alvo) alvo.video_url = formVideoUrl.value
+      if (alvo) Object.assign(alvo, { video_url: formVideoUrl.value, versao })
     }
     showVideoModal.value = false
   })

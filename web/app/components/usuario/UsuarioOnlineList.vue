@@ -6,11 +6,17 @@
       </p>
     </template>
 
-    <p v-if="!loading && usuarios.length === 0" class="text-sm text-muted">
+    <p
+      v-if="!loading && usuarios.length === 0"
+      class="text-sm text-muted"
+    >
       Ninguém online no momento.
     </p>
 
-    <div v-else class="flex flex-wrap gap-2">
+    <div
+      v-else
+      class="flex flex-wrap gap-2"
+    >
       <UBadge
         v-for="usuario in usuarios"
         :key="usuario.id"

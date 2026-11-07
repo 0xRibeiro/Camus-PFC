@@ -12,11 +12,19 @@ export const zAcaoAuditoria = z.enum([
 ]);
 
 /**
+ * AlternativaAlunoRead
+ */
+export const zAlternativaAlunoRead = z.object({
+    id: z.int(),
+    texto: z.string()
+});
+
+/**
  * AlternativaCreate
  */
 export const zAlternativaCreate = z.object({
     questao_id: z.int(),
-    texto: z.string(),
+    texto: z.string().min(1).max(200),
     correta: z.boolean().optional().default(false)
 });
 
@@ -34,8 +42,15 @@ export const zAlternativaRead = z.object({
  * AlternativaUpdate
  */
 export const zAlternativaUpdate = z.object({
-    texto: z.string().nullish(),
+    texto: z.string().min(1).max(200).nullish(),
     correta: z.boolean().nullish()
+});
+
+/**
+ * Body_enviar_imagem_imagens_post
+ */
+export const zBodyEnviarImagemImagensPost = z.object({
+    file: z.string()
 });
 
 /**
@@ -44,6 +59,13 @@ export const zAlternativaUpdate = z.object({
 export const zCadastroDiaRead = z.object({
     data: z.iso.date(),
     quantidade: z.int()
+});
+
+/**
+ * ConclusaoRead
+ */
+export const zConclusaoRead = z.object({
+    xp_ganho: z.int()
 });
 
 /**
@@ -102,7 +124,7 @@ export const zConteudoCreate = z.object({
     ordem: z.int().gte(0),
     pontos: z.int().gte(0),
     video_url: z.string().max(500).nullish(),
-    artigo_texto: z.string().nullish()
+    artigo_conteudo: z.record(z.string(), z.unknown()).nullish()
 });
 
 /**
@@ -115,8 +137,24 @@ export const zConteudoRead = z.object({
     tipo: zConteudoTipo,
     ordem: z.int(),
     pontos: z.int(),
+    versao: z.int(),
     video_url: z.string().nullish(),
-    artigo_texto: z.string().nullish()
+    artigo_conteudo: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
+ * ConteudoStatusRead
+ */
+export const zConteudoStatusRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    tipo: zConteudoTipo,
+    ordem: z.int(),
+    pontos: z.int(),
+    versao: z.int(),
+    concluido: z.boolean(),
+    liberado: z.boolean(),
+    atualizado: z.boolean()
 });
 
 /**
@@ -126,8 +164,9 @@ export const zConteudoUpdate = z.object({
     titulo: z.string().min(1).max(100).nullish(),
     ordem: z.int().gte(0).nullish(),
     pontos: z.int().gte(0).nullish(),
+    versao: z.int().gte(1).nullish(),
     video_url: z.string().max(500).nullish(),
-    artigo_texto: z.string().nullish()
+    artigo_conteudo: z.record(z.string(), z.unknown()).nullish()
 });
 
 /**
@@ -136,6 +175,16 @@ export const zConteudoUpdate = z.object({
 export const zConviteRead = z.object({
     convite: z.string(),
     expira_em_segundos: z.int()
+});
+
+/**
+ * CorrecaoQuestaoRead
+ */
+export const zCorrecaoQuestaoRead = z.object({
+    questao_id: z.int(),
+    alternativa_escolhida_id: z.int().nullish(),
+    alternativa_correta_id: z.int().nullish(),
+    acertou: z.boolean()
 });
 
 /**
@@ -181,6 +230,13 @@ export const zGrupoRead = z.object({
 });
 
 /**
+ * ImagemRead
+ */
+export const zImagemRead = z.object({
+    url: z.string()
+});
+
+/**
  * LogAuditoriaRead
  */
 export const zLogAuditoriaRead = z.object({
@@ -200,6 +256,18 @@ export const zMembroGrupoRead = z.object({
     id: z.int(),
     username: z.string(),
     papel: z.enum(['dono', 'membro'])
+});
+
+/**
+ * ModuloAlunoRead
+ */
+export const zModuloAlunoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    ordem: z.int(),
+    concluidos: z.int(),
+    total: z.int(),
+    conteudos: z.array(zConteudoStatusRead)
 });
 
 /**
@@ -230,6 +298,53 @@ export const zModuloUpdate = z.object({
 });
 
 /**
+ * OrigemLancamento
+ */
+export const zOrigemLancamento = z.enum(['conteudo']);
+
+/**
+ * LancamentoRead
+ */
+export const zLancamentoRead = z.object({
+    id: z.int(),
+    origem_tipo: zOrigemLancamento,
+    origem_id: z.int(),
+    titulo: z.string().nullish(),
+    versao: z.int(),
+    pontos: z.int(),
+    grupo_id: z.int().nullish(),
+    criado_em: z.iso.datetime()
+});
+
+/**
+ * QuestaoAlunoRead
+ */
+export const zQuestaoAlunoRead = z.object({
+    id: z.int(),
+    ordem: z.int(),
+    enunciado: z.string(),
+    alternativas: z.array(zAlternativaAlunoRead)
+});
+
+/**
+ * ConteudoAlunoRead
+ */
+export const zConteudoAlunoRead = z.object({
+    id: z.int(),
+    modulo_id: z.int(),
+    titulo: z.string(),
+    tipo: zConteudoTipo,
+    pontos: z.int(),
+    versao: z.int(),
+    video_url: z.string().nullish(),
+    artigo_conteudo: z.record(z.string(), z.unknown()).nullish(),
+    questoes: z.array(zQuestaoAlunoRead),
+    concluido: z.boolean(),
+    atualizado: z.boolean(),
+    proximo_conteudo_id: z.int().nullish()
+});
+
+/**
  * QuestaoCreate
  */
 export const zQuestaoCreate = z.object({
@@ -252,7 +367,8 @@ export const zQuestaoRead = z.object({
  * QuestaoUpdate
  */
 export const zQuestaoUpdate = z.object({
-    enunciado: z.string().nullish()
+    ordem: z.int().gte(0).nullish(),
+    enunciado: z.string().min(1).nullish()
 });
 
 /**
@@ -272,6 +388,23 @@ export const zResetPasswordInput = z.object({
 });
 
 /**
+ * RespostaQuizCreate
+ */
+export const zRespostaQuizCreate = z.object({
+    respostas: z.record(z.string(), z.int())
+});
+
+/**
+ * ResultadoQuizRead
+ */
+export const zResultadoQuizRead = z.object({
+    acertos: z.int(),
+    total: z.int(),
+    xp_ganho: z.int(),
+    correcao: z.array(zCorrecaoQuestaoRead)
+});
+
+/**
  * RoleUsuario
  */
 export const zRoleUsuario = z.enum([
@@ -286,6 +419,21 @@ export const zRoleUsuario = z.enum([
 export const zTokenPair = z.object({
     access_token: z.string(),
     refresh_token: z.string()
+});
+
+/**
+ * TrilhaAlunoRead
+ */
+export const zTrilhaAlunoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    foto: z.string().nullish(),
+    tag: z.string().nullish(),
+    concluidos: z.int(),
+    total: z.int(),
+    progresso: z.int(),
+    modulos: z.array(zModuloAlunoRead)
 });
 
 /**
@@ -308,6 +456,20 @@ export const zTrilhaRead = z.object({
     foto: z.string().nullish(),
     tag: z.string().nullish(),
     is_active: z.boolean()
+});
+
+/**
+ * TrilhaResumoRead
+ */
+export const zTrilhaResumoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    foto: z.string().nullish(),
+    tag: z.string().nullish(),
+    concluidos: z.int(),
+    total: z.int(),
+    progresso: z.int()
 });
 
 /**
@@ -396,6 +558,13 @@ export const zValidationError = z.object({
  */
 export const zHttpValidationError = z.object({
     detail: z.array(zValidationError).optional()
+});
+
+/**
+ * XpRead
+ */
+export const zXpRead = z.object({
+    xp_total: z.int()
 });
 
 /**
@@ -944,3 +1113,67 @@ export const zListarMembrosGruposGrupoIdMembrosGetPath = z.object({
  * Successful Response
  */
 export const zListarMembrosGruposGrupoIdMembrosGetResponse = z.array(zMembroGrupoRead);
+
+/**
+ * Successful Response
+ */
+export const zMeuXpPontuacaoXpGetResponse = zXpRead;
+
+/**
+ * Response Meu Extrato Pontuacao Extrato Get
+ *
+ * Successful Response
+ */
+export const zMeuExtratoPontuacaoExtratoGetResponse = z.array(zLancamentoRead);
+
+/**
+ * Response Listar Trilhas Progresso Trilhas Get
+ *
+ * Successful Response
+ */
+export const zListarTrilhasProgressoTrilhasGetResponse = z.array(zTrilhaResumoRead);
+
+export const zBuscarTrilhaProgressoTrilhasTrilhaIdGetPath = z.object({
+    trilha_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarTrilhaProgressoTrilhasTrilhaIdGetResponse = zTrilhaAlunoRead;
+
+export const zBuscarConteudoProgressoConteudosConteudoIdGetPath = z.object({
+    conteudo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarConteudoProgressoConteudosConteudoIdGetResponse = zConteudoAlunoRead;
+
+export const zConcluirConteudoProgressoConteudosConteudoIdConcluirPostPath = z.object({
+    conteudo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zConcluirConteudoProgressoConteudosConteudoIdConcluirPostResponse = zConclusaoRead;
+
+export const zResponderQuizProgressoConteudosConteudoIdResponderPostBody = zRespostaQuizCreate;
+
+export const zResponderQuizProgressoConteudosConteudoIdResponderPostPath = z.object({
+    conteudo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResponderQuizProgressoConteudosConteudoIdResponderPostResponse = zResultadoQuizRead;
+
+export const zEnviarImagemImagensPostBody = zBodyEnviarImagemImagensPost;
+
+/**
+ * Successful Response
+ */
+export const zEnviarImagemImagensPostResponse = zImagemRead;
