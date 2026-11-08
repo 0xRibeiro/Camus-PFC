@@ -29,6 +29,14 @@ class Usuario(Base):
 
     role: Mapped[RoleUsuario] = mapped_column(default=RoleUsuario.aluno)  # default aluno se n definir
 
+    # soft delete: fica null enquanto a conta ta normal. quando o usuario
+    # pede a exclusao, marcamos a data aqui em vez de dar DELETE na linha.
+    # o registro continua no banco (o trigger de auditoria pega como UPDATE)
+    # mas os dados pessoais sao anonimizados pelo service
+    deletado_em: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+
     minhas_conquistas = relationship(
         "Conquista",
         secondary="associacao_conquista_usuario"

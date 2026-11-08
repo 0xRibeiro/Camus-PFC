@@ -1,3 +1,8 @@
+
+from datetime import datetime, timezone
+
+from app.domains.usuario.model import RoleUsuario
+
 from tests.domains.usuario.factories import (
     UsuarioCreateFactory,
     UsuarioFactory,
@@ -96,3 +101,39 @@ async def test_register_sucesso(client, repo):
     assert resposta.status_code == 201
     assert "password" not in resposta.json()
     assert "hashed_password" not in resposta.json()
+
+
+###### soft delete (LGPD: exclusão de conta sem apagar a linha do banco)
+
+
+async def test_deletar_me_faz_soft_delete(client, repo, usuario_logado):
+    resposta = await client.delete("/usuarios/me")
+
+    assert resposta.status_code == 204
+    assert usuario_logado.deletado_em is not None
+    assert usuario_logado.is_active is False
+    assert usuario_logado.username == f"usuario-excluido-{usuario_logado.id}"
+    assert usuario_logado.email == f"usuario-excluido-{usuario_logado.id}@removido.camus"
+    repo.salvar.assert_awaited_once_with(usuario_logado)
+
+
+async def test_deletar_me_e_idempotente(client, repo, usuario_logado):
+    usuario_logado.deletado_em = datetime.now(timezone.utc)
+
+    resposta = await client.delete("/usuarios/me")
+
+    assert resposta.status_code == 204
+    repo.salvar.assert_not_called()
+
+
+async def test_admin_deletar_usuario_faz_soft_delete(client, repo, usuario_logado):
+    usuario_logado.role = RoleUsuario.admin
+    alvo = UsuarioFactory.build()
+    repo.buscar.return_value = alvo
+
+    resposta = await client.delete(f"/admin/usuarios/{alvo.id}")
+
+    assert resposta.status_code == 204
+    assert alvo.deletado_em is not None
+    assert alvo.is_active is False
+    repo.salvar.assert_awaited_once_with(alvo)
