@@ -714,6 +714,18 @@ export type UsuarioRead = {
      */
     is_active: boolean;
     role: RoleUsuario;
+    /**
+     * Deletado Em
+     */
+    deletado_em: string | null;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
 };
 
 /**
@@ -754,6 +766,14 @@ export type UsuarioUpdate = {
      * Password
      */
     password?: string | null;
+    /**
+     * Avatar
+     */
+    avatar?: string | null;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo?: string | null;
 };
 
 /**
@@ -1149,6 +1169,24 @@ export type ResetPasswordAuthResetPasswordPostResponses = {
 };
 
 export type ResetPasswordAuthResetPasswordPostResponse = ResetPasswordAuthResetPasswordPostResponses[keyof ResetPasswordAuthResetPasswordPostResponses];
+
+export type ListarAvataresAvataresGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/avatares';
+};
+
+export type ListarAvataresAvataresGetResponses = {
+    /**
+     * Response Listar Avatares Avatares Get
+     *
+     * Successful Response
+     */
+    200: Array<string>;
+};
+
+export type ListarAvataresAvataresGetResponse = ListarAvataresAvataresGetResponses[keyof ListarAvataresAvataresGetResponses];
 
 export type DeleteMeUsuariosMeDeleteData = {
     body?: never;
