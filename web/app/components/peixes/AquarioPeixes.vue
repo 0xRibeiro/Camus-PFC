@@ -42,7 +42,9 @@
             <span
               aria-hidden="true"
               class="block text-3xl"
-            >🐠</span>
+            >
+              {{ emojisPorEspecie[peixe.especie] ?? '🐟' }}
+            </span>
 
             <p class="break-words font-medium">
               {{ peixe.nome }}
@@ -80,7 +82,7 @@
         >
           <USelect
             v-model="formulario.especie"
-            :items="zEspecie.options"
+            :items="opcoesEspecie"
             placeholder="Selecione uma espécie"
             class="w-full"
           />
@@ -100,7 +102,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { PeixeCreate, PeixeRead } from '~/types/generated'
-import { zEspecie, zPeixeCreate } from '~/types/generated/zod.gen'
+import { zPeixeCreate } from '~/types/generated/zod.gen'
 
 const props = defineProps<{ aquarioId: number }>()
 
@@ -110,6 +112,16 @@ const toast = useToast()
 const carregando = ref(true)
 const cadastrando = ref(false)
 const peixes = ref<PeixeRead[] | null>(null)
+
+const opcoesEspecie = zPeixeCreate.shape.especie.options
+
+const emojisPorEspecie: Partial<Record<PeixeRead['especie'], string>> = {
+  'Peixe Dourado': '🎏',
+  'Peixe Betta': '🐡',
+  'Peixe Palhaço': '🐠',
+  'Peixe Anjo': '🦈',
+  'Peixe Neon': '🐟',
+}
 
 const formulario = reactive({
   nome: '',
