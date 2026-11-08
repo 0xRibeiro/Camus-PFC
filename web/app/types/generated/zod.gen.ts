@@ -220,8 +220,12 @@ export const zDashboardRead = z.object({
  * Especie
  */
 export const zEspecie = z.enum([
+    'Peixe Dourado',
+    'Peixe Betta',
+    'Peixe Palhaço',
+    'Peixe Anjo',
+    'Peixe Neon',
     'Donzela chromis verde',
-    'Peixe-palhaço comum',
     'Cardinal banggai',
     'Anthias cauda de lira',
     'Bodião limpador'
@@ -349,16 +353,22 @@ export const zLancamentoRead = z.object({
  */
 export const zPeixeCreate = z.object({
     nome: z.string().min(1).max(50),
-    especie: zEspecie
+    especie: z.enum([
+        'Peixe Dourado',
+        'Peixe Betta',
+        'Peixe Palhaço',
+        'Peixe Anjo',
+        'Peixe Neon'
+    ])
 });
 
 /**
  * PeixeRead
  */
 export const zPeixeRead = z.object({
+    id: z.int(),
     nome: z.string(),
-    especie: zEspecie,
-    id: z.int()
+    especie: zEspecie
 });
 
 /**
@@ -1144,6 +1154,15 @@ export const zCadastrarPeixeAquariosAquarioIdPeixesPostPath = z.object({
  * Successful Response
  */
 export const zCadastrarPeixeAquariosAquarioIdPeixesPostResponse = zPeixeRead;
+
+export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
 
 /**
  * Response Listar Grupos Grupos Get

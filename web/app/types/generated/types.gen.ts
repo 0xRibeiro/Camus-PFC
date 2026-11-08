@@ -491,7 +491,7 @@ export type DashboardRead = {
 /**
  * Especie
  */
-export type Especie = 'Donzela chromis verde' | 'Peixe-palhaço comum' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
+export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
 
 /**
  * ForgotPasswordInput
@@ -744,7 +744,10 @@ export type PeixeCreate = {
      * Nome
      */
     nome: string;
-    especie: Especie;
+    /**
+     * Especie
+     */
+    especie: 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon';
 };
 
 /**
@@ -752,14 +755,14 @@ export type PeixeCreate = {
  */
 export type PeixeRead = {
     /**
+     * Id
+     */
+    id: number;
+    /**
      * Nome
      */
     nome: string;
     especie: Especie;
-    /**
-     * Id
-     */
-    id: number;
 };
 
 /**
@@ -3031,6 +3034,36 @@ export type CadastrarPeixeAquariosAquarioIdPeixesPostResponses = {
 };
 
 export type CadastrarPeixeAquariosAquarioIdPeixesPostResponse = CadastrarPeixeAquariosAquarioIdPeixesPostResponses[keyof CadastrarPeixeAquariosAquarioIdPeixesPostResponses];
+
+export type BuscarAquarioAquariosAquarioIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}';
+};
+
+export type BuscarAquarioAquariosAquarioIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarAquarioAquariosAquarioIdGetError = BuscarAquarioAquariosAquarioIdGetErrors[keyof BuscarAquarioAquariosAquarioIdGetErrors];
+
+export type BuscarAquarioAquariosAquarioIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AquarioRead;
+};
+
+export type BuscarAquarioAquariosAquarioIdGetResponse = BuscarAquarioAquariosAquarioIdGetResponses[keyof BuscarAquarioAquariosAquarioIdGetResponses];
 
 export type ListarGruposGruposGetData = {
     body?: never;
