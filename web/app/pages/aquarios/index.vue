@@ -55,6 +55,7 @@
         <p class="mt-1 text-sm text-muted">
           {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
         </p>
+        <AquarioPeixes :aquario-id="aquario.id" />
       </UCard>
     </div>
 
@@ -108,6 +109,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
+import AquarioPeixes from '~/components/peixes/AquarioPeixes.vue'
 
 definePageMeta({ middleware: 'role' })
 
