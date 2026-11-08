@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
+from app.domains.aquario.router import router as aquario_router
 from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
@@ -56,6 +57,7 @@ app.include_router(questao_router)
 app.include_router(dashboard_router)
 app.include_router(alternativa_router)
 app.include_router(auditoria_router)
+app.include_router(aquario_router)
 app.include_router(grupo_router)
 app.include_router(pontuacao_router)
 app.include_router(progresso_router)

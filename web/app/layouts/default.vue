@@ -120,6 +120,7 @@ const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
+    { label: 'Aquários', icon: 'i-lucide-waves', to: '/aquarios' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
   ]

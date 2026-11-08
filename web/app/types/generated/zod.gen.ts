@@ -47,6 +47,23 @@ export const zAlternativaUpdate = z.object({
 });
 
 /**
+ * AquarioCreate
+ */
+export const zAquarioCreate = z.object({
+    nome: z.string().min(1).max(50),
+    litros: z.int().gt(0).nullish()
+});
+
+/**
+ * AquarioRead
+ */
+export const zAquarioRead = z.object({
+    id: z.int(),
+    nome: z.string(),
+    litros: z.int().nullable()
+});
+
+/**
  * Body_enviar_imagem_imagens_post
  */
 export const zBodyEnviarImagemImagensPost = z.object({
@@ -200,6 +217,21 @@ export const zDashboardRead = z.object({
 });
 
 /**
+ * Especie
+ */
+export const zEspecie = z.enum([
+    'Peixe Dourado',
+    'Peixe Betta',
+    'Peixe Palhaço',
+    'Peixe Anjo',
+    'Peixe Neon',
+    'Donzela chromis verde',
+    'Cardinal banggai',
+    'Anthias cauda de lira',
+    'Bodião limpador'
+]);
+
+/**
  * ForgotPasswordInput
  */
 export const zForgotPasswordInput = z.object({
@@ -314,6 +346,29 @@ export const zLancamentoRead = z.object({
     pontos: z.int(),
     grupo_id: z.int().nullish(),
     criado_em: z.iso.datetime()
+});
+
+/**
+ * PeixeCreate
+ */
+export const zPeixeCreate = z.object({
+    nome: z.string().min(1).max(50),
+    especie: z.enum([
+        'Peixe Dourado',
+        'Peixe Betta',
+        'Peixe Palhaço',
+        'Peixe Anjo',
+        'Peixe Neon'
+    ])
+});
+
+/**
+ * PeixeRead
+ */
+export const zPeixeRead = z.object({
+    id: z.int(),
+    nome: z.string(),
+    especie: zEspecie
 });
 
 /**
@@ -1063,6 +1118,51 @@ export const zListarLogsAdminAuditoriaGetQuery = z.object({
  * Successful Response
  */
 export const zListarLogsAdminAuditoriaGetResponse = z.array(zLogAuditoriaRead);
+
+/**
+ * Response Listar Aquarios Aquarios Get
+ *
+ * Successful Response
+ */
+export const zListarAquariosAquariosGetResponse = z.array(zAquarioRead);
+
+export const zCriarAquarioAquariosPostBody = zAquarioCreate;
+
+/**
+ * Successful Response
+ */
+export const zCriarAquarioAquariosPostResponse = zAquarioRead;
+
+export const zListarPeixesAquariosAquarioIdPeixesGetPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Response Listar Peixes Aquarios  Aquario Id  Peixes Get
+ *
+ * Successful Response
+ */
+export const zListarPeixesAquariosAquarioIdPeixesGetResponse = z.array(zPeixeRead);
+
+export const zCadastrarPeixeAquariosAquarioIdPeixesPostBody = zPeixeCreate;
+
+export const zCadastrarPeixeAquariosAquarioIdPeixesPostPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zCadastrarPeixeAquariosAquarioIdPeixesPostResponse = zPeixeRead;
+
+export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
 
 /**
  * Response Listar Grupos Grupos Get
