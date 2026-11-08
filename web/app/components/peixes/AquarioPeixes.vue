@@ -1,106 +1,98 @@
 <template>
-  <section class="mt-4 space-y-4 border-t border-default pt-4">
-    <UButton
-      :label="aberto ? 'Ocultar peixes' : 'Ver peixes'"
-      icon="i-lucide-fish"
-      color="neutral"
-      variant="outline"
-      :aria-expanded="aberto"
-      @click="alternarPeixes"
+  <section class="space-y-4">
+    <USkeleton
+      v-if="carregando"
+      class="h-52 w-full rounded-xl"
     />
 
-    <template v-if="aberto">
-      <USkeleton
-        v-if="carregando"
-        class="h-12 w-full rounded-lg"
+    <div
+      v-else-if="peixes === null"
+      class="space-y-2"
+    >
+      <UAlert
+        color="error"
+        title="Não foi possível carregar os peixes"
       />
 
-      <div
-        v-else-if="peixes === null"
-        class="space-y-2"
-      >
-        <UAlert
-          color="error"
-          title="Não foi possível carregar os peixes"
-        />
-        <UButton
-          label="Tentar novamente"
-          variant="outline"
-          @click="carregarPeixes"
-        />
-      </div>
+      <UButton
+        label="Tentar novamente"
+        variant="outline"
+        @click="carregarPeixes"
+      />
+    </div>
 
-      <div
-        v-else
-        class="space-y-4"
-      >
+    <template v-else>
+      <div class="flex min-h-52 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 p-6">
         <p
           v-if="!peixes.length"
           class="text-sm text-muted"
         >
-          Nenhum peixe cadastrado.
+          Seu aquário ainda está vazio.
         </p>
 
         <ul
           v-else
-          class="space-y-2"
+          class="flex w-full flex-wrap justify-center gap-x-8 gap-y-5"
         >
           <li
             v-for="peixe in peixes"
             :key="peixe.id"
-            class="flex items-center gap-3"
+            class="max-w-40 text-center"
           >
-            <span aria-hidden="true">🐠</span>
-            <div>
-              <p class="break-words font-medium">
-                {{ peixe.nome }}
-              </p>
-              <p class="text-sm text-muted">
-                {{ peixe.especie }}
-              </p>
-            </div>
+            <span
+              aria-hidden="true"
+              class="block text-3xl"
+            >🐠</span>
+
+            <p class="break-words font-medium">
+              {{ peixe.nome }}
+            </p>
+
+            <p class="text-xs text-muted">
+              {{ peixe.especie }}
+            </p>
           </li>
         </ul>
-
-        <UForm
-          :schema="zPeixeCreate"
-          :state="formulario"
-          class="space-y-3"
-          @submit="cadastrarPeixe"
-        >
-          <UFormField
-            label="Nome do peixe"
-            name="nome"
-            required
-          >
-            <UInput
-              v-model="formulario.nome"
-              placeholder="Ex. Nemo"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UFormField
-            label="Espécie"
-            name="especie"
-            required
-          >
-            <USelect
-              v-model="formulario.especie"
-              :items="zEspecie.options"
-              placeholder="Selecione uma espécie"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UButton
-            type="submit"
-            label="Adicionar peixe"
-            :loading="cadastrando"
-            :disabled="!formulario.nome.trim() || !formulario.especie"
-          />
-        </UForm>
       </div>
+
+      <UForm
+        :schema="zPeixeCreate"
+        :state="formulario"
+        class="space-y-3"
+        @submit="cadastrarPeixe"
+      >
+        <UFormField
+          label="Nome do peixe"
+          name="nome"
+          required
+        >
+          <UInput
+            v-model="formulario.nome"
+            placeholder="Ex. Nemo"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Espécie"
+          name="especie"
+          required
+        >
+          <USelect
+            v-model="formulario.especie"
+            :items="zEspecie.options"
+            placeholder="Selecione uma espécie"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UButton
+          type="submit"
+          label="Adicionar peixe"
+          :loading="cadastrando"
+          :disabled="!formulario.nome.trim() || !formulario.especie"
+        />
+      </UForm>
     </template>
   </section>
 </template>
@@ -115,8 +107,7 @@ const props = defineProps<{ aquarioId: number }>()
 const api = useApi()
 const toast = useToast()
 
-const aberto = ref(false)
-const carregando = ref(false)
+const carregando = ref(true)
 const cadastrando = ref(false)
 const peixes = ref<PeixeRead[] | null>(null)
 
@@ -136,14 +127,6 @@ async function carregarPeixes() {
   }
   finally {
     carregando.value = false
-  }
-}
-
-async function alternarPeixes() {
-  aberto.value = !aberto.value
-
-  if (aberto.value && peixes.value === null && !carregando.value) {
-    await carregarPeixes()
   }
 }
 
@@ -173,4 +156,6 @@ async function cadastrarPeixe(evento: FormSubmitEvent<PeixeCreate>) {
     cadastrando.value = false
   }
 }
+
+onMounted(carregarPeixes)
 </script>
