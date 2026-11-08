@@ -1,12 +1,13 @@
 import enum
+from datetime import datetime
 
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from app.core.database import Base
-from datetime import datetime
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.sql import func
+from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
+
 
 class RoleUsuario(enum.Enum):
     aluno = "aluno"
@@ -35,6 +36,14 @@ class Usuario(Base):
     # mas os dados pessoais sao anonimizados pelo service
     deletado_em: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None
+    )
+
+
+    avatar: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=AVATAR_PADRAO, server_default=AVATAR_PADRAO
+    )
+    cor_fundo: Mapped[str] = mapped_column(
+        String(7), nullable=False, default=COR_FUNDO_PADRAO, server_default=COR_FUNDO_PADRAO
     )
 
     minhas_conquistas = relationship(

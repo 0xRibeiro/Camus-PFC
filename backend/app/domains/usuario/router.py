@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from app.domains.conquistas.schema import ConquistaRead
 from app.domains.usuario import service
+from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
     ForgotPasswordInput,
@@ -86,7 +87,9 @@ async def reset_password(
 ### usuario
 
 # tudo aqui é o proprio usuario mexendo em si mesmo
-
+@router.get("/avatares", response_model=list[str], tags=["usuarios"])
+async def listar_avatares() -> list[str]:
+    return list(AVATARES)
 
 @router.get("/usuarios/me", response_model=UsuarioRead, tags=["usuarios"])
 async def read_me(user: Usuario = Depends(service.get_current_user)) -> Usuario:

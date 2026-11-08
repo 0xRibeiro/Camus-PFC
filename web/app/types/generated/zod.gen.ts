@@ -575,7 +575,10 @@ export const zUsuarioRead = z.object({
     username: z.string(),
     email: z.email(),
     is_active: z.boolean(),
-    role: zRoleUsuario
+    role: zRoleUsuario,
+    deletado_em: z.iso.datetime().nullable(),
+    avatar: z.string(),
+    cor_fundo: z.string()
 });
 
 /**
@@ -594,7 +597,9 @@ export const zUsuarioStaffCreate = z.object({
 export const zUsuarioUpdate = z.object({
     username: z.string().min(3).max(50).nullish(),
     email: z.email().max(100).nullish(),
-    password: z.string().min(8).max(128).nullish()
+    password: z.string().min(8).max(128).nullish(),
+    avatar: z.string().nullish(),
+    cor_fundo: z.string().nullish()
 });
 
 /**
@@ -771,6 +776,13 @@ export const zResetPasswordAuthResetPasswordPostBody = zResetPasswordInput;
  * Successful Response
  */
 export const zResetPasswordAuthResetPasswordPostResponse = z.void();
+
+/**
+ * Response Listar Avatares Avatares Get
+ *
+ * Successful Response
+ */
+export const zListarAvataresAvataresGetResponse = z.array(z.string());
 
 /**
  * Successful Response
