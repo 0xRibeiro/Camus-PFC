@@ -1,7 +1,7 @@
 from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
-
+from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
 from app.core.security import criar_hash
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.schema import UsuarioCreate, UsuarioLogin
@@ -16,6 +16,8 @@ class UsuarioFactory(SQLAlchemyFactory[Usuario]):
     email = Use(SQLAlchemyFactory.__faker__.email)
     hashed_password = criar_hash(SENHA_PADRAO)
     deletado_em = None
+    avatar = AVATAR_PADRAO
+    cor_fundo = COR_FUNDO_PADRAO
 
 # gera o payload do cadastro (schema) ja passando nas validacoes do schema
 # aceitou_termos valor padrao em True pq o schema recusa False e o teste quebraria antes de ir no service

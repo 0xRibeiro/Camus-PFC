@@ -271,6 +271,10 @@ async def atualizar_usuario(
         user.email = data.email
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
+    if data.avatar is not None:
+        user.avatar = data.avatar
+    if data.cor_fundo is not None:
+        user.cor_fundo = data.cor_fundo
     return await UsuarioRepository(db).salvar(user)
 
 

@@ -1,8 +1,9 @@
-
 from datetime import datetime, timezone
 
-from app.domains.usuario.model import RoleUsuario
+import pytest
 
+from app.domains.usuario.avatares import AVATARES
+from app.domains.usuario.model import RoleUsuario
 from tests.domains.usuario.factories import (
     UsuarioCreateFactory,
     UsuarioFactory,
@@ -113,7 +114,9 @@ async def test_deletar_me_faz_soft_delete(client, repo, usuario_logado):
     assert usuario_logado.deletado_em is not None
     assert usuario_logado.is_active is False
     assert usuario_logado.username == f"usuario-excluido-{usuario_logado.id}"
-    assert usuario_logado.email == f"usuario-excluido-{usuario_logado.id}@removido.camus"
+    assert (
+        usuario_logado.email == f"usuario-excluido-{usuario_logado.id}@removido.camus"
+    )
     repo.salvar.assert_awaited_once_with(usuario_logado)
 
 
@@ -137,3 +140,44 @@ async def test_admin_deletar_usuario_faz_soft_delete(client, repo, usuario_logad
     assert alvo.deletado_em is not None
     assert alvo.is_active is False
     repo.salvar.assert_awaited_once_with(alvo)
+
+
+###### perfil (avatar e cor de fundo)
+
+
+async def test_listar_avatares(client):
+    resposta = await client.get("/avatares")
+
+    assert resposta.status_code == 200
+    assert resposta.json() == list(AVATARES)
+
+
+async def test_atualizar_avatar_e_cor(client, repo, usuario_logado):
+    repo.salvar.return_value = usuario_logado
+    avatar = AVATARES[1]
+
+    resposta = await client.patch(
+        "/usuarios/me",
+        json={"avatar": avatar, "cor_fundo": "#ff8800"},
+    )
+
+    assert resposta.status_code == 200
+    assert usuario_logado.avatar == avatar
+    assert usuario_logado.cor_fundo == "#FF8800"  # o schema normaliza pra maiuscula
+    assert resposta.json()["avatar"] == avatar
+    repo.salvar.assert_awaited_once_with(usuario_logado)
+
+
+async def test_atualizar_avatar_invalido(client, repo, usuario_logado):
+    resposta = await client.patch("/usuarios/me", json={"avatar": "qualquer-coisa"})
+
+    assert resposta.status_code == 422
+    repo.salvar.assert_not_called()
+
+
+@pytest.mark.parametrize("cor", ["vermelho", "#fff", "#GGGGGG", "ff8800"])
+async def test_atualizar_cor_invalida(client, repo, usuario_logado, cor):
+    resposta = await client.patch("/usuarios/me", json={"cor_fundo": cor})
+
+    assert resposta.status_code == 422
+    repo.salvar.assert_not_called()
