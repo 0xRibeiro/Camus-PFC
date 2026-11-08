@@ -78,6 +78,38 @@ export type AlternativaUpdate = {
 };
 
 /**
+ * AquarioCreate
+ */
+export type AquarioCreate = {
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Litros
+     */
+    litros?: number | null;
+};
+
+/**
+ * AquarioRead
+ */
+export type AquarioRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Litros
+     */
+    litros: number | null;
+};
+
+/**
  * Body_enviar_imagem_imagens_post
  */
 export type BodyEnviarImagemImagensPost = {
@@ -457,6 +489,11 @@ export type DashboardRead = {
 };
 
 /**
+ * Especie
+ */
+export type Especie = 'Donzela chromis verde' | 'Peixe-palhaço comum' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
+
+/**
  * ForgotPasswordInput
  */
 export type ForgotPasswordInput = {
@@ -698,6 +735,32 @@ export type ModuloUpdate = {
  * OrigemLancamento
  */
 export type OrigemLancamento = 'conteudo';
+
+/**
+ * PeixeCreate
+ */
+export type PeixeCreate = {
+    /**
+     * Nome
+     */
+    nome: string;
+    especie: Especie;
+};
+
+/**
+ * PeixeRead
+ */
+export type PeixeRead = {
+    /**
+     * Nome
+     */
+    nome: string;
+    especie: Especie;
+    /**
+     * Id
+     */
+    id: number;
+};
 
 /**
  * QuestaoAlunoRead
@@ -2863,6 +2926,111 @@ export type ListarLogsAdminAuditoriaGetResponses = {
 };
 
 export type ListarLogsAdminAuditoriaGetResponse = ListarLogsAdminAuditoriaGetResponses[keyof ListarLogsAdminAuditoriaGetResponses];
+
+export type ListarAquariosAquariosGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/aquarios';
+};
+
+export type ListarAquariosAquariosGetResponses = {
+    /**
+     * Response Listar Aquarios Aquarios Get
+     *
+     * Successful Response
+     */
+    200: Array<AquarioRead>;
+};
+
+export type ListarAquariosAquariosGetResponse = ListarAquariosAquariosGetResponses[keyof ListarAquariosAquariosGetResponses];
+
+export type CriarAquarioAquariosPostData = {
+    body: AquarioCreate;
+    path?: never;
+    query?: never;
+    url: '/aquarios';
+};
+
+export type CriarAquarioAquariosPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CriarAquarioAquariosPostError = CriarAquarioAquariosPostErrors[keyof CriarAquarioAquariosPostErrors];
+
+export type CriarAquarioAquariosPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AquarioRead;
+};
+
+export type CriarAquarioAquariosPostResponse = CriarAquarioAquariosPostResponses[keyof CriarAquarioAquariosPostResponses];
+
+export type ListarPeixesAquariosAquarioIdPeixesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes';
+};
+
+export type ListarPeixesAquariosAquarioIdPeixesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarPeixesAquariosAquarioIdPeixesGetError = ListarPeixesAquariosAquarioIdPeixesGetErrors[keyof ListarPeixesAquariosAquarioIdPeixesGetErrors];
+
+export type ListarPeixesAquariosAquarioIdPeixesGetResponses = {
+    /**
+     * Response Listar Peixes Aquarios  Aquario Id  Peixes Get
+     *
+     * Successful Response
+     */
+    200: Array<PeixeRead>;
+};
+
+export type ListarPeixesAquariosAquarioIdPeixesGetResponse = ListarPeixesAquariosAquarioIdPeixesGetResponses[keyof ListarPeixesAquariosAquarioIdPeixesGetResponses];
+
+export type CadastrarPeixeAquariosAquarioIdPeixesPostData = {
+    body: PeixeCreate;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes';
+};
+
+export type CadastrarPeixeAquariosAquarioIdPeixesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CadastrarPeixeAquariosAquarioIdPeixesPostError = CadastrarPeixeAquariosAquarioIdPeixesPostErrors[keyof CadastrarPeixeAquariosAquarioIdPeixesPostErrors];
+
+export type CadastrarPeixeAquariosAquarioIdPeixesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: PeixeRead;
+};
+
+export type CadastrarPeixeAquariosAquarioIdPeixesPostResponse = CadastrarPeixeAquariosAquarioIdPeixesPostResponses[keyof CadastrarPeixeAquariosAquarioIdPeixesPostResponses];
 
 export type ListarGruposGruposGetData = {
     body?: never;
