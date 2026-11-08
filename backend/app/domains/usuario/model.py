@@ -1,13 +1,13 @@
 import enum
+from datetime import datetime
 
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
-from datetime import datetime
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.sql import func
+
 
 class RoleUsuario(enum.Enum):
     aluno = "aluno"

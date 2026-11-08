@@ -265,7 +265,10 @@ async def conceder_conquista(
 async def atualizar_usuario(
     db: AsyncSession, user: Usuario, data: UsuarioUpdate
 ) -> Usuario:
-    if data.username is not None:
+    repo = UsuarioRepository(db)
+    if data.username is not None and data.username != user.username:
+        if await repo.buscar_por_username(data.username) is not None:
+            raise DuplicateValueException("username já existe")
         user.username = data.username
     if data.email is not None:
         user.email = data.email
@@ -302,9 +305,12 @@ async def atualizar_usuario_admin(
 # de auditoria pega isso como UPDATE e guarda o antes/depois no logs_auditoria,
 # entao fica provado que a conta existiu e quando foi encerrada
 async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
+    if user.role == RoleUsuario.admin:
+        raise ForbiddenException("contas de administrador não podem ser excluídas")
     if user.deletado_em is not None:
         return  # ja tava deletado, n faz nada
 
+    user.username = f"usuario-excluido-{user.id}"
     user.username = f"usuario-excluido-{user.id}"
     user.email = f"usuario-excluido-{user.id}@removido.camus"
     user.hashed_password = criar_hash(secrets.token_urlsafe(32))

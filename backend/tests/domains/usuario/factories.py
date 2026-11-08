@@ -1,8 +1,9 @@
 from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
-from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
+
 from app.core.security import criar_hash
+from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.schema import UsuarioCreate, UsuarioLogin
 

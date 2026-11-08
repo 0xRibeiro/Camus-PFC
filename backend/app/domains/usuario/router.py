@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.domains.usuario.avatares import AVATARES
+
 from app.core.database import get_async_session
 from app.domains.conquistas.schema import ConquistaRead
 from app.domains.usuario import service
+from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
     ForgotPasswordInput,

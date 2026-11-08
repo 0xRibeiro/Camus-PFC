@@ -1,10 +1,9 @@
 import re
-
-from app.domains.usuario.avatares import AVATARES
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario
 
 ###### auth: entrada do login e formato dos tokens
