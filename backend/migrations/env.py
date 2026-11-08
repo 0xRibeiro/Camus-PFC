@@ -22,7 +22,9 @@ import app.domains.conquistas.model
 import app.domains.usuario.model
 import app.domains.auditoria.model
 import app.domains.grupo.model
-
+import app.domains.pontuacao.model
+import app.domains.progresso.model
+import app.domains.peixe.model
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

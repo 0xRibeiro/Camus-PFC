@@ -156,6 +156,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
+import { useConquistasStore } from '~/stores/conquistas'
 import type { ConviteRead, GrupoRead, MembroGrupoRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
@@ -164,6 +165,7 @@ const route = useRoute()
 const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
+const conquistas = useConquistasStore()
 
 const grupoId = Number(route.params.id)
 const grupo = ref<GrupoRead | null>(null)
@@ -177,7 +179,8 @@ const expiraEm = ref(0)
 
 // módulo VueUse
 const agora = useNow({ interval: 1000 })
-// arredonda pra cima o tempo restante.
+
+// arredonda para cima o tempo restante
 const segundosRestantes = computed(() => Math.max(0, Math.ceil((expiraEm.value - agora.value.getTime()) / 1000)))
 
 const tempoRestante = computed(() => {
@@ -233,6 +236,9 @@ async function gerarConvite() {
     convite.value = resposta
     expiraEm.value = inicio + resposta.expira_em_segundos * 1000
     toast.add({ title: 'Convite gerado', color: 'success' })
+
+    // conquista 10: solicita o desbloqueio depois de gerar o convite
+    await conquistas.desbloquearConquista(10).catch(() => {})
   }
   catch (error) {
     toast.add({ title: mensagemErro(error, 'Não foi possível gerar o convite'), color: 'error' })

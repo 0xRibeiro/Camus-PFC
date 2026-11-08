@@ -1,5 +1,8 @@
 <template>
-  <UModal v-model:open="open" title="Detalhes da alteração">
+  <UModal
+    v-model:open="open"
+    title="Detalhes da alteração"
+  >
     <template #body>
       <div class="grid grid-cols-2 gap-4">
         <div>

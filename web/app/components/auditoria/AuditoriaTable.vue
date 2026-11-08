@@ -1,11 +1,21 @@
 <template>
-  <UTable :data="logs" :columns="columns" :loading="loading" class="cursor-pointer" @select="abrirDetalhe">
+  <UTable
+    :data="logs"
+    :columns="columns"
+    :loading="loading"
+    class="cursor-pointer"
+    @select="abrirDetalhe"
+  >
     <template #usuario_id-cell="{ row }">
       {{ nomeDoUsuario(row.original.usuario_id) }}
     </template>
 
     <template #acao-cell="{ row }">
-      <UBadge :label="row.original.acao" :color="corDaAcao(row.original.acao)" variant="soft" />
+      <UBadge
+        :label="row.original.acao"
+        :color="corDaAcao(row.original.acao)"
+        variant="soft"
+      />
     </template>
 
     <template #criado_em-cell="{ row }">
@@ -13,7 +23,10 @@
     </template>
   </UTable>
 
-  <AuditoriaDetalheModal v-model:open="modalAberto" :log="logSelecionado" />
+  <AuditoriaDetalheModal
+    v-model:open="modalAberto"
+    :log="logSelecionado"
+  />
 </template>
 
 <script setup lang="ts">

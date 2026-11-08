@@ -30,8 +30,8 @@ from app.core.security import (
     validar_refresh_token,
     verificar_password,
 )
+from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
-from app.domains.conquistas.repository import ConquistaRepository
 from app.domains.usuario.model import AceiteTermos, RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
@@ -250,12 +250,8 @@ async def listar_conquistas_usuario(db: AsyncSession, user_id: int):
 
 # metodo faz algumas checagens para não dar conquistas não existentes
 # ou duplicadas
-async def conceder_conquista(
-    db: AsyncSession,
-    user_id: int,
-    conquista_id: int,
-) -> Conquista | None:
-    return await ConquistaRepository(db).conceder(user_id, conquista_id)
+async def conceder_conquista(db: AsyncSession, user_id: int, conquista_id: int) -> Conquista | None:
+    return await conquistas_service.conceder_conquista(db, user_id, conquista_id)
 
 
 ###### edicao

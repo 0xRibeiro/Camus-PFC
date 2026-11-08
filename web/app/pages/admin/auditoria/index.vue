@@ -6,15 +6,27 @@
 
     <div class="flex flex-wrap items-end gap-3 mb-4">
       <UFormField label="Entidade">
-        <USelect v-model="entidade" :items="opcoesEntidade" class="w-40" />
+        <USelect
+          v-model="entidade"
+          :items="opcoesEntidade"
+          class="w-40"
+        />
       </UFormField>
 
       <UFormField label="Id do usuário">
-        <UInput v-model.number="usuarioId" type="number" class="w-32" />
+        <UInput
+          v-model.number="usuarioId"
+          type="number"
+          class="w-32"
+        />
       </UFormField>
     </div>
 
-    <AuditoriaTable :logs="logs" :loading="loading" :usuarios="usuarios" />
+    <AuditoriaTable
+      :logs="logs"
+      :loading="loading"
+      :usuarios="usuarios"
+    />
 
     <div class="flex justify-end gap-2 mt-4">
       <UButton

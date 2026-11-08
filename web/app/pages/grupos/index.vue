@@ -140,15 +140,16 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
+import { useConquistasStore } from '~/stores/conquistas'
 import type { GrupoRead } from '~/types/generated'
 import { zGrupoCreate, zGrupoEntrar } from '~/types/generated/zod.gen'
 
-// exige login, permitindo qualquer papel de usuário
 definePageMeta({ middleware: 'role' })
 
 const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
+const conquistas = useConquistasStore()
 
 const grupos = ref<GrupoRead[]>([])
 const loading = ref(true)
@@ -173,7 +174,6 @@ async function fetchGrupos() {
   erroCarregamento.value = false
 
   try {
-    // retorna a lista diretamente, sem o tratamento do FastCRUD
     grupos.value = await api('/grupos')
   }
   catch {
@@ -190,6 +190,9 @@ async function criarGrupo(event: FormSubmitEvent<typeof formCriar>) {
     grupos.value.push(grupo)
     formCriar.nome = ''
     toast.add({ title: 'Grupo criado', color: 'success' })
+
+    // conquista 8: solicita o desbloqueio depois de criar o grupo
+    await conquistas.desbloquearConquista(8).catch(() => {})
   }
   catch (error) {
     toast.add({ title: mensagemErro(error, 'Não foi possível criar o grupo'), color: 'error' })
@@ -212,10 +215,14 @@ async function entrarGrupo(event: FormSubmitEvent<typeof formEntrar>) {
 
     formEntrar.convite = ''
     toast.add({ title: 'Você entrou no grupo', color: 'success' })
+
+    // conquista 9: solicita o desbloqueio depois de entrar por convite
+    await conquistas.desbloquearConquista(9).catch(() => {})
   }
   catch (error) {
     toast.add({ title: mensagemErro(error, 'Não foi possível entrar no grupo'), color: 'error' })
   }
+
   entrando.value = false
 }
 

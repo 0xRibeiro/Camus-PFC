@@ -26,19 +26,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
   // login so devolve token, entao busca o usuario dps
   async function login(credentials: UsuarioLogin) {
-  const api = useApi()
+    const api = useApi()
 
-  const tokens = await api('/auth/login', {
-    method: 'POST',
-    body: credentials,
-  })
+    const tokens = await api('/auth/login', {
+      method: 'POST',
+      body: credentials,
+    })
 
-  accessToken.value = tokens.access_token
-  refreshToken.value = tokens.refresh_token
+    accessToken.value = tokens.access_token
+    refreshToken.value = tokens.refresh_token
 
-  await fetchMe()
-  await fetchAceiteTermos()
-}
+    await fetchMe()
+    await fetchAceiteTermos()
+  }
   // registro n devolve token, entao loga logo em seguida com os msm dados
   async function register(data: UsuarioCreate) {
     const api = useApi()
@@ -117,21 +117,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-  user,
-  accessToken,
-  refreshToken,
-  aceiteTermos,
-  isAuthenticated,
-  role,
-  login,
-  register,
-  forgotPassword,
-  resetPassword,
-  fetchMe,
-  fetchAceiteTermos,
-  refresh,
-  logout,
-}
+    user,
+    accessToken,
+    refreshToken,
+    aceiteTermos,
+    isAuthenticated,
+    role,
+    login,
+    register,
+    forgotPassword,
+    resetPassword,
+    fetchMe,
+    fetchAceiteTermos,
+    refresh,
+    logout,
+  }
 }, {
   persist: {
     storage: sessionStorage,
