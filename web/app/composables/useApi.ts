@@ -1,7 +1,7 @@
 import { FetchError } from 'ofetch'
 
 // cliente de api que ja manda o token e tenta renovar sozinho se expirar
-export function useApi() {
+export function useApi(grupoId = Number(useRouter().currentRoute.value.path.match(/^\/grupos\/(\d+)(\/|$)/)?.[1])) {
   const config = useRuntimeConfig()
   const auth = useAuthStore()
 
@@ -17,6 +17,12 @@ export function useApi() {
 
   // tenta a chamada, se cair 401 renova o token e tenta dnv
   return async function api(request: string, options?: any) {
+    // os componentes de trilha e quiz usam a API do grupo quando abertos dentro dele
+    const recurso = /^\/(trilhas|modulos|conteudos|questoes|alternativas|imagens|progresso|pontuacao)(\/|$)/
+    if (grupoId > 0 && recurso.test(request)) {
+      request = `/grupos/${grupoId}${request}`
+    }
+
     try {
       return await client<any>(request, options)
     }

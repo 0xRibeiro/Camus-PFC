@@ -26,6 +26,9 @@ class Trilha(Base):
 
     tag: Mapped[str | None] = mapped_column(String(50))
 
+    # agora o id do grupo é incluido para diferenciar entre trilhas privadas e publicas.
+    grupo_id: Mapped[int | None] = mapped_column(ForeignKey("grupos.id", ondelete="CASCADE"), index=True)
+
     is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha
 
 
