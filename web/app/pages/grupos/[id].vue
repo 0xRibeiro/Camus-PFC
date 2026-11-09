@@ -138,17 +138,10 @@
         </div>
       </UCard>
 
-      <UCard>
-        <template #header>
-          <h2 class="font-medium">
-            Conteúdos do grupo
-          </h2>
-        </template>
-
-        <p class="text-muted">
-          As trilhas e os demais conteúdos exclusivos deste grupo serão exibidos aqui.
-        </p>
-      </UCard>
+      <GrupoTrilhas
+        :grupo-id="grupoId"
+        :dono="usuarioCriador"
+      />
     </div>
   </div>
 </template>
