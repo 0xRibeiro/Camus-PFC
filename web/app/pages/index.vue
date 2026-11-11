@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h1 class="text-xl font-semibold">
-      Camuswdawdasda
+    <h1 class="text-xl font-semibold" style="color: purple">
+      Codigo Roxo! Apresentação é sexta!
     </h1>
     <p class="text-muted mt-1">
       pagina
