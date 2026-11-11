@@ -31,12 +31,12 @@ void setup() {
   tft.setCursor(10, 40);
   tft.setTextColor(ST77XX_RED);
   tft.setTextSize(2);
-  tft.println("Hello ESP32");
+  tft.println(" ");
 
   tft.setCursor(0, 3);
   tft.setTextColor(ST77XX_GREEN);
-  tft.setTextSize(2);
-  tft.println("I can do SPI :-)");
+  tft.setTextSize(1);
+  tft.println("Camus vai dominar o mundo dos aquarios)");
 }
 
 void loop() { delay(10); }
