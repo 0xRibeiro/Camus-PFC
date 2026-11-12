@@ -40,9 +40,6 @@ class UsuarioRepository:
         await self.db.refresh(user)  # recarrega pra pegar id/defaults do banco
         return user
 
-    async def deletar(self, user: Usuario) -> None:
-        await self.db.delete(user)
-        await self.db.commit()
 
     # esse metódo usa a tabela de associação para buscar todas as
     # conquistas que o usuario tem. antes eu queria fazer um desses

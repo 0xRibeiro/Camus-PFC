@@ -1,4 +1,8 @@
+import secrets
+from datetime import datetime, timezone
+
 from fastapi import Depends
+
 from fastapi.security import HTTPAuthorizationCredentials
 from fastcrud.exceptions.http_exceptions import (
     DuplicateValueException,
@@ -257,12 +261,19 @@ async def conceder_conquista(db: AsyncSession, user_id: int, conquista_id: int) 
 async def atualizar_usuario(
     db: AsyncSession, user: Usuario, data: UsuarioUpdate
 ) -> Usuario:
-    if data.username is not None:
+    repo = UsuarioRepository(db)
+    if data.username is not None and data.username != user.username:
+        if await repo.buscar_por_username(data.username) is not None:
+            raise DuplicateValueException("username já existe")
         user.username = data.username
     if data.email is not None:
         user.email = data.email
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
+    if data.avatar is not None:
+        user.avatar = data.avatar
+    if data.cor_fundo is not None:
+        user.cor_fundo = data.cor_fundo
     return await UsuarioRepository(db).salvar(user)
 
 
@@ -284,5 +295,22 @@ async def atualizar_usuario_admin(
     return await UsuarioRepository(db).salvar(user)
 
 
+# soft delete: em vez de apagar a linha, sobrescreve os dados pessoais e marca
+# deletado_em. a conta fica inutilizavel (senha trocada por uma aleatoria que
+# ninguem sabe, is_active false) mas o registro continua no banco. o trigger
+# de auditoria pega isso como UPDATE e guarda o antes/depois no logs_auditoria,
+# entao fica provado que a conta existiu e quando foi encerrada
 async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
-    await UsuarioRepository(db).deletar(user)
+    if user.role == RoleUsuario.admin:
+        raise ForbiddenException("contas de administrador não podem ser excluídas")
+    if user.deletado_em is not None:
+        return  # ja tava deletado, n faz nada
+
+    user.username = f"usuario-excluido-{user.id}"
+    user.username = f"usuario-excluido-{user.id}"
+    user.email = f"usuario-excluido-{user.id}@removido.camus"
+    user.hashed_password = criar_hash(secrets.token_urlsafe(32))
+    user.is_active = False
+    user.deletado_em = datetime.now(timezone.utc)
+
+    await UsuarioRepository(db).salvar(user)

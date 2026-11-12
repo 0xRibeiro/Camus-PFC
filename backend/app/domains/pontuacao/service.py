@@ -1,4 +1,3 @@
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
@@ -7,35 +6,16 @@ from app.domains.pontuacao.schema import LancamentoRead, XpRead
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 
-async def registrar_lancamento(
-    db: AsyncSession,
-    usuario: Usuario,
-    origem_tipo: OrigemLancamento,
-    origem_id: int,
-    pontos: int,
-    versao: int = 1,
-    grupo_id: int | None = None,
-) -> LancamentoPontos | None:
-    # so aluno ganha xp e n tem lancamento de 0
-    if usuario.role != RoleUsuario.aluno or pontos <= 0:
+def registrar_lancamento(db: AsyncSession, usuario: Usuario, origem_tipo: OrigemLancamento, origem_id: int, pontos: int,  versao: int = 1, grupo_id: int | None = None) -> LancamentoPontos | None:
+    # XP global é só para alunos. No grupo, qualquer membro pode ganhar XP.
+    # se tiver com zero pontos é ignorado.
+    if pontos <= 0 or (grupo_id is None and usuario.role != RoleUsuario.aluno):
         return None
 
-    repo = PontuacaoRepository(db)
-    lancamento = LancamentoPontos(
-        usuario_id=usuario.id,
-        origem_tipo=origem_tipo,
-        origem_id=origem_id,
-        versao=versao,
-        pontos=pontos,
-        grupo_id=grupo_id,
-    )
+    lancamento = LancamentoPontos(usuario_id=usuario.id, origem_tipo=origem_tipo, origem_id=origem_id, versao=versao, pontos=pontos, grupo_id=grupo_id)
 
-    # o unique bloqueia pagar 2x a msm versao se chegar 2 requisicao junto
-    try:
-        return await repo.salvar(lancamento)
-    except IntegrityError:
-        await repo.desfazer()
-        return None
+    PontuacaoRepository(db).adicionar(lancamento)
+    return lancamento
 
 
 async def total_ganho_na_origem(
@@ -50,13 +30,13 @@ async def total_ganho_na_origem(
 
 
 async def meu_xp(db: AsyncSession, usuario: Usuario) -> XpRead:
-    total = await PontuacaoRepository(db).somar_global(usuario.id)
+    total = await PontuacaoRepository(db).somar_xp(usuario.id, db.info.get("grupo_id"))
     return XpRead(xp_total=total)
 
 
 async def meu_extrato(db: AsyncSession, usuario: Usuario) -> list[LancamentoRead]:
     repo = PontuacaoRepository(db)
-    lancamentos = await repo.listar_do_usuario(usuario.id)
+    lancamentos = await repo.listar_do_usuario(usuario.id, db.info.get("grupo_id"))
 
     # junta os ids pra buscar todos os titulos numa query so
     conteudo_ids = []

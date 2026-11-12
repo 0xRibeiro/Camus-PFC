@@ -32,12 +32,25 @@
             v-if="auth.user"
             class="flex items-center gap-1 w-full"
           >
-            <UUser
-              :name="auth.user.username"
-              :description="auth.user.role"
-              :avatar="{ text: auth.user.username.charAt(0).toUpperCase() }"
-              class="min-w-0 flex-1"
-            />
+          <!-- clicar no usuario leva pro perfil -->
+            <NuxtLink
+              to="/perfil"
+              class="min-w-0 flex-1 rounded-md p-1 hover:bg-elevated"
+              aria-label="Meu perfil"
+            >
+              <UUser
+                :name="auth.user.username"
+                :description="auth.user.role"
+              >
+                <template #avatar>
+                  <UsuarioAvatar
+                    :avatar="auth.user.avatar"
+                    :cor-fundo="auth.user.cor_fundo"
+                    :tamanho="32"
+                  />
+                </template>
+              </UUser>
+            </NuxtLink>
 
             <UButton
               icon="i-lucide-log-out"
@@ -120,6 +133,7 @@ const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
     { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
+    { label: 'Aquários', icon: 'i-lucide-waves', to: '/aquarios' },
     { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
     { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
   ]

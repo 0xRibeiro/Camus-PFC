@@ -9,14 +9,9 @@ class PontuacaoRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def salvar(self, lancamento: LancamentoPontos) -> LancamentoPontos:
+    # adiciona apenas na sessão sem fazr o commit ainda pra evitar erros de ganhar o xp sem cumprir o conteudo
+    def adicionar(self, lancamento: LancamentoPontos) -> None:
         self.db.add(lancamento)
-        await self.db.commit()
-        await self.db.refresh(lancamento)
-        return lancamento
-
-    async def desfazer(self) -> None:
-        await self.db.rollback()
 
     async def somar_por_origem(
         self,
@@ -36,22 +31,27 @@ class PontuacaoRepository:
             return 0
         return total
 
-    # so xp global sem o de grupo
-    async def somar_global(self, usuario_id: int) -> int:
+    # Escopo nulo soma só o XP global. Com grupo_id, soma só o XP do grupo.
+    async def somar_xp(self, usuario_id: int, grupo_id: int | None) -> int:
         total = await self.db.scalar(
             select(func.sum(LancamentoPontos.pontos)).where(
                 LancamentoPontos.usuario_id == usuario_id,
-                LancamentoPontos.grupo_id.is_(None),
+                LancamentoPontos.grupo_id == grupo_id,
             )
         )
         if total is None:
             return 0
         return total
 
-    async def listar_do_usuario(self, usuario_id: int) -> list[LancamentoPontos]:
+    async def listar_do_usuario(
+        self, usuario_id: int, grupo_id: int | None
+    ) -> list[LancamentoPontos]:
         resultado = await self.db.execute(
             select(LancamentoPontos)
-            .where(LancamentoPontos.usuario_id == usuario_id)
+            .where(
+                LancamentoPontos.usuario_id == usuario_id,
+                LancamentoPontos.grupo_id == grupo_id,
+            )
             .order_by(LancamentoPontos.criado_em.desc())
         )
         return list(resultado.scalars().all())

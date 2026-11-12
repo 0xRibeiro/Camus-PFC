@@ -1,5 +1,6 @@
 import secrets
 
+from fastapi import Depends
 from fastcrud.exceptions.http_exceptions import (
     DuplicateValueException,
     ForbiddenException,
@@ -7,6 +8,7 @@ from fastcrud.exceptions.http_exceptions import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_async_session
 from app.core.redis import redis_client
 from app.domains.grupo.model import Grupo
 from app.domains.grupo.repository import GrupoRepository
@@ -17,6 +19,7 @@ from app.domains.grupo.schema import (
     MembroGrupoRead,
 )
 from app.domains.usuario.model import Usuario
+from app.domains.usuario.service import get_current_user
 
 # está com esse tempo por enquanto.
 CONVITE_VALIDADE_SEGUNDOS = 900
@@ -44,6 +47,21 @@ async def buscar_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Gru
         raise ForbiddenException("Você não participa deste grupo.")
 
     return grupo
+
+
+# funçção que retorna o grupo e guarda o id.
+async def grupo_membro(grupo_id: int, db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> Grupo:
+    grupo = await buscar_grupo(db, grupo_id, usuario)
+    # Guarda o escopo apenas na sessão da requisição.
+    db.info["grupo_id"] = grupo.id
+    return grupo
+
+# função que checa se o usuário é dono do grupo, caso não seja, lança uma exceção. retorna o id do grupo.
+async def grupo_dono(grupo: Grupo = Depends(grupo_membro), usuario: Usuario = Depends(get_current_user)) -> int:
+    if grupo.id_dono != usuario.id:
+        raise ForbiddenException("Apenas o dono pode gerenciar as trilhas do grupo.")
+
+    return grupo.id
 
 
 async def gerar_convite(db: AsyncSession, grupo_id: int, usuario: Usuario) -> ConviteRead:

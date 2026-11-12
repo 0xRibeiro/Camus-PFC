@@ -108,7 +108,7 @@ def contar_concluidos(status: list[ConteudoStatusRead]) -> int:
 
 
 ###### trilhas do aluno
-# trilha inativa so staff enxerga pra testar
+# Staff pode testar rascunhos globais. No grupo, rascunhos ficam no editor.
 async def buscar_trilha_visivel(
     repo: ProgressoRepository, trilha_id: int, usuario: Usuario
 ) -> Trilha:
@@ -116,7 +116,7 @@ async def buscar_trilha_visivel(
 
     if trilha is None:
         raise NotFoundException("Trilha não encontrada")
-    if not trilha.is_active and usuario.role == RoleUsuario.aluno:
+    if not trilha.is_active and (repo.grupo_id is not None or usuario.role == RoleUsuario.aluno):
         raise NotFoundException("Trilha não encontrada")
 
     return trilha
@@ -212,7 +212,10 @@ async def buscar_conteudo_liberado(
     conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
     status = calcular_status(sequencia, conclusoes)
 
-    if not status[conteudo.id].liberado:
+    item = status.get(conteudo.id)
+    if item is None:
+        raise NotFoundException("Conteúdo não encontrado")
+    if not item.liberado:
         raise ForbiddenException("Conclua os conteúdos anteriores primeiro")
 
     return conteudo, sequencia, conclusoes.get(conteudo.id)
@@ -292,20 +295,21 @@ async def buscar_conteudo(
 ###### concluir e pagar xp
 # paga so oq falta pra chegar no valor novo, nunca tira ponto
 async def pagar_diferenca(
-    db: AsyncSession, usuario: Usuario, conteudo: Conteudo, valor_novo: int
+    repo: ProgressoRepository, usuario: Usuario, conteudo: Conteudo, valor_novo: int
 ) -> int:
     ja_ganho = await total_ganho_na_origem(
-        db, usuario, OrigemLancamento.conteudo, conteudo.id
+        repo.db, usuario, OrigemLancamento.conteudo, conteudo.id
     )
     diferenca = valor_novo - ja_ganho
 
-    lancamento = await registrar_lancamento(
-        db,
+    lancamento = registrar_lancamento(
+        repo.db,
         usuario,
         OrigemLancamento.conteudo,
         conteudo.id,
         diferenca,
         versao=conteudo.versao,
+        grupo_id=repo.grupo_id,
     )
     if lancamento is None:
         return 0
@@ -313,7 +317,7 @@ async def pagar_diferenca(
 
 
 # cria a conclusao na 1 vez e nas proximas so atualiza a versao
-async def salvar_conclusao(
+def salvar_conclusao(
     repo: ProgressoRepository,
     usuario: Usuario,
     conteudo: Conteudo,
@@ -328,14 +332,15 @@ async def salvar_conclusao(
     else:
         conclusao.versao_conteudo = conteudo.versao
 
-    await repo.salvar_conclusao(conclusao)
+    repo.salvar_conclusao(conclusao)
 
 
 async def concluir_conteudo(
     db: AsyncSession, conteudo_id: int, usuario: Usuario
 ) -> ConclusaoRead:
     repo = ProgressoRepository(db)
-    conteudo, sequencia, conclusao = await buscar_conteudo_liberado(
+    await repo.bloquear_progresso(usuario.id)
+    conteudo, modulos, conclusao = await buscar_conteudo_liberado(
         repo, conteudo_id, usuario
     )
 
@@ -346,9 +351,10 @@ async def concluir_conteudo(
     if conclusao is not None and conclusao.versao_conteudo == conteudo.versao:
         return ConclusaoRead(xp_ganho=0)
 
-    xp_ganho = await pagar_diferenca(db, usuario, conteudo, conteudo.pontos)
-    await salvar_conclusao(repo, usuario, conteudo, conclusao)
+    xp_ganho = await pagar_diferenca(repo, usuario, conteudo, conteudo.pontos)
+    salvar_conclusao(repo, usuario, conteudo, conclusao)
 
+    await repo.confirmar()
     return ConclusaoRead(xp_ganho=xp_ganho)
 
 
@@ -391,7 +397,8 @@ async def responder_quiz(
     db: AsyncSession, conteudo_id: int, usuario: Usuario, data: RespostaQuizCreate
 ) -> ResultadoQuizRead:
     repo = ProgressoRepository(db)
-    conteudo, sequencia, conclusao = await buscar_conteudo_liberado(
+    await repo.bloquear_progresso(usuario.id)
+    conteudo, modulos, conclusao = await buscar_conteudo_liberado(
         repo, conteudo_id, usuario
     )
 
@@ -407,7 +414,7 @@ async def responder_quiz(
     total = len(correcao)
 
     # toda tentativa fica salva msm sem ganhar xp
-    await repo.salvar_tentativa(
+    repo.salvar_tentativa(
         TentativaQuiz(
             usuario_id=usuario.id,
             conteudo_id=conteudo.id,
@@ -422,9 +429,10 @@ async def responder_quiz(
     xp_ganho = 0
     if conclusao is None or conclusao.versao_conteudo != conteudo.versao:
         valor_novo = conteudo.pontos * acertos // total
-        xp_ganho = await pagar_diferenca(db, usuario, conteudo, valor_novo)
-        await salvar_conclusao(repo, usuario, conteudo, conclusao)
+        xp_ganho = await pagar_diferenca(repo, usuario, conteudo, valor_novo)
+        salvar_conclusao(repo, usuario, conteudo, conclusao)
 
+    await repo.confirmar()
     return ResultadoQuizRead(
         acertos=acertos,
         total=total,
