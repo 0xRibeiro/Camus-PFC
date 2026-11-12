@@ -1,7 +1,7 @@
 #include "navegacao.h"
 
 #include "../hardware/display.h"
-#include "logo.h"
+#include "navbar.h"
 #include "telas/tela_modulos.h"
 #include "telas/tela_vinculo.h"
 #include "telas/tela_wifi.h"
@@ -16,16 +16,13 @@ namespace navegacao {
   const int QUANTIDADE = 3;
   int ativa = 0;
 
-  // barra de cima, 18px de altura
-  void desenharNavbar() {
-    display::tft.drawRGBBitmap(1, 1, LOGO, 16, 16);
-  }
-
   // só redesenha tudo na troca
   void trocarPara(int indice) {
     ativa = indice;
     display::tft.fillScreen(ST77XX_BLACK);
-    desenharNavbar();
+
+    // +1 pq o índice começa no 0
+    navbar::desenhar(telas[ativa]->nome(), ativa + 1, QUANTIDADE);
     telas[ativa]->desenhar();
   }
 
@@ -34,6 +31,10 @@ namespace navegacao {
   }
 
   void atualizar(joystick::Evento evento) {
+    if (evento != joystick::Evento::NENHUM) {
+      navbar::limparAvisos();
+    }
+
     // % faz dar a volta nas pontas
     if (evento == joystick::Evento::DIREITA) {
       trocarPara((ativa + 1) % QUANTIDADE);
@@ -44,5 +45,6 @@ namespace navegacao {
     }
 
     telas[ativa]->atualizar();
+    navbar::atualizar();
   }
 }
