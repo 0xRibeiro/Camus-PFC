@@ -44,6 +44,16 @@
 
   services.influxdb.enable = true;
 
+  # broker MQTT do IoT, aberto na rede pro ESP32 alcançar
+  services.mosquitto = {
+    enable = true;
+    bind = null;
+    port = 1883;
+    extraConfig = ''
+      allow_anonymous true
+    '';
+  };
+
 
   processes.backend = {
     ports.http.allocate = 8000;

@@ -4,6 +4,7 @@
 #include "hardware/display.h"
 #include "hardware/joystick.h"
 #include "hardware/sons.h"
+#include "rede/mqtt.h"
 #include "rede/wifi.h"
 #include "ui/navbar.h"
 #include "ui/navegacao.h"
@@ -15,6 +16,7 @@ void setup() {
   joystick::iniciar();
   buzzer::iniciar();
   wifi::iniciar();
+  mqtt::iniciar();
   navegacao::iniciar();
 
   // TESTE: liga os dois avisos pra ver piscando
@@ -35,6 +37,14 @@ void loop() {
   } else if (eventoWifi == wifi::Evento::CAIU) {
     navbar::definirWifi(false);
     buzzer::tocar(sons::WIFI_CAIU);
+  }
+
+  // TESTE: só no serial por enquanto, navbar vem depois
+  mqtt::Evento eventoMqtt = mqtt::atualizar();
+  if (eventoMqtt == mqtt::Evento::CONECTOU) {
+    Serial.println("broker conectou");
+  } else if (eventoMqtt == mqtt::Evento::CAIU) {
+    Serial.println("broker caiu");
   }
 
   // TESTE: cima liga o +, baixo liga o -

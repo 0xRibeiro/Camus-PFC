@@ -26,3 +26,6 @@
 
 // Buzzer passivo
 #define BUZZER 18
+
+// broker MQTT local
+#define MQTT_URI "mqtt://192.168.0.13:1883"
