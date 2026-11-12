@@ -17,3 +17,6 @@
 #define JOY_LIMITE_BAIXO 1000
 #define JOY_LIMITE_ALTO 3000
 #define JOY_INTERVALO_MS 100
+
+// Buzzer passivo
+#define BUZZER 18
