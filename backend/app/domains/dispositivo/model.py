@@ -34,13 +34,5 @@ class Dispositivo(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-class DispositivoUsuario(Base):
-    __tablename__ = "dispositivos_usuarios"
-
-    id_dispositivo: Mapped[int] = mapped_column(ForeignKey("dispositivos.id", ondelete="CASCADE"), primary_key=True)
-
-    id_usuario: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True, index=True)
-
-    vinculado_em: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    # unique: 1 esp por aquario
+    id_aquario: Mapped[int | None] = mapped_column(ForeignKey("aquarios.id", ondelete="SET NULL"), unique=True)

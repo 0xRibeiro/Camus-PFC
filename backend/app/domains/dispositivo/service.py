@@ -1,11 +1,7 @@
 import secrets
 from datetime import UTC, datetime
 
-from fastcrud.exceptions.http_exceptions import (
-    DuplicateValueException,
-    ForbiddenException,
-    NotFoundException,
-)
+from fastcrud.exceptions.http_exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.redis import redis_client
@@ -15,10 +11,7 @@ from app.domains.dispositivo.schema import (
     RespostaDesvinculo,
     RespostaVinculo,
     StatusDispositivo,
-    UsuarioVinculadoRead,
-    VincularDispositivo,
 )
-from app.domains.usuario.model import Usuario
 
 CODIGO_VALIDADE_SEGUNDOS = 300
 
@@ -51,69 +44,42 @@ async def gerar_codigo(mac: str) -> RespostaVinculo:
             return RespostaVinculo(codigo=codigo, expira_em=CODIGO_VALIDADE_SEGUNDOS)
 
 
-async def vincular(db: AsyncSession, data: VincularDispositivo, usuario: Usuario) -> Dispositivo:
-    chave = f"dispositivo:codigo:{data.codigo}"
-    mac = await redis_client.get(chave)
+# usado pelo aquario pra conectar e pra entrar com codigo
+async def buscar_por_codigo(db: AsyncSession, codigo: str) -> Dispositivo:
+    mac = await redis_client.get(f"dispositivo:codigo:{codigo}")
 
     if mac is None:
         raise NotFoundException("Código inválido ou expirou")
 
-    repo = DispositivoRepository(db)
-    dispositivo = await repo.buscar_por_mac(mac)
+    dispositivo = await DispositivoRepository(db).buscar_por_mac(mac)
 
     if dispositivo is None:
         raise NotFoundException("Dispositivo não encontrado")
 
-    vinculo = await repo.buscar_vinculo(dispositivo.id, usuario.id)
-
-    if vinculo is not None:
-        raise DuplicateValueException("Você já está vinculado a esse dispositivo")
-
-    await repo.adicionar_vinculo(dispositivo.id, usuario.id)
-
-    # so apaga depois de vincular, se falhar o codigo continua valendo
-    await redis_client.delete(chave)
     return dispositivo
 
 
-async def listar_dispositivos(db: AsyncSession, usuario: Usuario) -> list[Dispositivo]:
-    return await DispositivoRepository(db).listar_do_usuario(usuario.id)
+async def apagar_codigo(codigo: str) -> None:
+    await redis_client.delete(f"dispositivo:codigo:{codigo}")
 
 
-async def listar_usuarios(db: AsyncSession, id_dispositivo: int, usuario: Usuario) -> list[UsuarioVinculadoRead]:
+# tira o esp do aquario e os operadores saem junto
+async def tirar_do_aquario(db: AsyncSession, dispositivo: Dispositivo) -> int:
+    if dispositivo.id_aquario is None:
+        return 0
+
     repo = DispositivoRepository(db)
-    dispositivo = await repo.buscar(id_dispositivo)
-
-    if dispositivo is None:
-        raise NotFoundException("Dispositivo não encontrado")
-
-    vinculo = await repo.buscar_vinculo(dispositivo.id, usuario.id)
-
-    if vinculo is None:
-        raise ForbiddenException("Você não está vinculado a esse dispositivo")
-
-    usuarios = []
-    for username, vinculado_em in await repo.listar_usuarios(dispositivo.id):
-        usuarios.append(UsuarioVinculadoRead(username=username, vinculado_em=vinculado_em))
-    return usuarios
-
-
-async def remover_da_conta(db: AsyncSession, id_dispositivo: int, usuario: Usuario) -> None:
-    repo = DispositivoRepository(db)
-    vinculo = await repo.buscar_vinculo(id_dispositivo, usuario.id)
-
-    if vinculo is None:
-        raise NotFoundException("Você não está vinculado a esse dispositivo")
-
-    await repo.remover_vinculo(vinculo)
+    removidos = await repo.remover_operadores(dispositivo.id_aquario)
+    dispositivo.id_aquario = None
+    await repo.salvar(dispositivo)
+    return removidos
 
 
 async def desvincular_todos(db: AsyncSession, mac: str) -> RespostaDesvinculo:
-    repo = DispositivoRepository(db)
-    dispositivo = await repo.buscar_por_mac(mac)
+    dispositivo = await DispositivoRepository(db).buscar_por_mac(mac)
 
     if dispositivo is None:
         return RespostaDesvinculo(removidos=0)
 
-    removidos = await repo.remover_vinculos(dispositivo.id)
+    removidos = await tirar_do_aquario(db, dispositivo)
     return RespostaDesvinculo(removidos=removidos)

@@ -31,7 +31,7 @@ class RespostaDesvinculo(BaseModel):
     removidos: int
 
 
-class VincularDispositivo(BaseModel):
+class CodigoDispositivo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     codigo: str = Field(..., min_length=6, max_length=6)
@@ -45,8 +45,3 @@ class DispositivoRead(BaseModel):
     estado: EstadoDispositivo
     firmware: str | None
     ultimo_contato: datetime
-
-
-class UsuarioVinculadoRead(BaseModel):
-    username: str
-    vinculado_em: datetime
