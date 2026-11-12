@@ -24,26 +24,46 @@
         :description="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L`"
       />
 
-      <AquarioPeixes :aquario-id="aquario.id" />
+      <AquarioPeixes
+        :aquario-id="aquario.id"
+        :pode-editar="aquario.papel !== 'leitor'"
+      />
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <AquarioIot
+          :aquario-id="aquario.id"
+          :papel="aquario.papel ?? 'dono'"
+          :dispositivo="aquario.dispositivo ?? null"
+          @atualizado="atualizarDispositivo"
+        />
+
+        <AquarioMembros
+          :aquario-id="aquario.id"
+          :papel="aquario.papel ?? 'dono'"
+        />
+      </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import AquarioIot from '~/components/aquario/AquarioIot.vue'
+import AquarioMembros from '~/components/aquario/AquarioMembros.vue'
 import AquarioPeixes from '~/components/peixes/AquarioPeixes.vue'
+import type { AquarioRead, DispositivoRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
 
-type Aquario = {
-  id: number
-  nome: string
-  litros: number | null
-}
-
 const route = useRoute()
 const api = useApi()
-const aquario = ref<Aquario | null>(null)
+const aquario = ref<AquarioRead | null>(null)
 const carregando = ref(true)
+
+function atualizarDispositivo(dispositivo: DispositivoRead | null) {
+  if (aquario.value) {
+    aquario.value.dispositivo = dispositivo
+  }
+}
 
 onMounted(async () => {
   try {

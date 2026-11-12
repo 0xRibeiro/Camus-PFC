@@ -92,6 +92,16 @@ export type AquarioCreate = {
 };
 
 /**
+ * AquarioEntrar
+ */
+export type AquarioEntrar = {
+    /**
+     * Convite
+     */
+    convite: string;
+};
+
+/**
  * AquarioRead
  */
 export type AquarioRead = {
@@ -107,6 +117,18 @@ export type AquarioRead = {
      * Litros
      */
     litros: number | null;
+    papel?: PapelAquario;
+    dispositivo?: DispositivoRead | null;
+};
+
+/**
+ * Body_enviar_imagem_grupos__grupo_id__imagens_post
+ */
+export type BodyEnviarImagemGruposGrupoIdImagensPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
 };
 
 /**
@@ -131,6 +153,16 @@ export type CadastroDiaRead = {
      * Quantidade
      */
     quantidade: number;
+};
+
+/**
+ * CodigoDispositivo
+ */
+export type CodigoDispositivo = {
+    /**
+     * Codigo
+     */
+    codigo: string;
 };
 
 /**
@@ -423,6 +455,20 @@ export type ConteudoUpdate = {
 };
 
 /**
+ * ConviteAquarioRead
+ */
+export type ConviteAquarioRead = {
+    /**
+     * Convite
+     */
+    convite: string;
+    /**
+     * Expira Em Segundos
+     */
+    expira_em_segundos: number;
+};
+
+/**
  * ConviteRead
  */
 export type ConviteRead = {
@@ -489,9 +535,37 @@ export type DashboardRead = {
 };
 
 /**
+ * DispositivoRead
+ */
+export type DispositivoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Mac
+     */
+    mac: string;
+    estado: EstadoDispositivo;
+    /**
+     * Firmware
+     */
+    firmware: string | null;
+    /**
+     * Ultimo Contato
+     */
+    ultimo_contato: string;
+};
+
+/**
  * Especie
  */
 export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
+
+/**
+ * EstadoDispositivo
+ */
+export type EstadoDispositivo = 'online' | 'offline';
 
 /**
  * ForgotPasswordInput
@@ -630,6 +704,17 @@ export type LogAuditoriaRead = {
 };
 
 /**
+ * MembroAquarioRead
+ */
+export type MembroAquarioRead = {
+    /**
+     * Username
+     */
+    username: string;
+    papel: PapelAquario;
+};
+
+/**
  * MembroGrupoRead
  */
 export type MembroGrupoRead = {
@@ -735,6 +820,11 @@ export type ModuloUpdate = {
  * OrigemLancamento
  */
 export type OrigemLancamento = 'conteudo';
+
+/**
+ * PapelAquario
+ */
+export type PapelAquario = 'dono' | 'operador' | 'leitor';
 
 /**
  * PeixeCreate
@@ -1275,11 +1365,31 @@ export type FastcrudCorePaginationDynamicListResponse1 = {
 /**
  * DynamicListResponse
  */
+export type FastcrudCorePaginationDynamicListResponse10 = {
+    /**
+     * Data
+     */
+    data: Array<QuestaoRead>;
+};
+
+/**
+ * DynamicListResponse
+ */
+export type FastcrudCorePaginationDynamicListResponse11 = {
+    /**
+     * Data
+     */
+    data: Array<AlternativaRead>;
+};
+
+/**
+ * DynamicListResponse
+ */
 export type FastcrudCorePaginationDynamicListResponse2 = {
     /**
      * Data
      */
-    data: Array<ModuloRead>;
+    data: Array<TrilhaRead>;
 };
 
 /**
@@ -1289,7 +1399,7 @@ export type FastcrudCorePaginationDynamicListResponse3 = {
     /**
      * Data
      */
-    data: Array<ConquistaRead>;
+    data: Array<ModuloRead>;
 };
 
 /**
@@ -1323,6 +1433,36 @@ export type FastcrudCorePaginationDynamicListResponse6 = {
 };
 
 /**
+ * DynamicListResponse
+ */
+export type FastcrudCorePaginationDynamicListResponse7 = {
+    /**
+     * Data
+     */
+    data: Array<ModuloRead>;
+};
+
+/**
+ * DynamicListResponse
+ */
+export type FastcrudCorePaginationDynamicListResponse8 = {
+    /**
+     * Data
+     */
+    data: Array<ConquistaRead>;
+};
+
+/**
+ * DynamicListResponse
+ */
+export type FastcrudCorePaginationDynamicListResponse9 = {
+    /**
+     * Data
+     */
+    data: Array<ConteudoRead>;
+};
+
+/**
  * DynamicPaginatedResponse
  */
 export type FastcrudCorePaginationDynamicPaginatedResponse1 = {
@@ -1351,11 +1491,63 @@ export type FastcrudCorePaginationDynamicPaginatedResponse1 = {
 /**
  * DynamicPaginatedResponse
  */
+export type FastcrudCorePaginationDynamicPaginatedResponse10 = {
+    /**
+     * Data
+     */
+    data: Array<QuestaoRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
+export type FastcrudCorePaginationDynamicPaginatedResponse11 = {
+    /**
+     * Data
+     */
+    data: Array<AlternativaRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
 export type FastcrudCorePaginationDynamicPaginatedResponse2 = {
     /**
      * Data
      */
-    data: Array<ModuloRead>;
+    data: Array<TrilhaRead>;
     /**
      * Total Count
      */
@@ -1381,7 +1573,7 @@ export type FastcrudCorePaginationDynamicPaginatedResponse3 = {
     /**
      * Data
      */
-    data: Array<ConquistaRead>;
+    data: Array<ModuloRead>;
     /**
      * Total Count
      */
@@ -1460,6 +1652,84 @@ export type FastcrudCorePaginationDynamicPaginatedResponse6 = {
      * Data
      */
     data: Array<AlternativaRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
+export type FastcrudCorePaginationDynamicPaginatedResponse7 = {
+    /**
+     * Data
+     */
+    data: Array<ModuloRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
+export type FastcrudCorePaginationDynamicPaginatedResponse8 = {
+    /**
+     * Data
+     */
+    data: Array<ConquistaRead>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Items Per Page
+     */
+    items_per_page?: number | null;
+};
+
+/**
+ * DynamicPaginatedResponse
+ */
+export type FastcrudCorePaginationDynamicPaginatedResponse9 = {
+    /**
+     * Data
+     */
+    data: Array<ConteudoRead>;
     /**
      * Total Count
      */
@@ -2089,6 +2359,917 @@ export type TrilhaUpdateTrilhasIdPatchResponses = {
     200: unknown;
 };
 
+export type TrilhaReadMultiGruposGrupoIdTrilhasGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+    };
+    url: '/grupos/{grupo_id}/trilhas';
+};
+
+export type TrilhaReadMultiGruposGrupoIdTrilhasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrilhaReadMultiGruposGrupoIdTrilhasGetError = TrilhaReadMultiGruposGrupoIdTrilhasGetErrors[keyof TrilhaReadMultiGruposGrupoIdTrilhasGetErrors];
+
+export type TrilhaReadMultiGruposGrupoIdTrilhasGetResponses = {
+    /**
+     * Response Trilha Read Multi Grupos  Grupo Id  Trilhas Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse2 | FastcrudCorePaginationDynamicListResponse2;
+};
+
+export type TrilhaReadMultiGruposGrupoIdTrilhasGetResponse = TrilhaReadMultiGruposGrupoIdTrilhasGetResponses[keyof TrilhaReadMultiGruposGrupoIdTrilhasGetResponses];
+
+export type TrilhaCreateGruposGrupoIdTrilhasPostData = {
+    body: TrilhaCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas';
+};
+
+export type TrilhaCreateGruposGrupoIdTrilhasPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrilhaCreateGruposGrupoIdTrilhasPostError = TrilhaCreateGruposGrupoIdTrilhasPostErrors[keyof TrilhaCreateGruposGrupoIdTrilhasPostErrors];
+
+export type TrilhaCreateGruposGrupoIdTrilhasPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type TrilhaDeleteGruposGrupoIdTrilhasIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}';
+};
+
+export type TrilhaDeleteGruposGrupoIdTrilhasIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrilhaDeleteGruposGrupoIdTrilhasIdDeleteError = TrilhaDeleteGruposGrupoIdTrilhasIdDeleteErrors[keyof TrilhaDeleteGruposGrupoIdTrilhasIdDeleteErrors];
+
+export type TrilhaDeleteGruposGrupoIdTrilhasIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type TrilhaReadGruposGrupoIdTrilhasIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}';
+};
+
+export type TrilhaReadGruposGrupoIdTrilhasIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrilhaReadGruposGrupoIdTrilhasIdGetError = TrilhaReadGruposGrupoIdTrilhasIdGetErrors[keyof TrilhaReadGruposGrupoIdTrilhasIdGetErrors];
+
+export type TrilhaReadGruposGrupoIdTrilhasIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TrilhaRead;
+};
+
+export type TrilhaReadGruposGrupoIdTrilhasIdGetResponse = TrilhaReadGruposGrupoIdTrilhasIdGetResponses[keyof TrilhaReadGruposGrupoIdTrilhasIdGetResponses];
+
+export type TrilhaUpdateGruposGrupoIdTrilhasIdPatchData = {
+    body: TrilhaUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}';
+};
+
+export type TrilhaUpdateGruposGrupoIdTrilhasIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrilhaUpdateGruposGrupoIdTrilhasIdPatchError = TrilhaUpdateGruposGrupoIdTrilhasIdPatchErrors[keyof TrilhaUpdateGruposGrupoIdTrilhasIdPatchErrors];
+
+export type TrilhaUpdateGruposGrupoIdTrilhasIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ModuloReadMultiGruposGrupoIdModulosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+        /**
+         * Trilha Id
+         */
+        trilha_id?: number;
+    };
+    url: '/grupos/{grupo_id}/modulos';
+};
+
+export type ModuloReadMultiGruposGrupoIdModulosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModuloReadMultiGruposGrupoIdModulosGetError = ModuloReadMultiGruposGrupoIdModulosGetErrors[keyof ModuloReadMultiGruposGrupoIdModulosGetErrors];
+
+export type ModuloReadMultiGruposGrupoIdModulosGetResponses = {
+    /**
+     * Response Modulo Read Multi Grupos  Grupo Id  Modulos Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse3 | FastcrudCorePaginationDynamicListResponse3;
+};
+
+export type ModuloReadMultiGruposGrupoIdModulosGetResponse = ModuloReadMultiGruposGrupoIdModulosGetResponses[keyof ModuloReadMultiGruposGrupoIdModulosGetResponses];
+
+export type ModuloCreateGruposGrupoIdModulosPostData = {
+    body: ModuloCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/modulos';
+};
+
+export type ModuloCreateGruposGrupoIdModulosPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModuloCreateGruposGrupoIdModulosPostError = ModuloCreateGruposGrupoIdModulosPostErrors[keyof ModuloCreateGruposGrupoIdModulosPostErrors];
+
+export type ModuloCreateGruposGrupoIdModulosPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ModuloDeleteGruposGrupoIdModulosIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/modulos/{id}';
+};
+
+export type ModuloDeleteGruposGrupoIdModulosIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModuloDeleteGruposGrupoIdModulosIdDeleteError = ModuloDeleteGruposGrupoIdModulosIdDeleteErrors[keyof ModuloDeleteGruposGrupoIdModulosIdDeleteErrors];
+
+export type ModuloDeleteGruposGrupoIdModulosIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ModuloReadGruposGrupoIdModulosIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/modulos/{id}';
+};
+
+export type ModuloReadGruposGrupoIdModulosIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModuloReadGruposGrupoIdModulosIdGetError = ModuloReadGruposGrupoIdModulosIdGetErrors[keyof ModuloReadGruposGrupoIdModulosIdGetErrors];
+
+export type ModuloReadGruposGrupoIdModulosIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuloRead;
+};
+
+export type ModuloReadGruposGrupoIdModulosIdGetResponse = ModuloReadGruposGrupoIdModulosIdGetResponses[keyof ModuloReadGruposGrupoIdModulosIdGetResponses];
+
+export type ModuloUpdateGruposGrupoIdModulosIdPatchData = {
+    body: ModuloUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/modulos/{id}';
+};
+
+export type ModuloUpdateGruposGrupoIdModulosIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ModuloUpdateGruposGrupoIdModulosIdPatchError = ModuloUpdateGruposGrupoIdModulosIdPatchErrors[keyof ModuloUpdateGruposGrupoIdModulosIdPatchErrors];
+
+export type ModuloUpdateGruposGrupoIdModulosIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ConteudoReadMultiGruposGrupoIdConteudosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+        /**
+         * Modulo Id
+         */
+        modulo_id?: number;
+    };
+    url: '/grupos/{grupo_id}/conteudos';
+};
+
+export type ConteudoReadMultiGruposGrupoIdConteudosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConteudoReadMultiGruposGrupoIdConteudosGetError = ConteudoReadMultiGruposGrupoIdConteudosGetErrors[keyof ConteudoReadMultiGruposGrupoIdConteudosGetErrors];
+
+export type ConteudoReadMultiGruposGrupoIdConteudosGetResponses = {
+    /**
+     * Response Conteudo Read Multi Grupos  Grupo Id  Conteudos Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse4 | FastcrudCorePaginationDynamicListResponse4;
+};
+
+export type ConteudoReadMultiGruposGrupoIdConteudosGetResponse = ConteudoReadMultiGruposGrupoIdConteudosGetResponses[keyof ConteudoReadMultiGruposGrupoIdConteudosGetResponses];
+
+export type ConteudoCreateGruposGrupoIdConteudosPostData = {
+    body: ConteudoCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/conteudos';
+};
+
+export type ConteudoCreateGruposGrupoIdConteudosPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConteudoCreateGruposGrupoIdConteudosPostError = ConteudoCreateGruposGrupoIdConteudosPostErrors[keyof ConteudoCreateGruposGrupoIdConteudosPostErrors];
+
+export type ConteudoCreateGruposGrupoIdConteudosPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ConteudoDeleteGruposGrupoIdConteudosIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/conteudos/{id}';
+};
+
+export type ConteudoDeleteGruposGrupoIdConteudosIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConteudoDeleteGruposGrupoIdConteudosIdDeleteError = ConteudoDeleteGruposGrupoIdConteudosIdDeleteErrors[keyof ConteudoDeleteGruposGrupoIdConteudosIdDeleteErrors];
+
+export type ConteudoDeleteGruposGrupoIdConteudosIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ConteudoReadGruposGrupoIdConteudosIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/conteudos/{id}';
+};
+
+export type ConteudoReadGruposGrupoIdConteudosIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConteudoReadGruposGrupoIdConteudosIdGetError = ConteudoReadGruposGrupoIdConteudosIdGetErrors[keyof ConteudoReadGruposGrupoIdConteudosIdGetErrors];
+
+export type ConteudoReadGruposGrupoIdConteudosIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConteudoRead;
+};
+
+export type ConteudoReadGruposGrupoIdConteudosIdGetResponse = ConteudoReadGruposGrupoIdConteudosIdGetResponses[keyof ConteudoReadGruposGrupoIdConteudosIdGetResponses];
+
+export type ConteudoUpdateGruposGrupoIdConteudosIdPatchData = {
+    body: ConteudoUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/conteudos/{id}';
+};
+
+export type ConteudoUpdateGruposGrupoIdConteudosIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConteudoUpdateGruposGrupoIdConteudosIdPatchError = ConteudoUpdateGruposGrupoIdConteudosIdPatchErrors[keyof ConteudoUpdateGruposGrupoIdConteudosIdPatchErrors];
+
+export type ConteudoUpdateGruposGrupoIdConteudosIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type QuestaoReadMultiGruposGrupoIdQuestoesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+        /**
+         * Conteudo Id
+         */
+        conteudo_id?: number;
+    };
+    url: '/grupos/{grupo_id}/questoes';
+};
+
+export type QuestaoReadMultiGruposGrupoIdQuestoesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuestaoReadMultiGruposGrupoIdQuestoesGetError = QuestaoReadMultiGruposGrupoIdQuestoesGetErrors[keyof QuestaoReadMultiGruposGrupoIdQuestoesGetErrors];
+
+export type QuestaoReadMultiGruposGrupoIdQuestoesGetResponses = {
+    /**
+     * Response Questao Read Multi Grupos  Grupo Id  Questoes Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse5 | FastcrudCorePaginationDynamicListResponse5;
+};
+
+export type QuestaoReadMultiGruposGrupoIdQuestoesGetResponse = QuestaoReadMultiGruposGrupoIdQuestoesGetResponses[keyof QuestaoReadMultiGruposGrupoIdQuestoesGetResponses];
+
+export type QuestaoCreateGruposGrupoIdQuestoesPostData = {
+    body: QuestaoCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/questoes';
+};
+
+export type QuestaoCreateGruposGrupoIdQuestoesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuestaoCreateGruposGrupoIdQuestoesPostError = QuestaoCreateGruposGrupoIdQuestoesPostErrors[keyof QuestaoCreateGruposGrupoIdQuestoesPostErrors];
+
+export type QuestaoCreateGruposGrupoIdQuestoesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type QuestaoDeleteGruposGrupoIdQuestoesIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/questoes/{id}';
+};
+
+export type QuestaoDeleteGruposGrupoIdQuestoesIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuestaoDeleteGruposGrupoIdQuestoesIdDeleteError = QuestaoDeleteGruposGrupoIdQuestoesIdDeleteErrors[keyof QuestaoDeleteGruposGrupoIdQuestoesIdDeleteErrors];
+
+export type QuestaoDeleteGruposGrupoIdQuestoesIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type QuestaoReadGruposGrupoIdQuestoesIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/questoes/{id}';
+};
+
+export type QuestaoReadGruposGrupoIdQuestoesIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuestaoReadGruposGrupoIdQuestoesIdGetError = QuestaoReadGruposGrupoIdQuestoesIdGetErrors[keyof QuestaoReadGruposGrupoIdQuestoesIdGetErrors];
+
+export type QuestaoReadGruposGrupoIdQuestoesIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuestaoRead;
+};
+
+export type QuestaoReadGruposGrupoIdQuestoesIdGetResponse = QuestaoReadGruposGrupoIdQuestoesIdGetResponses[keyof QuestaoReadGruposGrupoIdQuestoesIdGetResponses];
+
+export type QuestaoUpdateGruposGrupoIdQuestoesIdPatchData = {
+    body: QuestaoUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/questoes/{id}';
+};
+
+export type QuestaoUpdateGruposGrupoIdQuestoesIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuestaoUpdateGruposGrupoIdQuestoesIdPatchError = QuestaoUpdateGruposGrupoIdQuestoesIdPatchErrors[keyof QuestaoUpdateGruposGrupoIdQuestoesIdPatchErrors];
+
+export type QuestaoUpdateGruposGrupoIdQuestoesIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type AlternativaReadMultiGruposGrupoIdAlternativasGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number | null;
+        /**
+         * Page
+         */
+        page?: number | null;
+        /**
+         * Itemsperpage
+         */
+        itemsPerPage?: number | null;
+        /**
+         * Sort
+         */
+        sort?: string | null;
+        /**
+         * Questao Id
+         */
+        questao_id?: number;
+    };
+    url: '/grupos/{grupo_id}/alternativas';
+};
+
+export type AlternativaReadMultiGruposGrupoIdAlternativasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AlternativaReadMultiGruposGrupoIdAlternativasGetError = AlternativaReadMultiGruposGrupoIdAlternativasGetErrors[keyof AlternativaReadMultiGruposGrupoIdAlternativasGetErrors];
+
+export type AlternativaReadMultiGruposGrupoIdAlternativasGetResponses = {
+    /**
+     * Response Alternativa Read Multi Grupos  Grupo Id  Alternativas Get
+     *
+     * Successful Response
+     */
+    200: FastcrudCorePaginationDynamicPaginatedResponse6 | FastcrudCorePaginationDynamicListResponse6;
+};
+
+export type AlternativaReadMultiGruposGrupoIdAlternativasGetResponse = AlternativaReadMultiGruposGrupoIdAlternativasGetResponses[keyof AlternativaReadMultiGruposGrupoIdAlternativasGetResponses];
+
+export type AlternativaCreateGruposGrupoIdAlternativasPostData = {
+    body: AlternativaCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/alternativas';
+};
+
+export type AlternativaCreateGruposGrupoIdAlternativasPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AlternativaCreateGruposGrupoIdAlternativasPostError = AlternativaCreateGruposGrupoIdAlternativasPostErrors[keyof AlternativaCreateGruposGrupoIdAlternativasPostErrors];
+
+export type AlternativaCreateGruposGrupoIdAlternativasPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type AlternativaDeleteGruposGrupoIdAlternativasIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/alternativas/{id}';
+};
+
+export type AlternativaDeleteGruposGrupoIdAlternativasIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AlternativaDeleteGruposGrupoIdAlternativasIdDeleteError = AlternativaDeleteGruposGrupoIdAlternativasIdDeleteErrors[keyof AlternativaDeleteGruposGrupoIdAlternativasIdDeleteErrors];
+
+export type AlternativaDeleteGruposGrupoIdAlternativasIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type AlternativaReadGruposGrupoIdAlternativasIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/alternativas/{id}';
+};
+
+export type AlternativaReadGruposGrupoIdAlternativasIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AlternativaReadGruposGrupoIdAlternativasIdGetError = AlternativaReadGruposGrupoIdAlternativasIdGetErrors[keyof AlternativaReadGruposGrupoIdAlternativasIdGetErrors];
+
+export type AlternativaReadGruposGrupoIdAlternativasIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AlternativaRead;
+};
+
+export type AlternativaReadGruposGrupoIdAlternativasIdGetResponse = AlternativaReadGruposGrupoIdAlternativasIdGetResponses[keyof AlternativaReadGruposGrupoIdAlternativasIdGetResponses];
+
+export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchData = {
+    body: AlternativaUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/alternativas/{id}';
+};
+
+export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchError = AlternativaUpdateGruposGrupoIdAlternativasIdPatchErrors[keyof AlternativaUpdateGruposGrupoIdAlternativasIdPatchErrors];
+
+export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type ModuloReadMultiModulosGetData = {
     body?: never;
     path?: never;
@@ -2136,7 +3317,7 @@ export type ModuloReadMultiModulosGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse2 | FastcrudCorePaginationDynamicListResponse2;
+    200: FastcrudCorePaginationDynamicPaginatedResponse7 | FastcrudCorePaginationDynamicListResponse7;
 };
 
 export type ModuloReadMultiModulosGetResponse = ModuloReadMultiModulosGetResponses[keyof ModuloReadMultiModulosGetResponses];
@@ -2293,7 +3474,7 @@ export type ConquistaReadMultiConquistasGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse3 | FastcrudCorePaginationDynamicListResponse3;
+    200: FastcrudCorePaginationDynamicPaginatedResponse8 | FastcrudCorePaginationDynamicListResponse8;
 };
 
 export type ConquistaReadMultiConquistasGetResponse = ConquistaReadMultiConquistasGetResponses[keyof ConquistaReadMultiConquistasGetResponses];
@@ -2454,7 +3635,7 @@ export type ConteudoReadMultiConteudosGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse4 | FastcrudCorePaginationDynamicListResponse4;
+    200: FastcrudCorePaginationDynamicPaginatedResponse9 | FastcrudCorePaginationDynamicListResponse9;
 };
 
 export type ConteudoReadMultiConteudosGetResponse = ConteudoReadMultiConteudosGetResponses[keyof ConteudoReadMultiConteudosGetResponses];
@@ -2615,7 +3796,7 @@ export type QuestaoReadMultiQuestoesGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse5 | FastcrudCorePaginationDynamicListResponse5;
+    200: FastcrudCorePaginationDynamicPaginatedResponse10 | FastcrudCorePaginationDynamicListResponse10;
 };
 
 export type QuestaoReadMultiQuestoesGetResponse = QuestaoReadMultiQuestoesGetResponses[keyof QuestaoReadMultiQuestoesGetResponses];
@@ -2806,7 +3987,7 @@ export type AlternativaReadMultiAlternativasGetResponses = {
      *
      * Successful Response
      */
-    200: FastcrudCorePaginationDynamicPaginatedResponse6 | FastcrudCorePaginationDynamicListResponse6;
+    200: FastcrudCorePaginationDynamicPaginatedResponse11 | FastcrudCorePaginationDynamicListResponse11;
 };
 
 export type AlternativaReadMultiAlternativasGetResponse = AlternativaReadMultiAlternativasGetResponses[keyof AlternativaReadMultiAlternativasGetResponses];
@@ -3010,6 +4191,208 @@ export type CriarAquarioAquariosPostResponses = {
 };
 
 export type CriarAquarioAquariosPostResponse = CriarAquarioAquariosPostResponses[keyof CriarAquarioAquariosPostResponses];
+
+export type EntrarComCodigoAquariosEntrarComCodigoPostData = {
+    body: CodigoDispositivo;
+    path?: never;
+    query?: never;
+    url: '/aquarios/entrar-com-codigo';
+};
+
+export type EntrarComCodigoAquariosEntrarComCodigoPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EntrarComCodigoAquariosEntrarComCodigoPostError = EntrarComCodigoAquariosEntrarComCodigoPostErrors[keyof EntrarComCodigoAquariosEntrarComCodigoPostErrors];
+
+export type EntrarComCodigoAquariosEntrarComCodigoPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AquarioRead;
+};
+
+export type EntrarComCodigoAquariosEntrarComCodigoPostResponse = EntrarComCodigoAquariosEntrarComCodigoPostResponses[keyof EntrarComCodigoAquariosEntrarComCodigoPostResponses];
+
+export type EntrarComConviteAquariosEntrarPostData = {
+    body: AquarioEntrar;
+    path?: never;
+    query?: never;
+    url: '/aquarios/entrar';
+};
+
+export type EntrarComConviteAquariosEntrarPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EntrarComConviteAquariosEntrarPostError = EntrarComConviteAquariosEntrarPostErrors[keyof EntrarComConviteAquariosEntrarPostErrors];
+
+export type EntrarComConviteAquariosEntrarPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AquarioRead;
+};
+
+export type EntrarComConviteAquariosEntrarPostResponse = EntrarComConviteAquariosEntrarPostResponses[keyof EntrarComConviteAquariosEntrarPostResponses];
+
+export type DesconectarDispositivoAquariosAquarioIdDispositivoDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/dispositivo';
+};
+
+export type DesconectarDispositivoAquariosAquarioIdDispositivoDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DesconectarDispositivoAquariosAquarioIdDispositivoDeleteError = DesconectarDispositivoAquariosAquarioIdDispositivoDeleteErrors[keyof DesconectarDispositivoAquariosAquarioIdDispositivoDeleteErrors];
+
+export type DesconectarDispositivoAquariosAquarioIdDispositivoDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DesconectarDispositivoAquariosAquarioIdDispositivoDeleteResponse = DesconectarDispositivoAquariosAquarioIdDispositivoDeleteResponses[keyof DesconectarDispositivoAquariosAquarioIdDispositivoDeleteResponses];
+
+export type ConectarDispositivoAquariosAquarioIdDispositivoPostData = {
+    body: CodigoDispositivo;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/dispositivo';
+};
+
+export type ConectarDispositivoAquariosAquarioIdDispositivoPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConectarDispositivoAquariosAquarioIdDispositivoPostError = ConectarDispositivoAquariosAquarioIdDispositivoPostErrors[keyof ConectarDispositivoAquariosAquarioIdDispositivoPostErrors];
+
+export type ConectarDispositivoAquariosAquarioIdDispositivoPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: DispositivoRead;
+};
+
+export type ConectarDispositivoAquariosAquarioIdDispositivoPostResponse = ConectarDispositivoAquariosAquarioIdDispositivoPostResponses[keyof ConectarDispositivoAquariosAquarioIdDispositivoPostResponses];
+
+export type GerarConviteAquariosAquarioIdConvitesPostData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/convites';
+};
+
+export type GerarConviteAquariosAquarioIdConvitesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GerarConviteAquariosAquarioIdConvitesPostError = GerarConviteAquariosAquarioIdConvitesPostErrors[keyof GerarConviteAquariosAquarioIdConvitesPostErrors];
+
+export type GerarConviteAquariosAquarioIdConvitesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ConviteAquarioRead;
+};
+
+export type GerarConviteAquariosAquarioIdConvitesPostResponse = GerarConviteAquariosAquarioIdConvitesPostResponses[keyof GerarConviteAquariosAquarioIdConvitesPostResponses];
+
+export type ListarMembrosAquariosAquarioIdMembrosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/membros';
+};
+
+export type ListarMembrosAquariosAquarioIdMembrosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarMembrosAquariosAquarioIdMembrosGetError = ListarMembrosAquariosAquarioIdMembrosGetErrors[keyof ListarMembrosAquariosAquarioIdMembrosGetErrors];
+
+export type ListarMembrosAquariosAquarioIdMembrosGetResponses = {
+    /**
+     * Response Listar Membros Aquarios  Aquario Id  Membros Get
+     *
+     * Successful Response
+     */
+    200: Array<MembroAquarioRead>;
+};
+
+export type ListarMembrosAquariosAquarioIdMembrosGetResponse = ListarMembrosAquariosAquarioIdMembrosGetResponses[keyof ListarMembrosAquariosAquarioIdMembrosGetResponses];
+
+export type SairDoAquarioAquariosAquarioIdSairDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/sair';
+};
+
+export type SairDoAquarioAquariosAquarioIdSairDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SairDoAquarioAquariosAquarioIdSairDeleteError = SairDoAquarioAquariosAquarioIdSairDeleteErrors[keyof SairDoAquarioAquariosAquarioIdSairDeleteErrors];
+
+export type SairDoAquarioAquariosAquarioIdSairDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type SairDoAquarioAquariosAquarioIdSairDeleteResponse = SairDoAquarioAquariosAquarioIdSairDeleteResponses[keyof SairDoAquarioAquariosAquarioIdSairDeleteResponses];
 
 export type ListarPeixesAquariosAquarioIdPeixesGetData = {
     body?: never;
@@ -3459,6 +4842,266 @@ export type EnviarImagemImagensPostResponses = {
 };
 
 export type EnviarImagemImagensPostResponse = EnviarImagemImagensPostResponses[keyof EnviarImagemImagensPostResponses];
+
+export type EnviarImagemGruposGrupoIdImagensPostData = {
+    body: BodyEnviarImagemGruposGrupoIdImagensPost;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/imagens';
+};
+
+export type EnviarImagemGruposGrupoIdImagensPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EnviarImagemGruposGrupoIdImagensPostError = EnviarImagemGruposGrupoIdImagensPostErrors[keyof EnviarImagemGruposGrupoIdImagensPostErrors];
+
+export type EnviarImagemGruposGrupoIdImagensPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: ImagemRead;
+};
+
+export type EnviarImagemGruposGrupoIdImagensPostResponse = EnviarImagemGruposGrupoIdImagensPostResponses[keyof EnviarImagemGruposGrupoIdImagensPostResponses];
+
+export type MeuXpGruposGrupoIdPontuacaoXpGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/pontuacao/xp';
+};
+
+export type MeuXpGruposGrupoIdPontuacaoXpGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MeuXpGruposGrupoIdPontuacaoXpGetError = MeuXpGruposGrupoIdPontuacaoXpGetErrors[keyof MeuXpGruposGrupoIdPontuacaoXpGetErrors];
+
+export type MeuXpGruposGrupoIdPontuacaoXpGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: XpRead;
+};
+
+export type MeuXpGruposGrupoIdPontuacaoXpGetResponse = MeuXpGruposGrupoIdPontuacaoXpGetResponses[keyof MeuXpGruposGrupoIdPontuacaoXpGetResponses];
+
+export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/pontuacao/extrato';
+};
+
+export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetError = MeuExtratoGruposGrupoIdPontuacaoExtratoGetErrors[keyof MeuExtratoGruposGrupoIdPontuacaoExtratoGetErrors];
+
+export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetResponses = {
+    /**
+     * Response Meu Extrato Grupos  Grupo Id  Pontuacao Extrato Get
+     *
+     * Successful Response
+     */
+    200: Array<LancamentoRead>;
+};
+
+export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetResponse = MeuExtratoGruposGrupoIdPontuacaoExtratoGetResponses[keyof MeuExtratoGruposGrupoIdPontuacaoExtratoGetResponses];
+
+export type ListarTrilhasGruposGrupoIdProgressoTrilhasGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/progresso/trilhas';
+};
+
+export type ListarTrilhasGruposGrupoIdProgressoTrilhasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarTrilhasGruposGrupoIdProgressoTrilhasGetError = ListarTrilhasGruposGrupoIdProgressoTrilhasGetErrors[keyof ListarTrilhasGruposGrupoIdProgressoTrilhasGetErrors];
+
+export type ListarTrilhasGruposGrupoIdProgressoTrilhasGetResponses = {
+    /**
+     * Response Listar Trilhas Grupos  Grupo Id  Progresso Trilhas Get
+     *
+     * Successful Response
+     */
+    200: Array<TrilhaResumoRead>;
+};
+
+export type ListarTrilhasGruposGrupoIdProgressoTrilhasGetResponse = ListarTrilhasGruposGrupoIdProgressoTrilhasGetResponses[keyof ListarTrilhasGruposGrupoIdProgressoTrilhasGetResponses];
+
+export type BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Trilha Id
+         */
+        trilha_id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/progresso/trilhas/{trilha_id}';
+};
+
+export type BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetError = BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetErrors[keyof BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetErrors];
+
+export type BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TrilhaAlunoRead;
+};
+
+export type BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetResponse = BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetResponses[keyof BuscarTrilhaGruposGrupoIdProgressoTrilhasTrilhaIdGetResponses];
+
+export type BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Conteudo Id
+         */
+        conteudo_id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/progresso/conteudos/{conteudo_id}';
+};
+
+export type BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetError = BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetErrors[keyof BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetErrors];
+
+export type BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConteudoAlunoRead;
+};
+
+export type BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetResponse = BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetResponses[keyof BuscarConteudoGruposGrupoIdProgressoConteudosConteudoIdGetResponses];
+
+export type ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostData = {
+    body?: never;
+    path: {
+        /**
+         * Conteudo Id
+         */
+        conteudo_id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/progresso/conteudos/{conteudo_id}/concluir';
+};
+
+export type ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostError = ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostErrors[keyof ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostErrors];
+
+export type ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConclusaoRead;
+};
+
+export type ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostResponse = ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostResponses[keyof ConcluirConteudoGruposGrupoIdProgressoConteudosConteudoIdConcluirPostResponses];
+
+export type ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostData = {
+    body: RespostaQuizCreate;
+    path: {
+        /**
+         * Conteudo Id
+         */
+        conteudo_id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/progresso/conteudos/{conteudo_id}/responder';
+};
+
+export type ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostError = ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostErrors[keyof ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostErrors];
+
+export type ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResultadoQuizRead;
+};
+
+export type ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostResponse = ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostResponses[keyof ResponderQuizGruposGrupoIdProgressoConteudosConteudoIdResponderPostResponses];
 
 export type HealthHealthGetData = {
     body?: never;
