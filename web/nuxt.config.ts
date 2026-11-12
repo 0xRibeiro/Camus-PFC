@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  app: {
+    head: {
+      title: 'Camus',
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}],
+    },
+  },
   ui: {
     // array de nome das cores semanticas q as adicionais sao definidas no web/app/app.config.ts
     theme: {
