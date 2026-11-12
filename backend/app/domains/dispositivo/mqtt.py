@@ -1,7 +1,7 @@
 from app.core.database import async_session_maker
 from app.core.mqtt import mqtt
-from app.domains.dispositivo.schema import StatusDispositivo
-from app.domains.dispositivo.service import registrar_status
+from app.domains.dispositivo.schema import PedidoVinculo, StatusDispositivo
+from app.domains.dispositivo.service import desvincular_todos, gerar_codigo, registrar_status
 
 
 # + pega o status de qualquer esp
@@ -12,3 +12,16 @@ async def ao_status(status: StatusDispositivo, topic: str):
 
     async with async_session_maker() as db:
         await registrar_status(db, mac, status)
+
+
+@mqtt.subscribe("camus/dispositivos/+/vinculo/pedido")
+async def ao_pedido_vinculo(pedido: PedidoVinculo, topic: str):
+    mac = topic.split("/")[2]
+
+    if pedido.acao == "gerar_codigo":
+        resposta = await gerar_codigo(mac)
+        mqtt.publish(f"camus/dispositivos/{mac}/vinculo/resposta", resposta)
+    elif pedido.acao == "desvincular_todos":
+        async with async_session_maker() as db:
+            resposta = await desvincular_todos(db, mac)
+        mqtt.publish(f"camus/dispositivos/{mac}/vinculo/resposta", resposta)

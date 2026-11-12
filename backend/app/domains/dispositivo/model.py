@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -31,5 +31,16 @@ class Dispositivo(Base):
     )
 
     criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+class DispositivoUsuario(Base):
+    __tablename__ = "dispositivos_usuarios"
+
+    id_dispositivo: Mapped[int] = mapped_column(ForeignKey("dispositivos.id", ondelete="CASCADE"), primary_key=True)
+
+    id_usuario: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True, index=True)
+
+    vinculado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
