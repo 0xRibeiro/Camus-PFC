@@ -11,6 +11,7 @@ from app.core.mqtt import mqtt
 from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
+from app.domains.dispositivo import mqtt as dispositivo_mqtt 
 from app.domains.grupo.router import router as grupo_router
 from app.domains.pontuacao.router import router as pontuacao_router
 from app.domains.progresso.router import router as progresso_router
