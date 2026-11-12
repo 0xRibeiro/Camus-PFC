@@ -6,6 +6,7 @@ namespace navbar {
 
   void desenhar(const char* nome, int pagina, int total);
   void definirWifi(bool conectado);
+  void definirBroker(bool conectado);
   void avisarModuloNovo();
   void avisarModuloSaiu();
   void limparAvisos();

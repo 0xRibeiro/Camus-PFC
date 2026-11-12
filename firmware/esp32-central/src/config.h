@@ -29,3 +29,6 @@
 
 // broker MQTT local
 #define MQTT_URI "mqtt://192.168.0.13:1883"
+
+// vai no status
+#define FIRMWARE_VERSAO "0.1.0"

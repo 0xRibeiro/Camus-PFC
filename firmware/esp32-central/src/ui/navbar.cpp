@@ -7,6 +7,7 @@
 namespace navbar {
   // começa cortado até o wifi avisar q conectou
   bool wifiConectado = false;
+  bool brokerConectado = false;
   bool moduloNovo = false;
   bool moduloSaiu = false;
   bool aceso = true;
@@ -15,12 +16,14 @@ namespace navbar {
 
   // wifi bem no canto direito, 160 - 16 - 1 de folga
   void desenharWifi() {
-    if (wifiConectado) {
+    if (wifiConectado && brokerConectado) {
       display::tft.drawRGBBitmap(143, 1, WIFI, 16, 16);
-    } else if (aceso) {
-      display::tft.drawRGBBitmap(143, 1, WIFI_CORTADO, 16, 16);
-    } else {
+    } else if (!aceso) {
       display::tft.fillRect(143, 1, 16, 16, ST77XX_BLACK);
+    } else if (wifiConectado) {
+      display::tft.drawRGBBitmap(143, 1, WIFI_SEM_BROKER, 16, 16);
+    } else {
+      display::tft.drawRGBBitmap(143, 1, WIFI_CORTADO, 16, 16);
     }
   }
 
@@ -74,6 +77,12 @@ namespace navbar {
     desenharWifi();
   }
 
+  void definirBroker(bool conectado) {
+    brokerConectado = conectado;
+    aceso = true;
+    desenharWifi();
+  }
+
   void avisarModuloNovo() {
     moduloNovo = true;
     aceso = true;
@@ -94,7 +103,7 @@ namespace navbar {
 
   // pisca sem delay, só redesenha os quadrados dos ícones
   void atualizar() {
-    if (wifiConectado && !moduloNovo && !moduloSaiu) {
+    if (wifiConectado && brokerConectado && !moduloNovo && !moduloSaiu) {
       return;
     }
 

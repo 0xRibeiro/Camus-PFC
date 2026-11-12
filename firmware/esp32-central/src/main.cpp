@@ -39,12 +39,12 @@ void loop() {
     buzzer::tocar(sons::WIFI_CAIU);
   }
 
-  // TESTE: só no serial por enquanto, navbar vem depois
+  // broker so mexe no icone, sem som
   mqtt::Evento eventoMqtt = mqtt::atualizar();
   if (eventoMqtt == mqtt::Evento::CONECTOU) {
-    Serial.println("broker conectou");
+    navbar::definirBroker(true);
   } else if (eventoMqtt == mqtt::Evento::CAIU) {
-    Serial.println("broker caiu");
+    navbar::definirBroker(false);
   }
 
   // TESTE: cima liga o +, baixo liga o -

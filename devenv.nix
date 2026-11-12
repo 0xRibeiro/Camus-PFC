@@ -44,7 +44,7 @@
 
   services.influxdb.enable = true;
 
-  # broker MQTT do IoT, aberto na rede pro ESP32 alcançar
+  # broker do iot, aberto na rede pro esp
   services.mosquitto = {
     enable = true;
     bind = null;

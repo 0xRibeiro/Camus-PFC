@@ -8,14 +8,16 @@
 namespace mqtt {
   esp_mqtt_client_handle_t cliente;
 
-  // quem escreve é a tarefa da esp-mqtt, o loop só lê
   bool conectado = false;
 
-  // último valor q o atualizar() já avisou
+  // ultimo estado ja avisado
   bool avisado = false;
 
-  // MAC em minúsculo e sem ":", 12 + \0
+  // mac sem ":", 12 + \0
   char id[13];
+
+  // camus/dispositivos/<mac>/status + \0
+  char topicoStatus[39];
 
   void gerarId() {
     uint8_t mac[6];
@@ -23,23 +25,36 @@ namespace mqtt {
     snprintf(id, sizeof(id), "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   }
 
-  // roda na tarefa da esp-mqtt, então só marca o estado e mais nada
-  // o formato é obrigatório da lib, só o evento interessa
+  // roda na task do mqtt, sem tela/buzzer aqui
   void aoEvento(void*, esp_event_base_t, int32_t evento, void*) {
     if (evento == MQTT_EVENT_CONNECTED) {
       conectado = true;
+
+      // retido, sobrescreve o offline
+      char mensagem[48];
+      snprintf(mensagem, sizeof(mensagem), "{\"estado\":\"online\",\"firmware\":\"%s\"}", FIRMWARE_VERSAO);
+      esp_mqtt_client_publish(cliente, topicoStatus, mensagem, 0, 0, 1);
     } else if (evento == MQTT_EVENT_DISCONNECTED) {
       conectado = false;
     }
   }
 
-  // liga direto, se n tiver wifi ainda a lib tenta de novo sozinha
+  // sem wifi a lib tenta de novo sozinha
   void iniciar() {
     gerarId();
+    snprintf(topicoStatus, sizeof(topicoStatus), "camus/dispositivos/%s/status", id);
 
     esp_mqtt_client_config_t config = {};
     config.broker.address.uri = MQTT_URI;
     config.credentials.client_id = id;
+
+    // padrao 120s, offline demorava demais
+    config.session.keepalive = 30;
+
+    // broker publica se o esp cair
+    config.session.last_will.topic = topicoStatus;
+    config.session.last_will.msg = "{\"estado\":\"offline\"}";
+    config.session.last_will.retain = 1;
 
     cliente = esp_mqtt_client_init(&config);
     esp_mqtt_client_register_event(cliente, MQTT_EVENT_ANY, aoEvento, nullptr);
