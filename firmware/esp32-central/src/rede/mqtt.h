@@ -7,4 +7,14 @@ namespace mqtt {
   Evento atualizar();
 
   bool estaConectado();
+
+  void pedirCodigo();
+  void pedirDesvincularTodos();
+
+  bool chegouCodigo();
+  const char* codigo();
+  int validade();
+
+  bool chegouDesvinculo();
+  int removidos();
 }

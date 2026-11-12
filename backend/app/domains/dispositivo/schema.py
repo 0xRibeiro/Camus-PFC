@@ -45,3 +45,8 @@ class DispositivoRead(BaseModel):
     estado: EstadoDispositivo
     firmware: str | None
     ultimo_contato: datetime
+
+
+class UsuarioVinculadoRead(BaseModel):
+    username: str
+    vinculado_em: datetime
