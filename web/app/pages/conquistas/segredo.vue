@@ -4,7 +4,7 @@
     <div class="flex w-full max-w-7xl items-center justify-center gap-6">
       <!-- o eslint na teoria ajuda, mas acho horrivel essa ordem de atributos... -->
       <img
-        src="/camus-logo-inicial.png"
+        src="/favicon.png"
         alt="Logo do Camus"
         class="size-48 shrink-0 object-contain sm:size-64 lg:size-80"
       >
