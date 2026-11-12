@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Camus',
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}],
+      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png'}],
     },
   },
   ui: {
