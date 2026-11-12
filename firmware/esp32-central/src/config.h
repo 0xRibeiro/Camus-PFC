@@ -27,6 +27,10 @@
 // Buzzer passivo
 #define BUZZER 18
 
+// I2C pros modulos, direto no nano com pull-up no 3v3
+#define I2C_SDA 21
+#define I2C_SCL 22
+
 // broker MQTT local
 #define MQTT_URI "mqtt://192.168.0.13:1883"
 
