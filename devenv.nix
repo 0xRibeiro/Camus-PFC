@@ -57,7 +57,7 @@
 
   processes.backend = {
     ports.http.allocate = 8000;
-    after = [ "devenv:processes:postgres" "devenv:processes:redis" ];
+    after = [ "devenv:processes:postgres" "devenv:processes:redis" "devenv:processes:mosquitto" ];
     exec = ''
       cd "$DEVENV_ROOT/backend"
       echo "${toString config.processes.backend.ports.http.value}" > "$DEVENV_ROOT/.devenv/backend-port"

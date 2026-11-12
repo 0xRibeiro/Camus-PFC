@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
+from app.core.mqtt import mqtt
 from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
@@ -32,7 +33,10 @@ async def lifespan(app: FastAPI):
     await seed_admin()
     # testando a criação de conquistas
     await seed_conquistas()
+    # conecta no broker e roda em paralelo com a api
+    await mqtt.mqtt_startup()
     yield
+    await mqtt.mqtt_shutdown()
 
 
 app = FastAPI(title="Projeto Camus - API", lifespan=lifespan)

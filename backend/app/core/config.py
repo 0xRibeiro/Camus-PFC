@@ -28,5 +28,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     upload_max_bytes: int = 10 * 1024 * 1024  # 10 MB
 
+    # broker mqtt do iot
+    mqtt_host: str = "localhost"
+    mqtt_port: int = 1883
+
 
 settings = Settings()
