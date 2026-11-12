@@ -5,7 +5,8 @@
 #include "logo.h"
 
 namespace navbar {
-  bool wifiConectado = true;
+  // começa cortado até o wifi avisar q conectou
+  bool wifiConectado = false;
   bool moduloNovo = false;
   bool moduloSaiu = false;
   bool aceso = true;

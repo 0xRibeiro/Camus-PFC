@@ -18,5 +18,11 @@
 #define JOY_LIMITE_ALTO 3000
 #define JOY_INTERVALO_MS 100
 
+// olha se o wifi caiu ou voltou
+#define WIFI_INTERVALO_MS 1000
+
+// portal fecha sozinho depois de 5 min parado
+#define WIFI_PORTAL_TIMEOUT_S 300
+
 // Buzzer passivo
 #define BUZZER 18

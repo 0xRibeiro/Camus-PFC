@@ -4,10 +4,9 @@
 #include "hardware/display.h"
 #include "hardware/joystick.h"
 #include "hardware/sons.h"
+#include "rede/wifi.h"
 #include "ui/navbar.h"
 #include "ui/navegacao.h"
-
-bool wifiTeste = true;
 
 void setup() {
   Serial.begin(115200);
@@ -15,10 +14,8 @@ void setup() {
   display::iniciar();
   joystick::iniciar();
   buzzer::iniciar();
+  wifi::iniciar();
   navegacao::iniciar();
-
-  // TESTE: erro no boot só pra ouvir ele
-  buzzer::tocar(sons::ERRO);
 
   // TESTE: liga os dois avisos pra ver piscando
   navbar::avisarModuloNovo();
@@ -30,16 +27,14 @@ void loop() {
   navegacao::atualizar(evento);
   buzzer::atualizar();
 
-  // TESTE: clique liga/desliga o wifi falso, sai quando tiver wifi de vdd
-  if (evento == joystick::Evento::CLIQUE) {
-    wifiTeste = !wifiTeste;
-    navbar::definirWifi(wifiTeste);
-
-    if (wifiTeste) {
-      buzzer::tocar(sons::WIFI_CONECTOU);
-    } else {
-      buzzer::tocar(sons::WIFI_CAIU);
-    }
+  // wifi avisa a navbar e o buzzer só qnd muda
+  wifi::Evento eventoWifi = wifi::atualizar();
+  if (eventoWifi == wifi::Evento::CONECTOU) {
+    navbar::definirWifi(true);
+    buzzer::tocar(sons::WIFI_CONECTOU);
+  } else if (eventoWifi == wifi::Evento::CAIU) {
+    navbar::definirWifi(false);
+    buzzer::tocar(sons::WIFI_CAIU);
   }
 
   // TESTE: cima liga o +, baixo liga o -
