@@ -39,14 +39,26 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div>
-        <h1 class="text-xl font-semibold break-words">
-          {{ grupo.nome }}
-        </h1>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-semibold break-words">
+            {{ grupo.nome }}
+          </h1>
 
-        <p class="text-sm text-muted">
-          Consulte os participantes e os conteúdos do grupo.
-        </p>
+          <p class="text-sm text-muted">
+            Consulte os participantes e os conteúdos do grupo.
+          </p>
+        </div>
+
+        <!-- só quem é membro vê o botão, o dono não -->
+        <UButton
+          v-if="!usuarioCriador"
+          label="Denunciar grupo"
+          icon="i-lucide-flag"
+          color="error"
+          variant="outline"
+          @click="denunciando = true"
+        />
       </div>
 
       <UCard>
@@ -142,6 +154,11 @@
         :grupo-id="grupoId"
         :dono="usuarioCriador"
       />
+
+      <GrupoDenunciaModal
+        v-model:open="denunciando"
+        :grupo-id="grupoId"
+      />
     </div>
   </div>
 </template>
@@ -165,6 +182,7 @@ const grupo = ref<GrupoRead | null>(null)
 const membros = ref<MembroGrupoRead[]>([])
 const loading = ref(true)
 const erroCarregamento = ref('')
+const denunciando = ref(false)
 
 const convite = ref<ConviteRead | null>(null)
 const gerando = ref(false)
