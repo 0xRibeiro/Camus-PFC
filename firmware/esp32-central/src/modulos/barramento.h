@@ -11,6 +11,9 @@ namespace barramento {
     uint32_t serial;
     bool temValor;
     float valor;
+
+    // so atuador, confirmado pelo ESTADO do modulo
+    bool ligado;
   };
 
   void iniciar();
@@ -25,6 +28,10 @@ namespace barramento {
 
   const char* nomeTipo(uint8_t tipo);
   const char* unidadeTipo(uint8_t tipo);
+  bool atuadorTipo(uint8_t tipo);
 
   void publicarModulos();
+
+  // so atuador, quem confirma e o ESTADO
+  void comandar(uint32_t serial, bool ligar);
 }

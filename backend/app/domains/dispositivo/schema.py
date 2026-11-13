@@ -56,6 +56,9 @@ class ModuloPayload(BaseModel):
     tipo: TipoModulo
     endereco: int
 
+    # so vem nos atuadores
+    ligado: bool | None = None
+
 
 class ListaModulos(BaseModel):
     modulos: list[ModuloPayload]
@@ -89,6 +92,20 @@ class ModuloIotRead(BaseModel):
     serial: str
     tipo: TipoModulo
     series: list[SerieLeitura]
+
+    # None = n tem rele
+    ligado: bool | None = None
+
+
+# body da rota de comando
+class ComandoModulo(BaseModel):
+    acao: Literal["ativar", "desativar"]
+
+
+# camus/dispositivos/<mac>/comandos
+class ComandoPayload(BaseModel):
+    serial: str
+    acao: Literal["ativar", "desativar"]
 
 
 class DispositivoRead(BaseModel):

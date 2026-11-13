@@ -27,6 +27,7 @@
       <AquarioModulos
         v-if="aquario.dispositivo"
         :aquario-id="aquario.id"
+        :pode-editar="aquario.papel !== 'leitor'"
       />
 
       <AquarioPeixes

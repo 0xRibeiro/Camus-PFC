@@ -7,11 +7,14 @@ from influxdb_client import Point
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import dynsec
+from app.core.mqtt import mqtt
 from app.core.redis import redis_client
-from app.domains.dispositivo.model import Dispositivo, ModuloIot
+from app.domains.dispositivo.model import Dispositivo, EstadoDispositivo, ModuloIot
 from app.domains.dispositivo.repository import DispositivoRepository, LeituraRepository
 from app.domains.dispositivo.schema import (
     CadastroDispositivo,
+    ComandoModulo,
+    ComandoPayload,
     CredencialDispositivo,
     LeituraModulo,
     ListaModulos,
@@ -131,6 +134,7 @@ async def registrar_modulos(db: AsyncSession, mac: str, lista: ListaModulos) -> 
             modulo = ModuloIot(serial=item.serial)
 
         modulo.tipo = item.tipo
+        modulo.ligado = item.ligado
         modulo.id_dispositivo = dispositivo.id
         modulo.ultimo_contato = agora
         alterados.append(modulo)
@@ -182,5 +186,22 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: in
         for serie in series.get(modulo.serial, {}).values():
             series_do_modulo.append(serie)
 
-        modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo))
+        modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo, ligado=modulo.ligado))
     return modulos
+
+
+# o esp manda pro modulo e o estado novo volta pelo topico modulos
+async def enviar_comando(db: AsyncSession, dispositivo: Dispositivo, serial: str, comando: ComandoModulo) -> None:
+    modulo = await DispositivoRepository(db).buscar_modulo(serial)
+
+    if modulo is None or modulo.id_dispositivo != dispositivo.id:
+        raise NotFoundException("Módulo não encontrado")
+
+    if modulo.ligado is None:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Módulo não aceita comando")
+
+    # qos 0 e sem fila, offline o comando se perderia
+    if dispositivo.estado != EstadoDispositivo.online:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Dispositivo offline")
+
+    mqtt.publish(f"camus/dispositivos/{dispositivo.mac}/comandos", ComandoPayload(serial=serial, acao=comando.acao))

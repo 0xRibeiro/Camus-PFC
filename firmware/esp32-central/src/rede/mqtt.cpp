@@ -28,12 +28,20 @@ namespace mqtt {
   // camus/dispositivos/<mac>/vinculo/resposta + \0
   char topicoResposta[49];
 
+  // camus/dispositivos/<mac>/comandos + \0
+  char topicoComandos[41];
+
   // ultima resposta do vinculo, a tela le e limpa a marca
   bool temCodigo = false;
   char codigoRecebido[7];
   int validadeRecebida = 0;
   bool temDesvinculo = false;
   int removidosRecebidos = 0;
+
+  // ultimo comando, o loop le e manda pro modulo (i2c n roda nessa task)
+  bool temComando = false;
+  uint32_t serialRecebido = 0;
+  bool ligarRecebido = false;
 
   void gerarId() {
     uint8_t mac[6];
@@ -51,15 +59,24 @@ namespace mqtt {
       snprintf(mensagem, sizeof(mensagem), "{\"estado\":\"online\",\"firmware\":\"%s\"}", FIRMWARE_VERSAO);
       esp_mqtt_client_publish(cliente, topicoStatus, mensagem, 0, 0, 1);
       esp_mqtt_client_subscribe(cliente, topicoResposta, 0);
+      esp_mqtt_client_subscribe(cliente, topicoComandos, 0);
     } else if (evento == MQTT_EVENT_DISCONNECTED) {
       conectado = false;
     } else if (evento == MQTT_EVENT_DATA) {
-      // so assina o vinculo/resposta, entao todo DATA e dele
+      // assina comandos e vinculo/resposta, o topico diz qual chegou
       esp_mqtt_event_handle_t mensagem = (esp_mqtt_event_handle_t) dados;
       JsonDocument json;
       deserializeJson(json, mensagem->data, mensagem->data_len);
 
-      if (json["acao"] == "gerar_codigo") {
+      // topico do evento n termina em \0
+      bool ehComando = mensagem->topic_len == (int) strlen(topicoComandos) &&
+                       strncmp(mensagem->topic, topicoComandos, mensagem->topic_len) == 0;
+
+      if (ehComando) {
+        serialRecebido = strtoul(json["serial"] | "", nullptr, 16);
+        ligarRecebido = json["acao"] == "ativar";
+        temComando = true;
+      } else if (json["acao"] == "gerar_codigo") {
         strlcpy(codigoRecebido, json["codigo"] | "", sizeof(codigoRecebido));
         validadeRecebida = json["expira_em"];
         temCodigo = true;
@@ -76,6 +93,7 @@ namespace mqtt {
     snprintf(topicoStatus, sizeof(topicoStatus), "camus/dispositivos/%s/status", id);
     snprintf(topicoPedido, sizeof(topicoPedido), "camus/dispositivos/%s/vinculo/pedido", id);
     snprintf(topicoResposta, sizeof(topicoResposta), "camus/dispositivos/%s/vinculo/resposta", id);
+    snprintf(topicoComandos, sizeof(topicoComandos), "camus/dispositivos/%s/comandos", id);
 
     // sem cadastro o broker recusa, nem tenta
     if (!credencial::temSenha()) {
@@ -157,6 +175,22 @@ namespace mqtt {
 
   int removidos() {
     return removidosRecebidos;
+  }
+
+  bool chegouComando() {
+    if (!temComando) {
+      return false;
+    }
+    temComando = false;
+    return true;
+  }
+
+  uint32_t serialComando() {
+    return serialRecebido;
+  }
+
+  bool ligarComando() {
+    return ligarRecebido;
   }
 
   Evento atualizar() {

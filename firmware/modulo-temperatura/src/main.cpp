@@ -8,8 +8,8 @@
 #define SENSOR 2
 #define RELE 3
 
-// modulo de rele ativo em low
-#define RELE_LIGA LOW
+// ky-019, transistor npn: ativo em high
+#define RELE_LIGA HIGH
 #define INTERVALO_MS 5000
 
 // 12 bits leva ate 750ms

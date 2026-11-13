@@ -52,6 +52,11 @@ void loop() {
     navbar::definirBroker(false);
   }
 
+  // comando chega na task do mqtt, o i2c roda aqui no loop
+  if (mqtt::chegouComando()) {
+    barramento::comandar(mqtt::serialComando(), mqtt::ligarComando());
+  }
+
   barramento::Evento eventoModulo = barramento::atualizar();
   if (eventoModulo == barramento::Evento::ENTROU) {
     navbar::avisarModuloNovo();

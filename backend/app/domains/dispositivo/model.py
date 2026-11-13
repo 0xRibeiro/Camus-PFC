@@ -52,6 +52,9 @@ class ModuloIot(Base):
     serial: Mapped[str] = mapped_column(String(8), unique=True, index=True)
     tipo: Mapped[int]
 
+    # so atuador tem, ultimo estado confirmado pelo esp
+    ligado: Mapped[bool | None]
+
     id_dispositivo: Mapped[int | None] = mapped_column(ForeignKey("dispositivos.id", ondelete="SET NULL"), index=True)
 
     ultimo_contato: Mapped[datetime] = mapped_column(
