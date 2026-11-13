@@ -2,14 +2,20 @@ import secrets
 from datetime import UTC, datetime
 
 from fastcrud.exceptions.http_exceptions import NotFoundException
+from influxdb_client import Point
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.redis import redis_client
-from app.domains.dispositivo.model import Dispositivo
-from app.domains.dispositivo.repository import DispositivoRepository
+from app.domains.dispositivo.model import Dispositivo, ModuloIot
+from app.domains.dispositivo.repository import DispositivoRepository, LeituraRepository
 from app.domains.dispositivo.schema import (
+    LeituraModulo,
+    ListaModulos,
+    ModuloIotRead,
+    PontoLeitura,
     RespostaDesvinculo,
     RespostaVinculo,
+    SerieLeitura,
     StatusDispositivo,
 )
 
@@ -83,3 +89,78 @@ async def desvincular_todos(db: AsyncSession, mac: str) -> RespostaDesvinculo:
 
     removidos = await tirar_do_aquario(db, dispositivo)
     return RespostaDesvinculo(removidos=removidos)
+
+
+# o q n veio na lista fica sem dispositivo
+async def registrar_modulos(db: AsyncSession, mac: str, lista: ListaModulos) -> None:
+    repo = DispositivoRepository(db)
+    dispositivo = await repo.buscar_por_mac(mac)
+
+    if dispositivo is None:
+        return
+
+    agora = datetime.now(UTC)
+    alterados = []
+    seriais = set()
+
+    for item in lista.modulos:
+        seriais.add(item.serial)
+        modulo = await repo.buscar_modulo(item.serial)
+
+        if modulo is None:
+            modulo = ModuloIot(serial=item.serial)
+
+        modulo.tipo = item.tipo
+        modulo.id_dispositivo = dispositivo.id
+        modulo.ultimo_contato = agora
+        alterados.append(modulo)
+
+    for modulo in await repo.listar_modulos(dispositivo.id):
+        if modulo.serial not in seriais:
+            modulo.id_dispositivo = None
+            alterados.append(modulo)
+
+    await repo.salvar_modulos(alterados)
+
+
+async def gravar_leitura(mac: str, leitura: LeituraModulo) -> None:
+    pontos = []
+    for item in leitura.leituras:
+        ponto = (
+            Point("leitura")
+            .tag("dispositivo", mac)
+            .tag("modulo", leitura.serial)
+            .tag("tipo", str(leitura.tipo.value))
+            .tag("nome", item.nome)
+            .tag("unidade", item.unidade)
+            .field("valor", item.valor)
+        )
+        pontos.append(ponto)
+
+    await LeituraRepository().gravar(pontos)
+
+
+# junta os pontos do influx por modulo e por nome da leitura
+async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: int) -> list[ModuloIotRead]:
+    series: dict[str, dict[str, SerieLeitura]] = {}
+
+    for registro in await LeituraRepository().listar_do_dispositivo(dispositivo.mac, minutos):
+        serial = registro.values["modulo"]
+        nome = registro.values["nome"]
+
+        if serial not in series:
+            series[serial] = {}
+
+        if nome not in series[serial]:
+            series[serial][nome] = SerieLeitura(nome=nome, unidade=registro.values["unidade"], pontos=[])
+
+        series[serial][nome].pontos.append(PontoLeitura(tempo=registro.get_time(), valor=registro.get_value()))
+
+    modulos = []
+    for modulo in await DispositivoRepository(db).listar_modulos(dispositivo.id):
+        series_do_modulo = []
+        for serie in series.get(modulo.serial, {}).values():
+            series_do_modulo.append(serie)
+
+        modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo))
+    return modulos

@@ -781,6 +781,21 @@ export type ModuloCreate = {
 };
 
 /**
+ * ModuloIotRead
+ */
+export type ModuloIotRead = {
+    /**
+     * Serial
+     */
+    serial: string;
+    tipo: TipoModulo;
+    /**
+     * Series
+     */
+    series: Array<SerieLeitura>;
+};
+
+/**
  * ModuloRead
  */
 export type ModuloRead = {
@@ -853,6 +868,20 @@ export type PeixeRead = {
      */
     nome: string;
     especie: Especie;
+};
+
+/**
+ * PontoLeitura
+ */
+export type PontoLeitura = {
+    /**
+     * Tempo
+     */
+    tempo: string;
+    /**
+     * Valor
+     */
+    valor: number;
 };
 
 /**
@@ -997,6 +1026,29 @@ export type ResultadoQuizRead = {
  * RoleUsuario
  */
 export type RoleUsuario = 'aluno' | 'author' | 'admin';
+
+/**
+ * SerieLeitura
+ */
+export type SerieLeitura = {
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Unidade
+     */
+    unidade: string;
+    /**
+     * Pontos
+     */
+    pontos: Array<PontoLeitura>;
+};
+
+/**
+ * TipoModulo
+ */
+export type TipoModulo = 1 | 2;
 
 /**
  * TokenPair
@@ -4301,6 +4353,43 @@ export type ConectarDispositivoAquariosAquarioIdDispositivoPostResponses = {
 };
 
 export type ConectarDispositivoAquariosAquarioIdDispositivoPostResponse = ConectarDispositivoAquariosAquarioIdDispositivoPostResponses[keyof ConectarDispositivoAquariosAquarioIdDispositivoPostResponses];
+
+export type ListarModulosAquariosAquarioIdModulosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: {
+        /**
+         * Minutos
+         */
+        minutos?: number;
+    };
+    url: '/aquarios/{aquario_id}/modulos';
+};
+
+export type ListarModulosAquariosAquarioIdModulosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarModulosAquariosAquarioIdModulosGetError = ListarModulosAquariosAquarioIdModulosGetErrors[keyof ListarModulosAquariosAquarioIdModulosGetErrors];
+
+export type ListarModulosAquariosAquarioIdModulosGetResponses = {
+    /**
+     * Response Listar Modulos Aquarios  Aquario Id  Modulos Get
+     *
+     * Successful Response
+     */
+    200: Array<ModuloIotRead>;
+};
+
+export type ListarModulosAquariosAquarioIdModulosGetResponse = ListarModulosAquariosAquarioIdModulosGetResponses[keyof ListarModulosAquariosAquarioIdModulosGetResponses];
 
 export type GerarConviteAquariosAquarioIdConvitesPostData = {
     body?: never;

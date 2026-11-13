@@ -24,6 +24,11 @@
         :description="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L`"
       />
 
+      <AquarioModulos
+        v-if="aquario.dispositivo"
+        :aquario-id="aquario.id"
+      />
+
       <AquarioPeixes
         :aquario-id="aquario.id"
         :pode-editar="aquario.papel !== 'leitor'"
@@ -49,6 +54,7 @@
 <script setup lang="ts">
 import AquarioIot from '~/components/aquario/AquarioIot.vue'
 import AquarioMembros from '~/components/aquario/AquarioMembros.vue'
+import AquarioModulos from '~/components/aquario/AquarioModulos.vue'
 import AquarioPeixes from '~/components/peixes/AquarioPeixes.vue'
 import type { AquarioRead, DispositivoRead } from '~/types/generated'
 

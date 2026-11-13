@@ -32,5 +32,11 @@ class Settings(BaseSettings):
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883
 
+    # influxdb das leituras do iot
+    influx_url: str = "http://localhost:8086"
+    influx_token: str = ""
+    influx_org: str = "camus"
+    influx_bucket: str = "leituras"
+
 
 settings = Settings()

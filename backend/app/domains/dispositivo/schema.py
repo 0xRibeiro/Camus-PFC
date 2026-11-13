@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domains.dispositivo.model import EstadoDispositivo
+from app.domains.dispositivo.model import EstadoDispositivo, TipoModulo
 
 
 # payload do topico camus/dispositivos/<mac>/status
@@ -35,6 +35,47 @@ class CodigoDispositivo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     codigo: str = Field(..., min_length=6, max_length=6)
+
+
+# camus/dispositivos/<mac>/modulos
+class ModuloPayload(BaseModel):
+    serial: str
+    tipo: TipoModulo
+    endereco: int
+
+
+class ListaModulos(BaseModel):
+    modulos: list[ModuloPayload]
+
+
+# camus/dispositivos/<mac>/leituras
+class LeituraPayload(BaseModel):
+    nome: str
+    valor: float
+    unidade: str
+
+
+class LeituraModulo(BaseModel):
+    serial: str
+    tipo: TipoModulo
+    leituras: list[LeituraPayload]
+
+
+class PontoLeitura(BaseModel):
+    tempo: datetime
+    valor: float
+
+
+class SerieLeitura(BaseModel):
+    nome: str
+    unidade: str
+    pontos: list[PontoLeitura]
+
+
+class ModuloIotRead(BaseModel):
+    serial: str
+    tipo: TipoModulo
+    series: list[SerieLeitura]
 
 
 class DispositivoRead(BaseModel):

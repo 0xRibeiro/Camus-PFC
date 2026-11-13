@@ -96,6 +96,16 @@ namespace mqtt {
     return conectado;
   }
 
+  void publicar(const char* sufixo, const char* mensagem, bool retido) {
+    if (!conectado) {
+      return;
+    }
+
+    char topico[64];
+    snprintf(topico, sizeof(topico), "camus/dispositivos/%s/%s", id, sufixo);
+    esp_mqtt_client_publish(cliente, topico, mensagem, 0, 0, retido);
+  }
+
   void pedirCodigo() {
     esp_mqtt_client_publish(cliente, topicoPedido, "{\"acao\":\"gerar_codigo\"}", 0, 0, 0);
   }

@@ -7,4 +7,8 @@ public:
   void desenhar() override;
   void aoEvento(joystick::Evento evento) override;
   const char* nome() override;
+  void atualizar() override;
+
+private:
+  int versaoDesenhada = -1;
 };

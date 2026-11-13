@@ -19,7 +19,7 @@ from app.domains.aquario.schema import (
 from app.domains.dispositivo import service as dispositivo_service
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.dispositivo.repository import DispositivoRepository
-from app.domains.dispositivo.schema import CodigoDispositivo, DispositivoRead
+from app.domains.dispositivo.schema import CodigoDispositivo, DispositivoRead, ModuloIotRead
 from app.domains.peixe.model import Peixe
 from app.domains.peixe.schema import PeixeCreate
 
@@ -162,6 +162,16 @@ async def desconectar_dispositivo(db: AsyncSession, aquario_id: int, usuario_id:
         raise NotFoundException("Esse aquário não tem IoT")
 
     await dispositivo_service.tirar_do_aquario(db, dispositivo)
+
+
+async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, minutos: int) -> list[ModuloIotRead]:
+    aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    dispositivo = await DispositivoRepository(db).buscar_do_aquario(aquario.id)
+
+    if dispositivo is None:
+        return []
+
+    return await dispositivo_service.listar_modulos(db, dispositivo, minutos)
 
 
 async def gerar_convite(db: AsyncSession, aquario_id: int, usuario_id: int) -> ConviteAquarioRead:

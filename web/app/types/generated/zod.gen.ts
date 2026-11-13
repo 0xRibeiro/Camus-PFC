@@ -436,6 +436,14 @@ export const zPeixeRead = z.object({
 });
 
 /**
+ * PontoLeitura
+ */
+export const zPontoLeitura = z.object({
+    tempo: z.iso.datetime(),
+    valor: z.number()
+});
+
+/**
  * QuestaoAlunoRead
  */
 export const zQuestaoAlunoRead = z.object({
@@ -531,6 +539,29 @@ export const zRoleUsuario = z.enum([
     'author',
     'admin'
 ]);
+
+/**
+ * SerieLeitura
+ */
+export const zSerieLeitura = z.object({
+    nome: z.string(),
+    unidade: z.string(),
+    pontos: z.array(zPontoLeitura)
+});
+
+/**
+ * TipoModulo
+ */
+export const zTipoModulo = z.union([z.literal(1), z.literal(2)]);
+
+/**
+ * ModuloIotRead
+ */
+export const zModuloIotRead = z.object({
+    serial: z.string(),
+    tipo: zTipoModulo,
+    series: z.array(zSerieLeitura)
+});
 
 /**
  * TokenPair
@@ -1586,6 +1617,21 @@ export const zConectarDispositivoAquariosAquarioIdDispositivoPostPath = z.object
  * Successful Response
  */
 export const zConectarDispositivoAquariosAquarioIdDispositivoPostResponse = zDispositivoRead;
+
+export const zListarModulosAquariosAquarioIdModulosGetPath = z.object({
+    aquario_id: z.int()
+});
+
+export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
+    minutos: z.int().gte(1).lte(1440).optional().default(60)
+});
+
+/**
+ * Response Listar Modulos Aquarios  Aquario Id  Modulos Get
+ *
+ * Successful Response
+ */
+export const zListarModulosAquariosAquarioIdModulosGetResponse = z.array(zModuloIotRead);
 
 export const zGerarConviteAquariosAquarioIdConvitesPostPath = z.object({
     aquario_id: z.int()

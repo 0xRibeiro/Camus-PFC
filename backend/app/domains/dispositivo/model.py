@@ -12,6 +12,12 @@ class EstadoDispositivo(enum.Enum):
     offline = "offline"
 
 
+# igual ao TipoModulo do protocolo.h
+class TipoModulo(enum.IntEnum):
+    distancia = 1
+    temperatura = 2
+
+
 # esp central, criado sozinho qnd chega o 1o status dele no mqtt
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
@@ -36,3 +42,18 @@ class Dispositivo(Base):
 
     # unique: 1 esp por aquario
     id_aquario: Mapped[int | None] = mapped_column(ForeignKey("aquarios.id", ondelete="SET NULL"), unique=True)
+
+
+# modulo i2c, sem dispositivo = desconectado
+class ModuloIot(Base):
+    __tablename__ = "modulos_iot"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    serial: Mapped[str] = mapped_column(String(8), unique=True, index=True)
+    tipo: Mapped[int]
+
+    id_dispositivo: Mapped[int | None] = mapped_column(ForeignKey("dispositivos.id", ondelete="SET NULL"), index=True)
+
+    ultimo_contato: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
