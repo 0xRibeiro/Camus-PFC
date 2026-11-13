@@ -1,6 +1,7 @@
+from datetime import UTC, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 
 class GrupoCreate(BaseModel):
@@ -17,7 +18,24 @@ class GrupoRead(BaseModel):
     id: int
     nome: str
     id_dono: int
+    inabilitado: bool = False
+    suspenso_ate: datetime | None = None
 
+    # um grupo que acabou de ser criado na memória ainda não recebeu o valor padrão
+    @field_validator("inabilitado", mode="before")
+    @classmethod
+    def inabilitado_vazio_vira_false(cls, valor: bool | None) -> bool:
+        return bool(valor)
+
+    # o front lê esse campo pra decidir se mostra o aviso de grupo bloqueado.
+    # a conta fica no back pra não depender da hora do navegador.
+    @computed_field
+    @property
+    def suspenso(self) -> bool:
+        if self.inabilitado:
+            return True
+
+        return self.suspenso_ate is not None and self.suspenso_ate > datetime.now(UTC)
 
 class GrupoEntrar(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)

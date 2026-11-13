@@ -1,6 +1,8 @@
 import secrets
+from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastcrud.exceptions.http_exceptions import (
     DuplicateValueException,
     ForbiddenException,
@@ -18,11 +20,31 @@ from app.domains.grupo.schema import (
     GrupoEntrar,
     MembroGrupoRead,
 )
-from app.domains.usuario.model import Usuario
+from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.service import get_current_user
 
 # está com esse tempo por enquanto.
 CONVITE_VALIDADE_SEGUNDOS = 900
+
+# a data do fim da suspensão é mostrada pro usuário no horário de Brasília
+FUSO = ZoneInfo("America/Sao_Paulo")
+
+
+# o grupo fica bloqueado se foi inabilitado ou se a suspensão ainda está valendo.
+# ela acaba sozinha, basta comparar a data de fim com a hora de agora.
+def grupo_suspenso(grupo: Grupo) -> bool:
+    if grupo.inabilitado:
+        return True
+
+    return grupo.suspenso_ate is not None and grupo.suspenso_ate > datetime.now(UTC)
+
+
+def mensagem_suspensao(grupo: Grupo) -> str:
+    if grupo.inabilitado:
+        return "Este grupo foi inabilitado pela administração."
+
+    fim = grupo.suspenso_ate.astimezone(FUSO)
+    return f"Este grupo está suspenso até {fim:%d/%m/%Y %H:%M}."
 
 
 async def criar_grupo(db: AsyncSession, data: GrupoCreate, usuario: Usuario) -> Grupo:
@@ -41,6 +63,11 @@ async def buscar_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Gru
     if grupo is None:
         raise NotFoundException("Grupo não encontrado. Verifique se foi digitado corretamente")
 
+    # o admin abre qualquer grupo pra poder moderar. que ele só lê e nunca altera
+    # é checado lá no grupo_membro.
+    if usuario.role == RoleUsuario.admin:
+        return grupo
+
     participacao = await repo.buscar_participacao(grupo.id, usuario.id)
 
     if participacao is None:
@@ -49,16 +76,35 @@ async def buscar_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Gru
     return grupo
 
 
-# funçção que retorna o grupo e guarda o id.
-async def grupo_membro(grupo_id: int, db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> Grupo:
+# retorna o grupo e guarda o id dele na sessão.
+async def grupo_membro(
+    request: Request,
+    grupo_id: int,
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> Grupo:
     grupo = await buscar_grupo(db, grupo_id, usuario)
-    # Guarda o escopo apenas na sessão da requisição.
+
+    # nos casos abaixo, só requisição de leitura (GET) passa
+    somente_leitura = request.method in ("GET", "HEAD")
+
+    if usuario.role == RoleUsuario.admin and not somente_leitura:
+        raise ForbiddenException("O admin só pode visualizar o conteúdo do grupo.")
+
+    # com o grupo suspenso, o dono ainda consegue ver mas não muda nada, e o membro
+    # perde o acesso. a suspensão não vale pro admin.
+    if usuario.role != RoleUsuario.admin and grupo_suspenso(grupo):
+        if grupo.id_dono != usuario.id or not somente_leitura:
+            raise ForbiddenException(mensagem_suspensao(grupo))
+
+    # esse escopo vale só durante a sessão da requisição.
     db.info["grupo_id"] = grupo.id
     return grupo
 
-# função que checa se o usuário é dono do grupo, caso não seja, lança uma exceção. retorna o id do grupo.
+# confere se o usuário é o dono do grupo e levanta erro se não for. devolve o id do grupo.
+# o admin passa só pra ler, já que o grupo_membro barra qualquer escrita dele.
 async def grupo_dono(grupo: Grupo = Depends(grupo_membro), usuario: Usuario = Depends(get_current_user)) -> int:
-    if grupo.id_dono != usuario.id:
+    if grupo.id_dono != usuario.id and usuario.role != RoleUsuario.admin:
         raise ForbiddenException("Apenas o dono pode gerenciar as trilhas do grupo.")
 
     return grupo.id
@@ -72,6 +118,9 @@ async def gerar_convite(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Co
     # depois.
     if grupo.id_dono != usuario.id:
         raise ForbiddenException("Apenas o dono pode gerar convites")
+    
+    if grupo_suspenso(grupo):
+        raise ForbiddenException(mensagem_suspensao(grupo))
 
     while True:
         convite = secrets.token_urlsafe(9)
@@ -96,6 +145,9 @@ async def entrar_grupo(db: AsyncSession, data: GrupoEntrar, usuario: Usuario) ->
 
     if grupo is None:
         raise NotFoundException("Grupo não encontrado")
+
+    if grupo_suspenso(grupo):
+        raise ForbiddenException("Não é possível entrar: este grupo está suspenso.")
 
     participacao = await repo.buscar_participacao(grupo.id, usuario.id)
 
