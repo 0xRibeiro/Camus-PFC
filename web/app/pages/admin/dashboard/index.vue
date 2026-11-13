@@ -65,66 +65,11 @@
       <DashboardNumeros :dados="dados" />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <UCard>
-          <template #header>
-            <h2 class="font-medium">
-              Trilhas por escopo
-            </h2>
-            <p class="text-sm text-muted">
-              Todas as trilhas cadastradas, incluindo rascunhos.
-            </p>
-          </template>
-
-          <UChart
-            v-if="dados.total_trilhas > 0"
-            type="donut"
-            :data="trilhasPorEscopo"
-            index="escopo"
-            :categories="[{ key: 'quantidade', label: 'Trilhas' }]"
-            :height="208"
-            :colors="['primary', 'quaternary']"
-            :legend="false"
-            :format="formatarNumero"
-            :aria-label="`Trilhas por escopo. Globais: ${dados.total_trilhas_globais}. De grupo: ${dados.total_trilhas_de_grupo}.`"
-          >
-            <template #center>
-              <span
-                class="text-2xl font-semibold text-highlighted"
-                aria-hidden="true"
-              >
-                {{ formatarNumero(dados.total_trilhas) }}
-              </span>
-            </template>
-          </UChart>
-
-          <p
-            v-else
-            class="text-sm text-muted"
-          >
-            Nenhuma trilha cadastrada.
-          </p>
-
-          <ul
-            v-if="dados.total_trilhas > 0"
-            class="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted"
-          >
-            <li
-              v-for="trilha in trilhasPorEscopo"
-              :key="trilha.escopo"
-              class="flex items-center gap-2"
-            >
-              <span
-                class="size-2 rounded-full"
-                :class="trilha.escopo === 'Globais' ? 'bg-primary' : 'bg-quaternary'"
-                aria-hidden="true"
-              />
-              {{ trilha.escopo }}
-              <span class="font-medium text-highlighted">
-                {{ formatarNumero(trilha.quantidade) }}
-              </span>
-            </li>
-          </ul>
-        </UCard>
+        <DashboardTrilhas
+          :globais="dados.total_trilhas_globais"
+          :de-grupo="dados.total_trilhas_de_grupo"
+          class="min-w-0"
+        />
 
         <DashboardConquistas
           :conquistas="dados.conquistas_por_quantidade"
@@ -150,12 +95,6 @@ const api = useApi()
 const dados = ref<DashboardRead | null>(null)
 const loading = ref(true)
 const erro = ref('')
-const formatarNumero = new Intl.NumberFormat('pt-BR').format
-
-const trilhasPorEscopo = computed(() => [
-  { escopo: 'Globais', quantidade: dados.value?.total_trilhas_globais ?? 0 },
-  { escopo: 'De grupo', quantidade: dados.value?.total_trilhas_de_grupo ?? 0 },
-])
 
 const dias = ref(30)
 
