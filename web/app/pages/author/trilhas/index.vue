@@ -1,10 +1,21 @@
 <template>
   <div>
+    <!-- esse botão só aparece se estivermos em uma rota de grupo -->
+    <UButton
+      v-if="grupoId"
+      label="Voltar ao grupo"
+      icon="i-lucide-arrow-left"
+      variant="link"
+      color="neutral"
+      class="mb-3 px-0"
+      :to="`/grupos/${grupoId}`"
+    />
+
     <!-- cabecalho: titulo + descricao curta + contador de trilhas -->
     <div class="flex items-center justify-between mb-4">
       <div>
         <h1 class="text-xl font-semibold">
-          Trilhas
+          {{ grupoId ? 'Trilhas do grupo' : 'Trilhas' }}
         </h1>
         <p class="text-sm text-muted">
           Cadastre uma trilha e clique nela para montar a jornada de módulos e conteúdos.
@@ -71,6 +82,7 @@
         v-for="trilha in trilhasFiltradas"
         :key="trilha.id"
         :trilha="trilha"
+        :to="grupoId ? `/grupos/${grupoId}/trilhas/${trilha.id}/editar` : `/author/trilhas/${trilha.id}`"
         :modulos-count="contarModulos(trilha.id)"
         :conteudos-count="contarConteudos(trilha.id)"
         @edit="abrirEditar(trilha)"
@@ -136,9 +148,11 @@
 // mudar um campo, esse tipo atualiza sozinho quando a gente roda o comando de gerar
 import type { TrilhaRead } from '~/types/generated'
 
-// so author/admin acessam essa pagina
-definePageMeta({ middleware: 'role', roles: ['author', 'admin'] })
+// Na rota global, a gestão exige author/admin. No grupo, exige o dono.
+definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
+const grupoId = useRoute().params.grupoId
+const api = useApi()
 const toast = useToast()
 
 const trilhas = ref<TrilhaRead[]>([])
@@ -195,8 +209,6 @@ function contarConteudos(trilhaId: number) {
 
 async function fetchTrilhas() {
   loading.value = true
-  const api = useApi()
-
   const [trilhasRes, modulosRes, conteudosRes] = await Promise.all([
     api('/trilhas'),
     api('/modulos'),
@@ -252,7 +264,6 @@ async function confirmarExclusao() {
 
   excluindo.value = true
   try {
-    const api = useApi()
     await api(`/trilhas/${trilhaParaExcluir.value.id}`, { method: 'DELETE' })
 
     // monta a lista de novo, sem a trilha excluida
@@ -294,8 +305,6 @@ function abrirEditar(trilha: TrilhaRead) {
 async function onSubmitForm(dados: { titulo: string, descricao?: string | null, tag?: string | null, foto?: string | null, is_active: boolean }) {
   saving.value = true
   try {
-    const api = useApi()
-
     if (editandoTrilha.value) {
       // o PATCH do fastcrud n devolve o item atualizado (volta vazio), entao
       // atualiza a lista local com os dados que a gente ja tem, sem depender da resposta

@@ -138,10 +138,20 @@
         </div>
       </UCard>
 
-      <GrupoTrilhas
-        :grupo-id="grupoId"
-        :dono="usuarioCriador"
-      />
+      <!-- seção nova dos grupos para ver ou editar as trilhas dependendo da role -->
+      <section class="flex flex-wrap items-center gap-3">
+        <UButton
+          :label="usuarioCriador ? 'Gerenciar trilhas' : 'Ver trilhas'"
+          icon="i-lucide-book-open"
+          :to="usuarioCriador ? `/grupos/${grupoId}/trilhas/gerenciar` : `/grupos/${grupoId}/trilhas`"
+        />
+        <UBadge
+          v-if="xpGrupo !== null"
+          variant="soft"
+        >
+          {{ xpGrupo }} XP no grupo
+        </UBadge>
+      </section>
     </div>
   </div>
 </template>
@@ -150,17 +160,18 @@
 import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { ConviteRead, GrupoRead, MembroGrupoRead } from '~/types/generated'
+import type { ConviteRead, GrupoRead, MembroGrupoRead, XpRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
-const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
 const conquistas = useConquistasStore()
 
 const grupoId = Number(route.params.id)
+const api = useApi(grupoId)
+const xpGrupo = ref<number | null>(null)
 const grupo = ref<GrupoRead | null>(null)
 const membros = ref<MembroGrupoRead[]>([])
 const loading = ref(true)
@@ -201,13 +212,15 @@ async function fetchGrupo() {
   erroCarregamento.value = ''
 
   try {
-    const [dadosGrupo, dadosMembros] = await Promise.all([
+    const [dadosGrupo, dadosMembros, pontos] = await Promise.all([
       api(`/grupos/${grupoId}`),
       api(`/grupos/${grupoId}/membros`),
+      (api('/pontuacao/xp') as Promise<XpRead>).catch(() => null),
     ])
 
     grupo.value = dadosGrupo
     membros.value = dadosMembros
+    xpGrupo.value = pontos?.xp_total ?? null
   }
   catch (error) {
     grupo.value = null

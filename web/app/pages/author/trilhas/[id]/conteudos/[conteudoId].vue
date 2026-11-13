@@ -2,11 +2,14 @@
 import type { JSONContent } from '@tiptap/core'
 import type { ConteudoRead } from '~/types/generated'
 
-definePageMeta({ middleware: 'role', roles: ['author', 'admin'] })
+definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
 const route = useRoute()
+const api = useApi()
+const grupoId = route.params.grupoId
 const toast = useToast()
 const trilhaId = Number(route.params.id)
+const trilhaPath = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}/editar` : `/author/trilhas/${trilhaId}`
 const conteudoId = Number(route.params.conteudoId)
 
 const conteudo = ref<ConteudoRead | null>(null)
@@ -18,7 +21,6 @@ const alteracaoSignificativa = ref(false)
 async function fetchConteudo() {
   loading.value = true
   try {
-    const api = useApi()
     conteudo.value = await api(`/conteudos/${conteudoId}`)
     artigo.value = (conteudo.value?.artigo_conteudo ?? undefined) as JSONContent | undefined
   }
@@ -41,7 +43,6 @@ async function onSalvarArtigo() {
     let versao = conteudo.value.versao
     if (alteracaoSignificativa.value) versao += 1
 
-    const api = useApi()
     await api(`/conteudos/${conteudoId}`, {
       method: 'PATCH',
       body: { artigo_conteudo: artigo.value ?? null, versao },
@@ -64,7 +65,6 @@ async function onQuizAlterou() {
 
   try {
     const versao = conteudo.value.versao + 1
-    const api = useApi()
     await api(`/conteudos/${conteudoId}`, { method: 'PATCH', body: { versao } })
     conteudo.value.versao = versao
     alteracaoSignificativa.value = false
@@ -85,7 +85,7 @@ async function onQuizAlterou() {
         color="neutral"
         variant="link"
         class="px-0"
-        :to="`/author/trilhas/${trilhaId}`"
+        :to="trilhaPath"
       />
 
       <div
