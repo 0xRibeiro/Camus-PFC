@@ -4,7 +4,7 @@
 # ///
 
 # grava esp e modulos
-#   uv run firmware/gravar.py esp --porta /dev/ttyUSB1
+#   uv run firmware/gravar.py esp --porta /dev/ttyUSB1 --ambiente producao
 #   uv run firmware/gravar.py distancia --porta /dev/ttyUSB0
 
 import argparse
@@ -24,6 +24,12 @@ PASTA_ESP = PASTA / "esp32-central"
 
 MODULOS = {
     "distancia": PASTA / "modulo-distancia",
+}
+
+# mesmo nome dos envs do platformio.ini do esp
+APIS = {
+    "dev": "http://localhost:8000",
+    "producao": "https://api.camus.gardiencor.app.br",
 }
 
 
@@ -66,7 +72,7 @@ def entrar(api: str) -> str:
     return chamar_api(f"{api}/auth/login", {"email": email, "password": senha})["access_token"]
 
 
-def gravar_firmware(pasta: Path, porta: str, ambiente: str | None) -> None:
+def gravar_firmware(pasta: Path, porta: str, ambiente: str | None = None) -> None:
     comando = ["pio", "run", "-t", "upload", "--upload-port", porta]
     if ambiente is not None:
         comando += ["-e", ambiente]
@@ -93,7 +99,10 @@ def enviar_senha(porta: str, mac: str, senha: str) -> None:
     sys.exit("esp nao confirmou a senha")
 
 
-def gravar_esp(porta: str, api: str, ambiente: str | None) -> None:
+def gravar_esp(porta: str, ambiente: str) -> None:
+    api = APIS[ambiente]
+    print(f"ambiente: {ambiente} ({api})")
+
     mac = ler_mac(porta)
     print(f"mac: {mac}")
 
@@ -112,16 +121,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="grava o esp central ou um modulo")
     parser.add_argument("alvo", choices=["esp", *MODULOS])
     parser.add_argument("--porta", required=True)
-    parser.add_argument("--api", default="http://localhost:8000")
-    parser.add_argument("--ambiente", help="env do platformio.ini do esp")
+    parser.add_argument("--ambiente", choices=list(APIS), default="dev")
     argumentos = parser.parse_args()
 
     if argumentos.alvo == "esp":
-        gravar_esp(argumentos.porta, argumentos.api.rstrip("/"), argumentos.ambiente)
+        gravar_esp(argumentos.porta, argumentos.ambiente)
         return
 
-    # modulo gera o serial sozinho, so grava
-    gravar_firmware(MODULOS[argumentos.alvo], argumentos.porta, None)
+    # modulo gera o serial sozinho e n tem ambiente, so grava
+    gravar_firmware(MODULOS[argumentos.alvo], argumentos.porta)
     print("modulo gravado")
 
 
