@@ -18,6 +18,7 @@
       :data="denuncias"
       :columns="columns"
       :loading="loading"
+      :ui="{ td: 'whitespace-normal wrap-anywhere' }"
     >
       <template #motivo-cell="{ row }">
         {{ rotuloMotivo(row.original.motivo) }}
@@ -29,7 +30,7 @@
         </p>
         <p
           v-if="row.original.descricao"
-          class="text-sm text-muted max-w-xs break-words"
+          class="text-sm text-muted max-w-48 whitespace-normal break-words"
         >
           {{ row.original.descricao }}
         </p>
@@ -49,28 +50,48 @@
       </template>
 
       <template #acoes-cell="{ row }">
-        <!-- os botões só aparecem se a denúncia ainda estiver pendente -->
-        <div
-          v-if="row.original.status === 'pendente'"
-          class="flex gap-2"
-        >
-          <UButton
-            label="Resolver"
-            size="sm"
-            :loading="atualizando === row.original.id"
-            @click="analisar(row.original, 'resolvida')"
-          />
-          <UButton
-            label="Rejeitar"
-            size="sm"
-            color="neutral"
-            variant="outline"
-            :disabled="atualizando === row.original.id"
-            @click="analisar(row.original, 'rejeitada')"
-          />
+        <div class="flex items-center gap-2">
+          <!-- resolver e rejeitar só aparecem enquanto a denúncia tá pendente -->
+          <template v-if="row.original.status === 'pendente'">
+            <UButton
+              label="Resolver"
+              size="sm"
+              :loading="atualizando === row.original.id"
+              @click="analisar(row.original, 'resolvida')"
+            />
+            <UButton
+              label="Rejeitar"
+              size="sm"
+              color="neutral"
+              variant="outline"
+              :disabled="atualizando === row.original.id"
+              @click="analisar(row.original, 'rejeitada')"
+            />
+          </template>
+
+          <!-- o menu de moderar sempre aparece, só o ícone pra caber na tela -->
+          <UDropdownMenu :items="itensModeracao(row.original)">
+            <UButton
+              icon="i-lucide-shield"
+              size="sm"
+              color="neutral"
+              variant="outline"
+              aria-label="Moderar grupo"
+            />
+          </UDropdownMenu>
         </div>
       </template>
     </UTable>
+
+    <GrupoModeracaoModal
+      v-if="alvo"
+      v-model:open="moderando"
+      :acao="acao"
+      :grupo-id="alvo.id_grupo"
+      :conteudo-id="alvo.id_conteudo"
+      :nome-alvo="acao === 'excluir_conteudo' ? (alvo.conteudo ?? '') : alvo.grupo"
+      @concluida="aposModeracao"
+    />
 
     <p
       v-if="!loading && denuncias.length === 0"
@@ -168,6 +189,50 @@ async function analisar(denuncia: DenunciaAdminRead, status: 'resolvida' | 'reje
   finally {
     atualizando.value = null
   }
+}
+
+// moderação: qual ação o admin escolheu e sobre qual denúncia
+type Acao = 'suspender' | 'excluir_grupo' | 'excluir_conteudo'
+
+const moderando = ref(false)
+const acao = ref<Acao>('suspender')
+const alvo = ref<DenunciaAdminRead | null>(null)
+
+function abrirModeracao(novaAcao: Acao, denuncia: DenunciaAdminRead) {
+  acao.value = novaAcao
+  alvo.value = denuncia
+  moderando.value = true
+}
+
+// o apagar conteúdo só aparece quando a denúncia é sobre um conteúdo
+function itensModeracao(denuncia: DenunciaAdminRead) {
+  const acoes = []
+
+  // grupo que já tá suspenso não precisa da opção de suspender de novo
+  if (!denuncia.grupo_suspenso) {
+    acoes.push({ label: 'Suspender grupo', icon: 'i-lucide-clock', onSelect: () => abrirModeracao('suspender', denuncia) })
+  }
+
+  if (denuncia.id_conteudo !== null) {
+    acoes.push({ label: 'Apagar conteúdo', icon: 'i-lucide-file-x', onSelect: () => abrirModeracao('excluir_conteudo', denuncia) })
+  }
+
+  return [
+    [{ label: 'Ver grupo', icon: 'i-lucide-eye', to: `/grupos/${denuncia.id_grupo}` }],
+    acoes,
+    [{ label: 'Excluir grupo', icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => abrirModeracao('excluir_grupo', denuncia) }],
+  ]
+}
+
+// suspender ou apagar o conteúdo já resolve a denúncia. excluir o grupo apaga a denúncia junto.
+async function aposModeracao() {
+  const denuncia = alvo.value
+
+  if (denuncia && denuncia.status === 'pendente' && acao.value !== 'excluir_grupo') {
+    await api(`/admin/denuncias/${denuncia.id}`, { method: 'PATCH', body: { status: 'resolvida' } }).catch(() => {})
+  }
+
+  await fetchDenuncias()
 }
 
 watch(filtroStatus, fetchDenuncias)

@@ -4,6 +4,23 @@
       Meus grupos
     </h1>
 
+    <!-- recados do admin: continuam na tela até a pessoa apertar em "Entendi" -->
+    <div
+      v-if="avisos.length"
+      class="space-y-3 mb-6"
+    >
+      <UAlert
+        v-for="aviso in avisos"
+        :key="aviso.id"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-bell"
+        title="Aviso da administração"
+        :description="aviso.mensagem"
+        :actions="[{ label: 'Entendi', color: 'neutral', variant: 'outline', onClick: () => dispensarAviso(aviso) }]"
+      />
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <UCard>
         <template #header>
@@ -141,7 +158,7 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { GrupoRead } from '~/types/generated'
+import type { AvisoRead, GrupoRead } from '~/types/generated/types.gen'
 import { zGrupoCreate, zGrupoEntrar } from '~/types/generated/zod.gen'
 
 definePageMeta({ middleware: 'role' })
@@ -227,4 +244,27 @@ async function entrarGrupo(event: FormSubmitEvent<typeof formEntrar>) {
 }
 
 onMounted(fetchGrupos)
+
+const avisos = ref<AvisoRead[]>([])
+
+async function fetchAvisos() {
+  try {
+    avisos.value = await api('/avisos')
+  }
+  catch {
+    avisos.value = []
+  }
+}
+
+async function dispensarAviso(aviso: AvisoRead) {
+  try {
+    await api(`/avisos/${aviso.id}/lido`, { method: 'PATCH' })
+    avisos.value = avisos.value.filter(a => a.id !== aviso.id)
+  }
+  catch (error) {
+    toast.add({ title: mensagemErro(error, 'Não foi possível dispensar o aviso'), color: 'error' })
+  }
+}
+
+onMounted(fetchAvisos)
 </script>
