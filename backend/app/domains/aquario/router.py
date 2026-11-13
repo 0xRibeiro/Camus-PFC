@@ -12,7 +12,7 @@ from app.domains.aquario.schema import (
     MembroAquarioRead,
 )
 from app.domains.dispositivo.model import Dispositivo
-from app.domains.dispositivo.schema import CodigoDispositivo, DispositivoRead, ModuloIotRead
+from app.domains.dispositivo.schema import CodigoDispositivo, ComandoModulo, DispositivoRead, ModuloIotRead
 from app.domains.peixe.model import Peixe
 from app.domains.peixe.schema import PeixeCreate, PeixeRead
 from app.domains.usuario.model import Usuario
@@ -63,6 +63,13 @@ async def desconectar_dispositivo(aquario_id: int, db: AsyncSession = Depends(ge
 async def listar_modulos(aquario_id: int, minutos: int = Query(60, ge=1, le=1440), db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> list[ModuloIotRead]:
     return await service.listar_modulos(db, aquario_id, usuario.id, minutos)
+
+
+# 202: o esp confirma depois, o estado novo aparece no listar_modulos
+@router.post("/{aquario_id}/modulos/{serial}/comando", status_code=status.HTTP_202_ACCEPTED)
+async def comandar_modulo(aquario_id: int, serial: str, data: ComandoModulo, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> None:
+    await service.comandar_modulo(db, aquario_id, usuario.id, serial, data)
 
 
 @router.post("/{aquario_id}/convites", response_model=ConviteAquarioRead, status_code=status.HTTP_201_CREATED)

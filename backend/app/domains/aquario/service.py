@@ -19,7 +19,7 @@ from app.domains.aquario.schema import (
 from app.domains.dispositivo import service as dispositivo_service
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.dispositivo.repository import DispositivoRepository
-from app.domains.dispositivo.schema import CodigoDispositivo, DispositivoRead, ModuloIotRead
+from app.domains.dispositivo.schema import CodigoDispositivo, ComandoModulo, DispositivoRead, ModuloIotRead
 from app.domains.peixe.model import Peixe
 from app.domains.peixe.schema import PeixeCreate
 
@@ -172,6 +172,18 @@ async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, min
         return []
 
     return await dispositivo_service.listar_modulos(db, dispositivo, minutos)
+
+
+# leitor so ve, dono e operador ligam/desligam
+async def comandar_modulo(db: AsyncSession, aquario_id: int, usuario_id: int, serial: str, comando: ComandoModulo) -> None:
+    aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    exigir_edicao(papel)
+
+    dispositivo = await DispositivoRepository(db).buscar_do_aquario(aquario.id)
+    if dispositivo is None:
+        raise NotFoundException("Aquário sem IoT conectado")
+
+    await dispositivo_service.enviar_comando(db, dispositivo, serial, comando)
 
 
 async def gerar_convite(db: AsyncSession, aquario_id: int, usuario_id: int) -> ConviteAquarioRead:

@@ -98,6 +98,13 @@ export const zCodigoDispositivo = z.object({
 });
 
 /**
+ * ComandoModulo
+ */
+export const zComandoModulo = z.object({
+    acao: z.enum(['ativar', 'desativar'])
+});
+
+/**
  * ConclusaoRead
  */
 export const zConclusaoRead = z.object({
@@ -577,7 +584,8 @@ export const zTipoModulo = z.union([z.literal(1), z.literal(2)]);
 export const zModuloIotRead = z.object({
     serial: z.string(),
     tipo: zTipoModulo,
-    series: z.array(zSerieLeitura)
+    series: z.array(zSerieLeitura),
+    ligado: z.boolean().nullish()
 });
 
 /**
@@ -1145,6 +1153,13 @@ export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
  * Successful Response
  */
 export const zListarModulosAquariosAquarioIdModulosGetResponse = z.array(zModuloIotRead);
+
+export const zComandarModuloAquariosAquarioIdModulosSerialComandoPostBody = zComandoModulo;
+
+export const zComandarModuloAquariosAquarioIdModulosSerialComandoPostPath = z.object({
+    aquario_id: z.int(),
+    serial: z.string()
+});
 
 export const zGerarConviteAquariosAquarioIdConvitesPostPath = z.object({
     aquario_id: z.int()

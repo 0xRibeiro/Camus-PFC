@@ -18,11 +18,14 @@ namespace barramento {
     const char* leitura;
     const char* unidade;
     float escala;
+    bool atuador;
   };
 
   // escala: valor bruto / escala = valor real
+  // atuador: tem rele, responde COMANDO e ESTADO
   const Catalogo CATALOGO[] = {
-    { (uint8_t) TipoModulo::DISTANCIA, "Distancia", "distancia", "cm", 10 },
+    { (uint8_t) TipoModulo::DISTANCIA, "Distancia", "distancia", "cm", 10, false },
+    { (uint8_t) TipoModulo::TEMPERATURA, "Temperatura", "temperatura", "C", 100, true },
   };
 
   Modulo modulos[MAX_MODULOS];
@@ -101,12 +104,14 @@ namespace barramento {
       novo.serial = ((uint32_t) id[2] << 24) | ((uint32_t) id[3] << 16) | ((uint32_t) id[4] << 8) | id[5];
       novo.temValor = false;
       novo.valor = 0;
+      novo.ligado = false;
 
       // mantem o ultimo valor de quem ja tava
       int antigo = buscarEm(modulos, total, novo.serial);
       if (antigo >= 0) {
         novo.temValor = modulos[antigo].temValor;
         novo.valor = modulos[antigo].valor;
+        novo.ligado = modulos[antigo].ligado;
       }
       quantidadeAchados++;
     }
@@ -194,6 +199,34 @@ namespace barramento {
     }
   }
 
+  // estado do rele vai no modulos (retido), publica so qnd muda
+  void lerEstados() {
+    bool mudou = false;
+
+    for (int i = 0; i < total; i++) {
+      const Catalogo* catalogo = buscarCatalogo(modulos[i].tipo);
+      if (catalogo == nullptr || !catalogo->atuador) {
+        continue;
+      }
+
+      uint8_t resposta[TAM_ESTADO];
+      if (!ler(modulos[i].endereco, REG_ESTADO, resposta, TAM_ESTADO)) {
+        continue;
+      }
+
+      bool ligado = resposta[0] == 1;
+      if (ligado != modulos[i].ligado) {
+        modulos[i].ligado = ligado;
+        mudou = true;
+      }
+    }
+
+    if (mudou) {
+      versaoAtual++;
+      publicarModulos();
+    }
+  }
+
   void publicarModulos() {
     JsonDocument json;
     JsonArray lista = json["modulos"].to<JsonArray>();
@@ -206,6 +239,11 @@ namespace barramento {
       item["serial"] = serial;
       item["tipo"] = modulos[i].tipo;
       item["endereco"] = modulos[i].endereco;
+
+      const Catalogo* catalogo = buscarCatalogo(modulos[i].tipo);
+      if (catalogo != nullptr && catalogo->atuador) {
+        item["ligado"] = modulos[i].ligado;
+      }
     }
 
     char mensagem[512];
@@ -213,6 +251,19 @@ namespace barramento {
 
     // retido, backend pega a lista atual ao conectar
     mqtt::publicar("modulos", mensagem, true);
+  }
+
+  // [0x03, acao], o lerEstados confirma no proximo segundo
+  void comandar(uint32_t serial, bool ligar) {
+    int indice = buscarEm(modulos, total, serial);
+    if (indice < 0) {
+      return;
+    }
+
+    Wire.beginTransmission(modulos[indice].endereco);
+    Wire.write(REG_COMANDO);
+    Wire.write(ligar ? 1 : 0);
+    Wire.endTransmission();
   }
 
   void iniciar() {
@@ -224,6 +275,7 @@ namespace barramento {
     if (millis() - ultimaLeitura >= INTERVALO_LEITURA) {
       ultimaLeitura = millis();
       lerModulos();
+      lerEstados();
     }
 
     if (millis() - ultimaVarredura < INTERVALO_VARREDURA) {
@@ -263,5 +315,13 @@ namespace barramento {
       return "";
     }
     return catalogo->unidade;
+  }
+
+  bool atuadorTipo(uint8_t tipo) {
+    const Catalogo* catalogo = buscarCatalogo(tipo);
+    if (catalogo == nullptr) {
+      return false;
+    }
+    return catalogo->atuador;
   }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace mqtt {
   enum class Evento { NENHUM, CONECTOU, CAIU };
 
@@ -22,4 +24,9 @@ namespace mqtt {
 
   bool chegouDesvinculo();
   int removidos();
+
+  // comando pra um modulo, true so uma vez por mensagem
+  bool chegouComando();
+  uint32_t serialComando();
+  bool ligarComando();
 }

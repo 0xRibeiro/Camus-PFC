@@ -35,6 +35,18 @@ void TelaModulos::desenhar() {
     display::tft.setCursor(4, y);
     display::tft.print(barramento::nomeTipo(modulo.tipo));
 
+    // estado do rele do lado do nome
+    if (barramento::atuadorTipo(modulo.tipo)) {
+      display::tft.setCursor(100, y);
+      if (modulo.ligado) {
+        display::tft.setTextColor(ST77XX_GREEN);
+        display::tft.print("rele ON");
+      } else {
+        display::tft.setTextColor(ST77XX_RED);
+        display::tft.print("rele OFF");
+      }
+    }
+
     display::tft.setTextSize(2);
     display::tft.setTextColor(ST77XX_CYAN);
     display::tft.setCursor(4, y + 10);
