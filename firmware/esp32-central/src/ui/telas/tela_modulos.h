@@ -1,0 +1,14 @@
+#pragma once
+
+#include "../tela.h"
+
+class TelaModulos : public Tela {
+public:
+  void desenhar() override;
+  void aoEvento(joystick::Evento evento) override;
+  const char* nome() override;
+  void atualizar() override;
+
+private:
+  int versaoDesenhada = -1;
+};
