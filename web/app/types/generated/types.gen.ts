@@ -110,6 +110,28 @@ export type AquarioRead = {
 };
 
 /**
+ * AvisoRead
+ */
+export type AvisoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Mensagem
+     */
+    mensagem: string;
+    /**
+     * Lido
+     */
+    lido: boolean;
+    /**
+     * Criado Em
+     */
+    criado_em: string;
+};
+
+/**
  * Body_enviar_imagem_grupos__grupo_id__imagens_post
  */
 export type BodyEnviarImagemGruposGrupoIdImagensPost = {
@@ -550,6 +572,10 @@ export type DenunciaAdminRead = {
      * Conteudo
      */
     conteudo: string | null;
+    /**
+     * Grupo Suspenso
+     */
+    grupo_suspenso?: boolean;
 };
 
 /**
@@ -669,6 +695,18 @@ export type GrupoRead = {
      * Id Dono
      */
     id_dono: number;
+    /**
+     * Inabilitado
+     */
+    inabilitado?: boolean;
+    /**
+     * Suspenso Ate
+     */
+    suspenso_ate?: string | null;
+    /**
+     * Suspenso
+     */
+    readonly suspenso: boolean;
 };
 
 /**
@@ -862,6 +900,16 @@ export type ModuloUpdate = {
 };
 
 /**
+ * MotivoCreate
+ */
+export type MotivoCreate = {
+    /**
+     * Motivo
+     */
+    motivo: string;
+};
+
+/**
  * OrigemLancamento
  */
 export type OrigemLancamento = 'conteudo';
@@ -1037,6 +1085,20 @@ export type ResultadoQuizRead = {
  * RoleUsuario
  */
 export type RoleUsuario = 'aluno' | 'author' | 'admin';
+
+/**
+ * SuspensaoCreate
+ */
+export type SuspensaoCreate = {
+    /**
+     * Dias
+     */
+    dias: 14 | 30;
+    /**
+     * Motivo
+     */
+    motivo: string;
+};
 
 /**
  * TokenPair
@@ -1786,6 +1848,32 @@ export type FastcrudCorePaginationDynamicPaginatedResponse9 = {
      * Items Per Page
      */
     items_per_page?: number | null;
+};
+
+/**
+ * GrupoRead
+ */
+export type GrupoReadWritable = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Id Dono
+     */
+    id_dono: number;
+    /**
+     * Inabilitado
+     */
+    inabilitado?: boolean;
+    /**
+     * Suspenso Ate
+     */
+    suspenso_ate?: string | null;
 };
 
 export type RegisterAuthRegisterPostData = {
@@ -4802,6 +4890,148 @@ export type ResolverDenunciaAdminDenunciasDenunciaIdPatchResponses = {
 };
 
 export type ResolverDenunciaAdminDenunciasDenunciaIdPatchResponse = ResolverDenunciaAdminDenunciasDenunciaIdPatchResponses[keyof ResolverDenunciaAdminDenunciasDenunciaIdPatchResponses];
+
+export type SuspenderGrupoAdminGruposGrupoIdSuspensaoPostData = {
+    body: SuspensaoCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/admin/grupos/{grupo_id}/suspensao';
+};
+
+export type SuspenderGrupoAdminGruposGrupoIdSuspensaoPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SuspenderGrupoAdminGruposGrupoIdSuspensaoPostError = SuspenderGrupoAdminGruposGrupoIdSuspensaoPostErrors[keyof SuspenderGrupoAdminGruposGrupoIdSuspensaoPostErrors];
+
+export type SuspenderGrupoAdminGruposGrupoIdSuspensaoPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrupoRead;
+};
+
+export type SuspenderGrupoAdminGruposGrupoIdSuspensaoPostResponse = SuspenderGrupoAdminGruposGrupoIdSuspensaoPostResponses[keyof SuspenderGrupoAdminGruposGrupoIdSuspensaoPostResponses];
+
+export type ExcluirGrupoAdminGruposGrupoIdDeleteData = {
+    body: MotivoCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/admin/grupos/{grupo_id}';
+};
+
+export type ExcluirGrupoAdminGruposGrupoIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExcluirGrupoAdminGruposGrupoIdDeleteError = ExcluirGrupoAdminGruposGrupoIdDeleteErrors[keyof ExcluirGrupoAdminGruposGrupoIdDeleteErrors];
+
+export type ExcluirGrupoAdminGruposGrupoIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ExcluirGrupoAdminGruposGrupoIdDeleteResponse = ExcluirGrupoAdminGruposGrupoIdDeleteResponses[keyof ExcluirGrupoAdminGruposGrupoIdDeleteResponses];
+
+export type ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteData = {
+    body: MotivoCreate;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+        /**
+         * Conteudo Id
+         */
+        conteudo_id: number;
+    };
+    query?: never;
+    url: '/admin/grupos/{grupo_id}/conteudos/{conteudo_id}';
+};
+
+export type ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteError = ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteErrors[keyof ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteErrors];
+
+export type ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteResponse = ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteResponses[keyof ExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteResponses];
+
+export type ListarAvisosAvisosGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/avisos';
+};
+
+export type ListarAvisosAvisosGetResponses = {
+    /**
+     * Response Listar Avisos Avisos Get
+     *
+     * Successful Response
+     */
+    200: Array<AvisoRead>;
+};
+
+export type ListarAvisosAvisosGetResponse = ListarAvisosAvisosGetResponses[keyof ListarAvisosAvisosGetResponses];
+
+export type MarcarComoLidoAvisosAvisoIdLidoPatchData = {
+    body?: never;
+    path: {
+        /**
+         * Aviso Id
+         */
+        aviso_id: number;
+    };
+    query?: never;
+    url: '/avisos/{aviso_id}/lido';
+};
+
+export type MarcarComoLidoAvisosAvisoIdLidoPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MarcarComoLidoAvisosAvisoIdLidoPatchError = MarcarComoLidoAvisosAvisoIdLidoPatchErrors[keyof MarcarComoLidoAvisosAvisoIdLidoPatchErrors];
+
+export type MarcarComoLidoAvisosAvisoIdLidoPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: AvisoRead;
+};
+
+export type MarcarComoLidoAvisosAvisoIdLidoPatchResponse = MarcarComoLidoAvisosAvisoIdLidoPatchResponses[keyof MarcarComoLidoAvisosAvisoIdLidoPatchResponses];
 
 export type MeuXpGruposGrupoIdPontuacaoXpGetData = {
     body?: never;

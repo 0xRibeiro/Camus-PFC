@@ -61,13 +61,13 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
-import type { DenunciaCreate } from '~/types/generated'
+import type { DenunciaCreate } from '~/types/generated/types.gen'
 import { zDenunciaCreate } from '~/types/generated/zod.gen'
 
-// mesmo esquema do TrilhaFormModal: quem abre e fecha o modal é a página que usa ele
+// v-model:open igual ao do TrilhaFormModal: o pai controla se o modal está aberto
 const open = defineModel<boolean>('open', { required: true })
 
-// sem idConteudo, a denúncia vai contra o grupo; com ele, aponta pra um conteúdo específico
+// sem idConteudo a denúncia é contra o grupo. com idConteudo é sobre aquele conteúdo.
 const props = defineProps<{
   grupoId: number
   idConteudo?: number | null
@@ -89,7 +89,7 @@ const motivos = [
   { label: 'Outro', value: 'outro' },
 ]
 
-// as regras de validação já vêm do schema que o back gerou (zDenunciaCreate)
+// a regra de validação vem do schema gerado a partir do back (zDenunciaCreate)
 const formSchema = zDenunciaCreate.pick({ motivo: true, descricao: true })
 
 const formState = reactive({
@@ -98,7 +98,7 @@ const formState = reactive({
 })
 const enviando = ref(false)
 
-// zera os campos sempre que o modal é aberto
+// limpa o formulário toda vez que o modal abre
 watch(open, (aberto) => {
   if (!aberto) return
   formState.motivo = undefined
