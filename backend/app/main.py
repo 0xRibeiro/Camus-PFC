@@ -22,7 +22,6 @@ from app.domains.trilha.router import (
     alternativa_router,
     conteudo_router,
     modulo_router,
-    
     questao_router,
     trilha_router,
 )
