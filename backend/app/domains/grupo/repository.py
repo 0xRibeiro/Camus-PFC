@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.grupo.model import Grupo, Participacao
@@ -48,3 +48,19 @@ class GrupoRepository:
         resultado = await self.db.execute(select(Usuario).join(Participacao, Participacao.id_usuario == Usuario.id)
         .where(Participacao.id_grupo == grupo_id).order_by(Usuario.username, Usuario.id))
         return list(resultado.scalars().all())
+
+
+    # metodo do aluno para sair do grupo
+    async def remover_participante(self, grupo_id: int, usuario_id: int) -> None:
+        await self.db.execute(
+            delete(Participacao).where(
+                Participacao.id_grupo == grupo_id,
+                Participacao.id_usuario == usuario_id,
+            )
+        )
+        await self.db.commit()
+
+    # metodo do dono pra excluir o grupo.
+    async def excluir(self, grupo: Grupo) -> None:
+        await self.db.execute(delete(Grupo).where(Grupo.id == grupo.id))
+        await self.db.commit()

@@ -115,3 +115,20 @@ async def listar_membros(db: AsyncSession, grupo_id: int, usuario: Usuario) -> l
         MembroGrupoRead(id=membro.id, username=membro.username, papel="dono" if membro.id == grupo.id_dono else "membro")
         for membro in membros
     ]
+
+# metodo da service pra sair do grupo. tem exceção até caso o dono chegue nesse metodo! mas o ideal é que não
+async def sair_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> None:
+    grupo = await buscar_grupo(db, grupo_id, usuario)
+    if grupo.id_dono == usuario.id:
+        raise ForbiddenException("O dono precisa excluir o grupo.")
+
+    await GrupoRepository(db).remover_participante(grupo.id, usuario.id)
+
+
+# metodo da service pra excluir o grupo. tem exceção caso o usuário não seja o dono também!
+async def excluir_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> None:
+    grupo = await buscar_grupo(db, grupo_id, usuario)
+    if grupo.id_dono != usuario.id:
+        raise ForbiddenException("Apenas o dono pode excluir o grupo.")
+
+    await GrupoRepository(db).excluir(grupo)

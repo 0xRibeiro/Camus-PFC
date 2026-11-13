@@ -39,14 +39,24 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div>
-        <h1 class="text-xl font-semibold break-words">
-          {{ grupo.nome }}
-        </h1>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold break-words">
+            {{ grupo.nome }}
+          </h1>
 
-        <p class="text-sm text-muted">
-          Consulte os participantes e os conteúdos do grupo.
-        </p>
+          <p class="text-sm text-muted">
+            Consulte os participantes e os conteúdos do grupo.
+          </p>
+        </div>
+
+        <UButton
+          :label="acaoGrupo"
+          :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
+          color="error"
+          variant="outline"
+          @click="confirmando = true"
+        />
       </div>
 
       <UCard>
@@ -152,6 +162,31 @@
           {{ xpGrupo }} XP no grupo
         </UBadge>
       </section>
+      <UModal
+        v-model:open="confirmando"
+        :title="acaoGrupo"
+        :description="usuarioCriador
+          ? 'Isso exclui o grupo, suas trilhas e o XP do grupo para todos os membros.'
+          : 'Você perde o acesso às trilhas do grupo. Para voltar, use um convite válido.'"
+        :dismissible="!removendo"
+        :close="!removendo"
+      >
+        <template #footer="{ close }">
+          <UButton
+            label="Cancelar"
+            color="neutral"
+            variant="outline"
+            :disabled="removendo"
+            @click="close"
+          />
+          <UButton
+            :label="acaoGrupo"
+            color="error"
+            :loading="removendo"
+            @click="confirmarSaida"
+          />
+        </template>
+      </UModal>
     </div>
   </div>
 </template>
@@ -194,6 +229,9 @@ const tempoRestante = computed(() => {
 })
 
 const usuarioCriador = computed(() => !!grupo.value && grupo.value.id_dono === auth.user?.id)
+const confirmando = ref(false)
+const removendo = ref(false)
+const acaoGrupo = computed(() => usuarioCriador.value ? 'Excluir grupo' : 'Sair do grupo')
 
 const columns: TableColumn<MembroGrupoRead>[] = [
   { accessorKey: 'username', header: 'Usuário' },
@@ -266,5 +304,26 @@ async function copiarConvite() {
   }
 }
 
+async function confirmarSaida() {
+  if (removendo.value) return
+
+  const excluir = usuarioCriador.value
+  const caminho = excluir ? `/grupos/${grupoId}` : `/grupos/${grupoId}/membros/me`
+  removendo.value = true
+
+  try {
+    await api(caminho, { method: 'DELETE' })
+    confirmando.value = false
+    toast.add({ title: excluir ? 'Grupo excluído' : 'Você saiu do grupo', color: 'success' })
+    await navigateTo('/grupos', { replace: true })
+  }
+  catch (error) {
+    const padrao = excluir ? 'Não foi possível excluir o grupo' : 'Não foi possível sair do grupo'
+    toast.add({ title: mensagemErro(error, padrao), color: 'error' })
+  }
+  finally {
+    removendo.value = false
+  }
+}
 onMounted(fetchGrupo)
 </script>

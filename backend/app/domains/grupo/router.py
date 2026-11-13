@@ -59,3 +59,19 @@ async def gerar_convite(grupo_id: int, db: AsyncSession = Depends(get_async_sess
 async def listar_membros(grupo_id: int, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> list[MembroGrupoRead]:
     return await service.listar_membros(db, grupo_id, usuario)
+
+
+# rota 7 = remove o usuário do grupo, retornando 204. qualquer membro pode sair do grupo.
+@router.delete("/{grupo_id}/membros/me", status_code=status.HTTP_204_NO_CONTENT)
+async def sair_grupo(
+    grupo_id: int,
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> None:
+    await service.sair_grupo(db, grupo_id, usuario)
+
+
+# rota 8 = remove o grupo, retornando 204. apenas o dono pode remover o grupo.
+@router.delete("/{grupo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def excluir_grupo(grupo_id: int, db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> None:
+    await service.excluir_grupo(db, grupo_id, usuario)
