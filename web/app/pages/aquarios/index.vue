@@ -50,33 +50,45 @@
 
     <div
       v-else
-      class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      class="space-y-8"
     >
-      <UCard
-        v-for="aquario in aquarios"
-        :key="aquario.id"
+      <section
+        v-for="grupo in grupos"
+        :key="grupo.titulo"
+        class="space-y-3"
       >
-        <div class="flex items-start justify-between gap-2">
-          <h2 class="break-words font-semibold">
-            {{ aquario.nome }}
-          </h2>
-          <UBadge
-            :label="aquario.papel ?? 'dono'"
-            color="neutral"
-            variant="subtle"
-          />
+        <h2 class="text-lg font-semibold">
+          {{ grupo.titulo }}
+        </h2>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <UCard
+            v-for="aquario in grupo.aquarios"
+            :key="aquario.id"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="break-words font-semibold">
+                {{ aquario.nome }}
+              </h3>
+              <UBadge
+                :label="aquario.papel ?? 'dono'"
+                color="neutral"
+                variant="subtle"
+              />
+            </div>
+            <p class="mt-1 text-sm text-muted">
+              {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
+            </p>
+            <UButton
+              :to="`/aquarios/${aquario.id}`"
+              label="Abrir aquário"
+              icon="i-lucide-arrow-right"
+              variant="outline"
+              class="mt-4"
+            />
+          </UCard>
         </div>
-        <p class="mt-1 text-sm text-muted">
-          {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
-        </p>
-        <UButton
-          :to="`/aquarios/${aquario.id}`"
-          label="Abrir aquário"
-          icon="i-lucide-arrow-right"
-          variant="outline"
-          class="mt-4"
-        />
-      </UCard>
+      </section>
     </div>
 
     <UModal
@@ -250,6 +262,38 @@ async function entrarComCodigo(evento: FormSubmitEvent<CodigoDispositivo>) {
 async function entrarComConvite(evento: FormSubmitEvent<AquarioEntrar>) {
   await entrar('/aquarios/entrar', evento.data)
 }
+
+// ---- separação dos cards ----
+// cada aquário cai em um grupo pelo papel e por ter IoT, grupo vazio não aparece
+
+const grupos = computed(() => {
+  const donoComIot: Aquario[] = []
+  const donoSemIot: Aquario[] = []
+  const operador: Aquario[] = []
+  const leitor: Aquario[] = []
+
+  for (const aquario of aquarios.value) {
+    const papel = aquario.papel ?? 'dono'
+
+    if (papel === 'dono' && aquario.dispositivo) donoComIot.push(aquario)
+    else if (papel === 'dono') donoSemIot.push(aquario)
+    else if (papel === 'operador') operador.push(aquario)
+    else leitor.push(aquario)
+  }
+
+  const todos = [
+    { titulo: 'Meus aquários com IoT', aquarios: donoComIot },
+    { titulo: 'Meus aquários sem IoT', aquarios: donoSemIot },
+    { titulo: 'Aquários que gerencio', aquarios: operador },
+    { titulo: 'Aquários como convidado', aquarios: leitor },
+  ]
+
+  const visiveis = []
+  for (const grupo of todos) {
+    if (grupo.aquarios.length) visiveis.push(grupo)
+  }
+  return visiveis
+})
 
 const formulario = reactive({
   nome: '',
