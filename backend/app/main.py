@@ -9,12 +9,14 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.domains.aquario.router import router as aquario_router
 from app.domains.auditoria.router import router as auditoria_router
+from app.domains.aviso.router import router as aviso_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.denuncia.router import admin_router as denuncia_admin_router
 from app.domains.denuncia.router import router as denuncia_router
 from app.domains.grupo.router import router as grupo_router
 from app.domains.grupo.service import grupo_membro
+from app.domains.moderacao.router import router as moderacao_router
 from app.domains.pontuacao.router import router as pontuacao_router
 from app.domains.progresso.router import router as progresso_router
 from app.domains.trilha.router import (
@@ -70,6 +72,8 @@ app.include_router(upload_router)
 app.include_router(grupo_upload_router, prefix="/grupos/{grupo_id}")
 app.include_router(denuncia_router)
 app.include_router(denuncia_admin_router)
+app.include_router(moderacao_router)
+app.include_router(aviso_router)
 for router in (pontuacao_router, progresso_router):
     
     app.include_router(

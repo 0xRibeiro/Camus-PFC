@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
@@ -55,7 +57,7 @@ class DenunciaRepository:
         dono = aliased(Usuario)
 
         consulta = (
-            select(Denuncia, denunciante.username, Grupo.nome, dono.username, Conteudo.titulo)
+            select(Denuncia, denunciante.username, Grupo, dono.username, Conteudo.titulo)
             .join(denunciante, denunciante.id == Denuncia.id_denunciante)
             .join(Grupo, Grupo.id == Denuncia.id_grupo)
             .join(dono, dono.id == Grupo.id_dono)
@@ -77,9 +79,12 @@ class DenunciaRepository:
                 criado_em=denuncia.criado_em,
                 resolvido_em=denuncia.resolvido_em,
                 denunciante=nome_denunciante,
-                grupo=nome_grupo,
+                grupo=grupo.nome,
                 dono=nome_dono,
                 conteudo=titulo_conteudo,
+                grupo_suspenso=grupo.inabilitado
+                or (grupo.suspenso_ate is not None and grupo.suspenso_ate > datetime.now(UTC)),
             )
-            for denuncia, nome_denunciante, nome_grupo, nome_dono, titulo_conteudo in resultado.all()
+            for denuncia, nome_denunciante, grupo, nome_dono, titulo_conteudo in resultado.all()
+
         ]

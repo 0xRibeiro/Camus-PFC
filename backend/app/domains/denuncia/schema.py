@@ -37,6 +37,8 @@ class DenunciaAdminRead(DenunciaRead):
     grupo: str
     dono: str
     conteudo: str | None
+    # o front usa isso pra esconder o suspender quando o grupo já está suspenso
+    grupo_suspenso: bool = False
 
 
 class DenunciaUpdate(BaseModel):
