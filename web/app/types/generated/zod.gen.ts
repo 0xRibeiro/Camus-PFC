@@ -84,6 +84,13 @@ export const zCadastroDiaRead = z.object({
 });
 
 /**
+ * CadastroDispositivo
+ */
+export const zCadastroDispositivo = z.object({
+    mac: z.string().regex(/^[0-9a-f]{12}$/)
+});
+
+/**
  * CodigoDispositivo
  */
 export const zCodigoDispositivo = z.object({
@@ -225,6 +232,14 @@ export const zCorrecaoQuestaoRead = z.object({
 });
 
 /**
+ * CredencialDispositivo
+ */
+export const zCredencialDispositivo = z.object({
+    mac: z.string(),
+    senha: z.string()
+});
+
+/**
  * DashboardRead
  */
 export const zDashboardRead = z.object({
@@ -233,7 +248,9 @@ export const zDashboardRead = z.object({
     total_conquistas_concedidas: z.int(),
     total_trilhas: z.int(),
     cadastros_por_dia: z.array(zCadastroDiaRead),
-    conquistas_por_quantidade: z.array(zConquistaResumoRead)
+    conquistas_por_quantidade: z.array(zConquistaResumoRead),
+    total_trilhas_globais: z.int(),
+    total_trilhas_de_grupo: z.int()
 });
 
 /**
@@ -732,22 +749,8 @@ export const zFastcrudCorePaginationDynamicListResponse1 = z.object({
 /**
  * DynamicListResponse
  */
-export const zFastcrudCorePaginationDynamicListResponse10 = z.object({
-    data: z.array(zQuestaoRead)
-});
-
-/**
- * DynamicListResponse
- */
-export const zFastcrudCorePaginationDynamicListResponse11 = z.object({
-    data: z.array(zAlternativaRead)
-});
-
-/**
- * DynamicListResponse
- */
 export const zFastcrudCorePaginationDynamicListResponse2 = z.object({
-    data: z.array(zTrilhaRead)
+    data: z.array(zConquistaRead)
 });
 
 /**
@@ -779,27 +782,6 @@ export const zFastcrudCorePaginationDynamicListResponse6 = z.object({
 });
 
 /**
- * DynamicListResponse
- */
-export const zFastcrudCorePaginationDynamicListResponse7 = z.object({
-    data: z.array(zModuloRead)
-});
-
-/**
- * DynamicListResponse
- */
-export const zFastcrudCorePaginationDynamicListResponse8 = z.object({
-    data: z.array(zConquistaRead)
-});
-
-/**
- * DynamicListResponse
- */
-export const zFastcrudCorePaginationDynamicListResponse9 = z.object({
-    data: z.array(zConteudoRead)
-});
-
-/**
  * DynamicPaginatedResponse
  */
 export const zFastcrudCorePaginationDynamicPaginatedResponse1 = z.object({
@@ -813,30 +795,8 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse1 = z.object({
 /**
  * DynamicPaginatedResponse
  */
-export const zFastcrudCorePaginationDynamicPaginatedResponse10 = z.object({
-    data: z.array(zQuestaoRead),
-    total_count: z.int(),
-    has_more: z.boolean(),
-    page: z.int().nullish(),
-    items_per_page: z.int().nullish()
-});
-
-/**
- * DynamicPaginatedResponse
- */
-export const zFastcrudCorePaginationDynamicPaginatedResponse11 = z.object({
-    data: z.array(zAlternativaRead),
-    total_count: z.int(),
-    has_more: z.boolean(),
-    page: z.int().nullish(),
-    items_per_page: z.int().nullish()
-});
-
-/**
- * DynamicPaginatedResponse
- */
 export const zFastcrudCorePaginationDynamicPaginatedResponse2 = z.object({
-    data: z.array(zTrilhaRead),
+    data: z.array(zConquistaRead),
     total_count: z.int(),
     has_more: z.boolean(),
     page: z.int().nullish(),
@@ -881,39 +841,6 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse5 = z.object({
  */
 export const zFastcrudCorePaginationDynamicPaginatedResponse6 = z.object({
     data: z.array(zAlternativaRead),
-    total_count: z.int(),
-    has_more: z.boolean(),
-    page: z.int().nullish(),
-    items_per_page: z.int().nullish()
-});
-
-/**
- * DynamicPaginatedResponse
- */
-export const zFastcrudCorePaginationDynamicPaginatedResponse7 = z.object({
-    data: z.array(zModuloRead),
-    total_count: z.int(),
-    has_more: z.boolean(),
-    page: z.int().nullish(),
-    items_per_page: z.int().nullish()
-});
-
-/**
- * DynamicPaginatedResponse
- */
-export const zFastcrudCorePaginationDynamicPaginatedResponse8 = z.object({
-    data: z.array(zConquistaRead),
-    total_count: z.int(),
-    has_more: z.boolean(),
-    page: z.int().nullish(),
-    items_per_page: z.int().nullish()
-});
-
-/**
- * DynamicPaginatedResponse
- */
-export const zFastcrudCorePaginationDynamicPaginatedResponse9 = z.object({
-    data: z.array(zConteudoRead),
     total_count: z.int(),
     has_more: z.boolean(),
     page: z.int().nullish(),
@@ -1093,300 +1020,6 @@ export const zTrilhaUpdateTrilhasIdPatchPath = z.object({
     id: z.int()
 });
 
-export const zTrilhaReadMultiGruposGrupoIdTrilhasGetPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zTrilhaReadMultiGruposGrupoIdTrilhasGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish()
-});
-
-/**
- * Response Trilha Read Multi Grupos  Grupo Id  Trilhas Get
- *
- * Successful Response
- */
-export const zTrilhaReadMultiGruposGrupoIdTrilhasGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse2,
-    zFastcrudCorePaginationDynamicListResponse2
-]);
-
-export const zTrilhaCreateGruposGrupoIdTrilhasPostBody = zTrilhaCreate;
-
-export const zTrilhaCreateGruposGrupoIdTrilhasPostPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zTrilhaDeleteGruposGrupoIdTrilhasIdDeletePath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zTrilhaReadGruposGrupoIdTrilhasIdGetPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zTrilhaReadGruposGrupoIdTrilhasIdGetResponse = zTrilhaRead;
-
-export const zTrilhaUpdateGruposGrupoIdTrilhasIdPatchBody = zTrilhaUpdate;
-
-export const zTrilhaUpdateGruposGrupoIdTrilhasIdPatchPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zModuloReadMultiGruposGrupoIdModulosGetPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zModuloReadMultiGruposGrupoIdModulosGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    trilha_id: z.int().optional()
-});
-
-/**
- * Response Modulo Read Multi Grupos  Grupo Id  Modulos Get
- *
- * Successful Response
- */
-export const zModuloReadMultiGruposGrupoIdModulosGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse3,
-    zFastcrudCorePaginationDynamicListResponse3
-]);
-
-export const zModuloCreateGruposGrupoIdModulosPostBody = zModuloCreate;
-
-export const zModuloCreateGruposGrupoIdModulosPostPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zModuloDeleteGruposGrupoIdModulosIdDeletePath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zModuloReadGruposGrupoIdModulosIdGetPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zModuloReadGruposGrupoIdModulosIdGetResponse = zModuloRead;
-
-export const zModuloUpdateGruposGrupoIdModulosIdPatchBody = zModuloUpdate;
-
-export const zModuloUpdateGruposGrupoIdModulosIdPatchPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zConteudoReadMultiGruposGrupoIdConteudosGetPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zConteudoReadMultiGruposGrupoIdConteudosGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    modulo_id: z.int().optional()
-});
-
-/**
- * Response Conteudo Read Multi Grupos  Grupo Id  Conteudos Get
- *
- * Successful Response
- */
-export const zConteudoReadMultiGruposGrupoIdConteudosGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse4,
-    zFastcrudCorePaginationDynamicListResponse4
-]);
-
-export const zConteudoCreateGruposGrupoIdConteudosPostBody = zConteudoCreate;
-
-export const zConteudoCreateGruposGrupoIdConteudosPostPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zConteudoDeleteGruposGrupoIdConteudosIdDeletePath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zConteudoReadGruposGrupoIdConteudosIdGetPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zConteudoReadGruposGrupoIdConteudosIdGetResponse = zConteudoRead;
-
-export const zConteudoUpdateGruposGrupoIdConteudosIdPatchBody = zConteudoUpdate;
-
-export const zConteudoUpdateGruposGrupoIdConteudosIdPatchPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zQuestaoReadMultiGruposGrupoIdQuestoesGetPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zQuestaoReadMultiGruposGrupoIdQuestoesGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    conteudo_id: z.int().optional()
-});
-
-/**
- * Response Questao Read Multi Grupos  Grupo Id  Questoes Get
- *
- * Successful Response
- */
-export const zQuestaoReadMultiGruposGrupoIdQuestoesGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse5,
-    zFastcrudCorePaginationDynamicListResponse5
-]);
-
-export const zQuestaoCreateGruposGrupoIdQuestoesPostBody = zQuestaoCreate;
-
-export const zQuestaoCreateGruposGrupoIdQuestoesPostPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zQuestaoDeleteGruposGrupoIdQuestoesIdDeletePath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zQuestaoReadGruposGrupoIdQuestoesIdGetPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zQuestaoReadGruposGrupoIdQuestoesIdGetResponse = zQuestaoRead;
-
-export const zQuestaoUpdateGruposGrupoIdQuestoesIdPatchBody = zQuestaoUpdate;
-
-export const zQuestaoUpdateGruposGrupoIdQuestoesIdPatchPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zAlternativaReadMultiGruposGrupoIdAlternativasGetPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zAlternativaReadMultiGruposGrupoIdAlternativasGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    questao_id: z.int().optional()
-});
-
-/**
- * Response Alternativa Read Multi Grupos  Grupo Id  Alternativas Get
- *
- * Successful Response
- */
-export const zAlternativaReadMultiGruposGrupoIdAlternativasGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse6,
-    zFastcrudCorePaginationDynamicListResponse6
-]);
-
-export const zAlternativaCreateGruposGrupoIdAlternativasPostBody = zAlternativaCreate;
-
-export const zAlternativaCreateGruposGrupoIdAlternativasPostPath = z.object({
-    grupo_id: z.int()
-});
-
-export const zAlternativaDeleteGruposGrupoIdAlternativasIdDeletePath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zAlternativaReadGruposGrupoIdAlternativasIdGetPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zAlternativaReadGruposGrupoIdAlternativasIdGetResponse = zAlternativaRead;
-
-export const zAlternativaUpdateGruposGrupoIdAlternativasIdPatchBody = zAlternativaUpdate;
-
-export const zAlternativaUpdateGruposGrupoIdAlternativasIdPatchPath = z.object({
-    id: z.int(),
-    grupo_id: z.int()
-});
-
-export const zModuloReadMultiModulosGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    trilha_id: z.int().optional()
-});
-
-/**
- * Response Modulo Read Multi Modulos Get
- *
- * Successful Response
- */
-export const zModuloReadMultiModulosGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse7,
-    zFastcrudCorePaginationDynamicListResponse7
-]);
-
-export const zModuloCreateModulosPostBody = zModuloCreate;
-
-export const zModuloDeleteModulosIdDeletePath = z.object({
-    id: z.int()
-});
-
-export const zModuloReadModulosIdGetPath = z.object({
-    id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zModuloReadModulosIdGetResponse = zModuloRead;
-
-export const zModuloUpdateModulosIdPatchBody = zModuloUpdate;
-
-export const zModuloUpdateModulosIdPatchPath = z.object({
-    id: z.int()
-});
-
 export const zConquistaReadMultiConquistasGetQuery = z.object({
     offset: z.int().nullish(),
     limit: z.int().nullish(),
@@ -1401,8 +1034,8 @@ export const zConquistaReadMultiConquistasGetQuery = z.object({
  * Successful Response
  */
 export const zConquistaReadMultiConquistasGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse8,
-    zFastcrudCorePaginationDynamicListResponse8
+    zFastcrudCorePaginationDynamicPaginatedResponse2,
+    zFastcrudCorePaginationDynamicListResponse2
 ]);
 
 export const zConquistaCreateConquistasPostBody = zConquistaCreate;
@@ -1426,86 +1059,6 @@ export const zConquistaUpdateConquistasIdPatchPath = z.object({
     id: z.int()
 });
 
-export const zConteudoReadMultiConteudosGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    modulo_id: z.int().optional()
-});
-
-/**
- * Response Conteudo Read Multi Conteudos Get
- *
- * Successful Response
- */
-export const zConteudoReadMultiConteudosGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse9,
-    zFastcrudCorePaginationDynamicListResponse9
-]);
-
-export const zConteudoCreateConteudosPostBody = zConteudoCreate;
-
-export const zConteudoDeleteConteudosIdDeletePath = z.object({
-    id: z.int()
-});
-
-export const zConteudoReadConteudosIdGetPath = z.object({
-    id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zConteudoReadConteudosIdGetResponse = zConteudoRead;
-
-export const zConteudoUpdateConteudosIdPatchBody = zConteudoUpdate;
-
-export const zConteudoUpdateConteudosIdPatchPath = z.object({
-    id: z.int()
-});
-
-export const zQuestaoReadMultiQuestoesGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    conteudo_id: z.int().optional()
-});
-
-/**
- * Response Questao Read Multi Questoes Get
- *
- * Successful Response
- */
-export const zQuestaoReadMultiQuestoesGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse10,
-    zFastcrudCorePaginationDynamicListResponse10
-]);
-
-export const zQuestaoCreateQuestoesPostBody = zQuestaoCreate;
-
-export const zQuestaoDeleteQuestoesIdDeletePath = z.object({
-    id: z.int()
-});
-
-export const zQuestaoReadQuestoesIdGetPath = z.object({
-    id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zQuestaoReadQuestoesIdGetResponse = zQuestaoRead;
-
-export const zQuestaoUpdateQuestoesIdPatchBody = zQuestaoUpdate;
-
-export const zQuestaoUpdateQuestoesIdPatchPath = z.object({
-    id: z.int()
-});
-
 export const zObterDashboardAdminDashboardGetQuery = z.object({
     dias: z.int().gte(1).lte(90).optional().default(30)
 });
@@ -1514,46 +1067,6 @@ export const zObterDashboardAdminDashboardGetQuery = z.object({
  * Successful Response
  */
 export const zObterDashboardAdminDashboardGetResponse = zDashboardRead;
-
-export const zAlternativaReadMultiAlternativasGetQuery = z.object({
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    page: z.int().nullish(),
-    itemsPerPage: z.int().nullish(),
-    sort: z.string().nullish(),
-    questao_id: z.int().optional()
-});
-
-/**
- * Response Alternativa Read Multi Alternativas Get
- *
- * Successful Response
- */
-export const zAlternativaReadMultiAlternativasGetResponse = z.union([
-    zFastcrudCorePaginationDynamicPaginatedResponse11,
-    zFastcrudCorePaginationDynamicListResponse11
-]);
-
-export const zAlternativaCreateAlternativasPostBody = zAlternativaCreate;
-
-export const zAlternativaDeleteAlternativasIdDeletePath = z.object({
-    id: z.int()
-});
-
-export const zAlternativaReadAlternativasIdGetPath = z.object({
-    id: z.int()
-});
-
-/**
- * Successful Response
- */
-export const zAlternativaReadAlternativasIdGetResponse = zAlternativaRead;
-
-export const zAlternativaUpdateAlternativasIdPatchBody = zAlternativaUpdate;
-
-export const zAlternativaUpdateAlternativasIdPatchPath = z.object({
-    id: z.int()
-});
 
 export const zListarLogsAdminAuditoriaGetQuery = z.object({
     limite: z.int().optional().default(50),
@@ -1693,6 +1206,13 @@ export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
  */
 export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
 
+export const zCadastrarDispositivoAdminDispositivosPostBody = zCadastroDispositivo;
+
+/**
+ * Successful Response
+ */
+export const zCadastrarDispositivoAdminDispositivosPostResponse = zCredencialDispositivo;
+
 /**
  * Response Listar Grupos Grupos Get
  *
@@ -1713,6 +1233,15 @@ export const zEntrarGrupoGruposEntrarPostBody = zGrupoEntrar;
  * Successful Response
  */
 export const zEntrarGrupoGruposEntrarPostResponse = zGrupoRead;
+
+export const zExcluirGrupoGruposGrupoIdDeletePath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zExcluirGrupoGruposGrupoIdDeleteResponse = z.void();
 
 export const zBuscarGrupoGruposGrupoIdGetPath = z.object({
     grupo_id: z.int()
@@ -1742,6 +1271,25 @@ export const zListarMembrosGruposGrupoIdMembrosGetPath = z.object({
  * Successful Response
  */
 export const zListarMembrosGruposGrupoIdMembrosGetResponse = z.array(zMembroGrupoRead);
+
+export const zSairGrupoGruposGrupoIdMembrosMeDeletePath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zSairGrupoGruposGrupoIdMembrosMeDeleteResponse = z.void();
+
+export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeletePath = z.object({
+    grupo_id: z.int(),
+    membro_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeleteResponse = z.void();
 
 /**
  * Successful Response
@@ -1806,6 +1354,420 @@ export const zEnviarImagemImagensPostBody = zBodyEnviarImagemImagensPost;
  * Successful Response
  */
 export const zEnviarImagemImagensPostResponse = zImagemRead;
+
+export const zTrilhaReadMultiGruposGrupoIdTrilhasGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zTrilhaReadMultiGruposGrupoIdTrilhasGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish()
+});
+
+/**
+ * Response Trilha Read Multi Grupos  Grupo Id  Trilhas Get
+ *
+ * Successful Response
+ */
+export const zTrilhaReadMultiGruposGrupoIdTrilhasGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse1,
+    zFastcrudCorePaginationDynamicListResponse1
+]);
+
+export const zTrilhaCreateGruposGrupoIdTrilhasPostBody = zTrilhaCreate;
+
+export const zTrilhaCreateGruposGrupoIdTrilhasPostPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zTrilhaDeleteGruposGrupoIdTrilhasIdDeletePath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zTrilhaReadGruposGrupoIdTrilhasIdGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zTrilhaReadGruposGrupoIdTrilhasIdGetResponse = zTrilhaRead;
+
+export const zTrilhaUpdateGruposGrupoIdTrilhasIdPatchBody = zTrilhaUpdate;
+
+export const zTrilhaUpdateGruposGrupoIdTrilhasIdPatchPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zModuloReadMultiModulosGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    trilha_id: z.int().optional()
+});
+
+/**
+ * Response Modulo Read Multi Modulos Get
+ *
+ * Successful Response
+ */
+export const zModuloReadMultiModulosGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse3,
+    zFastcrudCorePaginationDynamicListResponse3
+]);
+
+export const zModuloCreateModulosPostBody = zModuloCreate;
+
+export const zModuloDeleteModulosIdDeletePath = z.object({
+    id: z.int()
+});
+
+export const zModuloReadModulosIdGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zModuloReadModulosIdGetResponse = zModuloRead;
+
+export const zModuloUpdateModulosIdPatchBody = zModuloUpdate;
+
+export const zModuloUpdateModulosIdPatchPath = z.object({
+    id: z.int()
+});
+
+export const zModuloReadMultiGruposGrupoIdModulosGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zModuloReadMultiGruposGrupoIdModulosGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    trilha_id: z.int().optional()
+});
+
+/**
+ * Response Modulo Read Multi Grupos  Grupo Id  Modulos Get
+ *
+ * Successful Response
+ */
+export const zModuloReadMultiGruposGrupoIdModulosGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse3,
+    zFastcrudCorePaginationDynamicListResponse3
+]);
+
+export const zModuloCreateGruposGrupoIdModulosPostBody = zModuloCreate;
+
+export const zModuloCreateGruposGrupoIdModulosPostPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zModuloDeleteGruposGrupoIdModulosIdDeletePath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zModuloReadGruposGrupoIdModulosIdGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zModuloReadGruposGrupoIdModulosIdGetResponse = zModuloRead;
+
+export const zModuloUpdateGruposGrupoIdModulosIdPatchBody = zModuloUpdate;
+
+export const zModuloUpdateGruposGrupoIdModulosIdPatchPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zConteudoReadMultiConteudosGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    modulo_id: z.int().optional()
+});
+
+/**
+ * Response Conteudo Read Multi Conteudos Get
+ *
+ * Successful Response
+ */
+export const zConteudoReadMultiConteudosGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse4,
+    zFastcrudCorePaginationDynamicListResponse4
+]);
+
+export const zConteudoCreateConteudosPostBody = zConteudoCreate;
+
+export const zConteudoDeleteConteudosIdDeletePath = z.object({
+    id: z.int()
+});
+
+export const zConteudoReadConteudosIdGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zConteudoReadConteudosIdGetResponse = zConteudoRead;
+
+export const zConteudoUpdateConteudosIdPatchBody = zConteudoUpdate;
+
+export const zConteudoUpdateConteudosIdPatchPath = z.object({
+    id: z.int()
+});
+
+export const zConteudoReadMultiGruposGrupoIdConteudosGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zConteudoReadMultiGruposGrupoIdConteudosGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    modulo_id: z.int().optional()
+});
+
+/**
+ * Response Conteudo Read Multi Grupos  Grupo Id  Conteudos Get
+ *
+ * Successful Response
+ */
+export const zConteudoReadMultiGruposGrupoIdConteudosGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse4,
+    zFastcrudCorePaginationDynamicListResponse4
+]);
+
+export const zConteudoCreateGruposGrupoIdConteudosPostBody = zConteudoCreate;
+
+export const zConteudoCreateGruposGrupoIdConteudosPostPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zConteudoDeleteGruposGrupoIdConteudosIdDeletePath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zConteudoReadGruposGrupoIdConteudosIdGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zConteudoReadGruposGrupoIdConteudosIdGetResponse = zConteudoRead;
+
+export const zConteudoUpdateGruposGrupoIdConteudosIdPatchBody = zConteudoUpdate;
+
+export const zConteudoUpdateGruposGrupoIdConteudosIdPatchPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zQuestaoReadMultiQuestoesGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    conteudo_id: z.int().optional()
+});
+
+/**
+ * Response Questao Read Multi Questoes Get
+ *
+ * Successful Response
+ */
+export const zQuestaoReadMultiQuestoesGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse5,
+    zFastcrudCorePaginationDynamicListResponse5
+]);
+
+export const zQuestaoCreateQuestoesPostBody = zQuestaoCreate;
+
+export const zQuestaoDeleteQuestoesIdDeletePath = z.object({
+    id: z.int()
+});
+
+export const zQuestaoReadQuestoesIdGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zQuestaoReadQuestoesIdGetResponse = zQuestaoRead;
+
+export const zQuestaoUpdateQuestoesIdPatchBody = zQuestaoUpdate;
+
+export const zQuestaoUpdateQuestoesIdPatchPath = z.object({
+    id: z.int()
+});
+
+export const zQuestaoReadMultiGruposGrupoIdQuestoesGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zQuestaoReadMultiGruposGrupoIdQuestoesGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    conteudo_id: z.int().optional()
+});
+
+/**
+ * Response Questao Read Multi Grupos  Grupo Id  Questoes Get
+ *
+ * Successful Response
+ */
+export const zQuestaoReadMultiGruposGrupoIdQuestoesGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse5,
+    zFastcrudCorePaginationDynamicListResponse5
+]);
+
+export const zQuestaoCreateGruposGrupoIdQuestoesPostBody = zQuestaoCreate;
+
+export const zQuestaoCreateGruposGrupoIdQuestoesPostPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zQuestaoDeleteGruposGrupoIdQuestoesIdDeletePath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zQuestaoReadGruposGrupoIdQuestoesIdGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zQuestaoReadGruposGrupoIdQuestoesIdGetResponse = zQuestaoRead;
+
+export const zQuestaoUpdateGruposGrupoIdQuestoesIdPatchBody = zQuestaoUpdate;
+
+export const zQuestaoUpdateGruposGrupoIdQuestoesIdPatchPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zAlternativaReadMultiAlternativasGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    questao_id: z.int().optional()
+});
+
+/**
+ * Response Alternativa Read Multi Alternativas Get
+ *
+ * Successful Response
+ */
+export const zAlternativaReadMultiAlternativasGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse6,
+    zFastcrudCorePaginationDynamicListResponse6
+]);
+
+export const zAlternativaCreateAlternativasPostBody = zAlternativaCreate;
+
+export const zAlternativaDeleteAlternativasIdDeletePath = z.object({
+    id: z.int()
+});
+
+export const zAlternativaReadAlternativasIdGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zAlternativaReadAlternativasIdGetResponse = zAlternativaRead;
+
+export const zAlternativaUpdateAlternativasIdPatchBody = zAlternativaUpdate;
+
+export const zAlternativaUpdateAlternativasIdPatchPath = z.object({
+    id: z.int()
+});
+
+export const zAlternativaReadMultiGruposGrupoIdAlternativasGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zAlternativaReadMultiGruposGrupoIdAlternativasGetQuery = z.object({
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    page: z.int().nullish(),
+    itemsPerPage: z.int().nullish(),
+    sort: z.string().nullish(),
+    questao_id: z.int().optional()
+});
+
+/**
+ * Response Alternativa Read Multi Grupos  Grupo Id  Alternativas Get
+ *
+ * Successful Response
+ */
+export const zAlternativaReadMultiGruposGrupoIdAlternativasGetResponse = z.union([
+    zFastcrudCorePaginationDynamicPaginatedResponse6,
+    zFastcrudCorePaginationDynamicListResponse6
+]);
+
+export const zAlternativaCreateGruposGrupoIdAlternativasPostBody = zAlternativaCreate;
+
+export const zAlternativaCreateGruposGrupoIdAlternativasPostPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zAlternativaDeleteGruposGrupoIdAlternativasIdDeletePath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zAlternativaReadGruposGrupoIdAlternativasIdGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zAlternativaReadGruposGrupoIdAlternativasIdGetResponse = zAlternativaRead;
+
+export const zAlternativaUpdateGruposGrupoIdAlternativasIdPatchBody = zAlternativaUpdate;
+
+export const zAlternativaUpdateGruposGrupoIdAlternativasIdPatchPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
 
 export const zEnviarImagemGruposGrupoIdImagensPostBody = zBodyEnviarImagemGruposGrupoIdImagensPost;
 

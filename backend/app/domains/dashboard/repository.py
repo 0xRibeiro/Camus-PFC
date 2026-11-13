@@ -24,8 +24,11 @@ class DashboardRepository:
     async def contar_conquistas_concedidas(self) -> int:
         return await self.db.scalar(select(func.count()).select_from(associacao_conquista_usuario)) or 0
 
-    async def contar_trilhas(self) -> int:
-        return await self.db.scalar(select(func.count()).select_from(Trilha)) or 0
+    # atualiza o metodo de contar trilhas pra fornecer dados pra dash
+    async def contar_trilhas_por_escopo(self) -> tuple[int, int]:
+        resultado = await self.db.execute(select(func.count().filter(Trilha.grupo_id.is_(None)), func.count(Trilha.grupo_id)).select_from(Trilha))
+        globais, de_grupo = resultado.one()
+        return globais, de_grupo
 
     async def contar_cadastros_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
     # usa apenas a parte da data para agrupar os registros

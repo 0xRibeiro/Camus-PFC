@@ -24,3 +24,7 @@ class DashboardRead(BaseModel):
 
     cadastros_por_dia: list[CadastroDiaRead]
     conquistas_por_quantidade: list[ConquistaResumoRead]
+
+    # mais dados pra dash, diferenciando entre os tipos de trilhas
+    total_trilhas_globais: int
+    total_trilhas_de_grupo: int
