@@ -28,5 +28,17 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     upload_max_bytes: int = 10 * 1024 * 1024  # 10 MB
 
+    # broker mqtt do iot
+    mqtt_host: str = "localhost"
+    mqtt_port: int = 1883
+    mqtt_username: str = "admin"
+    mqtt_password: str = ""
+
+    # influxdb das leituras do iot
+    influx_url: str = "http://localhost:8086"
+    influx_token: str = ""
+    influx_org: str = "camus"
+    influx_bucket: str = "leituras"
+
 
 settings = Settings()
