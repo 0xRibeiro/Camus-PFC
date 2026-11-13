@@ -23,6 +23,7 @@ import app.domains.usuario.model
 import app.domains.auditoria.model
 import app.domains.grupo.model
 import app.domains.denuncia.model
+import app.domains.aviso.model
 import app.domains.pontuacao.model
 import app.domains.progresso.model
 import app.domains.peixe.model
