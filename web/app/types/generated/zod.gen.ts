@@ -84,10 +84,24 @@ export const zCadastroDiaRead = z.object({
 });
 
 /**
+ * CadastroDispositivo
+ */
+export const zCadastroDispositivo = z.object({
+    mac: z.string().regex(/^[0-9a-f]{12}$/)
+});
+
+/**
  * CodigoDispositivo
  */
 export const zCodigoDispositivo = z.object({
     codigo: z.string().length(6)
+});
+
+/**
+ * ComandoModulo
+ */
+export const zComandoModulo = z.object({
+    acao: z.enum(['ativar', 'desativar'])
 });
 
 /**
@@ -222,6 +236,14 @@ export const zCorrecaoQuestaoRead = z.object({
     alternativa_escolhida_id: z.int().nullish(),
     alternativa_correta_id: z.int().nullish(),
     acertou: z.boolean()
+});
+
+/**
+ * CredencialDispositivo
+ */
+export const zCredencialDispositivo = z.object({
+    mac: z.string(),
+    senha: z.string()
 });
 
 /**
@@ -560,7 +582,8 @@ export const zTipoModulo = z.union([z.literal(1), z.literal(2)]);
 export const zModuloIotRead = z.object({
     serial: z.string(),
     tipo: zTipoModulo,
-    series: z.array(zSerieLeitura)
+    series: z.array(zSerieLeitura),
+    ligado: z.boolean().nullish()
 });
 
 /**
@@ -1633,6 +1656,13 @@ export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
  */
 export const zListarModulosAquariosAquarioIdModulosGetResponse = z.array(zModuloIotRead);
 
+export const zComandarModuloAquariosAquarioIdModulosSerialComandoPostBody = zComandoModulo;
+
+export const zComandarModuloAquariosAquarioIdModulosSerialComandoPostPath = z.object({
+    aquario_id: z.int(),
+    serial: z.string()
+});
+
 export const zGerarConviteAquariosAquarioIdConvitesPostPath = z.object({
     aquario_id: z.int()
 });
@@ -1692,6 +1722,13 @@ export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
  * Successful Response
  */
 export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
+
+export const zCadastrarDispositivoAdminDispositivosPostBody = zCadastroDispositivo;
+
+/**
+ * Successful Response
+ */
+export const zCadastrarDispositivoAdminDispositivosPostResponse = zCredencialDispositivo;
 
 /**
  * Response Listar Grupos Grupos Get

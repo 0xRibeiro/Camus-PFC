@@ -156,6 +156,16 @@ export type CadastroDiaRead = {
 };
 
 /**
+ * CadastroDispositivo
+ */
+export type CadastroDispositivo = {
+    /**
+     * Mac
+     */
+    mac: string;
+};
+
+/**
  * CodigoDispositivo
  */
 export type CodigoDispositivo = {
@@ -163,6 +173,16 @@ export type CodigoDispositivo = {
      * Codigo
      */
     codigo: string;
+};
+
+/**
+ * ComandoModulo
+ */
+export type ComandoModulo = {
+    /**
+     * Acao
+     */
+    acao: 'ativar' | 'desativar';
 };
 
 /**
@@ -505,6 +525,20 @@ export type CorrecaoQuestaoRead = {
 };
 
 /**
+ * CredencialDispositivo
+ */
+export type CredencialDispositivo = {
+    /**
+     * Mac
+     */
+    mac: string;
+    /**
+     * Senha
+     */
+    senha: string;
+};
+
+/**
  * DashboardRead
  */
 export type DashboardRead = {
@@ -793,6 +827,10 @@ export type ModuloIotRead = {
      * Series
      */
     series: Array<SerieLeitura>;
+    /**
+     * Ligado
+     */
+    ligado?: boolean | null;
 };
 
 /**
@@ -4391,6 +4429,38 @@ export type ListarModulosAquariosAquarioIdModulosGetResponses = {
 
 export type ListarModulosAquariosAquarioIdModulosGetResponse = ListarModulosAquariosAquarioIdModulosGetResponses[keyof ListarModulosAquariosAquarioIdModulosGetResponses];
 
+export type ComandarModuloAquariosAquarioIdModulosSerialComandoPostData = {
+    body: ComandoModulo;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+        /**
+         * Serial
+         */
+        serial: string;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/modulos/{serial}/comando';
+};
+
+export type ComandarModuloAquariosAquarioIdModulosSerialComandoPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ComandarModuloAquariosAquarioIdModulosSerialComandoPostError = ComandarModuloAquariosAquarioIdModulosSerialComandoPostErrors[keyof ComandarModuloAquariosAquarioIdModulosSerialComandoPostErrors];
+
+export type ComandarModuloAquariosAquarioIdModulosSerialComandoPostResponses = {
+    /**
+     * Successful Response
+     */
+    202: unknown;
+};
+
 export type GerarConviteAquariosAquarioIdConvitesPostData = {
     body?: never;
     path: {
@@ -4574,6 +4644,31 @@ export type BuscarAquarioAquariosAquarioIdGetResponses = {
 };
 
 export type BuscarAquarioAquariosAquarioIdGetResponse = BuscarAquarioAquariosAquarioIdGetResponses[keyof BuscarAquarioAquariosAquarioIdGetResponses];
+
+export type CadastrarDispositivoAdminDispositivosPostData = {
+    body: CadastroDispositivo;
+    path?: never;
+    query?: never;
+    url: '/admin/dispositivos';
+};
+
+export type CadastrarDispositivoAdminDispositivosPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CadastrarDispositivoAdminDispositivosPostError = CadastrarDispositivoAdminDispositivosPostErrors[keyof CadastrarDispositivoAdminDispositivosPostErrors];
+
+export type CadastrarDispositivoAdminDispositivosPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: CredencialDispositivo;
+};
+
+export type CadastrarDispositivoAdminDispositivosPostResponse = CadastrarDispositivoAdminDispositivosPostResponses[keyof CadastrarDispositivoAdminDispositivosPostResponses];
 
 export type ListarGruposGruposGetData = {
     body?: never;
