@@ -20,6 +20,7 @@ namespace barramento {
     float escala;
   };
 
+  // escala: valor bruto / escala = valor real
   const Catalogo CATALOGO[] = {
     { (uint8_t) TipoModulo::DISTANCIA, "Distancia", "distancia", "cm", 10 },
   };
@@ -49,6 +50,7 @@ namespace barramento {
     return -1;
   }
 
+  // 8 hex + \0
   void textoSerial(uint32_t serial, char* destino) {
     snprintf(destino, 9, "%08lx", (unsigned long) serial);
   }
@@ -100,6 +102,7 @@ namespace barramento {
       novo.temValor = false;
       novo.valor = 0;
 
+      // mantem o ultimo valor de quem ja tava
       int antigo = buscarEm(modulos, total, novo.serial);
       if (antigo >= 0) {
         novo.temValor = modulos[antigo].temValor;
@@ -138,6 +141,7 @@ namespace barramento {
       publicarModulos();
     }
 
+    // um evento por varredura, repetido primeiro
     if (ficouRepetido) {
       return Evento::REPETIDO;
     }
@@ -181,6 +185,7 @@ namespace barramento {
         continue;
       }
 
+      // so o 1o valor por enquanto
       int16_t bruto = (resposta[2] << 8) | resposta[3];
       modulos[i].valor = bruto / catalogo->escala;
       modulos[i].temValor = true;
@@ -205,6 +210,8 @@ namespace barramento {
 
     char mensagem[512];
     serializeJson(json, mensagem);
+
+    // retido, backend pega a lista atual ao conectar
     mqtt::publicar("modulos", mensagem, true);
   }
 
@@ -212,6 +219,7 @@ namespace barramento {
     Wire.begin(I2C_SDA, I2C_SCL);
   }
 
+  // varredura bloqueia uns ms, por isso a cada 2s
   Evento atualizar() {
     if (millis() - ultimaLeitura >= INTERVALO_LEITURA) {
       ultimaLeitura = millis();

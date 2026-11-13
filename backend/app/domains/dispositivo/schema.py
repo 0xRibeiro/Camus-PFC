@@ -31,6 +31,19 @@ class RespostaDesvinculo(BaseModel):
     removidos: int
 
 
+class CadastroDispositivo(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    # mac minusculo sem ":", igual no topico
+    mac: str = Field(..., pattern=r"^[0-9a-f]{12}$")
+
+
+# a senha so aparece aqui, depois so o hash no broker
+class CredencialDispositivo(BaseModel):
+    mac: str
+    senha: str
+
+
 class CodigoDispositivo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 

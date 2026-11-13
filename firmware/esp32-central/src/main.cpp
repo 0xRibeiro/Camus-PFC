@@ -5,6 +5,7 @@
 #include "hardware/joystick.h"
 #include "hardware/sons.h"
 #include "modulos/barramento.h"
+#include "rede/credencial.h"
 #include "rede/mqtt.h"
 #include "rede/wifi.h"
 #include "ui/navbar.h"
@@ -17,7 +18,11 @@ void setup() {
   joystick::iniciar();
   buzzer::iniciar();
   wifi::iniciar();
+  credencial::iniciar();
   mqtt::iniciar();
+
+  // o script de gravacao confere o mac por aqui
+  Serial.printf("mac: %s\n", mqtt::identificador());
   barramento::iniciar();
   navegacao::iniciar();
 }
@@ -26,6 +31,7 @@ void loop() {
   joystick::Evento evento = joystick::atualizar();
   navegacao::atualizar(evento);
   buzzer::atualizar();
+  credencial::atualizar();
 
   // wifi avisa a navbar e o buzzer só qnd muda
   wifi::Evento eventoWifi = wifi::atualizar();

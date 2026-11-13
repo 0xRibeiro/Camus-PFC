@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # broker mqtt do iot
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883
+    mqtt_username: str = "admin"
+    mqtt_password: str = ""
 
     # influxdb das leituras do iot
     influx_url: str = "http://localhost:8086"

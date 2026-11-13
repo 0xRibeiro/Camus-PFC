@@ -8,6 +8,8 @@ namespace mqtt {
 
   bool estaConectado();
 
+  const char* identificador();
+
   // sufixo depois de camus/dispositivos/<mac>/
   void publicar(const char* sufixo, const char* mensagem, bool retido);
 

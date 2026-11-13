@@ -13,6 +13,7 @@ from app.domains.auditoria.router import router as auditoria_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.dispositivo import mqtt as dispositivo_mqtt
+from app.domains.dispositivo.router import admin_router as dispositivo_admin_router
 from app.domains.grupo.router import router as grupo_router
 from app.domains.grupo.service import grupo_membro
 from app.domains.pontuacao.router import router as pontuacao_router
@@ -66,6 +67,7 @@ app.include_router(dashboard_router)
 app.include_router(alternativa_router)
 app.include_router(auditoria_router)
 app.include_router(aquario_router)
+app.include_router(dispositivo_admin_router)
 app.include_router(grupo_router)
 app.include_router(pontuacao_router)
 app.include_router(progresso_router)

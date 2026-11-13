@@ -1,14 +1,18 @@
 import secrets
 from datetime import UTC, datetime
 
+from fastapi import HTTPException, status
 from fastcrud.exceptions.http_exceptions import NotFoundException
 from influxdb_client import Point
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import dynsec
 from app.core.redis import redis_client
 from app.domains.dispositivo.model import Dispositivo, ModuloIot
 from app.domains.dispositivo.repository import DispositivoRepository, LeituraRepository
 from app.domains.dispositivo.schema import (
+    CadastroDispositivo,
+    CredencialDispositivo,
     LeituraModulo,
     ListaModulos,
     ModuloIotRead,
@@ -22,13 +26,13 @@ from app.domains.dispositivo.schema import (
 CODIGO_VALIDADE_SEGUNDOS = 300
 
 
-# mac novo vira dispositivo, mac conhecido so atualiza
-async def registrar_status(db: AsyncSession, mac: str, status: StatusDispositivo) -> Dispositivo:
+# dispositivo nasce no cadastro do script, aqui so atualiza
+async def registrar_status(db: AsyncSession, mac: str, status: StatusDispositivo) -> Dispositivo | None:
     repo = DispositivoRepository(db)
     dispositivo = await repo.buscar_por_mac(mac)
 
     if dispositivo is None:
-        dispositivo = Dispositivo(mac=mac)
+        return None
 
     dispositivo.estado = status.estado
     dispositivo.ultimo_contato = datetime.now(UTC)
@@ -38,6 +42,22 @@ async def registrar_status(db: AsyncSession, mac: str, status: StatusDispositivo
         dispositivo.firmware = status.firmware
 
     return await repo.salvar(dispositivo)
+
+
+# cria a conta no broker (ou troca a senha) e a linha no banco
+async def cadastrar(db: AsyncSession, data: CadastroDispositivo) -> CredencialDispositivo:
+    senha = secrets.token_urlsafe(24)
+
+    try:
+        await dynsec.cadastrar_dispositivo(data.mac, senha)
+    except (dynsec.ErroDynsec, TimeoutError) as erro:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, f"Broker não cadastrou o dispositivo: {erro}")
+
+    repo = DispositivoRepository(db)
+    if await repo.buscar_por_mac(data.mac) is None:
+        await repo.salvar(Dispositivo(mac=data.mac))
+
+    return CredencialDispositivo(mac=data.mac, senha=senha)
 
 
 async def gerar_codigo(mac: str) -> RespostaVinculo:

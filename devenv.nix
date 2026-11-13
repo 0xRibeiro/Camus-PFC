@@ -45,12 +45,15 @@
   services.influxdb.enable = true;
 
   # broker do iot, aberto na rede pro esp
+  # senha do admin sai em .devenv/state/mosquitto-dynsec.json.pw no 1o start
   services.mosquitto = {
     enable = true;
     bind = null;
     port = 1883;
     extraConfig = ''
-      allow_anonymous true
+      allow_anonymous false
+      plugin ${pkgs.mosquitto.lib}/lib/mosquitto_dynamic_security.so
+      plugin_opt_config_file ${config.devenv.root}/.devenv/state/mosquitto-dynsec.json
     '';
   };
 

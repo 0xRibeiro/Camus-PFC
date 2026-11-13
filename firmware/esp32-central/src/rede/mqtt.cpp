@@ -5,6 +5,7 @@
 #include <mqtt_client.h>
 
 #include "../config.h"
+#include "credencial.h"
 
 namespace mqtt {
   esp_mqtt_client_handle_t cliente;
@@ -75,9 +76,16 @@ namespace mqtt {
     snprintf(topicoPedido, sizeof(topicoPedido), "camus/dispositivos/%s/vinculo/pedido", id);
     snprintf(topicoResposta, sizeof(topicoResposta), "camus/dispositivos/%s/vinculo/resposta", id);
 
+    // sem cadastro o broker recusa, nem tenta
+    if (!credencial::temSenha()) {
+      return;
+    }
+
     esp_mqtt_client_config_t config = {};
     config.broker.address.uri = MQTT_URI;
     config.credentials.client_id = id;
+    config.credentials.username = id;
+    config.credentials.authentication.password = credencial::senha();
 
     // padrao 120s, offline demorava demais
     config.session.keepalive = 30;
@@ -94,6 +102,10 @@ namespace mqtt {
 
   bool estaConectado() {
     return conectado;
+  }
+
+  const char* identificador() {
+    return id;
   }
 
   void publicar(const char* sufixo, const char* mensagem, bool retido) {

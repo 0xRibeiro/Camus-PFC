@@ -4,6 +4,7 @@
 #include "../../hardware/buzzer.h"
 #include "../../hardware/display.h"
 #include "../../hardware/sons.h"
+#include "../../rede/credencial.h"
 #include "../../rede/mqtt.h"
 #include "../navbar.h"
 
@@ -62,7 +63,7 @@ void TelaVinculo::desenhar() {
     if (!conectadoDesenhado) {
       display::tft.setTextColor(ST77XX_RED);
       display::tft.setCursor(4, TOPO + 40);
-      display::tft.print("Sem conexao");
+      display::tft.print(credencial::temSenha() ? "Sem conexao" : "Sem cadastro");
     }
   } else if (estado == Estado::ESPERANDO) {
     display::tft.setCursor(4, TOPO);
