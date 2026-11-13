@@ -132,3 +132,14 @@ async def excluir_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> No
         raise ForbiddenException("Apenas o dono pode excluir o grupo.")
 
     await GrupoRepository(db).excluir(grupo)
+
+# metodo pro dono remover um membro, com algumas exceções de permissão.
+async def remover_membro(db: AsyncSession, grupo_id: int, usuario: Usuario, membro_id: int) -> None:
+    grupo = await buscar_grupo(db, grupo_id, usuario)
+    if grupo.id_dono != usuario.id:
+        raise ForbiddenException("Apenas o dono pode remover membros.")
+    if membro_id == grupo.id_dono:
+        raise ForbiddenException("O dono do grupo não pode ser removido.")
+
+    if not await GrupoRepository(db).remover_participante(grupo.id, membro_id):
+        raise NotFoundException("Esse usuário não participa do grupo.")

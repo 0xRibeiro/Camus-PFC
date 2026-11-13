@@ -87,7 +87,27 @@
               {{ row.original.papel === 'dono' ? 'Dono' : 'Membro' }}
             </UBadge>
           </template>
+          <template #acoes-cell="{ row }">
+            <UButton
+              v-if="usuarioCriador && row.original.papel !== 'dono'"
+              label="Remover"
+              :aria-label="`Remover ${row.original.username}`"
+              color="error"
+              variant="ghost"
+              size="sm"
+              :loading="removendoMembro === row.original.id"
+              :disabled="removendoMembro !== null"
+              @click="removerMembro(row.original)"
+            />
+          </template>
         </UTable>
+        <p
+          v-if="erroRemocao"
+          role="alert"
+          class="mt-2 text-sm text-error"
+        >
+          {{ erroRemocao }}
+        </p>
       </UCard>
 
       <UCard v-if="usuarioCriador">
@@ -232,11 +252,14 @@ const usuarioCriador = computed(() => !!grupo.value && grupo.value.id_dono === a
 const confirmando = ref(false)
 const removendo = ref(false)
 const acaoGrupo = computed(() => usuarioCriador.value ? 'Excluir grupo' : 'Sair do grupo')
+const removendoMembro = ref<number | null>(null)
+const erroRemocao = ref('')
 
-const columns: TableColumn<MembroGrupoRead>[] = [
+const columns = computed<TableColumn<MembroGrupoRead>[]>(() => [
   { accessorKey: 'username', header: 'Usuário' },
   { accessorKey: 'papel', header: 'Papel' },
-]
+  ...(usuarioCriador.value ? [{ id: 'acoes', header: 'Ações' }] : []),
+])
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {
@@ -323,6 +346,25 @@ async function confirmarSaida() {
   }
   finally {
     removendo.value = false
+  }
+}
+
+async function removerMembro(membro: MembroGrupoRead) {
+  if (removendoMembro.value !== null) return
+  if (!window.confirm(`Remover ${membro.username} do grupo?`)) return
+
+  removendoMembro.value = membro.id
+  erroRemocao.value = ''
+
+  try {
+    await api(`/grupos/${grupoId}/membros/${membro.id}`, { method: 'DELETE' })
+    membros.value = membros.value.filter(item => item.id !== membro.id)
+  }
+  catch (error) {
+    erroRemocao.value = mensagemErro(error, 'Não foi possível remover o membro')
+  }
+  finally {
+    removendoMembro.value = null
   }
 }
 onMounted(fetchGrupo)

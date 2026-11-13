@@ -50,15 +50,12 @@ class GrupoRepository:
         return list(resultado.scalars().all())
 
 
-    # metodo do aluno para sair do grupo
-    async def remover_participante(self, grupo_id: int, usuario_id: int) -> None:
-        await self.db.execute(
-            delete(Participacao).where(
-                Participacao.id_grupo == grupo_id,
-                Participacao.id_usuario == usuario_id,
-            )
-        )
+    # metodo do aluno para sair do grupo ou do dono para remover um participante.
+    async def remover_participante(self, grupo_id: int, usuario_id: int) -> bool:
+        removido = await self.db.scalar(delete(Participacao).where(Participacao.id_grupo == grupo_id, Participacao.id_usuario == usuario_id)
+        .returning(Participacao.id_usuario))
         await self.db.commit()
+        return removido is not None
 
     # metodo do dono pra excluir o grupo.
     async def excluir(self, grupo: Grupo) -> None:

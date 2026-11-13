@@ -70,8 +70,12 @@ async def sair_grupo(
 ) -> None:
     await service.sair_grupo(db, grupo_id, usuario)
 
+# rota 8 = remove um membro do grupo. precisa ser o dono
+@router.delete("/{grupo_id}/membros/{membro_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remover_membro(grupo_id: int, membro_id: int, db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> None:
+    await service.remover_membro(db, grupo_id, usuario, membro_id)
 
-# rota 8 = remove o grupo, retornando 204. apenas o dono pode remover o grupo.
+# rota 9 = remove o grupo, retornando 204. apenas o dono pode remover o grupo.
 @router.delete("/{grupo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def excluir_grupo(grupo_id: int, db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> None:
     await service.excluir_grupo(db, grupo_id, usuario)
