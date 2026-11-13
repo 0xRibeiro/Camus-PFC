@@ -64,9 +64,7 @@
     >
       <DashboardNumeros :dados="dados" />
 
-      <div class="space-y-6 xl:col-span-2">
-        <DashboardCadastros :cadastros="dados.cadastros_por_dia" />
-
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <UCard>
           <template #header>
             <h2 class="font-medium">
@@ -90,12 +88,19 @@
             :aria-label="`Trilhas por escopo. Globais: ${dados.total_trilhas_globais}. De grupo: ${dados.total_trilhas_de_grupo}.`"
           >
             <template #center>
-              <span class="text-2xl font-semibold text-highlighted" aria-hidden="true">
+              <span
+                class="text-2xl font-semibold text-highlighted"
+                aria-hidden="true"
+              >
                 {{ formatarNumero(dados.total_trilhas) }}
               </span>
             </template>
           </UChart>
-          <p v-else class="text-sm text-muted">
+
+          <p
+            v-else
+            class="text-sm text-muted"
+          >
             Nenhuma trilha cadastrada.
           </p>
 
@@ -120,8 +125,17 @@
             </li>
           </ul>
         </UCard>
+
+        <DashboardConquistas
+          :conquistas="dados.conquistas_por_quantidade"
+          class="min-w-0"
+        />
+
+        <DashboardCadastros
+          :cadastros="dados.cadastros_por_dia"
+          class="min-w-0 lg:col-span-2"
+        />
       </div>
-      <DashboardConquistas :conquistas="dados.conquistas_por_quantidade" />
     </div>
   </div>
 </template>
@@ -134,13 +148,14 @@ definePageMeta({ middleware: 'role', roles: ['admin'] })
 
 const api = useApi()
 const dados = ref<DashboardRead | null>(null)
+const loading = ref(true)
+const erro = ref('')
 const formatarNumero = new Intl.NumberFormat('pt-BR').format
+
 const trilhasPorEscopo = computed(() => [
   { escopo: 'Globais', quantidade: dados.value?.total_trilhas_globais ?? 0 },
   { escopo: 'De grupo', quantidade: dados.value?.total_trilhas_de_grupo ?? 0 },
 ])
-const loading = ref(true)
-const erro = ref('')
 
 const dias = ref(30)
 
