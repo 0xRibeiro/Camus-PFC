@@ -14,7 +14,10 @@
 
     <div
       v-if="conquistas.length"
-      class="space-y-5"
+      class="max-h-64 space-y-5 overflow-y-auto"
+      tabindex="0"
+      role="region"
+      aria-label="Lista de Conquistas"
     >
       <div
         v-for="conquista in conquistas"

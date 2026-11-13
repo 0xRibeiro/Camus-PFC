@@ -1,8 +1,9 @@
 <template>
   <UCard>
     <!-- imagem + status + titulo + descricao, tudo dentro do link pra edicao -->
+    <!-- agora o :to não leva mais para o link fixo global -->
     <NuxtLink
-      :to="`/author/trilhas/${trilha.id}`"
+      :to="to"
       class="block"
     >
       <TrilhaImagem
@@ -98,6 +99,7 @@ import type { TrilhaRead } from '~/types/generated'
 // ele so pode ler e mostrar. quem manda o valor de "trilha" e quem usa
 // <TrilhaCard :trilha="..." /> - nesse caso, vai ser a pagina index.vue
 defineProps<{
+  to: string
   trilha: TrilhaRead
   modulosCount: number
   conteudosCount: number

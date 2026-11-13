@@ -64,12 +64,22 @@
     >
       <DashboardNumeros :dados="dados" />
 
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <DashboardTrilhas
+          :globais="dados.total_trilhas_globais"
+          :de-grupo="dados.total_trilhas_de_grupo"
+          class="min-w-0"
+        />
+
+        <DashboardConquistas
+          :conquistas="dados.conquistas_por_quantidade"
+          class="min-w-0"
+        />
+
         <DashboardCadastros
           :cadastros="dados.cadastros_por_dia"
-          class="xl:col-span-2"
+          class="min-w-0 lg:col-span-2"
         />
-        <DashboardConquistas :conquistas="dados.conquistas_por_quantidade" />
       </div>
     </div>
   </div>

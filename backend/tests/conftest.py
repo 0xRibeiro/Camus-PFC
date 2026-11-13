@@ -35,6 +35,9 @@ def usuario_logado():
 @pytest.fixture
 def db():
     db_fake = AsyncMock(spec=AsyncSession)  # spec copia o formato da sessao real
+    # serve para guardar info q normalmente o middleware do grupo colocaria. ja que ta
+    # vazio, o filtro de escopo do trilha converte em "global" e deixa passar
+    db_fake.info = {}
 
     async def get_async_session_fake():
         yield db_fake

@@ -39,14 +39,24 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div>
-        <h1 class="text-xl font-semibold break-words">
-          {{ grupo.nome }}
-        </h1>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold break-words">
+            {{ grupo.nome }}
+          </h1>
 
-        <p class="text-sm text-muted">
-          Consulte os participantes e os conteúdos do grupo.
-        </p>
+          <p class="text-sm text-muted">
+            Consulte os participantes e os conteúdos do grupo.
+          </p>
+        </div>
+
+        <UButton
+          :label="acaoGrupo"
+          :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
+          color="error"
+          variant="outline"
+          @click="confirmando = true"
+        />
       </div>
 
       <UCard>
@@ -77,7 +87,27 @@
               {{ row.original.papel === 'dono' ? 'Dono' : 'Membro' }}
             </UBadge>
           </template>
+          <template #acoes-cell="{ row }">
+            <UButton
+              v-if="usuarioCriador && row.original.papel !== 'dono'"
+              label="Remover"
+              :aria-label="`Remover ${row.original.username}`"
+              color="error"
+              variant="ghost"
+              size="sm"
+              :loading="removendoMembro === row.original.id"
+              :disabled="removendoMembro !== null"
+              @click="removerMembro(row.original)"
+            />
+          </template>
         </UTable>
+        <p
+          v-if="erroRemocao"
+          role="alert"
+          class="mt-2 text-sm text-error"
+        >
+          {{ erroRemocao }}
+        </p>
       </UCard>
 
       <UCard v-if="usuarioCriador">
@@ -138,10 +168,45 @@
         </div>
       </UCard>
 
-      <GrupoTrilhas
-        :grupo-id="grupoId"
-        :dono="usuarioCriador"
-      />
+      <!-- seção nova dos grupos para ver ou editar as trilhas dependendo da role -->
+      <section class="flex flex-wrap items-center gap-3">
+        <UButton
+          :label="usuarioCriador ? 'Gerenciar trilhas' : 'Ver trilhas'"
+          icon="i-lucide-book-open"
+          :to="usuarioCriador ? `/grupos/${grupoId}/trilhas/gerenciar` : `/grupos/${grupoId}/trilhas`"
+        />
+        <UBadge
+          v-if="xpGrupo !== null"
+          variant="soft"
+        >
+          {{ xpGrupo }} XP no grupo
+        </UBadge>
+      </section>
+      <UModal
+        v-model:open="confirmando"
+        :title="acaoGrupo"
+        :description="usuarioCriador
+          ? 'Isso exclui o grupo, suas trilhas e o XP do grupo para todos os membros.'
+          : 'Você perde o acesso às trilhas do grupo. Para voltar, use um convite válido.'"
+        :dismissible="!removendo"
+        :close="!removendo"
+      >
+        <template #footer="{ close }">
+          <UButton
+            label="Cancelar"
+            color="neutral"
+            variant="outline"
+            :disabled="removendo"
+            @click="close"
+          />
+          <UButton
+            :label="acaoGrupo"
+            color="error"
+            :loading="removendo"
+            @click="confirmarSaida"
+          />
+        </template>
+      </UModal>
     </div>
   </div>
 </template>
@@ -150,17 +215,18 @@
 import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { ConviteRead, GrupoRead, MembroGrupoRead } from '~/types/generated'
+import type { ConviteRead, GrupoRead, MembroGrupoRead, XpRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
-const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
 const conquistas = useConquistasStore()
 
 const grupoId = Number(route.params.id)
+const api = useApi(grupoId)
+const xpGrupo = ref<number | null>(null)
 const grupo = ref<GrupoRead | null>(null)
 const membros = ref<MembroGrupoRead[]>([])
 const loading = ref(true)
@@ -183,11 +249,17 @@ const tempoRestante = computed(() => {
 })
 
 const usuarioCriador = computed(() => !!grupo.value && grupo.value.id_dono === auth.user?.id)
+const confirmando = ref(false)
+const removendo = ref(false)
+const acaoGrupo = computed(() => usuarioCriador.value ? 'Excluir grupo' : 'Sair do grupo')
+const removendoMembro = ref<number | null>(null)
+const erroRemocao = ref('')
 
-const columns: TableColumn<MembroGrupoRead>[] = [
+const columns = computed<TableColumn<MembroGrupoRead>[]>(() => [
   { accessorKey: 'username', header: 'Usuário' },
   { accessorKey: 'papel', header: 'Papel' },
-]
+  ...(usuarioCriador.value ? [{ id: 'acoes', header: 'Ações' }] : []),
+])
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {
@@ -201,13 +273,15 @@ async function fetchGrupo() {
   erroCarregamento.value = ''
 
   try {
-    const [dadosGrupo, dadosMembros] = await Promise.all([
+    const [dadosGrupo, dadosMembros, pontos] = await Promise.all([
       api(`/grupos/${grupoId}`),
       api(`/grupos/${grupoId}/membros`),
+      (api('/pontuacao/xp') as Promise<XpRead>).catch(() => null),
     ])
 
     grupo.value = dadosGrupo
     membros.value = dadosMembros
+    xpGrupo.value = pontos?.xp_total ?? null
   }
   catch (error) {
     grupo.value = null
@@ -253,5 +327,45 @@ async function copiarConvite() {
   }
 }
 
+async function confirmarSaida() {
+  if (removendo.value) return
+
+  const excluir = usuarioCriador.value
+  const caminho = excluir ? `/grupos/${grupoId}` : `/grupos/${grupoId}/membros/me`
+  removendo.value = true
+
+  try {
+    await api(caminho, { method: 'DELETE' })
+    confirmando.value = false
+    toast.add({ title: excluir ? 'Grupo excluído' : 'Você saiu do grupo', color: 'success' })
+    await navigateTo('/grupos', { replace: true })
+  }
+  catch (error) {
+    const padrao = excluir ? 'Não foi possível excluir o grupo' : 'Não foi possível sair do grupo'
+    toast.add({ title: mensagemErro(error, padrao), color: 'error' })
+  }
+  finally {
+    removendo.value = false
+  }
+}
+
+async function removerMembro(membro: MembroGrupoRead) {
+  if (removendoMembro.value !== null) return
+  if (!window.confirm(`Remover ${membro.username} do grupo?`)) return
+
+  removendoMembro.value = membro.id
+  erroRemocao.value = ''
+
+  try {
+    await api(`/grupos/${grupoId}/membros/${membro.id}`, { method: 'DELETE' })
+    membros.value = membros.value.filter(item => item.id !== membro.id)
+  }
+  catch (error) {
+    erroRemocao.value = mensagemErro(error, 'Não foi possível remover o membro')
+  }
+  finally {
+    removendoMembro.value = null
+  }
+}
 onMounted(fetchGrupo)
 </script>
