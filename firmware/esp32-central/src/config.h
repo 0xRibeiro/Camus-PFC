@@ -31,8 +31,10 @@
 #define I2C_SDA 21
 #define I2C_SCL 22
 
-// broker MQTT local
-#define MQTT_URI "mqtt://192.168.0.13:1883"
+// MQTT_URI vem do ambiente no platformio.ini
+#ifndef MQTT_URI
+#error "MQTT_URI nao definido, use -e dev ou -e producao"
+#endif
 
 // sem resposta do backend nesse tempo, desiste
 #define VINCULO_ESPERA_MS 10000

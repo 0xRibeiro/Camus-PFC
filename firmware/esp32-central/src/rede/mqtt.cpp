@@ -2,6 +2,7 @@
 
 #include <ArduinoJson.h>
 #include <WiFi.h>
+#include <esp_crt_bundle.h>
 #include <mqtt_client.h>
 
 #include "../config.h"
@@ -83,6 +84,9 @@ namespace mqtt {
 
     esp_mqtt_client_config_t config = {};
     config.broker.address.uri = MQTT_URI;
+
+    // so vale no mqtts, confere o certificado
+    config.broker.verification.crt_bundle_attach = esp_crt_bundle_attach;
     config.credentials.client_id = id;
     config.credentials.username = id;
     config.credentials.authentication.password = credencial::senha();
