@@ -39,15 +39,38 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div>
-        <h1 class="text-xl font-semibold break-words">
-          {{ grupo.nome }}
-        </h1>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-semibold break-words">
+            {{ grupo.nome }}
+          </h1>
 
-        <p class="text-sm text-muted">
-          Consulte os participantes e os conteúdos do grupo.
-        </p>
+          <p class="text-sm text-muted">
+            Consulte os participantes e os conteúdos do grupo.
+          </p>
+        </div>
+
+        <!-- o botão aparece pros membros, mas não pro dono nem pro admin -->
+        <UButton
+          v-if="!usuarioCriador && !ehAdmin"
+          label="Denunciar grupo"
+          icon="i-lucide-flag"
+          color="error"
+          variant="outline"
+          @click="denunciando = true"
+        />
       </div>
+
+      <UAlert
+        v-if="grupo.suspenso"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-triangle-alert"
+        :title="tituloSuspensao"
+        :description="usuarioCriador
+          ? 'Você consegue visualizar o grupo, mas não pode alterar nada até o fim da suspensão.'
+          : 'O acesso aos conteúdos do grupo fica bloqueado até o fim da suspensão.'"
+      />
 
       <UCard>
         <template #header>
@@ -80,7 +103,7 @@
         </UTable>
       </UCard>
 
-      <UCard v-if="usuarioCriador">
+      <UCard v-if="usuarioCriador && !grupo.suspenso">
         <template #header>
           <h2 class="font-medium">
             Convidar pessoas
@@ -139,8 +162,14 @@
       </UCard>
 
       <GrupoTrilhas
+        v-if="!grupo.suspenso || usuarioCriador"
         :grupo-id="grupoId"
-        :dono="usuarioCriador"
+        :dono="usuarioCriador && !grupo.suspenso"
+      />
+
+      <GrupoDenunciaModal
+        v-model:open="denunciando"
+        :grupo-id="grupoId"
       />
     </div>
   </div>
@@ -150,8 +179,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { ConviteRead, GrupoRead, MembroGrupoRead } from '~/types/generated'
-
+import type { ConviteRead, GrupoRead, MembroGrupoRead } from '~/types/generated/types.gen'
 definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
@@ -165,6 +193,7 @@ const grupo = ref<GrupoRead | null>(null)
 const membros = ref<MembroGrupoRead[]>([])
 const loading = ref(true)
 const erroCarregamento = ref('')
+const denunciando = ref(false)
 
 const convite = ref<ConviteRead | null>(null)
 const gerando = ref(false)
@@ -183,6 +212,15 @@ const tempoRestante = computed(() => {
 })
 
 const usuarioCriador = computed(() => !!grupo.value && grupo.value.id_dono === auth.user?.id)
+// admin só olha o grupo, então o botão de denunciar não aparece pra ele
+const ehAdmin = computed(() => auth.role === 'admin')
+
+// o título do aviso depende de a suspensão ter data de fim ou de o grupo estar inabilitado
+const tituloSuspensao = computed(() => {
+  if (!grupo.value?.suspenso_ate) return 'Este grupo foi inabilitado'
+
+  return `Este grupo está suspenso até ${new Date(grupo.value.suspenso_ate).toLocaleDateString('pt-BR')}`
+})
 
 const columns: TableColumn<MembroGrupoRead>[] = [
   { accessorKey: 'username', header: 'Usuário' },
