@@ -1,0 +1,70 @@
+name: apk android
+
+# a cada atualizacao na main builda o apk e coloca na release da versao do package.json
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# se der 2 push seguidos n deixa 2 builds brigando pela msm release
+concurrency:
+  group: apk-release
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: instala deps
+        run: bun install --frozen-lockfile
+
+      # url da api vem das variables do repo (settings > secrets and variables > actions)
+      - name: gera o web e copia pro android
+        run: bun run build:android
+        env:
+          NUXT_PUBLIC_API_BASE: ${{ vars.API_BASE }}
+
+      - name: restaura a keystore
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/camus.jks"
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: builda o apk
+        working-directory: web/android
+        run: ./gradlew assembleRelease
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/camus.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # se a release da versao ja existe so troca o apk, se n cria ela
+      - name: publica na release
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          APK="camus-$VERSION.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "$APK"
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            gh release upload "$VERSION" "$APK" --clobber
+          else
+            gh release create "$VERSION" "$APK" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
