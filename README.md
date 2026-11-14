@@ -75,7 +75,7 @@ Além disto é bom ter um editor para trabalhar com o código como [VSCode](http
 
 ---
 
-Esse projeto usa [devenv](https://devenv.sh) (Nix) pra gerenciar o ambiente de desenvolvimento inteiro: Python, Node/bun, Postgres, Redis e InfluxDB sobem juntos, sem precisar instalar nada disso manualmente.
+Esse projeto usa [devenv](https://devenv.sh) (Nix) pra gerenciar o ambiente de desenvolvimento inteiro: Python, Node/bun, Postgres, Redis, InfluxDB e Mosquitto (broker MQTT do IoT) sobem juntos, sem precisar instalar nada disso manualmente.
 
 **1 - Instalar o Nix e o devenv**, seguindo o guia oficial: [devenv.sh/getting-started](https://devenv.sh/getting-started/)
 
@@ -86,34 +86,51 @@ git clone https://github.com/0xRibeiro/Camus-PFC.git
 cd Camus-PFC
 ```
 
-**3 - Entrar no ambiente**
+**3 - Entrar no ambiente** (a primeira vez demora, ele baixa tudo e instala as dependências do back e do front)
 ```bash
 devenv shell
 # ou, se você usa direnv:
 direnv allow
 ```
-**4 - Configurar o backend**
+
+**4 - Criar o `.env` do backend**
 ```bash
 cp backend/.env.example backend/.env
-# depois, preencha os valores em backend/.env
 ```
+Só precisa trocar o `JWT_SECRET` (gera com `openssl rand -hex 32`). A senha do Mosquitto e o token do Influx já vêm prontos.
 
-**5 - Subir tudo** (Postgres, Redis, InfluxDB, backend e frontend)
+**5 - Subir tudo** (Postgres, Redis, InfluxDB, Mosquitto, backend e frontend)
 ```bash
 devenv up
 ```
+Deixa esse terminal rodando. No primeiro start o backend vai reclamar do Influx, é normal, ainda falta configurar.
 
-**6 - Rodar Migrations
+> As portas são fixas (8000, 3000, 1883...). Se alguma já estiver ocupada o `devenv up` dá erro em vez de trocar de porta, então fecha o que estiver usando ela.
+>
+> Se der erro com `you are not a trusted user`, quase sempre é isso: outro `devenv up` ficou rodando (ex: terminal fechado sem Ctrl+C) e tá segurando as portas. Mata esses processos com:
+> ```bash
+> pkill redis-server; pkill influxd; pkill mosquitto; pkill postgres; pkill -f uvicorn; pkill -f nuxt
+> ```
+> Se não tiver o `pkill`, abre o monitor de sistema da sua distro, procura por `redis`, `influxd`, `mosquitto`, `postgres`, `uvicorn` (back) e `nuxt` (front) e encerra eles por lá.
+
+Os passos 6 e 7 são feitos **em outro terminal**, dentro da pasta do projeto e com o ambiente ativo (`devenv shell` de novo ou direnv).
+
+**6 - Configurar o InfluxDB** (só na primeira vez)
+```bash
+influx setup --org camus --bucket leituras --username admin --password senha-influx --token camus-dev-token --force
+```
+
+**7 - Rodar as migrations**
 ```bash
 cd backend
 alembic upgrade head
 ```
 
-**7 - Acessar o projeto**
+**8 - Reiniciar o `devenv up`** (Ctrl+C no primeiro terminal e `devenv up` de novo) pra o backend conectar no Influx já configurado.
+
+**9 - Acessar o projeto**
 - Front-end: http://localhost:3000
 - Back-end: http://localhost:8000/docs
-  
-  ou outras portas caso vc ja tiver com essas ocupadas (o devenv up gerencia automaticamente e é exibido no terminal)
 
 <!-- ---------------------------------------------------------------------- -->
 
@@ -129,7 +146,7 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 
 #### **Ambiente de desenvolvimento**
 
-- **[devenv](https://devenv.sh)** (Nix) — Python/UV, TS/bun, Postgres, Redis e InfluxDB gerenciados juntos
+- **[devenv](https://devenv.sh)** (Nix) — Python/UV, TS/bun, Postgres, Redis, InfluxDB e Mosquitto gerenciados juntos
 
 #### **Back-End** ([FastAPI](https://fastapi.tiangolo.com/) / Python)
 
@@ -141,6 +158,8 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 - [bun](https://bun.sh/)
 
 #### **Firmware / IoT** (C++ / [Arduino](https://www.arduino.cc/))
+
+- [Mosquitto](https://mosquitto.org/) (broker MQTT)
 
 #### **Bancos de dados**
 

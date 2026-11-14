@@ -44,8 +44,13 @@
 
   services.influxdb.enable = true;
 
+  # config do cli do influx fica no projeto, n bate com o ~/.influxdbv2 de outros projetos
+  env.INFLUX_CONFIGS_PATH = "${config.env.DEVENV_STATE}/influx-configs";
+
   # broker do iot, aberto na rede pro esp
-  # senha do admin sai em .devenv/state/mosquitto-dynsec.json.pw no 1o start
+  # senha fixa do admin, o plugin so usa no 1o start (quando o json ainda n existe)
+  env.MOSQUITTO_DYNSEC_PASSWORD = "camus-dev";
+
   services.mosquitto = {
     enable = true;
     bind = null;
