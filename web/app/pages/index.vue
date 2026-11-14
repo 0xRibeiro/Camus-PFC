@@ -1,6 +1,6 @@
 <template>
   <section
-    class="relative isolate mx-auto flex min-h-[32rem] w-full max-w-6xl flex-col items-start overflow-hidden rounded-2xl bg-[#07182f] px-6 py-10 sm:min-h-[50svh] sm:justify-center sm:px-12"
+    class="relative isolate flex min-h-[32rem] w-full flex-1 flex-col items-start overflow-hidden bg-[#07182f] px-6 py-10 sm:min-h-0 sm:justify-center sm:px-12"
   >
     <picture class="absolute inset-0 -z-20">
       <source media="(max-width: 639px)" srcset="/papeis-de-parede/inicio-mobile.webp">
