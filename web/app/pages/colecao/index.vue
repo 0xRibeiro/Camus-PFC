@@ -1,226 +1,237 @@
 <template>
-  <div class="mx-auto w-full max-w-6xl space-y-6">
-    <UPageHeader
-      title="Coleção de peixes"
-      description="Procure uma espécie no iNaturalist."
+  <section class="relative isolate flex-1 overflow-hidden bg-[#07182f] p-4">
+    <img
+      src="/papeis-de-parede/colecao.webp"
+      alt=""
+      class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
     >
-      <template #headline>
-        <div class="flex items-center gap-2 text-sm font-medium text-primary">
-          <UIcon
-            name="i-lucide-fish"
-            class="size-4"
-          />
-          Coleção
-        </div>
-      </template>
-    </UPageHeader>
-
-    <CamusFundo src="/papeis-de-parede/colecao.webp" />
-
-    <UCard>
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <UInput
-          v-model="busca"
-          icon="i-lucide-search"
-          placeholder="Digite um nome de peixe"
-          class="w-full"
-          :disabled="carregando"
-          @keyup.enter="buscarPeixes"
-        />
-
-        <UButton
-          label="Buscar"
-          icon="i-lucide-search"
-          :loading="carregando"
-          class="sm:shrink-0"
-          @click="buscarPeixes"
-        />
-      </div>
-    </UCard>
-
-    <UAlert
-      v-if="mensagemDeErro"
-      color="error"
-      variant="subtle"
-      icon="i-lucide-circle-alert"
-      title="Ocorreu um erro"
-      :description="mensagemDeErro"
-    />
 
     <div
-      v-if="carregando"
-      class="grid gap-4 sm:grid-cols-2"
-    >
-      <UCard
-        v-for="indice in 6"
-        :key="indice"
-      >
-        <USkeleton class="aspect-video w-full rounded-lg" />
-
-        <div class="mt-4 space-y-2">
-          <USkeleton class="h-5 w-2/3" />
-          <USkeleton class="h-4 w-1/2" />
-        </div>
-      </UCard>
-    </div>
-
-    <UEmpty
-      v-else-if="!peixes.length && !mensagemDeErro"
-      icon="i-lucide-fish"
-      title="Nada encontrado"
-      description="Tente o nome comum do peixe ou o nome científico."
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 -z-10 bg-[#07182f]/55"
     />
 
-    <section
-      v-else-if="peixes.length && !mensagemDeErro"
-      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
-    >
-      <div>
-        <p class="mb-3 text-sm text-muted">
-          Exibindo {{ inicioResultado }} a {{ fimResultado }}
-          de {{ totalResultados.toLocaleString('pt-BR') }}
-          {{ totalResultados === 1 ? 'espécie' : 'espécies' }}
-          para “{{ termoPesquisado }}”
-        </p>
+    <div class="mx-auto w-full max-w-6xl space-y-6">
+      <UPageHeader
+        title="Coleção de peixes"
+        description="Procure uma espécie no iNaturalist."
+      >
+        <template #headline>
+          <div class="flex items-center gap-2 text-sm font-medium text-primary">
+            <UIcon
+              name="i-lucide-fish"
+              class="size-4"
+            />
+            Coleção
+          </div>
+        </template>
+      </UPageHeader>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <UCard
-            v-for="peixe in peixes"
-            :key="peixe.id"
-            class="cursor-pointer"
-            :class="peixeSelecionado?.id === peixe.id ? 'border-primary ring-1 ring-primary' : ''"
-            :aria-label="`Selecionar ${peixe.preferred_common_name || peixe.name}`"
-            @click="selecionarPeixe(peixe)"
-          >
+      <UCard>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <UInput
+            v-model="busca"
+            icon="i-lucide-search"
+            placeholder="Digite um nome de peixe"
+            class="w-full"
+            :disabled="carregando"
+            @keyup.enter="buscarPeixes"
+          />
+
+          <UButton
+            label="Buscar"
+            icon="i-lucide-search"
+            :loading="carregando"
+            class="sm:shrink-0"
+            @click="buscarPeixes"
+          />
+        </div>
+      </UCard>
+
+      <UAlert
+        v-if="mensagemDeErro"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        title="Ocorreu um erro"
+        :description="mensagemDeErro"
+      />
+
+      <div
+        v-if="carregando"
+        class="grid gap-4 sm:grid-cols-2"
+      >
+        <UCard
+          v-for="indice in 6"
+          :key="indice"
+        >
+          <USkeleton class="aspect-video w-full rounded-lg" />
+
+          <div class="mt-4 space-y-2">
+            <USkeleton class="h-5 w-2/3" />
+            <USkeleton class="h-4 w-1/2" />
+          </div>
+        </UCard>
+      </div>
+
+      <UEmpty
+        v-else-if="!peixes.length && !mensagemDeErro"
+        icon="i-lucide-fish"
+        title="Nada encontrado"
+        description="Tente o nome comum do peixe ou o nome científico."
+      />
+
+      <section
+        v-else-if="peixes.length && !mensagemDeErro"
+        class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
+      >
+        <div>
+          <p class="mb-3 text-sm text-muted">
+            Exibindo {{ inicioResultado }} a {{ fimResultado }}
+            de {{ totalResultados.toLocaleString('pt-BR') }}
+            {{ totalResultados === 1 ? 'espécie' : 'espécies' }}
+            para “{{ termoPesquisado }}”
+          </p>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <UCard
+              v-for="peixe in peixes"
+              :key="peixe.id"
+              class="cursor-pointer"
+              :class="peixeSelecionado?.id === peixe.id ? 'border-primary ring-1 ring-primary' : ''"
+              :aria-label="`Selecionar ${peixe.preferred_common_name || peixe.name}`"
+              @click="selecionarPeixe(peixe)"
+            >
+              <img
+                v-if="peixe.default_photo?.medium_url"
+                :src="peixe.default_photo.medium_url"
+                :alt="`Imagem de ${peixe.preferred_common_name || peixe.name}`"
+                class="aspect-video w-full rounded-lg object-cover"
+              >
+
+              <div
+                v-else
+                class="flex aspect-video items-center justify-center rounded-lg bg-elevated text-muted"
+              >
+                <UIcon
+                  name="i-lucide-image-off"
+                  class="size-8"
+                />
+              </div>
+
+              <div class="mt-4 min-w-0">
+                <h2 class="truncate font-semibold text-highlighted">
+                  {{ peixe.preferred_common_name || peixe.name }}
+                </h2>
+
+                <p class="mt-1 truncate text-sm italic text-muted">
+                  {{ peixe.name }}
+                </p>
+              </div>
+            </UCard>
+          </div>
+        </div>
+
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-semibold text-highlighted">
+                Peixe Selecionado
+              </h2>
+
+              <UIcon
+                name="i-lucide-eye"
+                class="size-5 text-primary"
+              />
+            </div>
+          </template>
+
+          <template v-if="peixeSelecionado">
             <img
-              v-if="peixe.default_photo?.medium_url"
-              :src="peixe.default_photo.medium_url"
-              :alt="`Imagem de ${peixe.preferred_common_name || peixe.name}`"
-              class="aspect-video w-full rounded-lg object-cover"
+              v-if="peixeSelecionado.default_photo?.square_url"
+              :src="peixeSelecionado.default_photo.square_url"
+              :alt="`Imagem de ${peixeSelecionado.preferred_common_name || peixeSelecionado.name}`"
+              class="aspect-square w-full rounded-lg object-cover"
             >
 
             <div
               v-else
-              class="flex aspect-video items-center justify-center rounded-lg bg-elevated text-muted"
+              class="flex aspect-square items-center justify-center rounded-lg bg-elevated text-muted"
             >
               <UIcon
-                name="i-lucide-image-off"
-                class="size-8"
+                name="i-lucide-fish"
+                class="size-12"
               />
             </div>
 
-            <div class="mt-4 min-w-0">
-              <h2 class="truncate font-semibold text-highlighted">
-                {{ peixe.preferred_common_name || peixe.name }}
-              </h2>
+            <div class="mt-4 space-y-3">
+              <div>
+                <p class="text-lg font-semibold text-highlighted">
+                  {{ peixeSelecionado.preferred_common_name || peixeSelecionado.name }}
+                </p>
 
-              <p class="mt-1 truncate text-sm italic text-muted">
-                {{ peixe.name }}
-              </p>
+                <p class="text-sm italic text-muted">
+                  {{ peixeSelecionado.name }}
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <UBadge
+                  color="neutral"
+                  variant="subtle"
+                >
+                  {{ new Intl.NumberFormat('pt-BR').format(peixeSelecionado.observations_count ?? 0) }}
+                  observações
+                </UBadge>
+
+                <UBadge
+                  v-if="peixeSelecionado.rank"
+                  color="primary"
+                  variant="subtle"
+                >
+                  {{ peixeSelecionado.rank }}
+                </UBadge>
+              </div>
+
+              <UButton
+                v-if="peixeSelecionado.wikipedia_url"
+                label="Ver mais informações"
+                icon="i-lucide-external-link"
+                variant="outline"
+                block
+                :to="peixeSelecionado.wikipedia_url"
+                target="_blank"
+              />
             </div>
-          </UCard>
-        </div>
-      </div>
+          </template>
 
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-highlighted">
-              Peixe Selecionado
-            </h2>
-
-            <UIcon
-              name="i-lucide-eye"
-              class="size-5 text-primary"
-            />
-          </div>
-        </template>
-
-        <template v-if="peixeSelecionado">
-          <img
-            v-if="peixeSelecionado.default_photo?.square_url"
-            :src="peixeSelecionado.default_photo.square_url"
-            :alt="`Imagem de ${peixeSelecionado.preferred_common_name || peixeSelecionado.name}`"
-            class="aspect-square w-full rounded-lg object-cover"
-          >
-
-          <div
+          <UEmpty
             v-else
-            class="flex aspect-square items-center justify-center rounded-lg bg-elevated text-muted"
-          >
-            <UIcon
-              name="i-lucide-fish"
-              class="size-12"
-            />
-          </div>
+            icon="i-lucide-mouse-pointer-click"
+            title="Escolha um peixe"
+            description="Clique em um dos resultados para ver mais detalhes."
+          />
+        </UCard>
+      </section>
 
-          <div class="mt-4 space-y-3">
-            <div>
-              <p class="text-lg font-semibold text-highlighted">
-                {{ peixeSelecionado.preferred_common_name || peixeSelecionado.name }}
-              </p>
+      <div
+        v-if="totalResultados > itensPorPagina && !mensagemDeErro"
+        class="flex flex-wrap items-center justify-between gap-3"
+      >
+        <p class="text-sm text-muted">
+          Página {{ pagina }} de {{ totalPaginas }}
+        </p>
 
-              <p class="text-sm italic text-muted">
-                {{ peixeSelecionado.name }}
-              </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <UBadge
-                color="neutral"
-                variant="subtle"
-              >
-                {{ new Intl.NumberFormat('pt-BR').format(peixeSelecionado.observations_count ?? 0) }}
-                observações
-              </UBadge>
-
-              <UBadge
-                v-if="peixeSelecionado.rank"
-                color="primary"
-                variant="subtle"
-              >
-                {{ peixeSelecionado.rank }}
-              </UBadge>
-            </div>
-
-            <UButton
-              v-if="peixeSelecionado.wikipedia_url"
-              label="Ver mais informações"
-              icon="i-lucide-external-link"
-              variant="outline"
-              block
-              :to="peixeSelecionado.wikipedia_url"
-              target="_blank"
-            />
-          </div>
-        </template>
-
-        <UEmpty
-          v-else
-          icon="i-lucide-mouse-pointer-click"
-          title="Escolha um peixe"
-          description="Clique em um dos resultados para ver mais detalhes."
+        <UPagination
+          :page="pagina"
+          :items-per-page="itensPorPagina"
+          :total="totalResultados"
+          :disabled="carregando"
+          @update:page="mudarPagina"
         />
-      </UCard>
-    </section>
-
-    <div
-      v-if="totalResultados > itensPorPagina && !mensagemDeErro"
-      class="flex flex-wrap items-center justify-between gap-3"
-    >
-      <p class="text-sm text-muted">
-        Página {{ pagina }} de {{ totalPaginas }}
-      </p>
-
-      <UPagination
-        :page="pagina"
-        :items-per-page="itensPorPagina"
-        :total="totalResultados"
-        :disabled="carregando"
-        @update:page="mudarPagina"
-      />
+      </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
