@@ -18,6 +18,8 @@
     "node": "22.x"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
     "@nuxt/ui": "4.12.0",
     "@pinia/nuxt": "^1.0.2",
     "@tanstack/charts": "1.1.0",
@@ -42,9 +44,11 @@
     "zod": "^4.6.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@hey-api/openapi-ts": "^0.99.0",
     "@nuxt/eslint": "^1.17.0",
     "eslint": "^10.10.0",
+    "signal-exit": "^4.1.0",
     "typescript": "6",
     "vue-tsc": "^3.3.14"
   }
