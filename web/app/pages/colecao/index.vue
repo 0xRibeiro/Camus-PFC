@@ -15,6 +15,8 @@
       </template>
     </UPageHeader>
 
+    <CamusFundo src="/papeis-de-parede/colecao.webp" />
+
     <UCard>
       <div class="flex flex-col gap-3 sm:flex-row">
         <UInput
