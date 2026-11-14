@@ -13,6 +13,11 @@
 
   languages.typescript.enable = true;
 
+  packages = [
+    pkgs.platformio
+    pkgs.clang-tools
+  ];
+
   languages.python = {
     enable = true;
     venv.enable = true;
@@ -39,10 +44,23 @@
 
   services.influxdb.enable = true;
 
+  # broker do iot, aberto na rede pro esp
+  # senha do admin sai em .devenv/state/mosquitto-dynsec.json.pw no 1o start
+  services.mosquitto = {
+    enable = true;
+    bind = null;
+    port = 1883;
+    extraConfig = ''
+      allow_anonymous false
+      plugin ${pkgs.mosquitto.lib}/lib/mosquitto_dynamic_security.so
+      plugin_opt_config_file ${config.devenv.root}/.devenv/state/mosquitto-dynsec.json
+    '';
+  };
+
 
   processes.backend = {
     ports.http.allocate = 8000;
-    after = [ "devenv:processes:postgres" "devenv:processes:redis" ];
+    after = [ "devenv:processes:postgres" "devenv:processes:redis" "devenv:processes:mosquitto" ];
     exec = ''
       cd "$DEVENV_ROOT/backend"
       echo "${toString config.processes.backend.ports.http.value}" > "$DEVENV_ROOT/.devenv/backend-port"

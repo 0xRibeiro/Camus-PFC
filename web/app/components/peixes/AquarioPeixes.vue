@@ -58,6 +58,7 @@
       </div>
 
       <UForm
+        v-if="podeEditar"
         :schema="zPeixeCreate"
         :state="formulario"
         class="space-y-3"
@@ -104,7 +105,7 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import type { PeixeCreate, PeixeRead } from '~/types/generated'
 import { zPeixeCreate } from '~/types/generated/zod.gen'
 
-const props = defineProps<{ aquarioId: number }>()
+const props = withDefaults(defineProps<{ aquarioId: number, podeEditar?: boolean }>(), { podeEditar: true })
 
 const api = useApi()
 const toast = useToast()

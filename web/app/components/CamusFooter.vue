@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { version } from '../../package.json'
 
 const items: NavigationMenuItem[] = [
   {
@@ -23,6 +24,7 @@ const items: NavigationMenuItem[] = [
     <template #left>
       <p class="text-muted text-sm">
         Camus © {{ new Date().getFullYear() }}
+        <span class="ms-2 font-mono text-xs">v{{ version }}</span>
       </p>
     </template>
 

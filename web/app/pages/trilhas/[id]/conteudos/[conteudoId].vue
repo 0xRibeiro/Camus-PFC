@@ -3,11 +3,14 @@ import type { JSONContent } from '@tiptap/core'
 import { FetchError } from 'ofetch'
 import type { ConclusaoRead, ConteudoAlunoRead } from '~/types/generated'
 
-definePageMeta({ middleware: 'role' })
+definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
+const api = useApi()
+const grupoId = route.params.grupoId
 const toast = useToast()
 const trilhaId = Number(route.params.id)
+const trilhaPath = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}` : `/trilhas/${trilhaId}`
 const conteudoId = Number(route.params.conteudoId)
 
 const conteudo = ref<ConteudoAlunoRead | null>(null)
@@ -17,14 +20,13 @@ const concluindo = ref(false)
 async function fetchConteudo() {
   loading.value = true
   try {
-    const api = useApi()
     conteudo.value = await api(`/progresso/conteudos/${conteudoId}`)
   }
   catch (error) {
-    // 403 = ainda n liberou, volta pra trilha
-    if (error instanceof FetchError && error.status === 403) {
+    // Se o conteúdo ainda não foi liberado, volta para a trilha.
+    if (error instanceof FetchError && error.status === 403 && error.data?.detail === 'Conclua os conteúdos anteriores primeiro') {
       toast.add({ title: 'Conclua os conteúdos anteriores primeiro', color: 'warning' })
-      await navigateTo(`/trilhas/${trilhaId}`)
+      await navigateTo(trilhaPath)
       return
     }
     toast.add({ title: 'Não foi possível carregar o conteúdo', color: 'error' })
@@ -48,13 +50,12 @@ async function onConcluir() {
 
   concluindo.value = true
   try {
-    const api = useApi()
     const resposta: ConclusaoRead = await api(`/progresso/conteudos/${conteudoId}/concluir`, { method: 'POST' })
     conteudo.value.concluido = true
     conteudo.value.atualizado = false
     toast.add({
       title: 'Conteúdo concluído',
-      description: resposta.xp_ganho > 0 ? `+${resposta.xp_ganho} XP` : undefined,
+      description: resposta.xp_ganho > 0 ? `+${resposta.xp_ganho} XP${grupoId ? ' no grupo' : ''}` : undefined,
       color: 'success',
     })
   }
@@ -85,7 +86,7 @@ const precisaConcluir = computed(() => {
       color="neutral"
       variant="link"
       class="px-0 mb-3"
-      :to="`/trilhas/${trilhaId}`"
+      :to="trilhaPath"
     />
 
     <div
@@ -172,7 +173,7 @@ const precisaConcluir = computed(() => {
           label="Próximo"
           color="neutral"
           variant="outline"
-          :to="`/trilhas/${trilhaId}/conteudos/${conteudo.proximo_conteudo_id}`"
+          :to="`${trilhaPath}/conteudos/${conteudo.proximo_conteudo_id}`"
         />
       </div>
     </template>
