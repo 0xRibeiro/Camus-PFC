@@ -119,6 +119,11 @@ Os passos 6 e 7 são feitos **em outro terminal**, dentro da pasta do projeto e 
 ```bash
 influx setup --org camus --bucket leituras --username admin --password senha-influx --token camus-dev-token --force
 ```
+> Se der `instance has already been set up`, é porque você já tinha rodado o projeto antes e ficaram dados antigos do Influx e do Mosquitto no `.devenv`. Para o `devenv up` (Ctrl+C), apaga eles:
+> ```bash
+> rm -rf .devenv/state/influxdb .devenv/state/influx-configs .devenv/state/mosquitto-dynsec.json*
+> ```
+> Sobe o `devenv up` de novo e roda o `influx setup` outra vez. Isso apaga as leituras e os dispositivos cadastrados só da sua máquina, o Postgres não é mexido.
 
 **7 - Rodar as migrations**
 ```bash
