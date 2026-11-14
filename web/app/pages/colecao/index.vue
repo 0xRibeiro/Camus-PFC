@@ -1,33 +1,36 @@
 <template>
-  <section class="relative isolate flex-1 overflow-hidden bg-[#07182f] p-4">
-    <img
-      src="/papeis-de-parede/colecao.webp"
-      alt=""
-      class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
-    >
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0 -z-10 bg-[#07182f]/55"
-    />
-
+  <section class="flex-1 bg-[linear-gradient(to_bottom,#143457,#07182f_32rem)] p-4">
     <div class="mx-auto w-full max-w-6xl space-y-6">
-      <UPageHeader
-        title="Coleção de peixes"
-        description="Procure uma espécie no iNaturalist."
-      >
-        <template #headline>
-          <div class="flex items-center gap-2 text-sm font-medium text-primary">
-            <UIcon
-              name="i-lucide-fish"
-              class="size-4"
-            />
-            Coleção
-          </div>
-        </template>
-      </UPageHeader>
+      <div class="relative isolate overflow-hidden rounded-xl bg-[#07182f] px-6 sm:px-8">
+        <img
+          src="/papeis-de-parede/colecao.webp"
+          alt=""
+          class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+        >
 
-      <UCard variant="subtle">
+        <div
+          aria-hidden="true"
+          class="absolute inset-0 -z-10 bg-linear-to-r from-[#07182f]/95 via-[#07182f]/65 to-transparent"
+        />
+
+        <UPageHeader
+          title="Coleção de peixes"
+          description="Procure uma espécie no iNaturalist."
+          :ui="{ title: 'text-white', description: 'text-slate-200' }"
+        >
+          <template #headline>
+            <div class="flex items-center gap-2 text-sm font-medium text-blue-200">
+              <UIcon
+                name="i-lucide-fish"
+                class="size-4"
+              />
+              Coleção
+            </div>
+          </template>
+        </UPageHeader>
+      </div>
+
+      <UCard>
         <div class="flex flex-col gap-3 sm:flex-row">
           <UInput
             v-model="busca"
@@ -64,7 +67,6 @@
         <UCard
           v-for="indice in 6"
           :key="indice"
-          variant="subtle"
         >
           <USkeleton class="aspect-video w-full rounded-lg" />
 
@@ -98,7 +100,6 @@
             <UCard
               v-for="peixe in peixes"
               :key="peixe.id"
-              variant="subtle"
               class="cursor-pointer"
               :class="peixeSelecionado?.id === peixe.id ? 'border-primary ring-1 ring-primary' : ''"
               :aria-label="`Selecionar ${peixe.preferred_common_name || peixe.name}`"
@@ -134,7 +135,7 @@
           </div>
         </div>
 
-        <UCard variant="subtle">
+        <UCard>
           <template #header>
             <div class="flex items-center justify-between gap-3">
               <h2 class="font-semibold text-highlighted">
