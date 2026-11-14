@@ -137,6 +137,18 @@ alembic upgrade head
 - Front-end: http://localhost:3000
 - Back-end: http://localhost:8000/docs
 
+### 📱 App Android
+
+O app Android é o próprio front web empacotado com o [Capacitor](https://capacitorjs.com/). A cada atualização na `main` o GitHub Actions builda o APK e coloca ele na [release](https://github.com/0xRibeiro/Camus-PFC/releases) da versão atual do `web/package.json` (a mesma do footer). Pra instalar é só baixar o `camus-vX.Y.Z.apk` da release mais recente no celular.
+
+Pra gerar o APK localmente (precisa do JDK 21 e do Android SDK):
+```bash
+cd web
+NUXT_PUBLIC_API_BASE=https://api.camus.gardiencor.app.br bun run build:android
+cd android && ./gradlew assembleDebug
+```
+> O APK sai em `web/android/app/build/outputs/apk/debug/`. Se der erro de `SDK location not found`, cria o `web/android/local.properties` com `sdk.dir=/caminho/do/Android/Sdk`.
+
 <!-- ---------------------------------------------------------------------- -->
 
 
@@ -161,6 +173,7 @@ As seguintes ferramentas estao sendo usadas na construção do projeto:
 #### **Front-End Web** ([Nuxt](https://nuxt.com/) / Vue / TypeScript)
 
 - [bun](https://bun.sh/)
+- [Capacitor](https://capacitorjs.com/) (app Android)
 
 #### **Firmware / IoT** (C++ / [Arduino](https://www.arduino.cc/))
 
