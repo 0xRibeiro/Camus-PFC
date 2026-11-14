@@ -16,6 +16,9 @@
         orientation="vertical"
         :collapsed="state === 'collapsed'"
         :ui="{
+          root: 'min-h-0 flex-1',
+          list: 'flex min-h-0 flex-1 flex-col overflow-y-auto',
+          item: 'flex min-h-12 flex-1',
           linkLeadingIcon: 'size-9',
           link: state === 'collapsed' ? 'justify-center' : undefined,
         }"
