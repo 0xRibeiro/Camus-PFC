@@ -27,7 +27,7 @@
         </template>
       </UPageHeader>
 
-      <UCard>
+      <UCard variant="subtle">
         <div class="flex flex-col gap-3 sm:flex-row">
           <UInput
             v-model="busca"
@@ -64,6 +64,7 @@
         <UCard
           v-for="indice in 6"
           :key="indice"
+          variant="subtle"
         >
           <USkeleton class="aspect-video w-full rounded-lg" />
 
@@ -97,6 +98,7 @@
             <UCard
               v-for="peixe in peixes"
               :key="peixe.id"
+              variant="subtle"
               class="cursor-pointer"
               :class="peixeSelecionado?.id === peixe.id ? 'border-primary ring-1 ring-primary' : ''"
               :aria-label="`Selecionar ${peixe.preferred_common_name || peixe.name}`"
@@ -132,7 +134,7 @@
           </div>
         </div>
 
-        <UCard>
+        <UCard variant="subtle">
           <template #header>
             <div class="flex items-center justify-between gap-3">
               <h2 class="font-semibold text-highlighted">
