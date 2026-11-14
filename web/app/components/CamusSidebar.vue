@@ -85,6 +85,7 @@ const items = computed<NavigationMenuItem[]>(() => {
       { label: 'Aquários', icon: 'i-lucide-waves', to: '/aquarios' },
       { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
       { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
+      { label: 'Minigames', icon: 'i-lucide-gamepad-2', to: '/minigames' },
     )
   }
 
