@@ -472,9 +472,17 @@ export const zMotivoCreate = z.object({
 });
 
 /**
+ * OpcaoRead
+ */
+export const zOpcaoRead = z.object({
+    taxon_id: z.int(),
+    nome: z.string()
+});
+
+/**
  * OrigemLancamento
  */
-export const zOrigemLancamento = z.enum(['conteudo']);
+export const zOrigemLancamento = z.enum(['conteudo', 'minigame']);
 
 /**
  * LancamentoRead
@@ -621,6 +629,13 @@ export const zResetPasswordInput = z.object({
 });
 
 /**
+ * RespostaInput
+ */
+export const zRespostaInput = z.object({
+    taxon_id: z.int()
+});
+
+/**
  * RespostaQuizCreate
  */
 export const zRespostaQuizCreate = z.object({
@@ -635,6 +650,31 @@ export const zResultadoQuizRead = z.object({
     total: z.int(),
     xp_ganho: z.int(),
     correcao: z.array(zCorrecaoQuestaoRead)
+});
+
+/**
+ * ResultadoRead
+ */
+export const zResultadoRead = z.object({
+    acertou: z.boolean(),
+    resposta_taxon_id: z.int(),
+    resposta_nome: z.string(),
+    resposta_nome_cientifico: z.string(),
+    pontos: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
+});
+
+/**
+ * RodadaRead
+ */
+export const zRodadaRead = z.object({
+    id: z.int(),
+    foto_url: z.string(),
+    foto_atribuicao: z.string(),
+    opcoes: z.array(zOpcaoRead),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
 });
 
 /**
@@ -1418,6 +1458,22 @@ export const zMeuXpPontuacaoXpGetResponse = zXpRead;
  * Successful Response
  */
 export const zMeuExtratoPontuacaoExtratoGetResponse = z.array(zLancamentoRead);
+
+/**
+ * Successful Response
+ */
+export const zNovaRodadaMinigamesQuemEessePeixeRodadasPostResponse = zRodadaRead;
+
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostBody = zRespostaInput;
+
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostPath = z.object({
+    rodada_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponse = zResultadoRead;
 
 /**
  * Response Listar Trilhas Progresso Trilhas Get
