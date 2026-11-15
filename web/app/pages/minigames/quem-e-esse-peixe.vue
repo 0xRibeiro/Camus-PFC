@@ -44,12 +44,16 @@
           v-if="!rodada"
           class="h-[40dvh] min-h-56 w-full rounded-xl"
         />
-        <img
+        <!-- alt neutro pra n entregar a resposta no titulo do modal -->
+        <MinigameFotoZoom
           v-else
+          :key="rodada.id"
           :src="rodada.foto_url"
-          alt="Foto do animal misterioso"
-          class="h-[40dvh] min-h-56 w-full rounded-xl bg-elevated object-contain"
-        >
+          alt="Animal misterioso"
+          :atribuicao="`Foto: ${rodada.foto_atribuicao} · iNaturalist`"
+          img-class="h-[40dvh] min-h-56 object-contain"
+          class="rounded-xl"
+        />
         <figcaption
           v-if="rodada"
           class="text-xs text-muted"
