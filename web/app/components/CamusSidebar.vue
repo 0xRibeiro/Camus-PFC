@@ -5,11 +5,30 @@
     collapsible="icon"
     rail
     :ui="{
+      header: 'group-data-[state=collapsed]/sidebar:px-3',
+      title: 'flex group-data-[state=collapsed]/sidebar:justify-center',
       container: 'h-full',
       body: 'px-1.5',
       footer: 'p-3',
     }"
   >
+  <template #title="{ state }">
+  <NuxtLink
+    to="/"
+    aria-label="Camus — página inicial"
+    class="inline-flex shrink-0 rounded-md bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+    @click="fecharMenuNoCelular"
+  >
+    <img
+      src="/logo.png"
+      alt=""
+      width="384"
+      height="384"
+      class="rounded-md"
+      :class="state === 'collapsed' ? 'size-8' : 'size-11'"
+    >
+  </NuxtLink>
+  </template>
     <template #default="{ state }">
       <UNavigationMenu
         :items="items"
@@ -79,6 +98,12 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const open = defineModel<boolean>('open', { required: true })
 const auth = useAuthStore()
 const route = useRoute()
+const menuDesktop = useMediaQuery('(min-width: 64rem)')
+
+function fecharMenuNoCelular() {
+  if (!menuDesktop.value) open.value = false
+}
+
 function rotaAtual(caminho: string) {
   return route.path === caminho || route.path.startsWith(`${caminho}/`)
 }
