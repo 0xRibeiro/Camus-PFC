@@ -45,16 +45,32 @@
             <template #leading>
               <span
                 class="size-3 rounded-full border border-default"
-                :style="{ backgroundColor: cor }"
+                :style="{ background: `linear-gradient(${cor}, ${cor}), ${xadrez}` }"
               />
             </template>
           </UButton>
 
           <template #content>
-            <UColorPicker
-              v-model="cor"
-              class="p-2"
-            />
+            <div class="flex gap-4 p-2">
+              <UColorPicker v-model="corBase" />
+
+              <!-- easter egg: so aparece depois do konami code -->
+              <div
+                v-if="transparenciaLiberada"
+                class="relative h-42 w-2 rounded-md"
+                :style="{ background: `linear-gradient(to top, transparent, ${corBase}), ${xadrez}` }"
+              >
+                <USlider
+                  v-model="opacidade"
+                  orientation="vertical"
+                  :min="0"
+                  :max="100"
+                  aria-label="Transparência"
+                  class="absolute inset-0"
+                  :ui="{ track: 'bg-transparent', range: 'bg-transparent', thumb: 'size-4 bg-transparent ring-white' }"
+                />
+              </div>
+            </div>
           </template>
         </UPopover>
       </div>
@@ -141,15 +157,54 @@
 </template>
 
 <script setup lang="ts">
+import type { ConquistaRead } from '~/types/generated'
+
 // so exige estar logado, qualquer papel
 definePageMeta({ middleware: 'role' })
 
 const auth = useAuthStore()
 const toast = useToast()
 
+const conquistas = useConquistasStore()
+
 const avatares = ref<string[]>([])
 const avatarEscolhido = ref(auth.user?.avatar ?? 'peixe-palhaco')
-const cor = ref(auth.user?.cor_fundo ?? '#0EA5E9')
+
+// a cor salva pode vir #RRGGBBAA, o picker so entende #RRGGBB entao separa o alfa
+const corSalva = auth.user?.cor_fundo ?? '#0EA5E9'
+const corBase = ref(corSalva.slice(0, 7))
+const opacidade = ref(corSalva.length === 9 ? Math.round(parseInt(corSalva.slice(7), 16) / 2.55) : 100)
+
+const cor = computed(() => {
+  if (opacidade.value >= 100) return corBase.value
+  const alfa = Math.round(opacidade.value * 2.55).toString(16).padStart(2, '0')
+  return `${corBase.value}${alfa}`.toUpperCase()
+})
+
+const xadrez = 'repeating-conic-gradient(#d4d4d4 0 25%, #fff 0 50%) 0 0 / 8px 8px'
+
+// ↑ ↑ ↓ ↓ ← → ← → b a
+const CONQUISTA_TRANSPARENCIA = 11
+const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a']
+const transparenciaLiberada = ref(false)
+let teclas: string[] = []
+
+useEventListener(window, 'keydown', async (evento: KeyboardEvent) => {
+  if (transparenciaLiberada.value) return
+
+  teclas.push(evento.key.toLowerCase())
+  teclas = teclas.slice(-KONAMI.length)
+  if (teclas.join() !== KONAMI.join()) return
+
+  teclas = []
+  try {
+    await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
+    transparenciaLiberada.value = true
+  }
+  catch {
+    toast.add({ title: 'Quase... tente de novo', color: 'error' })
+  }
+})
 const username = ref(auth.user?.username ?? '')
 const erroUsername = ref<string | undefined>()
 const salvando = ref(false)
@@ -173,6 +228,17 @@ onMounted(async () => {
   }
   catch {
     toast.add({ title: 'Não foi possível carregar os avatares', color: 'error' })
+  }
+
+  // quem ja desbloqueou ve a barra direto
+  try {
+    const minhas: ConquistaRead[] = await api('/usuarios/me/conquistas')
+    for (const conquista of minhas) {
+      if (conquista.id === CONQUISTA_TRANSPARENCIA) transparenciaLiberada.value = true
+    }
+  }
+  catch {
+    // sem a lista so n mostra a barra, da pra liberar pelo codigo de novo
   }
 })
 
