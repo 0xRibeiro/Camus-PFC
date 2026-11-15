@@ -3,7 +3,7 @@
     <picture class="pointer-events-none absolute inset-0 -z-10">
       <source
         media="(min-width: 768px)"
-        srcset="/papeis-de-parede/anil/acesso.webp"
+        srcset="/papeis-de-parede/anil/cavalo-marinho-login.webp"
       >
 
       <img
