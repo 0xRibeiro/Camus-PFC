@@ -11,5 +11,7 @@
         </div>
       </NuxtLayout>
     </div>
+
+    <CamusAtualizacao />
   </UApp>
 </template>
