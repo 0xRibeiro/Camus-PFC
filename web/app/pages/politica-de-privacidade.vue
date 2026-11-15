@@ -1,6 +1,9 @@
 <template>
   <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#fecaca,#fff1f2)] dark:bg-[linear-gradient(to_bottom,#210007,#64242e)]">
-    <div class="max-w-3xl mx-auto px-4 py-10">
+    <CamusDocumentos
+      imagem-esquerda="/papeis-de-parede/vermelho/termos-esquerda.webp"
+      imagem-direita="/papeis-de-parede/vermelho/termos-direita.webp"
+    >
       <div class="max-w-3xl mx-auto px-4 py-10">
         <UButton
           icon="i-lucide-arrow-left"
@@ -151,7 +154,7 @@
           pública ou comercial, recomenda-se revisão jurídica.
         </p>
       </div>
-    </div>
+    </CamusDocumentos>
   </div>
 </template>
 

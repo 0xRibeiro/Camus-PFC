@@ -1,6 +1,9 @@
 <template>
   <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#eff6ff,#93c5fd)] dark:bg-[linear-gradient(to_bottom,#1e3a5f,#07182f)]">
-    <div class="max-w-3xl mx-auto px-4 py-10">
+    <CamusDocumentos
+      imagem-esquerda="/papeis-de-parede/azul/privacidade-esquerda.webp"
+      imagem-direita="/papeis-de-parede/azul/privacidade-direita.webp"
+    >
       <div class="max-w-3xl mx-auto px-4 py-10">
         <UButton
 
@@ -153,7 +156,7 @@
           pelo projeto.
         </p>
       </div>
-    </div>
+    </CamusDocumentos>
   </div>
 </template>
 
