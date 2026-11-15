@@ -40,18 +40,21 @@ async def meu_extrato(db: AsyncSession, usuario: Usuario) -> list[LancamentoRead
 
     # junta os ids pra buscar todos os titulos numa query so
     conteudo_ids = []
+    rodada_ids = []
     for lancamento in lancamentos:
         if lancamento.origem_tipo == OrigemLancamento.conteudo:
             conteudo_ids.append(lancamento.origem_id)
+        elif lancamento.origem_tipo == OrigemLancamento.minigame:
+            rodada_ids.append(lancamento.origem_id)
     titulos = await repo.listar_titulos_conteudos(conteudo_ids)
+    titulos_minigames = await repo.listar_titulos_minigames(rodada_ids)
 
     extrato = []
     for lancamento in lancamentos:
         item = LancamentoRead.model_validate(lancamento)
         if lancamento.origem_tipo == OrigemLancamento.conteudo:
             item.titulo = titulos.get(lancamento.origem_id)
-        # por enquanto so tem 1 minigame
         elif lancamento.origem_tipo == OrigemLancamento.minigame:
-            item.titulo = "Quem é esse peixe?"
+            item.titulo = titulos_minigames.get(lancamento.origem_id)
         extrato.append(item)
     return extrato

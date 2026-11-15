@@ -1,6 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.minigame.model import TITULOS_JOGOS, RodadaMinigame
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.trilha.model import Conteudo
 
@@ -63,4 +64,17 @@ class PontuacaoRepository:
         titulos = {}
         for conteudo_id, titulo in resultado.all():
             titulos[conteudo_id] = titulo
+        return titulos
+
+    # nome do jogo de cada rodada, com (combo) qnd for xp de combo
+    async def listar_titulos_minigames(self, rodada_ids: list[int]) -> dict[int, str]:
+        resultado = await self.db.execute(
+            select(RodadaMinigame.id, RodadaMinigame.jogo, RodadaMinigame.combo).where(RodadaMinigame.id.in_(rodada_ids))
+        )
+        titulos = {}
+        for rodada_id, jogo, combo in resultado.all():
+            titulo = TITULOS_JOGOS.get(jogo, "Minigame")
+            if combo:
+                titulo += " (combo)"
+            titulos[rodada_id] = titulo
         return titulos
