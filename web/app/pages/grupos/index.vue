@@ -1,8 +1,23 @@
 <template>
-  <div>
-    <h1 class="text-xl font-semibold mb-4">
-      Meus grupos
-    </h1>
+  <div
+    class="flex-1 bg-[linear-gradient(to_bottom,#ecfdf5,#d1fae5_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#123d2b,#01190b_32rem)] [--ui-primary:var(--ui-tertiary)]"
+  >
+    <div class="relative isolate mb-4 flex min-h-36 items-center overflow-hidden rounded-xl bg-[#01190b] px-6 py-8 sm:px-8">
+      <img
+        src="/papeis-de-parede/verde/grupos.webp"
+        alt=""
+        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+      >
+
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 bg-linear-to-r from-[#01190b]/95 via-[#01190b]/60 to-transparent"
+      />
+
+      <h1 class="text-xl font-semibold text-white">
+        Meus grupos
+      </h1>
+    </div>
 
     <!-- recados do admin: continuam na tela até a pessoa apertar em "Entendi" -->
     <div

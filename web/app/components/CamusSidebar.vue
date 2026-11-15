@@ -78,6 +78,10 @@ const rotaAmarela = computed(() =>
   route.path === '/conquistas' || route.path.startsWith('/conquistas/'),
 )
 
+const rotaVerde = computed(() =>
+  route.path === '/grupos' || route.path.startsWith('/grupos/'),
+)
+
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
     { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
@@ -95,7 +99,14 @@ const items = computed<NavigationMenuItem[]>(() => {
           ? '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15'
           : undefined,
       },
-      { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
+      {
+        label: 'Grupos',
+        icon: 'i-lucide-users',
+        to: '/grupos',
+        class: rotaVerde.value
+          ? '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15'
+          : undefined,
+      },
       { label: 'Minigames', icon: 'i-lucide-gamepad-2', to: '/minigames' },
     )
   }
