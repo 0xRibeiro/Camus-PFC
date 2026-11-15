@@ -3,7 +3,7 @@
     <div class="mx-auto w-full max-w-6xl space-y-6">
       <div class="relative isolate overflow-hidden rounded-xl bg-[#07182f] px-6 sm:px-8">
         <img
-          src="/papeis-de-parede/verde/colecao.webp"
+          src="/papeis-de-parede/azul/colecao.webp"
           alt=""
           class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
         >
