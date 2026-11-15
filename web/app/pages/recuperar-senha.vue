@@ -1,5 +1,17 @@
 <template>
-  <div class="flex flex-1 items-center justify-center">
+  <div class="relative isolate -m-4 flex flex-1 items-center justify-center overflow-hidden bg-[#032323] px-4 py-8">
+    <picture class="pointer-events-none absolute inset-0 -z-10">
+      <source
+        media="(min-width: 768px)"
+        srcset="/papeis-de-parede/verde-agua/recuperar-senha-desktop.webp"
+      >
+
+      <img
+        src="/papeis-de-parede/verde-agua/recuperar-senha-mobile.webp"
+        alt=""
+        class="block size-full object-cover object-bottom md:object-center"
+      >
+    </picture>
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         v-if="etapa === 'email'"
