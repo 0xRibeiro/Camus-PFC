@@ -83,6 +83,7 @@ const destaques = {
   primary: 'before:bg-primary/15',
   secondary: '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15',
   tertiary: '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15',
+  error: '[--ui-primary:var(--ui-error)] before:bg-error/15',
 }
 
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
@@ -97,7 +98,7 @@ const rotaVerde = computed(() =>
 
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    item('Trilhas', 'i-lucide-route', '/trilhas'),
+    item('Trilhas', 'i-lucide-route', '/trilhas', 'error'),
     item('Coleção', 'i-lucide-fish', '/colecao'),
   ]
 

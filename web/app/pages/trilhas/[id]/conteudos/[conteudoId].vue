@@ -79,7 +79,9 @@ const precisaConcluir = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div
+    :class="!grupoId && '-m-4 flex-1 bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
+  >
     <UButton
       icon="i-lucide-arrow-left"
       label="Trilha"

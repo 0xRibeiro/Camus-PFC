@@ -58,7 +58,9 @@ function iconeDoConteudo(conteudo: ConteudoStatusRead) {
 </script>
 
 <template>
-  <div>
+  <div
+    :class="!grupoId && '-m-4 flex-1 bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
+  >
     <div class="mb-3 flex items-center justify-between gap-3">
       <UButton
         icon="i-lucide-arrow-left"
