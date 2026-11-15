@@ -18,6 +18,7 @@ CONQUISTAS = [
     (8, "Capitão da tripulação", "Crie seu primeiro grupo de estudos."),
     (9, "Mergulho em equipe", "Entre em um grupo usando um convite."),
     (10, "Convite a bordo", "Gere um convite para o seu grupo."),
+    (11, "A melhor cor", "Camus code?"),
 ]
 
 

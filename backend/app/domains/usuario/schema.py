@@ -78,12 +78,12 @@ class UsuarioUpdate(BaseModel):
             raise ValueError("avatar inválido")
         return v
 
-    # cor no formato #RRGGBB (o mesmo que o UColorPicker devolve)
+    # #RRGGBB do UColorPicker, ou #RRGGBBAA qnd usa a barra de transparencia
     @field_validator("cor_fundo")
     @classmethod
     def valida_cor_fundo(cls, v: str | None) -> str | None:
-        if v is not None and not re.fullmatch(r"#[0-9a-fA-F]{6}", v):
-            raise ValueError("cor inválida, use o formato #RRGGBB")
+        if v is not None and not re.fullmatch(r"#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?", v):
+            raise ValueError("cor inválida, use o formato #RRGGBB ou #RRGGBBAA")
         return v.upper() if v is not None else v
     
 

@@ -43,7 +43,7 @@ class Usuario(Base):
         String(50), nullable=False, default=AVATAR_PADRAO, server_default=AVATAR_PADRAO
     )
     cor_fundo: Mapped[str] = mapped_column(
-        String(7), nullable=False, default=COR_FUNDO_PADRAO, server_default=COR_FUNDO_PADRAO
+        String(9), nullable=False, default=COR_FUNDO_PADRAO, server_default=COR_FUNDO_PADRAO
     )
 
     minhas_conquistas = relationship(

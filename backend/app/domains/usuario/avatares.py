@@ -1,7 +1,6 @@
-# avatares liberados pelo sistema. o usuario so escolhe uma dessas chaves
-# as imagens ficam no front, a chave e o nome do arquivo
-# avatares liberados pelo sistema. o usuario so escolhe uma dessas chaves
-# as imagens ficam no front, a chave e o nome do arquivo
+import colorsys
+import random
+
 # avatares liberados pelo sistema. o usuario so escolhe uma dessas chaves
 # a chave e o nome do arquivo da imagem no front (ex: betta -> betta.png)
 # pra adicionar um avatar novo: coloca a chave aqui e a imagem no front
@@ -15,3 +14,13 @@ AVATARES = (
 )
 AVATAR_PADRAO = AVATARES[0]
 COR_FUNDO_PADRAO = "#0EA5E9"
+
+
+# matiz qualquer, saturacao e luz fixas pra n sair cor apagada nem quase preta/branca
+def sortear_cor_fundo() -> str:
+    r, g, b = colorsys.hls_to_rgb(random.random(), 0.5, 0.75)
+    return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
+
+
+def sortear_avatar() -> str:
+    return random.choice(AVATARES)
