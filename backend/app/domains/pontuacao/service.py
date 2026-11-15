@@ -50,5 +50,8 @@ async def meu_extrato(db: AsyncSession, usuario: Usuario) -> list[LancamentoRead
         item = LancamentoRead.model_validate(lancamento)
         if lancamento.origem_tipo == OrigemLancamento.conteudo:
             item.titulo = titulos.get(lancamento.origem_id)
+        # por enquanto so tem 1 minigame
+        elif lancamento.origem_tipo == OrigemLancamento.minigame:
+            item.titulo = "Quem é esse peixe?"
         extrato.append(item)
     return extrato
