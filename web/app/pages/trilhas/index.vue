@@ -27,7 +27,10 @@ onMounted(fetchTrilhas)
 
 <template>
   <div
-    :class="!grupoId && '-m-4 flex-1 bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)] xl:grid xl:grid-cols-[minmax(0,1fr)_clamp(12rem,18vw,17rem)] xl:gap-5'"
+    class="-m-4 flex-1 p-4 xl:grid xl:grid-cols-[minmax(0,1fr)_clamp(12rem,18vw,17rem)] xl:gap-5"
+    :class="grupoId
+      ? 'bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)] [--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)]'
+      : 'bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
   >
     <div class="min-w-0">
       <UButton
@@ -119,8 +122,9 @@ onMounted(fetchTrilhas)
     </div>
 
     <img
-      v-if="!grupoId"
-      src="/papeis-de-parede/vermelho/trilha-vertical.webp"
+      :src="grupoId
+        ? '/papeis-de-parede/laranja/trilha-vertical.webp'
+        : '/papeis-de-parede/vermelho/trilha-vertical.webp'"
       alt=""
       width="480"
       height="1440"
