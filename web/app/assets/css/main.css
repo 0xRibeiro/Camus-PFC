@@ -5,19 +5,23 @@
   --ui-primary: var(--ui-error);
 }
 
-.camus-grupos {
+.camus-grupos,
+.camus-auditoria {
   --ui-primary: var(--color-orange-700);
 }
 
-.dark .camus-grupos {
+.dark .camus-grupos,
+.dark .camus-auditoria {
   --ui-primary: var(--color-orange-400);
 }
 
-.camus-aquarios {
+.camus-aquarios,
+.camus-denuncias {
   --ui-primary: var(--color-violet-600);
 }
 
-.dark .camus-aquarios {
+.dark .camus-aquarios,
+.dark .camus-denuncias {
   --ui-primary: var(--color-violet-400);
 }
 
@@ -43,4 +47,44 @@ main.camus-ranking {
 
 .dark main.camus-ranking {
   background-image: linear-gradient(to bottom, #3d2c06, #1b1300 32rem);
+}
+
+.camus-usuarios {
+  --ui-primary: var(--color-teal-700);
+  --camus-fundo: #f0fdfa, #b7ece3 32rem;
+}
+
+.dark .camus-usuarios {
+  --ui-primary: var(--color-teal-400);
+  --camus-fundo: #103b39, #021f21 32rem;
+}
+
+.camus-auditoria {
+  --camus-fundo: #fff7ed, #fed7aa 32rem;
+}
+
+.dark .camus-auditoria {
+  --camus-fundo: #4b210c, #240f00 32rem;
+}
+
+.camus-denuncias {
+  --camus-fundo: #f5edff, #e8d7fa 32rem;
+}
+
+.dark .camus-denuncias {
+  --camus-fundo: #39165b, #18012c 32rem;
+}
+
+.camus-dashboard {
+  --ui-primary: var(--color-sky-700);
+  --camus-fundo: #f0f9ff, #c7e4f7 32rem;
+}
+
+.dark .camus-dashboard {
+  --ui-primary: var(--color-sky-400);
+  --camus-fundo: #15364f, #08192c 32rem;
+}
+
+main:is(.camus-usuarios, .camus-auditoria, .camus-denuncias, .camus-dashboard) {
+  background-image: linear-gradient(to bottom, var(--camus-fundo));
 }

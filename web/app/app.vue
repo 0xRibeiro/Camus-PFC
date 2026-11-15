@@ -4,13 +4,17 @@ const route = useRoute()
 const temaPagina = computed(() => {
   const [, secao, pagina] = route.path.split('/')
 
-  if (secao === 'trilhas' || (secao === 'author' && pagina === 'trilhas')) {
-    return 'camus-trilhas'
-  }
+  if (secao === 'trilhas' || (secao === 'author' && pagina === 'trilhas')) return 'camus-trilhas'
   if (secao === 'grupos') return 'camus-grupos'
   if (secao === 'aquarios') return 'camus-aquarios'
   if (secao === 'minigames') return 'camus-minigames'
   if (route.path === '/ranking' || route.path === '/ranking/') return 'camus-ranking'
+  if (secao === 'admin') {
+    if (pagina === 'usuarios') return 'camus-usuarios'
+    if (pagina === 'auditoria') return 'camus-auditoria'
+    if (pagina === 'denuncias') return 'camus-denuncias'
+    if (pagina === 'dashboard') return 'camus-dashboard'
+  }
 })
 </script>
 

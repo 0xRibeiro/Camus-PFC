@@ -1,5 +1,10 @@
 <template>
-  <div>
+  <div
+    class="-m-4 flex-1 p-4"
+    :class="grupoId
+      ? 'bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)]'
+      : 'bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
+  >
     <!-- esse botão só aparece se estivermos em uma rota de grupo -->
     <UButton
       v-if="grupoId"
@@ -12,24 +17,17 @@
     />
 
     <!-- cabecalho: titulo + descricao curta + contador de trilhas -->
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h1 class="text-xl font-semibold">
-          {{ grupoId ? 'Trilhas do grupo' : 'Trilhas' }}
-        </h1>
-        <p class="text-sm text-muted">
-          Cadastre uma trilha e clique nela para montar a jornada de módulos e conteúdos.
-        </p>
-      </div>
-
-      <UBadge
-        color="secondary"
-        variant="soft"
-        size="xl"
-      >
-        {{ trilhas.length }} trilha{{ trilhas.length === 1 ? '' : 's' }}
-      </UBadge>
-    </div>
+    <CamusBanner
+      :titulo="grupoId ? 'Trilhas do grupo' : 'Gerenciar trilhas'"
+      descricao="Cadastre uma trilha e clique nela para montar a jornada de módulos e conteúdos."
+      :imagem="grupoId ? '/papeis-de-parede/laranja/trilhas.webp' : '/papeis-de-parede/vermelho/trilhas.webp'"
+    >
+      <template #acoes>
+        <UBadge size="xl">
+          {{ trilhas.length }} trilha{{ trilhas.length === 1 ? '' : 's' }}
+        </UBadge>
+      </template>
+    </CamusBanner>
 
     <div class="flex gap-3 mb-4">
       <UInput

@@ -1,8 +1,9 @@
 <template>
   <div>
-    <h1 class="text-xl font-semibold mb-4">
-      Auditoria
-    </h1>
+    <CamusBanner
+      titulo="Auditoria"
+      imagem="/papeis-de-parede/avulsos/naufragio.webp"
+    />
 
     <div class="flex flex-wrap items-end gap-3 mb-4">
       <UFormField label="Entidade">
@@ -22,11 +23,13 @@
       </UFormField>
     </div>
 
-    <AuditoriaTable
-      :logs="logs"
-      :loading="loading"
-      :usuarios="usuarios"
-    />
+    <div class="rounded-xl bg-default ring ring-default">
+      <AuditoriaTable
+        :logs="logs"
+        :loading="loading"
+        :usuarios="usuarios"
+      />
+    </div>
 
     <div class="flex justify-end gap-2 mt-4">
       <UButton

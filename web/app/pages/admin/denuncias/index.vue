@@ -1,8 +1,9 @@
 <template>
   <div>
-    <h1 class="text-xl font-semibold mb-4">
-      Denúncias
-    </h1>
+    <CamusBanner
+      titulo="Denúncias"
+      imagem="/papeis-de-parede/avulsos/sepia.webp"
+    />
 
     <div class="flex flex-wrap items-end gap-3 mb-4">
       <UFormField label="Status">
@@ -15,6 +16,7 @@
     </div>
 
     <UTable
+      class="rounded-xl bg-default ring ring-default"
       :data="denuncias"
       :columns="columns"
       :loading="loading"
