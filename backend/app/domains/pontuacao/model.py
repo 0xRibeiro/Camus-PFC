@@ -11,6 +11,7 @@ from app.core.database import Base
 # de onde veio o xp, ofensiva minigame etc entram aqui dps
 class OrigemLancamento(enum.Enum):
     conteudo = "conteudo"
+    minigame = "minigame"
 
 
 # extrato do xp, cada ganho vira uma linha
