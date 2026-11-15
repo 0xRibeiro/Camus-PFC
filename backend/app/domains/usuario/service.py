@@ -32,6 +32,7 @@ from app.core.security import (
 )
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
+from app.domains.usuario.avatares import sortear_avatar, sortear_cor_fundo
 from app.domains.usuario.model import AceiteTermos, RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
@@ -86,6 +87,8 @@ async def criar_aluno(db: AsyncSession, data: UsuarioCreate) -> Usuario:
         email=data.email,
         hashed_password=criar_hash(data.password),
         role=RoleUsuario.aluno,
+        avatar=sortear_avatar(),
+        cor_fundo=sortear_cor_fundo(),
     )
 
     user.aceites_termos.append(
@@ -111,6 +114,8 @@ async def criar_staff(db: AsyncSession, data: UsuarioStaffCreate) -> Usuario:
         email=data.email,
         hashed_password=criar_hash(data.password),
         role=data.role,
+        avatar=sortear_avatar(),
+        cor_fundo=sortear_cor_fundo(),
     )
     return await repo.salvar(user)
 
