@@ -104,6 +104,7 @@ const items = computed<NavigationMenuItem[]>(() => {
     lista.push(
       { label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' },
       { label: 'Auditoria', icon: 'i-lucide-history', to: '/admin/auditoria' },
+      { label: 'Denúncias', icon: 'i-lucide-flag', to: '/admin/denuncias' },
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin/dashboard' },
     )
   }

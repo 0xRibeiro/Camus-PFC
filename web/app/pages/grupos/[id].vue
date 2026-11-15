@@ -50,14 +50,39 @@
           </p>
         </div>
 
-        <UButton
-          :label="acaoGrupo"
-          :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
-          color="error"
-          variant="outline"
-          @click="confirmando = true"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- denunciar só aparece pra membro, dono e admin não veem -->
+          <UButton
+            v-if="!usuarioCriador && !ehAdmin"
+            label="Denunciar grupo"
+            icon="i-lucide-flag"
+            color="error"
+            variant="outline"
+            @click="denunciando = true"
+          />
+
+          <!-- admin só visualiza o grupo, então nem sair nem excluir -->
+          <UButton
+            v-if="!ehAdmin"
+            :label="acaoGrupo"
+            :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
+            color="error"
+            variant="outline"
+            @click="confirmando = true"
+          />
+        </div>
       </div>
+
+      <UAlert
+        v-if="grupo.suspenso"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-triangle-alert"
+        :title="tituloSuspensao"
+        :description="usuarioCriador
+          ? 'Você consegue visualizar o grupo, mas não pode alterar nada até o fim da suspensão.'
+          : 'O acesso aos conteúdos do grupo fica bloqueado até o fim da suspensão.'"
+      />
 
       <UCard>
         <template #header>
@@ -89,7 +114,7 @@
           </template>
           <template #acoes-cell="{ row }">
             <UButton
-              v-if="usuarioCriador && row.original.papel !== 'dono'"
+              v-if="usuarioCriador && !grupo.suspenso && row.original.papel !== 'dono'"
               label="Remover"
               :aria-label="`Remover ${row.original.username}`"
               color="error"
@@ -110,7 +135,7 @@
         </p>
       </UCard>
 
-      <UCard v-if="usuarioCriador">
+      <UCard v-if="usuarioCriador && !grupo.suspenso">
         <template #header>
           <h2 class="font-medium">
             Convidar pessoas
@@ -169,11 +194,14 @@
       </UCard>
 
       <!-- seção nova dos grupos para ver ou editar as trilhas dependendo da role -->
-      <section class="flex flex-wrap items-center gap-3">
+      <section
+        v-if="!grupo.suspenso || usuarioCriador || ehAdmin"
+        class="flex flex-wrap items-center gap-3"
+      >
         <UButton
-          :label="usuarioCriador ? 'Gerenciar trilhas' : 'Ver trilhas'"
+          :label="gerenciaTrilhas ? 'Gerenciar trilhas' : 'Ver trilhas'"
           icon="i-lucide-book-open"
-          :to="usuarioCriador ? `/grupos/${grupoId}/trilhas/gerenciar` : `/grupos/${grupoId}/trilhas`"
+          :to="gerenciaTrilhas ? `/grupos/${grupoId}/trilhas/gerenciar` : `/grupos/${grupoId}/trilhas`"
         />
         <UBadge
           v-if="xpGrupo !== null"
@@ -207,6 +235,11 @@
           />
         </template>
       </UModal>
+
+      <GrupoDenunciaModal
+        v-model:open="denunciando"
+        :grupo-id="grupoId"
+      />
     </div>
   </div>
 </template>
@@ -215,7 +248,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { ConviteRead, GrupoRead, MembroGrupoRead, XpRead } from '~/types/generated'
+import type { ConviteRead, GrupoRead, MembroGrupoRead, XpRead } from '~/types/generated/types.gen'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
 
@@ -254,11 +287,25 @@ const removendo = ref(false)
 const acaoGrupo = computed(() => usuarioCriador.value ? 'Excluir grupo' : 'Sair do grupo')
 const removendoMembro = ref<number | null>(null)
 const erroRemocao = ref('')
+const denunciando = ref(false)
+
+// admin só olha o grupo, então o botão de denunciar não aparece pra ele
+const ehAdmin = computed(() => auth.role === 'admin')
+
+// grupo suspenso: o dono só olha, não consegue gerenciar nada
+const gerenciaTrilhas = computed(() => usuarioCriador.value && !grupo.value?.suspenso)
+
+// o título do aviso depende de a suspensão ter data de fim ou de o grupo estar inabilitado
+const tituloSuspensao = computed(() => {
+  if (!grupo.value?.suspenso_ate) return 'Este grupo foi inabilitado'
+
+  return `Este grupo está suspenso até ${new Date(grupo.value.suspenso_ate).toLocaleDateString('pt-BR')}`
+})
 
 const columns = computed<TableColumn<MembroGrupoRead>[]>(() => [
   { accessorKey: 'username', header: 'Usuário' },
   { accessorKey: 'papel', header: 'Papel' },
-  ...(usuarioCriador.value ? [{ id: 'acoes', header: 'Ações' }] : []),
+  ...(gerenciaTrilhas.value ? [{ id: 'acoes', header: 'Ações' }] : []),
 ])
 
 function mensagemErro(error: unknown, padrao: string): string {
