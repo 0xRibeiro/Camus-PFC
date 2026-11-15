@@ -348,6 +348,17 @@ export const zEspecie = z.enum([
 ]);
 
 /**
+ * EspecieComparadaRead
+ */
+export const zEspecieComparadaRead = z.object({
+    taxon_id: z.int(),
+    nome: z.string(),
+    foto_url: z.string(),
+    foto_atribuicao: z.string(),
+    registros: z.int().nullish()
+});
+
+/**
  * EstadoDispositivo
  */
 export const zEstadoDispositivo = z.enum(['online', 'offline']);
@@ -499,6 +510,13 @@ export const zLancamentoRead = z.object({
 });
 
 /**
+ * PalpiteInput
+ */
+export const zPalpiteInput = z.object({
+    palpite: z.enum(['mais', 'menos'])
+});
+
+/**
  * PapelAquario
  */
 export const zPapelAquario = z.enum([
@@ -643,6 +661,21 @@ export const zRespostaQuizCreate = z.object({
 });
 
 /**
+ * ResultadoMaisOuMenosRead
+ */
+export const zResultadoMaisOuMenosRead = z.object({
+    acertou: z.boolean(),
+    registros_desafiante: z.int(),
+    nome_cientifico_desafiante: z.string(),
+    pontos: z.int(),
+    combo: z.boolean(),
+    sequencia: z.int(),
+    recorde: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
+});
+
+/**
  * ResultadoQuizRead
  */
 export const zResultadoQuizRead = z.object({
@@ -661,6 +694,20 @@ export const zResultadoRead = z.object({
     resposta_nome: z.string(),
     resposta_nome_cientifico: z.string(),
     pontos: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
+});
+
+/**
+ * RodadaMaisOuMenosRead
+ */
+export const zRodadaMaisOuMenosRead = z.object({
+    id: z.int(),
+    base: zEspecieComparadaRead,
+    desafiante: zEspecieComparadaRead,
+    sequencia: z.int(),
+    recorde: z.int(),
+    sequencia_para_combo: z.int(),
     acertos_com_xp_hoje: z.int(),
     limite_acertos_com_xp: z.int()
 });
@@ -1474,6 +1521,22 @@ export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostPath = 
  * Successful Response
  */
 export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponse = zResultadoRead;
+
+/**
+ * Successful Response
+ */
+export const zNovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponse = zRodadaMaisOuMenosRead;
+
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostBody = zPalpiteInput;
+
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostPath = z.object({
+    rodada_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponse = zResultadoMaisOuMenosRead;
 
 /**
  * Response Listar Trilhas Progresso Trilhas Get

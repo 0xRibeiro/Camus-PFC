@@ -751,6 +751,32 @@ export type DispositivoRead = {
 export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
 
 /**
+ * EspecieComparadaRead
+ */
+export type EspecieComparadaRead = {
+    /**
+     * Taxon Id
+     */
+    taxon_id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Foto Url
+     */
+    foto_url: string;
+    /**
+     * Foto Atribuicao
+     */
+    foto_atribuicao: string;
+    /**
+     * Registros
+     */
+    registros?: number | null;
+};
+
+/**
  * EstadoDispositivo
  */
 export type EstadoDispositivo = 'online' | 'offline';
@@ -1065,6 +1091,16 @@ export type OpcaoRead = {
 export type OrigemLancamento = 'conteudo' | 'minigame';
 
 /**
+ * PalpiteInput
+ */
+export type PalpiteInput = {
+    /**
+     * Palpite
+     */
+    palpite: 'mais' | 'menos';
+};
+
+/**
  * PapelAquario
  */
 export type PapelAquario = 'dono' | 'operador' | 'leitor';
@@ -1239,6 +1275,48 @@ export type RespostaQuizCreate = {
 };
 
 /**
+ * ResultadoMaisOuMenosRead
+ */
+export type ResultadoMaisOuMenosRead = {
+    /**
+     * Acertou
+     */
+    acertou: boolean;
+    /**
+     * Registros Desafiante
+     */
+    registros_desafiante: number;
+    /**
+     * Nome Cientifico Desafiante
+     */
+    nome_cientifico_desafiante: string;
+    /**
+     * Pontos
+     */
+    pontos: number;
+    /**
+     * Combo
+     */
+    combo: boolean;
+    /**
+     * Sequencia
+     */
+    sequencia: number;
+    /**
+     * Recorde
+     */
+    recorde: number;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
+};
+
+/**
  * ResultadoQuizRead
  */
 export type ResultadoQuizRead = {
@@ -1284,6 +1362,38 @@ export type ResultadoRead = {
      * Pontos
      */
     pontos: number;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
+};
+
+/**
+ * RodadaMaisOuMenosRead
+ */
+export type RodadaMaisOuMenosRead = {
+    /**
+     * Id
+     */
+    id: number;
+    base: EspecieComparadaRead;
+    desafiante: EspecieComparadaRead;
+    /**
+     * Sequencia
+     */
+    sequencia: number;
+    /**
+     * Recorde
+     */
+    recorde: number;
+    /**
+     * Sequencia Para Combo
+     */
+    sequencia_para_combo: number;
     /**
      * Acertos Com Xp Hoje
      */
@@ -3572,6 +3682,52 @@ export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses
 };
 
 export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponse = ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses[keyof ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses];
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/minigames/meio-peixe-meio-fotografo/rodadas';
+};
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: RodadaMaisOuMenosRead;
+};
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponse = NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses[keyof NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses];
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostData = {
+    body: PalpiteInput;
+    path: {
+        /**
+         * Rodada Id
+         */
+        rodada_id: number;
+    };
+    query?: never;
+    url: '/minigames/meio-peixe-meio-fotografo/rodadas/{rodada_id}/resposta';
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostError = ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors[keyof ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors];
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResultadoMaisOuMenosRead;
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponse = ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses[keyof ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses];
 
 export type ListarTrilhasProgressoTrilhasGetData = {
     body?: never;
