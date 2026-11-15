@@ -2,7 +2,7 @@
   <div class="mx-auto w-full max-w-6xl space-y-8 [--ui-primary:var(--ui-secondary)]">
     <div class="relative isolate overflow-hidden rounded-xl bg-[#1b1300] px-6 sm:px-8">
       <img
-        src="/artes/amarelo/conquistas.webp"
+        src="/papeis-de-parede/amarelo/conquistas.webp"
         alt=""
         class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
       >
