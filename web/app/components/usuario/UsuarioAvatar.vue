@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full"
+    class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full backdrop-blur-md"
     :style="{ backgroundColor: corFundo, width: `${tamanho}px`, height: `${tamanho}px` }"
   >
     <!-- se a imagem nao existir (ainda nao foi feita), mostra um peixe generico -->
