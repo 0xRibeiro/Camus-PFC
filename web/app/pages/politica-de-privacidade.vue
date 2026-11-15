@@ -1,8 +1,8 @@
 <template>
   <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#fecaca,#fff1f2)] dark:bg-[linear-gradient(to_bottom,#210007,#64242e)]">
     <CamusDocumentos
-      imagem-esquerda="/papeis-de-parede/vermelho/termos-esquerda.webp"
-      imagem-direita="/papeis-de-parede/vermelho/termos-direita.webp"
+      imagem-esquerda="/papeis-de-parede/vermelho/privacidade-esquerda.webp"
+      imagem-direita="/papeis-de-parede/vermelho/privacidade-direita.webp"
     >
       <div class="max-w-3xl mx-auto px-4 py-10">
         <UButton
