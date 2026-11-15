@@ -89,8 +89,8 @@
       v-else-if="!rodada"
       class="grid gap-4 sm:grid-cols-2"
     >
-      <USkeleton class="h-44 rounded-xl sm:h-[32dvh]" />
-      <USkeleton class="h-44 rounded-xl sm:h-[32dvh]" />
+      <USkeleton class="h-64 rounded-xl sm:h-[42dvh]" />
+      <USkeleton class="h-64 rounded-xl sm:h-[42dvh]" />
     </div>
 
     <!-- duelo -->
@@ -104,7 +104,8 @@
         :registros="rodada.base.registros ?? null"
       />
 
-      <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-(--ui-bg) bg-tertiary text-sm font-bold text-inverted">
+      <!-- no celular fica entre os cards, no desktop na altura do meio das fotos -->
+      <div class="pointer-events-none relative z-10 mx-auto -my-8 flex size-12 items-center justify-center rounded-full border-4 border-(--ui-bg) bg-tertiary text-sm font-bold text-inverted sm:absolute sm:left-1/2 sm:top-[14dvh] sm:my-0 sm:-translate-x-1/2 sm:-translate-y-1/2">
         VS
       </div>
 
@@ -119,7 +120,7 @@
           v-if="!resultado"
           class="space-y-2"
         >
-          <p class="text-sm text-white/80">
+          <p class="text-sm text-muted">
             tem
           </p>
           <div class="grid grid-cols-2 gap-2">
@@ -143,7 +144,7 @@
               @click="responder('menos')"
             />
           </div>
-          <p class="text-xs text-white/70">
+          <p class="text-xs text-muted">
             registros que {{ rodada.base.nome }}
           </p>
         </div>

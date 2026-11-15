@@ -1,15 +1,14 @@
 <template>
-  <div class="relative overflow-hidden rounded-xl bg-elevated">
-    <img
+  <div class="overflow-hidden rounded-xl border border-default bg-default">
+    <MinigameFotoZoom
       :src="especie.foto_url"
       :alt="especie.nome"
-      class="h-44 w-full object-cover sm:h-[32dvh]"
-    >
+      :atribuicao="especie.foto_atribuicao"
+      img-class="h-40 object-cover sm:h-[28dvh]"
+    />
 
-    <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent" />
-
-    <div class="absolute inset-x-0 bottom-0 space-y-2 p-4 text-center text-white">
-      <p class="text-lg font-semibold leading-tight sm:text-xl">
+    <div class="space-y-2 p-4 text-center">
+      <p class="text-lg font-semibold leading-tight text-highlighted sm:text-xl">
         {{ especie.nome }}
       </p>
 
@@ -20,15 +19,15 @@
         :class="corNumero"
       >
         {{ numeroFormatado }}
-        <span class="block text-xs font-normal text-white/70">registros no iNaturalist</span>
+        <span class="block text-xs font-normal text-muted">registros no iNaturalist</span>
       </p>
 
       <slot />
-    </div>
 
-    <p class="absolute right-2 top-2 max-w-[80%] truncate rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white/70">
-      {{ especie.foto_atribuicao }}
-    </p>
+      <p class="truncate text-[10px] text-dimmed">
+        {{ especie.foto_atribuicao }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -59,6 +58,6 @@ const numeroFormatado = computed(() => Math.round(animado.value).toLocaleString(
 const corNumero = computed(() => {
   if (props.acertou === true) return 'text-success'
   if (props.acertou === false) return 'text-error'
-  return ''
+  return 'text-highlighted'
 })
 </script>
