@@ -751,6 +751,32 @@ export type DispositivoRead = {
 export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
 
 /**
+ * EspecieComparadaRead
+ */
+export type EspecieComparadaRead = {
+    /**
+     * Taxon Id
+     */
+    taxon_id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+    /**
+     * Foto Url
+     */
+    foto_url: string;
+    /**
+     * Foto Atribuicao
+     */
+    foto_atribuicao: string;
+    /**
+     * Registros
+     */
+    registros?: number | null;
+};
+
+/**
  * EstadoDispositivo
  */
 export type EstadoDispositivo = 'online' | 'offline';
@@ -1046,9 +1072,33 @@ export type MotivoCreate = {
 };
 
 /**
+ * OpcaoRead
+ */
+export type OpcaoRead = {
+    /**
+     * Taxon Id
+     */
+    taxon_id: number;
+    /**
+     * Nome
+     */
+    nome: string;
+};
+
+/**
  * OrigemLancamento
  */
-export type OrigemLancamento = 'conteudo';
+export type OrigemLancamento = 'conteudo' | 'minigame';
+
+/**
+ * PalpiteInput
+ */
+export type PalpiteInput = {
+    /**
+     * Palpite
+     */
+    palpite: 'mais' | 'menos';
+};
 
 /**
  * PapelAquario
@@ -1175,6 +1225,36 @@ export type QuestaoUpdate = {
 };
 
 /**
+ * RankingItemRead
+ */
+export type RankingItemRead = {
+    /**
+     * Posicao
+     */
+    posicao: number;
+    /**
+     * Usuario Id
+     */
+    usuario_id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Xp Total
+     */
+    xp_total: number;
+};
+
+/**
  * RefreshInput
  */
 export type RefreshInput = {
@@ -1203,6 +1283,16 @@ export type ResetPasswordInput = {
 };
 
 /**
+ * RespostaInput
+ */
+export type RespostaInput = {
+    /**
+     * Taxon Id
+     */
+    taxon_id: number;
+};
+
+/**
  * RespostaQuizCreate
  */
 export type RespostaQuizCreate = {
@@ -1212,6 +1302,48 @@ export type RespostaQuizCreate = {
     respostas: {
         [key: string]: number;
     };
+};
+
+/**
+ * ResultadoMaisOuMenosRead
+ */
+export type ResultadoMaisOuMenosRead = {
+    /**
+     * Acertou
+     */
+    acertou: boolean;
+    /**
+     * Registros Desafiante
+     */
+    registros_desafiante: number;
+    /**
+     * Nome Cientifico Desafiante
+     */
+    nome_cientifico_desafiante: string;
+    /**
+     * Pontos
+     */
+    pontos: number;
+    /**
+     * Combo
+     */
+    combo: boolean;
+    /**
+     * Sequencia
+     */
+    sequencia: number;
+    /**
+     * Recorde
+     */
+    recorde: number;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
 };
 
 /**
@@ -1234,6 +1366,102 @@ export type ResultadoQuizRead = {
      * Correcao
      */
     correcao: Array<CorrecaoQuestaoRead>;
+};
+
+/**
+ * ResultadoRead
+ */
+export type ResultadoRead = {
+    /**
+     * Acertou
+     */
+    acertou: boolean;
+    /**
+     * Resposta Taxon Id
+     */
+    resposta_taxon_id: number;
+    /**
+     * Resposta Nome
+     */
+    resposta_nome: string;
+    /**
+     * Resposta Nome Cientifico
+     */
+    resposta_nome_cientifico: string;
+    /**
+     * Pontos
+     */
+    pontos: number;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
+};
+
+/**
+ * RodadaMaisOuMenosRead
+ */
+export type RodadaMaisOuMenosRead = {
+    /**
+     * Id
+     */
+    id: number;
+    base: EspecieComparadaRead;
+    desafiante: EspecieComparadaRead;
+    /**
+     * Sequencia
+     */
+    sequencia: number;
+    /**
+     * Recorde
+     */
+    recorde: number;
+    /**
+     * Sequencia Para Combo
+     */
+    sequencia_para_combo: number;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
+};
+
+/**
+ * RodadaRead
+ */
+export type RodadaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Foto Url
+     */
+    foto_url: string;
+    /**
+     * Foto Atribuicao
+     */
+    foto_atribuicao: string;
+    /**
+     * Opcoes
+     */
+    opcoes: Array<OpcaoRead>;
+    /**
+     * Acertos Com Xp Hoje
+     */
+    acertos_com_xp_hoje: number;
+    /**
+     * Limite Acertos Com Xp
+     */
+    limite_acertos_com_xp: number;
 };
 
 /**
@@ -3421,6 +3649,24 @@ export type MeuXpPontuacaoXpGetResponses = {
 
 export type MeuXpPontuacaoXpGetResponse = MeuXpPontuacaoXpGetResponses[keyof MeuXpPontuacaoXpGetResponses];
 
+export type RankingPontuacaoRankingGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/pontuacao/ranking';
+};
+
+export type RankingPontuacaoRankingGetResponses = {
+    /**
+     * Response Ranking Pontuacao Ranking Get
+     *
+     * Successful Response
+     */
+    200: Array<RankingItemRead>;
+};
+
+export type RankingPontuacaoRankingGetResponse = RankingPontuacaoRankingGetResponses[keyof RankingPontuacaoRankingGetResponses];
+
 export type MeuExtratoPontuacaoExtratoGetData = {
     body?: never;
     path?: never;
@@ -3438,6 +3684,98 @@ export type MeuExtratoPontuacaoExtratoGetResponses = {
 };
 
 export type MeuExtratoPontuacaoExtratoGetResponse = MeuExtratoPontuacaoExtratoGetResponses[keyof MeuExtratoPontuacaoExtratoGetResponses];
+
+export type NovaRodadaMinigamesQuemEessePeixeRodadasPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/minigames/quem-e-esse-peixe/rodadas';
+};
+
+export type NovaRodadaMinigamesQuemEessePeixeRodadasPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: RodadaRead;
+};
+
+export type NovaRodadaMinigamesQuemEessePeixeRodadasPostResponse = NovaRodadaMinigamesQuemEessePeixeRodadasPostResponses[keyof NovaRodadaMinigamesQuemEessePeixeRodadasPostResponses];
+
+export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostData = {
+    body: RespostaInput;
+    path: {
+        /**
+         * Rodada Id
+         */
+        rodada_id: number;
+    };
+    query?: never;
+    url: '/minigames/quem-e-esse-peixe/rodadas/{rodada_id}/resposta';
+};
+
+export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostError = ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostErrors[keyof ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostErrors];
+
+export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResultadoRead;
+};
+
+export type ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponse = ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses[keyof ResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponses];
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/minigames/meio-peixe-meio-fotografo/rodadas';
+};
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: RodadaMaisOuMenosRead;
+};
+
+export type NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponse = NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses[keyof NovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponses];
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostData = {
+    body: PalpiteInput;
+    path: {
+        /**
+         * Rodada Id
+         */
+        rodada_id: number;
+    };
+    query?: never;
+    url: '/minigames/meio-peixe-meio-fotografo/rodadas/{rodada_id}/resposta';
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostError = ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors[keyof ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostErrors];
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResultadoMaisOuMenosRead;
+};
+
+export type ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponse = ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses[keyof ResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponses];
 
 export type ListarTrilhasProgressoTrilhasGetData = {
     body?: never;
@@ -5450,6 +5788,38 @@ export type MeuXpGruposGrupoIdPontuacaoXpGetResponses = {
 };
 
 export type MeuXpGruposGrupoIdPontuacaoXpGetResponse = MeuXpGruposGrupoIdPontuacaoXpGetResponses[keyof MeuXpGruposGrupoIdPontuacaoXpGetResponses];
+
+export type RankingGruposGrupoIdPontuacaoRankingGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/pontuacao/ranking';
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetError = RankingGruposGrupoIdPontuacaoRankingGetErrors[keyof RankingGruposGrupoIdPontuacaoRankingGetErrors];
+
+export type RankingGruposGrupoIdPontuacaoRankingGetResponses = {
+    /**
+     * Response Ranking Grupos  Grupo Id  Pontuacao Ranking Get
+     *
+     * Successful Response
+     */
+    200: Array<RankingItemRead>;
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetResponse = RankingGruposGrupoIdPontuacaoRankingGetResponses[keyof RankingGruposGrupoIdPontuacaoRankingGetResponses];
 
 export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetData = {
     body?: never;

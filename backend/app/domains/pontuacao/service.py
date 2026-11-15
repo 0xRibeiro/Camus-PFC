@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.pontuacao.repository import PontuacaoRepository
-from app.domains.pontuacao.schema import LancamentoRead, XpRead
+from app.domains.pontuacao.schema import LancamentoRead, RankingItemRead, XpRead
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 
@@ -34,21 +34,48 @@ async def meu_xp(db: AsyncSession, usuario: Usuario) -> XpRead:
     return XpRead(xp_total=total)
 
 
+LIMITE_RANKING = 50
+
+
+async def ranking(db: AsyncSession) -> list[RankingItemRead]:
+    linhas = await PontuacaoRepository(db).listar_ranking(LIMITE_RANKING)
+
+    itens = []
+    posicao = 1
+    for usuario, xp in linhas:
+        itens.append(RankingItemRead(
+            posicao=posicao,
+            usuario_id=usuario.id,
+            username=usuario.username,
+            avatar=usuario.avatar,
+            cor_fundo=usuario.cor_fundo,
+            xp_total=xp,
+        ))
+        posicao += 1
+    return itens
+
+
 async def meu_extrato(db: AsyncSession, usuario: Usuario) -> list[LancamentoRead]:
     repo = PontuacaoRepository(db)
     lancamentos = await repo.listar_do_usuario(usuario.id, db.info.get("grupo_id"))
 
     # junta os ids pra buscar todos os titulos numa query so
     conteudo_ids = []
+    rodada_ids = []
     for lancamento in lancamentos:
         if lancamento.origem_tipo == OrigemLancamento.conteudo:
             conteudo_ids.append(lancamento.origem_id)
+        elif lancamento.origem_tipo == OrigemLancamento.minigame:
+            rodada_ids.append(lancamento.origem_id)
     titulos = await repo.listar_titulos_conteudos(conteudo_ids)
+    titulos_minigames = await repo.listar_titulos_minigames(rodada_ids)
 
     extrato = []
     for lancamento in lancamentos:
         item = LancamentoRead.model_validate(lancamento)
         if lancamento.origem_tipo == OrigemLancamento.conteudo:
             item.titulo = titulos.get(lancamento.origem_id)
+        elif lancamento.origem_tipo == OrigemLancamento.minigame:
+            item.titulo = titulos_minigames.get(lancamento.origem_id)
         extrato.append(item)
     return extrato
