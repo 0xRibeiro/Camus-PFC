@@ -1,2 +1,46 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+.camus-trilhas {
+  --ui-primary: var(--ui-error);
+}
+
+.camus-grupos {
+  --ui-primary: var(--color-orange-700);
+}
+
+.dark .camus-grupos {
+  --ui-primary: var(--color-orange-400);
+}
+
+.camus-aquarios {
+  --ui-primary: var(--color-violet-600);
+}
+
+.dark .camus-aquarios {
+  --ui-primary: var(--color-violet-400);
+}
+
+.camus-minigames {
+  --ui-primary: var(--ui-tertiary);
+}
+
+main.camus-minigames {
+  background-image: linear-gradient(to bottom, #ecfdf5, #a7f3d0 32rem);
+}
+
+.dark main.camus-minigames {
+  background-image: linear-gradient(to bottom, #103c22, #011f0e 32rem);
+}
+
+.camus-ranking {
+  --ui-primary: var(--ui-secondary);
+}
+
+main.camus-ranking {
+  background-image: linear-gradient(to bottom, #fffbeb, #f6e5b4 32rem);
+}
+
+.dark main.camus-ranking {
+  background-image: linear-gradient(to bottom, #3d2c06, #1b1300 32rem);
+}
