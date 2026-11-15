@@ -26,15 +26,34 @@
 </template>
 
 <script setup lang="ts">
+import { App } from '@capacitor/app'
+
 // aviso de versao nova do app, so aparece no android
 const { estado, publicada, verificar } = useVersaoApp()
 
 const aberto = ref(false)
 const bloqueado = computed(() => estado.value === 'bloqueado')
+// o aviso com "depois" so aparece 1x enquanto o app ta aberto, o bloqueio sempre
+let jaAvisou = false
 
-onMounted(async () => {
+async function checar() {
   await verificar()
-  aberto.value = estado.value !== 'ok'
+  if (estado.value === 'bloqueado') {
+    aberto.value = true
+  }
+  else if (estado.value === 'aviso' && !jaAvisou) {
+    aberto.value = true
+    jaAvisou = true
+  }
+}
+
+onMounted(checar)
+
+// voltar do segundo plano n recarrega a pagina, entao checa dnv qnd o app volta pra tela
+App.addListener('appStateChange', ({ isActive }) => {
+  if (isActive) {
+    checar()
+  }
 })
 
 // no capacitor url de fora abre no navegador do celular, q baixa o apk
