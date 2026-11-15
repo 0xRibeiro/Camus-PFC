@@ -55,5 +55,11 @@ const jogos = [
     icone: 'i-lucide-fish',
     to: '/minigames/quem-e-esse-peixe',
   },
+  {
+    titulo: 'Meio peixe, meio fotógrafo',
+    descricao: 'Qual espécie foi mais fotografada? Acerte 5 seguidas e entre no combo de 20 XP por acerto.',
+    icone: 'i-lucide-camera',
+    to: '/minigames/meio-peixe-meio-fotografo',
+  },
 ]
 </script>
