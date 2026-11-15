@@ -8,6 +8,8 @@ from app.core.redis import redis_client
 INAT_URL = "https://api.inaturalist.org/v1"
 BRASIL = 6878
 CACHE_SEGUNDOS = 60 * 60 * 24
+# muda o nome qnd mudar os campos da especie, se n le o cache velho
+CHAVE_ESPECIES = "minigame:especies:v2"
 
 # msm grupos da colecao no front (web/app/utils/inaturalista.ts)
 GRUPOS_COLECAO = [
@@ -35,7 +37,7 @@ def achar_grupo(ancestor_ids: list[int]) -> int | None:
 
 # especies mais vistas no brasil q tem nome popular em pt, o iNat limita req entao fica 1 dia no redis
 async def listar_especies() -> list[dict]:
-    em_cache = await redis_client.get("minigame:especies")
+    em_cache = await redis_client.get(CHAVE_ESPECIES)
     if em_cache:
         return json.loads(em_cache)
 
@@ -60,9 +62,11 @@ async def listar_especies() -> list[dict]:
                 "nome": nome[0].upper() + nome[1:],
                 "nome_cientifico": taxon["name"],
                 "grupo": achar_grupo(taxon["ancestor_ids"]),
+                # total no mundo, o count do species_counts é so do brasil
+                "registros": taxon["observations_count"],
             })
 
-    await redis_client.set("minigame:especies", json.dumps(especies), ex=CACHE_SEGUNDOS)
+    await redis_client.set(CHAVE_ESPECIES, json.dumps(especies), ex=CACHE_SEGUNDOS)
     return especies
 
 
