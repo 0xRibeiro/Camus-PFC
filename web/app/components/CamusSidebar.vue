@@ -36,8 +36,13 @@
         >
           <NuxtLink
             to="/perfil"
-            class="min-w-0 rounded-md p-0.5 hover:bg-elevated"
-            :class="{ 'flex-1': state === 'expanded' }"
+            class="min-w-0 rounded-md p-0.5"
+            :class="[
+              { 'flex-1': state === 'expanded' },
+              rotaAtual('/perfil')
+                ? 'bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/25 dark:hover:bg-indigo-500/35'
+                : 'hover:bg-elevated',
+            ]"
             aria-label="Meu perfil"
           >
             <UUser
