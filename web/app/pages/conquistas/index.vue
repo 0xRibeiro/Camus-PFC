@@ -1,19 +1,33 @@
 <template>
-  <div class="mx-auto max-w-6xl space-y-8">
-    <UPageHeader
-      title="Conquistas"
-      description="conquistas disponiveis atualmente."
-    >
-      <template #headline>
-        <div class="flex items-center gap-2 text-sm font-medium text-primary">
-          <UIcon
-            name="i-lucide-trophy"
-            class="size-4"
-          />
-          Seu progresso
-        </div>
-      </template>
-    </UPageHeader>
+  <div class="mx-auto w-full max-w-6xl space-y-8 [--ui-primary:var(--ui-secondary)]">
+    <div class="relative isolate overflow-hidden rounded-xl bg-[#1b1300] px-6 sm:px-8">
+      <img
+        src="/papeis-de-parede/amarelo/conquistas.webp"
+        alt=""
+        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+      >
+
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 bg-linear-to-r from-[#1b1300]/95 via-[#1b1300]/60 to-transparent"
+      />
+
+      <UPageHeader
+        title="Conquistas"
+        description="Conquistas disponíveis atualmente."
+        :ui="{ title: 'text-white', description: 'text-amber-100/85' }"
+      >
+        <template #headline>
+          <div class="flex items-center gap-2 text-sm font-medium text-amber-300">
+            <UIcon
+              name="i-lucide-trophy"
+              class="size-4"
+            />
+            Seu progresso
+          </div>
+        </template>
+      </UPageHeader>
+    </div>
 
     <!-- xp, extrato e progresso nas trilhas -->
     <PontuacaoResumo />
@@ -96,7 +110,7 @@
       <UCard
         v-for="conquista in todasConquistas"
         :key="conquista.id"
-        :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'border-primary/50' : 'opacity-70'"
+        :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'ring-primary/50' : 'opacity-70'"
       >
         <!-- a opacidade muda na linha de cima para distinguir as conquistas desbloqueadas das outras -->
         <div class="flex items-start gap-4">
