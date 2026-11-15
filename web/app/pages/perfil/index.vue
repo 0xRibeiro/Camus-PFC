@@ -197,20 +197,31 @@ const xadrez = 'repeating-conic-gradient(#d4d4d4 0 25%, #fff 0 50%) 0 0 / 8px 8p
 // ↑ ↑ ↓ ↓ ← → ← → b a
 const CONQUISTA_TRANSPARENCIA = 11
 const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a']
+const NEGACIONISMO = ['n', 'e', 'g', 'a', 'c', 'i', 'o', 'n', 'i', 's', 'm', 'o']
 const transparenciaLiberada = ref(false)
 let teclas: string[] = []
 
 useEventListener(window, 'keydown', async (evento: KeyboardEvent) => {
-  if (transparenciaLiberada.value) return
-
   teclas.push(evento.key.toLowerCase())
-  teclas = teclas.slice(-KONAMI.length)
-  if (teclas.join() !== KONAMI.join()) return
+  teclas = teclas.slice(-Math.max(KONAMI.length, NEGACIONISMO.length))
+
+  const digitouKonami = teclas.slice(-KONAMI.length).join() === KONAMI.join()
+  const digitouNegacionismo = teclas.slice(-NEGACIONISMO.length).join() === NEGACIONISMO.join()
+
+  if (!digitouNegacionismo && (!digitouKonami || transparenciaLiberada.value)) return
 
   teclas = []
+
   try {
-    await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
-    transparenciaLiberada.value = true
+    if (digitouNegacionismo) {
+      opacidade.value = 100
+      transparenciaLiberada.value = false
+      await conquistas.desbloquearConquista(12)
+    }
+    else {
+      await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
+      transparenciaLiberada.value = true
+    }
   }
   catch {
     toast.add({ title: 'Quase... tente de novo', color: 'error' })

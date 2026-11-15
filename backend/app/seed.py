@@ -19,6 +19,7 @@ CONQUISTAS = [
     (9, "Mergulho em equipe", "Entre em um grupo usando um convite."),
     (10, "Convite a bordo", "Gere um convite para o seu grupo."),
     (11, "A melhor cor", "Camus code?"),
+    (12, "Nem tudo é cor", "Luz + Materia + Observador, o resto é resto."),
 ]
 
 
