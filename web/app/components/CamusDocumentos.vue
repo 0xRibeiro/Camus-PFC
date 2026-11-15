@@ -26,7 +26,7 @@ defineProps<{
         :src="imagemDireita"
         alt=""
         width="480"
-        height="1440"
+        height="100%"
         class="block h-auto max-h-[calc(100dvh-3rem)] w-full rounded-xl object-cover"
       >
     </div>
