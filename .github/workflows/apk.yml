@@ -56,15 +56,21 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       # se a release da versao ja existe so troca o apk, se n cria ela
+      # o versao.json vai junto e é oq o app consulta pra saber se ta desatualizado
       - name: publica na release
         run: |
           VERSION="v$(node -p "require('./package.json').version")"
           APK="camus-$VERSION.apk"
           cp android/app/build/outputs/apk/release/app-release.apk "$APK"
+          node -p "JSON.stringify({
+            atual: require('./package.json').version,
+            minima: require('./package.json').camus.versaoMinimaApp,
+            apk: 'https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/$APK',
+          })" > versao.json
           if gh release view "$VERSION" > /dev/null 2>&1; then
-            gh release upload "$VERSION" "$APK" --clobber
+            gh release upload "$VERSION" "$APK" versao.json --clobber
           else
-            gh release create "$VERSION" "$APK" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
+            gh release create "$VERSION" "$APK" versao.json --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
           fi
         env:
           GH_TOKEN: ${{ github.token }}
