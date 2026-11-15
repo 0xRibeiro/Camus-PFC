@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.pontuacao.repository import PontuacaoRepository
-from app.domains.pontuacao.schema import LancamentoRead, XpRead
+from app.domains.pontuacao.schema import LancamentoRead, RankingItemRead, XpRead
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 
@@ -32,6 +32,27 @@ async def total_ganho_na_origem(
 async def meu_xp(db: AsyncSession, usuario: Usuario) -> XpRead:
     total = await PontuacaoRepository(db).somar_xp(usuario.id, db.info.get("grupo_id"))
     return XpRead(xp_total=total)
+
+
+LIMITE_RANKING = 50
+
+
+async def ranking(db: AsyncSession) -> list[RankingItemRead]:
+    linhas = await PontuacaoRepository(db).listar_ranking(LIMITE_RANKING)
+
+    itens = []
+    posicao = 1
+    for usuario, xp in linhas:
+        itens.append(RankingItemRead(
+            posicao=posicao,
+            usuario_id=usuario.id,
+            username=usuario.username,
+            avatar=usuario.avatar,
+            cor_fundo=usuario.cor_fundo,
+            xp_total=xp,
+        ))
+        posicao += 1
+    return itens
 
 
 async def meu_extrato(db: AsyncSession, usuario: Usuario) -> list[LancamentoRead]:
