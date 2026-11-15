@@ -1,5 +1,10 @@
 <template>
-  <div class="flex flex-1 items-center justify-center p-4">
+  <div class="relative isolate -m-4 flex flex-1 items-center justify-center overflow-hidden bg-[#10122e] px-4 py-8 sm:px-10 xl:justify-start xl:px-24 2xl:px-32">
+    <img
+      src="/papeis-de-parede/avulsos/lula-gigante.webp"
+      alt=""
+      class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-right-bottom lg:object-center"
+    >
     <UPageCard class="w-full max-w-2xl">
       <div class="space-y-6">
         <div>
