@@ -1,12 +1,18 @@
 <template>
-  <div class="relative isolate -m-4 flex flex-1 items-center justify-center overflow-hidden bg-[#07182f] p-4">
-    <img
-      src="/papeis-de-parede/anil/acesso-maior.webp"
-      alt=""
-      class="size-full object-cover object-bottom"
-    >
+  <div class="relative isolate -m-4 flex flex-1 items-center justify-start overflow-hidden bg-[#07182f] px-4 py-8 sm:px-10 lg:px-20">
+    <picture class="pointer-events-none absolute inset-0 -z-10">
+      <source
+        media="(min-width: 768px)"
+        srcset="/papeis-de-parede/anil/acesso.webp"
+      >
 
-    <!-- flex + items-center + justify-center = centraliza no meio. flex-1 = ocupa a altura da tela necessaria -->
+      <img
+        src="/papeis-de-parede/anil/acesso.webp"
+        alt=""
+        class="block size-full object-cover object-right-bottom"
+      >
+    </picture>
+
     <!-- UPageCard = card pronto do nuxt ui. w-full max-w-md = ocupa td a largura ate uns 448px no max -->
     <UPageCard class="w-full max-w-md">
       <!-- UAuthForm = form de login pronto: desenha os campos, valida com o schema, dispara @submit -->
