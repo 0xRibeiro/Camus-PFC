@@ -1225,6 +1225,36 @@ export type QuestaoUpdate = {
 };
 
 /**
+ * RankingItemRead
+ */
+export type RankingItemRead = {
+    /**
+     * Posicao
+     */
+    posicao: number;
+    /**
+     * Usuario Id
+     */
+    usuario_id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Xp Total
+     */
+    xp_total: number;
+};
+
+/**
  * RefreshInput
  */
 export type RefreshInput = {
@@ -3619,6 +3649,24 @@ export type MeuXpPontuacaoXpGetResponses = {
 
 export type MeuXpPontuacaoXpGetResponse = MeuXpPontuacaoXpGetResponses[keyof MeuXpPontuacaoXpGetResponses];
 
+export type RankingPontuacaoRankingGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/pontuacao/ranking';
+};
+
+export type RankingPontuacaoRankingGetResponses = {
+    /**
+     * Response Ranking Pontuacao Ranking Get
+     *
+     * Successful Response
+     */
+    200: Array<RankingItemRead>;
+};
+
+export type RankingPontuacaoRankingGetResponse = RankingPontuacaoRankingGetResponses[keyof RankingPontuacaoRankingGetResponses];
+
 export type MeuExtratoPontuacaoExtratoGetData = {
     body?: never;
     path?: never;
@@ -5740,6 +5788,38 @@ export type MeuXpGruposGrupoIdPontuacaoXpGetResponses = {
 };
 
 export type MeuXpGruposGrupoIdPontuacaoXpGetResponse = MeuXpGruposGrupoIdPontuacaoXpGetResponses[keyof MeuXpGruposGrupoIdPontuacaoXpGetResponses];
+
+export type RankingGruposGrupoIdPontuacaoRankingGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/pontuacao/ranking';
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetError = RankingGruposGrupoIdPontuacaoRankingGetErrors[keyof RankingGruposGrupoIdPontuacaoRankingGetErrors];
+
+export type RankingGruposGrupoIdPontuacaoRankingGetResponses = {
+    /**
+     * Response Ranking Grupos  Grupo Id  Pontuacao Ranking Get
+     *
+     * Successful Response
+     */
+    200: Array<RankingItemRead>;
+};
+
+export type RankingGruposGrupoIdPontuacaoRankingGetResponse = RankingGruposGrupoIdPontuacaoRankingGetResponses[keyof RankingGruposGrupoIdPontuacaoRankingGetResponses];
 
 export type MeuExtratoGruposGrupoIdPontuacaoExtratoGetData = {
     body?: never;

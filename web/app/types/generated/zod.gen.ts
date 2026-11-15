@@ -631,6 +631,18 @@ export const zQuestaoUpdate = z.object({
 });
 
 /**
+ * RankingItemRead
+ */
+export const zRankingItemRead = z.object({
+    posicao: z.int(),
+    usuario_id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    xp_total: z.int()
+});
+
+/**
  * RefreshInput
  */
 export const zRefreshInput = z.object({
@@ -1500,6 +1512,13 @@ export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeleteResponse = z.void()
 export const zMeuXpPontuacaoXpGetResponse = zXpRead;
 
 /**
+ * Response Ranking Pontuacao Ranking Get
+ *
+ * Successful Response
+ */
+export const zRankingPontuacaoRankingGetResponse = z.array(zRankingItemRead);
+
+/**
  * Response Meu Extrato Pontuacao Extrato Get
  *
  * Successful Response
@@ -2110,6 +2129,17 @@ export const zMeuXpGruposGrupoIdPontuacaoXpGetPath = z.object({
  * Successful Response
  */
 export const zMeuXpGruposGrupoIdPontuacaoXpGetResponse = zXpRead;
+
+export const zRankingGruposGrupoIdPontuacaoRankingGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Response Ranking Grupos  Grupo Id  Pontuacao Ranking Get
+ *
+ * Successful Response
+ */
+export const zRankingGruposGrupoIdPontuacaoRankingGetResponse = z.array(zRankingItemRead);
 
 export const zMeuExtratoGruposGrupoIdPontuacaoExtratoGetPath = z.object({
     grupo_id: z.int()
