@@ -3,8 +3,8 @@
     v-model:open="aberto"
     :title="bloqueado ? 'Atualização obrigatória' : 'Nova versão disponível'"
     :description="bloqueado
-      ? `Essa versão do app não funciona mais. Baixe a versão ${versaoNova} para continuar usando o Camus.`
-      : `A versão ${versaoNova} do Camus já está disponível.`"
+      ? `Essa versão do app não funciona mais. Baixe a versão ${publicada.atual} para continuar usando o Camus.`
+      : `A versão ${publicada.atual} do Camus já está disponível.`"
     :dismissible="!bloqueado"
     :close="!bloqueado"
   >
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 // aviso de versao nova do app, so aparece no android
-const { estado, versaoNova, linkApk, verificar } = useVersaoApp()
+const { estado, publicada, verificar } = useVersaoApp()
 
 const aberto = ref(false)
 const bloqueado = computed(() => estado.value === 'bloqueado')
@@ -39,6 +39,6 @@ onMounted(async () => {
 
 // no capacitor url de fora abre no navegador do celular, q baixa o apk
 function baixar() {
-  window.location.href = linkApk.value
+  window.location.href = publicada.value.apk
 }
 </script>
