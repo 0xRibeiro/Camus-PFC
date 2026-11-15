@@ -1,33 +1,43 @@
 <template>
   <div class="flex flex-1 items-center justify-center">
     <!-- flex + items-center + justify-center = centraliza no meio. flex-1 = ocupa a altura da tela necessaria -->
-    <!-- UPageCard = card pronto do nuxt ui. w-full max-w-md = ocupa td a largura ate uns 448px no max -->
-    <UPageCard class="w-full max-w-md">
-      <!-- UAuthForm = form de login pronto: desenha os campos, valida com o schema, dispara @submit -->
-      <UAuthForm
-        :schema="schema"
-        :fields="fields"
-        :loading="loading"
-        title="Entrar"
-        description="Acesse sua conta no Camus."
-        icon="i-lucide-lock"
-        @submit="onSubmit"
-      >
-        <template #footer>
-          <!-- ULink = link do nuxt ui, troca de rota sem recarregar a pagina -->
-          <ULink
-            to="/register"
-            class="text-primary font-medium"
-          >Cadastre-se</ULink>.
-          <br>
-          <br>
-          <ULink
-            to="/recuperar-senha"
-            class="text-primary font-medium"
-          >Esqueci minha senha</ULink>.
-        </template>
-      </UAuthForm>
-    </UPageCard>
+    <div class="grid w-full max-w-md gap-4 md:max-w-4xl md:grid-cols-2">
+      <!-- UPageCard = card pronto do nuxt ui. w-full preenche a coluna do formulário -->
+      <UPageCard class="w-full">
+        <!-- UAuthForm = form de login pronto: desenha os campos, valida com o schema, dispara @submit -->
+        <UAuthForm
+          :schema="schema"
+          :fields="fields"
+          :loading="loading"
+          title="Entrar"
+          description="Acesse sua conta no Camus."
+          icon="i-lucide-lock"
+          @submit="onSubmit"
+        >
+          <template #footer>
+            <!-- ULink = link do nuxt ui, troca de rota sem recarregar a pagina -->
+            <ULink
+              to="/register"
+              class="text-primary font-medium"
+            >Cadastre-se</ULink>.
+            <br>
+            <br>
+            <ULink
+              to="/recuperar-senha"
+              class="text-primary font-medium"
+            >Esqueci minha senha</ULink>.
+          </template>
+        </UAuthForm>
+      </UPageCard>
+
+      <div class="relative -order-1 h-36 overflow-hidden rounded-xl bg-[#07182f] md:order-none md:h-auto">
+        <img
+          src="/papeis-de-parede/azul/acesso.webp"
+          alt=""
+          class="absolute inset-0 size-full object-cover object-bottom"
+        >
+      </div>
+    </div>
   </div>
 </template>
 
