@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div
+    class="flex-1 bg-[linear-gradient(to_bottom,#ecfdf5,#d1fae5_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#123d2b,#01190b_32rem)] [--ui-primary:var(--ui-tertiary)]"
+  >
     <UButton
       label="Voltar aos grupos"
       icon="i-lucide-arrow-left"
@@ -39,13 +41,24 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="relative isolate flex min-h-36 flex-wrap items-center justify-between gap-3 overflow-hidden rounded-xl bg-[#01190b] px-6 py-8 sm:px-8">
+        <img
+          src="/papeis-de-parede/verde/grupos.webp"
+          alt=""
+          class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+        >
+
+        <div
+          aria-hidden="true"
+          class="absolute inset-0 -z-10 bg-linear-to-r from-[#01190b]/95 via-[#01190b]/60 to-transparent"
+        />
+
         <div class="min-w-0">
-          <h1 class="text-xl font-semibold break-words">
+          <h1 class="text-xl font-semibold break-words text-white">
             {{ grupo.nome }}
           </h1>
 
-          <p class="text-sm text-muted">
+          <p class="text-sm text-emerald-100">
             Consulte os participantes e os conteúdos do grupo.
           </p>
         </div>
