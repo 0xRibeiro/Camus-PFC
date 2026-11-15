@@ -162,7 +162,7 @@
       alt=""
       width="1536"
       height="512"
-      class="mt-auto h-36 w-full shrink-0 object-cover sm:h-44 lg:h-52"
+      class="mt-auto h-auto w-full shrink-0"
     >
   </div>
 </template>

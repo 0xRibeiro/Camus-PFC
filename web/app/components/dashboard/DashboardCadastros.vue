@@ -26,7 +26,7 @@
 
     <div
       v-if="dadosGrafico.length"
-      class="space-y-3"
+      class="space-y-3 pt-3"
     >
       <UChart
         type="area"
