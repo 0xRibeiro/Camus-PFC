@@ -84,7 +84,7 @@ async def nova_rodada(db: AsyncSession, usuario: Usuario) -> RodadaRead:
         foto_url=rodada.foto_url,
         foto_atribuicao=foto["atribuicao"],
         opcoes=rodada.opcoes,
-        acertos_com_xp_hoje=await repo.contar_acertos_com_xp_hoje(usuario.id),
+        acertos_com_xp_hoje=await repo.contar_acertos_com_xp_hoje(usuario.id, JOGO_QUEM_E_ESSE_PEIXE),
         limite_acertos_com_xp=LIMITE_ACERTOS_COM_XP,
     )
 
@@ -110,7 +110,7 @@ async def responder(db: AsyncSession, usuario: Usuario, rodada_id: int, taxon_id
     rodada.acertou = taxon_id == rodada.resposta_taxon_id
     rodada.respondida_em = datetime.now(timezone.utc)
 
-    acertos = await repo.contar_acertos_com_xp_hoje(usuario.id)
+    acertos = await repo.contar_acertos_com_xp_hoje(usuario.id, JOGO_QUEM_E_ESSE_PEIXE)
     if rodada.acertou and acertos < LIMITE_ACERTOS_COM_XP:
         # o unique do lancamento segura pagar 2x a msm rodada
         lancamento = registrar_lancamento(db, usuario, OrigemLancamento.minigame, rodada.id, XP_POR_ACERTO)

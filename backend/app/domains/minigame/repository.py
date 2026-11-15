@@ -21,13 +21,16 @@ class MinigameRepository:
         )
 
     # dia no fuso de sp igual a dashboard, se n vira o dia as 21h
-    async def contar_acertos_com_xp_hoje(self, usuario_id: int) -> int:
+    # limite é por jogo e acerto em combo fica de fora
+    async def contar_acertos_com_xp_hoje(self, usuario_id: int, jogo: str) -> int:
         hoje = cast(func.timezone("America/Sao_Paulo", func.now()), Date)
         dia_resposta = cast(func.timezone("America/Sao_Paulo", RodadaMinigame.respondida_em), Date)
         resultado = await self.db.execute(
             select(func.count()).select_from(RodadaMinigame).where(
                 RodadaMinigame.usuario_id == usuario_id,
+                RodadaMinigame.jogo == jogo,
                 RodadaMinigame.pontos > 0,
+                RodadaMinigame.combo.is_(False),
                 dia_resposta == hoje,
             )
         )

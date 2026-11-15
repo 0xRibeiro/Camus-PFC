@@ -8,6 +8,13 @@ from app.core.database import Base
 
 # jogo é texto igual o status da denuncia, minigame novo n precisa de migration de enum
 JOGO_QUEM_E_ESSE_PEIXE = "quem_e_esse_peixe"
+JOGO_MEIO_PEIXE_MEIO_FOTOGRAFO = "meio_peixe_meio_fotografo"
+
+# nome q aparece no extrato
+TITULOS_JOGOS = {
+    JOGO_QUEM_E_ESSE_PEIXE: "Quem é esse peixe?",
+    JOGO_MEIO_PEIXE_MEIO_FOTOGRAFO: "Meio peixe, meio fotógrafo",
+}
 
 
 # cada pergunta sorteada é uma rodada, a resposta certa fica so no back
@@ -33,6 +40,9 @@ class RodadaMinigame(Base):
     acertou: Mapped[bool | None] = mapped_column(default=None)
 
     pontos: Mapped[int] = mapped_column(default=0)
+
+    # xp de combo n conta pro limite do dia
+    combo: Mapped[bool] = mapped_column(default=False, server_default="false")
 
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
