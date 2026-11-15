@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import type { GrupoRead, TrilhaRead } from '~/types/generated/types.gen'
+
 definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()

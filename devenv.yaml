@@ -9,6 +9,9 @@ nix:
     config:
       allowUnfree: true
 
+# porta ocupada da erro em vez de pular pra proxima, o esp depende da 1883
+strict_ports: true
+
 # If you're not willing to allow unsupported packages:
 # allow_unsupported_system: false
 

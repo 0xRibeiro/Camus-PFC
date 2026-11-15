@@ -7,7 +7,7 @@
             <NuxtPage />
           </main>
 
-          <CamusFooter />
+          <CamusFooter class="shrink-0" />
         </div>
       </NuxtLayout>
     </div>

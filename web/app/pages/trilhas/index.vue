@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { TrilhaResumoRead } from '~/types/generated'
 
-definePageMeta({ middleware: 'role' })
+definePageMeta({ middleware: 'role', key: route => route.path })
+
+const grupoId = useRoute().params.grupoId
+const api = useApi()
 
 const toast = useToast()
 
@@ -11,7 +14,6 @@ const loading = ref(true)
 async function fetchTrilhas() {
   loading.value = true
   try {
-    const api = useApi()
     trilhas.value = await api('/progresso/trilhas')
   }
   catch {
@@ -25,9 +27,19 @@ onMounted(fetchTrilhas)
 
 <template>
   <div>
+    <UButton
+      v-if="grupoId"
+      label="Voltar ao grupo"
+      icon="i-lucide-arrow-left"
+      variant="link"
+      color="neutral"
+      class="mb-3 px-0"
+      :to="`/grupos/${grupoId}`"
+    />
+
     <div class="mb-4">
       <h1 class="text-xl font-semibold">
-        Trilhas
+        {{ grupoId ? 'Trilhas do grupo' : 'Trilhas' }}
       </h1>
       <p class="text-sm text-muted">
         Escolha uma trilha e siga os conteúdos na ordem.
@@ -57,7 +69,7 @@ onMounted(fetchTrilhas)
         :key="trilha.id"
       >
         <NuxtLink
-          :to="`/trilhas/${trilha.id}`"
+          :to="grupoId ? `/grupos/${grupoId}/trilhas/${trilha.id}` : `/trilhas/${trilha.id}`"
           class="block"
         >
           <TrilhaImagem

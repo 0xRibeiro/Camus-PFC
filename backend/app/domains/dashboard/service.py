@@ -28,11 +28,14 @@ async def obter_dashboard(db: AsyncSession, dias: int = 30) -> DashboardRead:
         dia = inicio + timedelta(days=indice)
         cadastros_por_dia.append(CadastroDiaRead(data=dia, quantidade=cadastros.get(dia, 0)))
 
+    trilhas_globais, trilhas_de_grupo = await repo.contar_trilhas_por_escopo()
     return DashboardRead(
         total_usuarios=await repo.contar_usuarios(),
         total_grupos=await repo.contar_grupos(),
         total_conquistas_concedidas=await repo.contar_conquistas_concedidas(),
-        total_trilhas=await repo.contar_trilhas(),
+        total_trilhas=trilhas_globais + trilhas_de_grupo,
+        total_trilhas_globais=trilhas_globais,
+        total_trilhas_de_grupo=trilhas_de_grupo,
         cadastros_por_dia=cadastros_por_dia,
         conquistas_por_quantidade=[
             ConquistaResumoRead(id=conquista_id, titulo=titulo, quantidade=quantidade)

@@ -27,7 +27,15 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- botao novo teste para o dono ver a trilha igual os alunos veriam -->
+        <UButton
+          v-if="trilhaGrupo && trilha.is_active"
+          label="Estudar trilha"
+          color="neutral"
+          variant="outline"
+          :to="trilhaGrupo"
+        />
         <UBadge
           color="neutral"
           variant="soft"
@@ -65,7 +73,7 @@
     por enquanto). o handle=".modulo-drag-handle" trava o arrasto no icone de
     pontinhos, senao qualquer clique no card ia comecar a arrastar -->
     <VueDraggable
-      v-else
+      v-else-if="trilha"
       v-model="modulos"
       :animation="150"
       handle=".modulo-drag-handle"
@@ -101,6 +109,14 @@
               variant="ghost"
               label="Conteúdo"
               @click="abrirCriarConteudo(modulo)"
+            />
+            <UButton
+              icon="i-lucide-pencil"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              aria-label="Editar módulo"
+              @click="abrirEditarModulo(modulo)"
             />
             <UButton
               icon="i-lucide-trash-2"
@@ -182,7 +198,7 @@
                 size="xs"
                 color="neutral"
                 variant="ghost"
-                :to="`/author/trilhas/${trilhaId}/conteudos/${conteudo.id}`"
+                :to="`${trilhaPath}/conteudos/${conteudo.id}`"
               />
               <UButton
                 icon="i-lucide-trash-2"
@@ -205,16 +221,16 @@
     </VueDraggable>
 
     <p
-      v-if="!loading && modulos.length === 0"
+      v-if="!loading && trilha && modulos.length === 0"
       class="text-sm text-muted text-center py-12"
     >
       Nenhum módulo cadastrado. Clique em "Módulo" para começar a jornada.
     </p>
 
-    <!-- criar modulo -->
+    <!-- criar ou editar modulo -->
     <UModal
       v-model:open="showModuloModal"
-      title="Novo módulo"
+      :title="moduloEditando ? 'Editar módulo' : 'Novo módulo'"
     >
       <template #body>
         <div class="space-y-4">
@@ -234,7 +250,7 @@
             />
             <UButton
               color="primary"
-              label="Criar"
+              :label="moduloEditando ? 'Salvar' : 'Criar'"
               :loading="savingModulo"
               :disabled="!formModulo.titulo.trim()"
               @click="onSubmitModulo"
@@ -282,6 +298,14 @@
             <UInput
               v-model="formConteudo.titulo"
               placeholder="Ex: Salinidade: o que é e como medir"
+              class="w-full"
+            />
+          </UFormField>
+
+          <UFormField label="Ordem">
+            <UInputNumber
+              v-model="formConteudo.ordem"
+              :min="0"
               class="w-full"
             />
           </UFormField>
@@ -412,16 +436,21 @@ import { VueDraggable } from 'vue-draggable-plus'
 import type { Ref } from 'vue'
 import type { ConteudoRead, ModuloRead, TrilhaRead } from '~/types/generated'
 
-definePageMeta({ middleware: 'role', roles: ['author', 'admin'] })
+definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
 const route = useRoute()
+const api = useApi()
+const grupoId = route.params.grupoId
 const router = useRouter()
 const trilhaId = Number(route.params.id)
+const trilhaGrupo = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}` : null
+const trilhaPath = trilhaGrupo ? `${trilhaGrupo}/editar` : `/author/trilhas/${trilhaId}`
 const toast = useToast()
 
 function voltarParaTrilhas() {
+  if (grupoId) return router.push(`/grupos/${grupoId}/trilhas/gerenciar`)
   if (window.history.length > 1) router.back()
-  else router.push('/author/trilha')
+  else return router.push('/author/trilhas')
 }
 
 // dois helpers pra n repetir try/catch/ em toda chamada de api:
@@ -475,26 +504,27 @@ function popularConteudosPorModulo() {
   for (const modulo of modulos.value) {
     conteudosPorModulo[modulo.id] = conteudos.value
       .filter(c => c.modulo_id === modulo.id)
-      .sort((a, b) => a.ordem - b.ordem)
+      .sort((a, b) => a.ordem - b.ordem || a.id - b.id)
   }
 }
 
 async function fetchTudo() {
   loading.value = true
-  const api = useApi()
 
-  const [trilhaRes, modulosRes, conteudosRes] = await Promise.all([
-    api(`/trilhas/${trilhaId}`),
-    api('/modulos', { query: { trilha_id: trilhaId } }),
-    api('/conteudos'),
-  ])
+  await comErro('Não foi possível carregar a trilha', async () => {
+    const [dadosTrilha, modulosRes] = await Promise.all([
+      api(`/trilhas/${trilhaId}`),
+      api('/modulos', { query: { trilha_id: trilhaId, sort: 'ordem,id' } }),
+    ])
 
-  trilha.value = trilhaRes
-  modulos.value = modulosRes.data.sort((a: ModuloRead, b: ModuloRead) => a.ordem - b.ordem)
-
-  const idsDosModulos = new Set(modulos.value.map(m => m.id))
-  conteudos.value = conteudosRes.data.filter((c: ConteudoRead) => idsDosModulos.has(c.modulo_id))
-  popularConteudosPorModulo()
+    modulos.value = modulosRes.data
+    const listas = await Promise.all(modulos.value.map(modulo =>
+      api('/conteudos', { query: { modulo_id: modulo.id, sort: 'ordem,id' } }),
+    ))
+    conteudos.value = listas.flatMap(lista => lista.data)
+    popularConteudosPorModulo()
+    trilha.value = dadosTrilha
+  })
 
   loading.value = false
 }
@@ -504,7 +534,6 @@ onMounted(fetchTudo)
 /* modulo */
 
 async function onReordenarModulos() {
-  const api = useApi()
   await comErro('Não foi possível salvar a nova ordem dos módulos', async () => {
     await Promise.all(modulos.value.map((modulo, indice) => {
       modulo.ordem = indice
@@ -515,22 +544,36 @@ async function onReordenarModulos() {
 
 const showModuloModal = ref(false)
 const savingModulo = ref(false)
+const moduloEditando = ref<ModuloRead | null>(null)
 const formModulo = reactive({ titulo: '' })
 
 function abrirCriarModulo() {
+  moduloEditando.value = null
   formModulo.titulo = ''
   showModuloModal.value = true
 }
 
+function abrirEditarModulo(modulo: ModuloRead) {
+  moduloEditando.value = modulo
+  formModulo.titulo = modulo.titulo
+  showModuloModal.value = true
+}
+
 async function onSubmitModulo() {
-  await salvando(savingModulo, 'Não foi possível criar o módulo', async () => {
-    const api = useApi()
-    const novoModulo = await api('/modulos', {
-      method: 'POST',
-      body: { trilha_id: trilhaId, titulo: formModulo.titulo, ordem: modulos.value.length },
-    })
-    modulos.value.push(novoModulo)
-    conteudosPorModulo[novoModulo.id] = []
+  await salvando(savingModulo, 'Não foi possível salvar o módulo', async () => {
+    const titulo = formModulo.titulo
+    if (moduloEditando.value) {
+      await api(`/modulos/${moduloEditando.value.id}`, { method: 'PATCH', body: { titulo } })
+      moduloEditando.value.titulo = titulo
+    }
+    else {
+      const novoModulo = await api('/modulos', {
+        method: 'POST',
+        body: { trilha_id: trilhaId, titulo, ordem: modulos.value.length },
+      })
+      modulos.value.push(novoModulo)
+      conteudosPorModulo[novoModulo.id] = []
+    }
     showModuloModal.value = false
   })
 }
@@ -541,7 +584,6 @@ function onDeleteModulo(modulo: ModuloRead) {
     `Excluir o módulo "${modulo.titulo}"? Isso apaga os conteúdos dele também.`,
     'Não foi possível excluir o módulo',
     async () => {
-      const api = useApi()
       await api(`/modulos/${modulo.id}`, { method: 'DELETE' })
       modulos.value = modulos.value.filter(m => m.id !== modulo.id)
       conteudos.value = conteudos.value.filter(c => c.modulo_id !== modulo.id)
@@ -558,26 +600,25 @@ const savingConteudo = ref(false)
 const modoConteudoModal = ref<'criar' | 'editar'>('criar')
 const moduloAlvo = ref<ModuloRead | null>(null) // usado so no modo criar
 const conteudoEditando = ref<ConteudoRead | null>(null) // usado so no modo editar
-const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10, alteracaoSignificativa: false })
+const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10, ordem: 0, alteracaoSignificativa: false })
 
 function abrirCriarConteudo(modulo: ModuloRead) {
   modoConteudoModal.value = 'criar'
   moduloAlvo.value = modulo
-  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10, alteracaoSignificativa: false })
+  const ordem = Math.max(-1, ...conteudosDoModulo(modulo.id).map(c => c.ordem)) + 1
+  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10, ordem, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
 function abrirEditarConteudo(conteudo: ConteudoRead) {
   modoConteudoModal.value = 'editar'
   conteudoEditando.value = conteudo
-  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos, alteracaoSignificativa: false })
+  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos, ordem: conteudo.ordem, alteracaoSignificativa: false })
   showConteudoModal.value = true
 }
 
 async function onSubmitConteudoModal() {
   await salvando(savingConteudo, 'Não foi possível salvar o conteúdo', async () => {
-    const api = useApi()
-
     if (modoConteudoModal.value === 'criar' && moduloAlvo.value) {
       const novo = await api('/conteudos', {
         method: 'POST',
@@ -585,18 +626,17 @@ async function onSubmitConteudoModal() {
           modulo_id: moduloAlvo.value.id,
           titulo: formConteudo.titulo,
           tipo: formConteudo.tipo,
-          ordem: contarConteudos(moduloAlvo.value.id),
+          ordem: formConteudo.ordem,
           pontos: formConteudo.pontos,
         },
       })
       conteudos.value.push(novo)
-      conteudosPorModulo[moduloAlvo.value.id] ??= []
-      conteudosPorModulo[moduloAlvo.value.id]?.push(novo)
+      popularConteudosPorModulo()
 
       // artigo e quiz ja abrem direto a tela de edicao depois de criar
       if (novo.tipo !== 'video') {
         showConteudoModal.value = false
-        await router.push(`/author/trilhas/${trilhaId}/conteudos/${novo.id}`)
+        await router.push(`${trilhaPath}/conteudos/${novo.id}`)
         return
       }
     }
@@ -609,15 +649,12 @@ async function onSubmitConteudoModal() {
         versao += 1
       }
 
-      await api(`/conteudos/${id}`, {
-        method: 'PATCH',
-        body: { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao },
-      })
+      const { titulo, pontos, ordem } = formConteudo
+      const dados = { titulo, pontos, ordem, versao }
+      await api(`/conteudos/${id}`, { method: 'PATCH', body: dados })
       // PATCH do fastcrud n devolve o item, entao atualiza local com o que ja temos
-      for (const lista of [conteudos.value, conteudosPorModulo[conteudoEditando.value.modulo_id] ?? []]) {
-        const alvo = lista.find(c => c.id === id)
-        if (alvo) Object.assign(alvo, { titulo: formConteudo.titulo, pontos: formConteudo.pontos, versao })
-      }
+      Object.assign(conteudoEditando.value, dados)
+      popularConteudosPorModulo()
     }
     showConteudoModal.value = false
   })
@@ -629,7 +666,6 @@ function onDeleteConteudo(conteudo: ConteudoRead) {
     `Excluir o conteúdo "${conteudo.titulo}"?`,
     'Não foi possível excluir o conteúdo',
     async () => {
-      const api = useApi()
       await api(`/conteudos/${conteudo.id}`, { method: 'DELETE' })
       conteudos.value = conteudos.value.filter(c => c.id !== conteudo.id)
       const lista = conteudosPorModulo[conteudo.modulo_id]
@@ -681,7 +717,6 @@ async function onSubmitVideoUrl() {
   if (alteracaoVideo.value) versao += 1
 
   await salvando(savingVideo, 'Não foi possível salvar o link do vídeo', async () => {
-    const api = useApi()
     await api(`/conteudos/${id}`, { method: 'PATCH', body: { video_url: formVideoUrl.value, versao } })
 
     for (const lista of [conteudos.value, conteudosPorModulo[moduloId] ?? []]) {

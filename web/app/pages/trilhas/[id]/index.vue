@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import type { ConteudoStatusRead, ConteudoTipo, TrilhaAlunoRead } from '~/types/generated'
+import type { ConteudoStatusRead, ConteudoTipo, GrupoRead, TrilhaAlunoRead, TrilhaRead } from '~/types/generated'
 
-definePageMeta({ middleware: 'role' })
+definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
+const api = useApi()
+const auth = useAuthStore()
+const grupoId = route.params.grupoId
 const toast = useToast()
 const trilhaId = Number(route.params.id)
+const trilhaPath = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}` : `/trilhas/${trilhaId}`
+const dono = ref(false)
 const NuxtLink = resolveComponent('NuxtLink')
 
 const trilha = ref<TrilhaAlunoRead | null>(null)
@@ -14,13 +19,26 @@ const loading = ref(true)
 async function fetchTrilha() {
   loading.value = true
   try {
-    const api = useApi()
+    if (grupoId) {
+      const grupo: GrupoRead = await api(`/grupos/${grupoId}`)
+      dono.value = grupo.id_dono === auth.user?.id
+      if (dono.value) {
+        const dados: TrilhaRead = await api(`/trilhas/${trilhaId}`)
+        // Links antigos de rascunhos continuam levando o dono ao editor.
+        if (!dados.is_active) {
+          await navigateTo(`${trilhaPath}/editar`, { replace: true })
+          return
+        }
+      }
+    }
     trilha.value = await api(`/progresso/trilhas/${trilhaId}`)
   }
   catch {
     toast.add({ title: 'Não foi possível carregar a trilha', color: 'error' })
   }
-  loading.value = false
+  finally {
+    loading.value = false
+  }
 }
 
 onMounted(fetchTrilha)
@@ -41,14 +59,23 @@ function iconeDoConteudo(conteudo: ConteudoStatusRead) {
 
 <template>
   <div>
-    <UButton
-      icon="i-lucide-arrow-left"
-      label="Trilhas"
-      color="neutral"
-      variant="link"
-      class="px-0 mb-3"
-      to="/trilhas"
-    />
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <UButton
+        icon="i-lucide-arrow-left"
+        label="Trilhas"
+        color="neutral"
+        variant="link"
+        class="px-0"
+        :to="grupoId ? `/grupos/${grupoId}/trilhas` : '/trilhas'"
+      />
+      <UButton
+        v-if="dono && trilha"
+        label="Gerenciar trilha"
+        color="neutral"
+        variant="outline"
+        :to="`${trilhaPath}/editar`"
+      />
+    </div>
 
     <div
       v-if="loading"
@@ -114,7 +141,7 @@ function iconeDoConteudo(conteudo: ConteudoStatusRead) {
               <!-- so vira link se ja ta liberado -->
               <component
                 :is="conteudo.liberado ? NuxtLink : 'div'"
-                :to="conteudo.liberado ? `/trilhas/${trilhaId}/conteudos/${conteudo.id}` : undefined"
+                :to="conteudo.liberado ? `${trilhaPath}/conteudos/${conteudo.id}` : undefined"
                 class="flex items-center gap-3 py-2"
                 :class="conteudo.liberado ? 'hover:text-primary' : 'text-dimmed cursor-not-allowed'"
               >
@@ -138,5 +165,12 @@ function iconeDoConteudo(conteudo: ConteudoStatusRead) {
         </UCard>
       </div>
     </template>
+
+    <UAlert
+      v-else
+      title="Trilha indisponível"
+      color="error"
+      variant="soft"
+    />
   </div>
 </template>

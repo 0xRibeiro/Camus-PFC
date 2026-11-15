@@ -1,5 +1,6 @@
 {
   "name": "camus-web",
+  "version": "0.7.3",
   "type": "module",
   "private": true,
   "scripts": {
