@@ -1,9 +1,9 @@
 <template>
   <div class="relative isolate -m-4 flex flex-1 items-center justify-center overflow-hidden bg-[#07182f] p-4">
     <img
-      src="/papeis-de-parede/azul/acesso.webp"
+      src="/papeis-de-parede/anil/acesso-maior.webp"
       alt=""
-      class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-bottom"
+      class="size-full object-cover object-bottom"
     >
 
     <!-- flex + items-center + justify-center = centraliza no meio. flex-1 = ocupa a altura da tela necessaria -->
