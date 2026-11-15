@@ -1,5 +1,5 @@
 <template>
-  <div class="relative isolate -m-4 flex flex-1 items-center justify-start overflow-hidden bg-[#07182f] px-4 py-8 sm:px-10 lg:px-20">
+  <div class="relative isolate -m-4 flex flex-1 items-center justify-start overflow-hidden bg-[#07182f] px-4 py-8 sm:px-10 lg:pr-20 lg:pl-28 xl:pl-32">
     <picture class="pointer-events-none absolute inset-0 -z-10">
       <source
         media="(min-width: 768px)"
@@ -9,7 +9,7 @@
       <img
         src="/papeis-de-parede/anil/acesso.webp"
         alt=""
-        class="block size-full object-cover object-right-bottom"
+        class="block size-full object-cover object-right-bottom lg:origin-right lg:scale-110"
       >
     </picture>
 
