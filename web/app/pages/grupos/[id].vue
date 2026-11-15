@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex-1 bg-[linear-gradient(to_bottom,#ecfdf5,#d1fae5_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#123d2b,#01190b_32rem)] [--ui-primary:var(--ui-tertiary)]"
+    class="flex-1 bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)] [--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)]"
   >
     <UButton
       label="Voltar aos grupos"

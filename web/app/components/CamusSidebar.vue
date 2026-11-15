@@ -84,6 +84,7 @@ const destaques = {
   secondary: '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15',
   tertiary: '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15',
   error: '[--ui-primary:var(--ui-error)] before:bg-error/15',
+  laranja: '[--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)] before:bg-orange-500/15',
   violeta: '[--ui-primary:var(--color-violet-600)] dark:[--ui-primary:var(--color-violet-400)] before:bg-violet-500/15',
 }
 
@@ -92,10 +93,6 @@ function item(label: string, icon: string, to: string, cor: keyof typeof destaqu
   const ativo = rotaAtual(to)
   return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined }
 }
-
-const rotaVerde = computed(() =>
-  route.path === '/grupos' || route.path.startsWith('/grupos/'),
-)
 
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
@@ -107,7 +104,7 @@ const items = computed<NavigationMenuItem[]>(() => {
     lista.push(
       item('Aquários', 'i-lucide-waves', '/aquarios', 'violeta'),
       item('Conquistas', 'i-lucide-trophy', '/conquistas', 'secondary'),
-      item('Grupos', 'i-lucide-users', '/grupos'),
+      item('Grupos', 'i-lucide-users', '/grupos', 'laranja'),
       item('Minigames', 'i-lucide-gamepad-2', '/minigames', 'tertiary'),
       item('Ranking', 'i-lucide-medal', '/ranking', 'secondary'),
     )
