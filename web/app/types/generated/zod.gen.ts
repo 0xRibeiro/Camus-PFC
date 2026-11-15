@@ -62,6 +62,16 @@ export const zAquarioEntrar = z.object({
 });
 
 /**
+ * AvisoRead
+ */
+export const zAvisoRead = z.object({
+    id: z.int(),
+    mensagem: z.string(),
+    lido: z.boolean(),
+    criado_em: z.iso.datetime()
+});
+
+/**
  * Body_enviar_imagem_grupos__grupo_id__imagens_post
  */
 export const zBodyEnviarImagemGruposGrupoIdImagensPost = z.object({
@@ -261,6 +271,68 @@ export const zDashboardRead = z.object({
 });
 
 /**
+ * DenunciaAdminRead
+ */
+export const zDenunciaAdminRead = z.object({
+    id: z.int(),
+    id_grupo: z.int(),
+    id_conteudo: z.int().nullable(),
+    motivo: z.string(),
+    descricao: z.string().nullable(),
+    status: z.enum([
+        'pendente',
+        'resolvida',
+        'rejeitada'
+    ]),
+    criado_em: z.iso.datetime(),
+    resolvido_em: z.iso.datetime().nullable(),
+    denunciante: z.string(),
+    grupo: z.string(),
+    dono: z.string(),
+    conteudo: z.string().nullable(),
+    grupo_suspenso: z.boolean().optional().default(false)
+});
+
+/**
+ * DenunciaCreate
+ */
+export const zDenunciaCreate = z.object({
+    motivo: z.enum([
+        'conteudo_improprio',
+        'assedio',
+        'spam',
+        'outro'
+    ]),
+    descricao: z.string().max(500).nullish(),
+    id_conteudo: z.int().nullish()
+});
+
+/**
+ * DenunciaRead
+ */
+export const zDenunciaRead = z.object({
+    id: z.int(),
+    id_grupo: z.int(),
+    id_conteudo: z.int().nullable(),
+    motivo: z.string(),
+    descricao: z.string().nullable(),
+    status: z.enum([
+        'pendente',
+        'resolvida',
+        'rejeitada'
+    ]),
+    criado_em: z.iso.datetime(),
+    resolvido_em: z.iso.datetime().nullable()
+});
+
+/**
+ * DenunciaUpdate
+ */
+export const zDenunciaUpdate = z.object({
+    status: z.enum(['resolvida', 'rejeitada'])
+});
+
+/**
  * Especie
  */
 export const zEspecie = z.enum([
@@ -318,7 +390,10 @@ export const zGrupoEntrar = z.object({
 export const zGrupoRead = z.object({
     id: z.int(),
     nome: z.string(),
-    id_dono: z.int()
+    id_dono: z.int(),
+    inabilitado: z.boolean().optional().default(false),
+    suspenso_ate: z.iso.datetime().nullish(),
+    suspenso: z.boolean().readonly()
 });
 
 /**
@@ -387,6 +462,13 @@ export const zModuloRead = z.object({
 export const zModuloUpdate = z.object({
     titulo: z.string().min(1).max(50).nullish(),
     ordem: z.int().gte(0).nullish()
+});
+
+/**
+ * MotivoCreate
+ */
+export const zMotivoCreate = z.object({
+    motivo: z.string().min(5).max(500)
 });
 
 /**
@@ -571,6 +653,14 @@ export const zSerieLeitura = z.object({
     nome: z.string(),
     unidade: z.string(),
     pontos: z.array(zPontoLeitura)
+});
+
+/**
+ * SuspensaoCreate
+ */
+export const zSuspensaoCreate = z.object({
+    dias: z.union([z.literal(14), z.literal(30)]),
+    motivo: z.string().min(5).max(500)
 });
 
 /**
@@ -853,6 +943,17 @@ export const zFastcrudCorePaginationDynamicPaginatedResponse6 = z.object({
     has_more: z.boolean(),
     page: z.int().nullish(),
     items_per_page: z.int().nullish()
+});
+
+/**
+ * GrupoRead
+ */
+export const zGrupoReadWritable = z.object({
+    id: z.int(),
+    nome: z.string(),
+    id_dono: z.int(),
+    inabilitado: z.boolean().optional().default(false),
+    suspenso_ate: z.iso.datetime().nullish()
 });
 
 export const zRegisterAuthRegisterPostBody = zUsuarioCreate;
@@ -1794,6 +1895,93 @@ export const zEnviarImagemGruposGrupoIdImagensPostPath = z.object({
  * Successful Response
  */
 export const zEnviarImagemGruposGrupoIdImagensPostResponse = zImagemRead;
+
+export const zDenunciarGruposGrupoIdDenunciasPostBody = zDenunciaCreate;
+
+export const zDenunciarGruposGrupoIdDenunciasPostPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zDenunciarGruposGrupoIdDenunciasPostResponse = zDenunciaRead;
+
+export const zListarDenunciasAdminDenunciasGetQuery = z.object({
+    status: z.enum([
+        'pendente',
+        'resolvida',
+        'rejeitada'
+    ]).nullish()
+});
+
+/**
+ * Response Listar Denuncias Admin Denuncias Get
+ *
+ * Successful Response
+ */
+export const zListarDenunciasAdminDenunciasGetResponse = z.array(zDenunciaAdminRead);
+
+export const zResolverDenunciaAdminDenunciasDenunciaIdPatchBody = zDenunciaUpdate;
+
+export const zResolverDenunciaAdminDenunciasDenunciaIdPatchPath = z.object({
+    denuncia_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResolverDenunciaAdminDenunciasDenunciaIdPatchResponse = zDenunciaRead;
+
+export const zSuspenderGrupoAdminGruposGrupoIdSuspensaoPostBody = zSuspensaoCreate;
+
+export const zSuspenderGrupoAdminGruposGrupoIdSuspensaoPostPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zSuspenderGrupoAdminGruposGrupoIdSuspensaoPostResponse = zGrupoRead;
+
+export const zExcluirGrupoAdminGruposGrupoIdDeleteBody = zMotivoCreate;
+
+export const zExcluirGrupoAdminGruposGrupoIdDeletePath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zExcluirGrupoAdminGruposGrupoIdDeleteResponse = z.void();
+
+export const zExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteBody = zMotivoCreate;
+
+export const zExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeletePath = z.object({
+    grupo_id: z.int(),
+    conteudo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zExcluirConteudoAdminGruposGrupoIdConteudosConteudoIdDeleteResponse = z.void();
+
+/**
+ * Response Listar Avisos Avisos Get
+ *
+ * Successful Response
+ */
+export const zListarAvisosAvisosGetResponse = z.array(zAvisoRead);
+
+export const zMarcarComoLidoAvisosAvisoIdLidoPatchPath = z.object({
+    aviso_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zMarcarComoLidoAvisosAvisoIdLidoPatchResponse = zAvisoRead;
 
 export const zMeuXpGruposGrupoIdPontuacaoXpGetPath = z.object({
     grupo_id: z.int()
