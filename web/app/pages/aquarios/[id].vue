@@ -1,54 +1,56 @@
 <template>
-  <div class="mx-auto w-full max-w-4xl space-y-6 p-4">
-    <UButton
-      to="/aquarios"
-      label="Voltar aos aquários"
-      icon="i-lucide-arrow-left"
-      variant="ghost"
-    />
-
-    <USkeleton
-      v-if="carregando"
-      class="h-24 w-full rounded-lg"
-    />
-
-    <UAlert
-      v-else-if="!aquario"
-      color="error"
-      title="Não foi possível abrir o aquário"
-    />
-
-    <template v-else>
-      <UPageHeader
-        :title="aquario.nome"
-        :description="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L`"
+  <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#f5edff,#e8d7fa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#39165b,#18012c_32rem)]">
+    <div class="mx-auto w-full max-w-4xl space-y-6 p-4">
+      <UButton
+        to="/aquarios"
+        label="Voltar aos aquários"
+        icon="i-lucide-arrow-left"
+        variant="ghost"
       />
 
-      <AquarioModulos
-        v-if="aquario.dispositivo"
-        :aquario-id="aquario.id"
-        :pode-editar="aquario.papel !== 'leitor'"
+      <USkeleton
+        v-if="carregando"
+        class="h-24 w-full rounded-lg"
       />
 
-      <AquarioPeixes
-        :aquario-id="aquario.id"
-        :pode-editar="aquario.papel !== 'leitor'"
+      <UAlert
+        v-else-if="!aquario"
+        color="error"
+        title="Não foi possível abrir o aquário"
       />
 
-      <div class="grid gap-4 md:grid-cols-2">
-        <AquarioIot
-          :aquario-id="aquario.id"
-          :papel="aquario.papel ?? 'dono'"
-          :dispositivo="aquario.dispositivo ?? null"
-          @atualizado="atualizarDispositivo"
+      <template v-else>
+        <UPageHeader
+          :title="aquario.nome"
+          :description="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L`"
         />
 
-        <AquarioMembros
+        <AquarioModulos
+          v-if="aquario.dispositivo"
           :aquario-id="aquario.id"
-          :papel="aquario.papel ?? 'dono'"
+          :pode-editar="aquario.papel !== 'leitor'"
         />
-      </div>
-    </template>
+
+        <AquarioPeixes
+          :aquario-id="aquario.id"
+          :pode-editar="aquario.papel !== 'leitor'"
+        />
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <AquarioIot
+            :aquario-id="aquario.id"
+            :papel="aquario.papel ?? 'dono'"
+            :dispositivo="aquario.dispositivo ?? null"
+            @atualizado="atualizarDispositivo"
+          />
+
+          <AquarioMembros
+            :aquario-id="aquario.id"
+            :papel="aquario.papel ?? 'dono'"
+          />
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 

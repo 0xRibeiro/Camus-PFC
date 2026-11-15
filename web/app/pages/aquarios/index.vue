@@ -1,203 +1,223 @@
 <template>
-  <div class="mx-auto w-full max-w-6xl space-y-6 px-4 pb-6">
-    <UPageHeader
-      title="Meus aquários"
-      description="Gerencie os aquários vinculados à sua conta."
-    >
-      <template #links>
-        <UButton
-          label="Entrar em aquário"
-          icon="i-lucide-log-in"
-          variant="outline"
-          :disabled="carregando || erroCarregamento"
-          @click="entrarAberto = true"
+  <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#f5edff,#e8d7fa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#39165b,#18012c_32rem)]">
+    <div class="mx-auto w-full max-w-6xl space-y-6 px-4 pb-6">
+      <UPageHeader
+        title="Meus aquários"
+        description="Gerencie os aquários vinculados à sua conta."
+        :ui="{
+          root: 'isolate overflow-hidden rounded-xl border-0 bg-[#18012c] px-4 py-8 text-center sm:px-8',
+          wrapper: 'lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]',
+          title: 'text-white lg:col-start-2',
+          description: 'mt-2 text-violet-100',
+          links: 'lg:col-start-3 lg:justify-end',
+        }"
+      >
+        <img
+          src="/papeis-de-parede/violeta/aquarios.webp"
+          alt=""
+          class="pointer-events-none absolute inset-0 -z-20 size-full -scale-x-100 object-cover"
+        >
+
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-r from-[#18012c]/15 via-[#18012c]/75 to-[#18012c]/35"
         />
-        <UButton
-          label="Cadastrar aquário"
-          icon="i-lucide-plus"
-          :disabled="carregando || erroCarregamento"
-          @click="modalAberto = true"
-        />
-      </template>
-    </UPageHeader>
 
-    <USkeleton
-      v-if="carregando"
-      class="h-24 w-full rounded-lg"
-    />
+        <template #links>
+          <UButton
+            label="Entrar em aquário"
+            icon="i-lucide-log-in"
+            variant="outline"
+            :disabled="carregando || erroCarregamento"
+            @click="entrarAberto = true"
+          />
+          <UButton
+            label="Cadastrar aquário"
+            icon="i-lucide-plus"
+            :disabled="carregando || erroCarregamento"
+            @click="modalAberto = true"
+          />
+        </template>
+      </UPageHeader>
 
-    <div
-      v-else-if="erroCarregamento"
-      class="space-y-3"
-    >
-      <UAlert
-        color="error"
-        title="Não foi possível carregar os aquários"
+      <USkeleton
+        v-if="carregando"
+        class="h-24 w-full rounded-lg"
       />
-      <UButton
-        label="Tentar novamente"
-        variant="outline"
-        @click="carregarAquarios"
-      />
-    </div>
 
-    <UEmpty
-      v-else-if="!aquarios.length"
-      icon="i-lucide-waves"
-      title="Nenhum aquário cadastrado"
-      description="Seus aquários aparecerão aqui após o cadastro."
-    />
-
-    <div
-      v-else
-      class="space-y-8"
-    >
-      <section
-        v-for="grupo in grupos"
-        :key="grupo.titulo"
+      <div
+        v-else-if="erroCarregamento"
         class="space-y-3"
       >
-        <h2 class="text-lg font-semibold">
-          {{ grupo.titulo }}
-        </h2>
+        <UAlert
+          color="error"
+          title="Não foi possível carregar os aquários"
+        />
+        <UButton
+          label="Tentar novamente"
+          variant="outline"
+          @click="carregarAquarios"
+        />
+      </div>
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <UCard
-            v-for="aquario in grupo.aquarios"
-            :key="aquario.id"
-          >
-            <div class="flex items-start justify-between gap-2">
-              <h3 class="break-words font-semibold">
-                {{ aquario.nome }}
-              </h3>
-              <UBadge
-                :label="aquario.papel ?? 'dono'"
-                color="neutral"
-                variant="subtle"
-              />
-            </div>
-            <p class="mt-1 text-sm text-muted">
-              {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
-            </p>
-            <UButton
-              :to="`/aquarios/${aquario.id}`"
-              label="Abrir aquário"
-              icon="i-lucide-arrow-right"
-              variant="outline"
-              class="mt-4"
-            />
-          </UCard>
-        </div>
-      </section>
-    </div>
+      <UEmpty
+        v-else-if="!aquarios.length"
+        icon="i-lucide-waves"
+        title="Nenhum aquário cadastrado"
+        description="Seus aquários aparecerão aqui após o cadastro."
+      />
 
-    <UModal
-      v-model:open="modalAberto"
-      title="Cadastrar aquário"
-      :dismissible="!cadastrando"
-    >
-      <template #body>
-        <UForm
-          :schema="schema"
-          :state="formulario"
-          class="space-y-4"
-          @submit="cadastrarAquario"
+      <div
+        v-else
+        class="space-y-8"
+      >
+        <section
+          v-for="grupo in grupos"
+          :key="grupo.titulo"
+          class="space-y-3"
         >
-          <UFormField
-            label="Nome"
-            name="nome"
-            required
-          >
-            <UInput
-              v-model="formulario.nome"
-              class="w-full"
-            />
-          </UFormField>
+          <h2 class="text-lg font-semibold">
+            {{ grupo.titulo }}
+          </h2>
 
-          <UFormField
-            label="Volume em litros (opcional)"
-            name="litros"
-          >
-            <UInput
-              v-model="formulario.litros"
-              type="number"
-              min="1"
-              step="1"
-              class="w-full"
-            />
-          </UFormField>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <UCard
+              v-for="aquario in grupo.aquarios"
+              :key="aquario.id"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="break-words font-semibold">
+                  {{ aquario.nome }}
+                </h3>
+                <UBadge
+                  :label="aquario.papel ?? 'dono'"
+                  color="neutral"
+                  variant="subtle"
+                />
+              </div>
+              <p class="mt-1 text-sm text-muted">
+                {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
+              </p>
+              <UButton
+                :to="`/aquarios/${aquario.id}`"
+                label="Abrir aquário"
+                icon="i-lucide-arrow-right"
+                variant="outline"
+                class="mt-4"
+              />
+            </UCard>
+          </div>
+        </section>
+      </div>
 
-          <UButton
-            type="submit"
-            label="Cadastrar"
-            :loading="cadastrando"
-          />
-        </UForm>
-      </template>
-    </UModal>
-
-    <UModal
-      v-model:open="entrarAberto"
-      title="Entrar em aquário"
-      :dismissible="!entrando"
-    >
-      <template #body>
-        <div class="space-y-6">
+      <UModal
+        v-model:open="modalAberto"
+        title="Cadastrar aquário"
+        :dismissible="!cadastrando"
+      >
+        <template #body>
           <UForm
-            :schema="zCodigoDispositivo"
-            :state="formCodigo"
-            class="space-y-3"
-            @submit="entrarComCodigo"
+            :schema="schema"
+            :state="formulario"
+            class="space-y-4"
+            @submit="cadastrarAquario"
           >
             <UFormField
-              name="codigo"
-              label="Código do IoT"
-              description="Gerado na tela Vínculo do aparelho. Entra como operador."
+              label="Nome"
+              name="nome"
+              required
             >
               <UInput
-                v-model="formCodigo.codigo"
-                placeholder="000000"
-                maxlength="6"
-                class="w-full sm:w-40"
+                v-model="formulario.nome"
+                class="w-full"
               />
             </UFormField>
 
-            <UButton
-              type="submit"
-              label="Entrar com código"
-              :loading="entrando"
-            />
-          </UForm>
-
-          <USeparator />
-
-          <UForm
-            :schema="zAquarioEntrar"
-            :state="formConvite"
-            class="space-y-3"
-            @submit="entrarComConvite"
-          >
             <UFormField
-              name="convite"
-              label="Código de convite"
-              description="Recebido do dono do aquário. Entra só como leitor."
+              label="Volume em litros (opcional)"
+              name="litros"
             >
               <UInput
-                v-model="formConvite.convite"
-                placeholder="Cole o código recebido"
+                v-model="formulario.litros"
+                type="number"
+                min="1"
+                step="1"
                 class="w-full"
               />
             </UFormField>
 
             <UButton
               type="submit"
-              label="Entrar com convite"
-              :loading="entrando"
+              label="Cadastrar"
+              :loading="cadastrando"
             />
           </UForm>
-        </div>
-      </template>
-    </UModal>
+        </template>
+      </UModal>
+
+      <UModal
+        v-model:open="entrarAberto"
+        title="Entrar em aquário"
+        :dismissible="!entrando"
+      >
+        <template #body>
+          <div class="space-y-6">
+            <UForm
+              :schema="zCodigoDispositivo"
+              :state="formCodigo"
+              class="space-y-3"
+              @submit="entrarComCodigo"
+            >
+              <UFormField
+                name="codigo"
+                label="Código do IoT"
+                description="Gerado na tela Vínculo do aparelho. Entra como operador."
+              >
+                <UInput
+                  v-model="formCodigo.codigo"
+                  placeholder="000000"
+                  maxlength="6"
+                  class="w-full sm:w-40"
+                />
+              </UFormField>
+
+              <UButton
+                type="submit"
+                label="Entrar com código"
+                :loading="entrando"
+              />
+            </UForm>
+
+            <USeparator />
+
+            <UForm
+              :schema="zAquarioEntrar"
+              :state="formConvite"
+              class="space-y-3"
+              @submit="entrarComConvite"
+            >
+              <UFormField
+                name="convite"
+                label="Código de convite"
+                description="Recebido do dono do aquário. Entra só como leitor."
+              >
+                <UInput
+                  v-model="formConvite.convite"
+                  placeholder="Cole o código recebido"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UButton
+                type="submit"
+                label="Entrar com convite"
+                :loading="entrando"
+              />
+            </UForm>
+          </div>
+        </template>
+      </UModal>
+    </div>
   </div>
 </template>
 

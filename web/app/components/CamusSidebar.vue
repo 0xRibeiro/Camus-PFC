@@ -84,6 +84,7 @@ const destaques = {
   secondary: '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15',
   tertiary: '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15',
   error: '[--ui-primary:var(--ui-error)] before:bg-error/15',
+  violeta: '[--ui-primary:var(--color-violet-600)] dark:[--ui-primary:var(--color-violet-400)] before:bg-violet-500/15',
 }
 
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
@@ -104,7 +105,7 @@ const items = computed<NavigationMenuItem[]>(() => {
 
   if (auth.role === 'aluno') {
     lista.push(
-      item('Aquários', 'i-lucide-waves', '/aquarios'),
+      item('Aquários', 'i-lucide-waves', '/aquarios', 'violeta'),
       item('Conquistas', 'i-lucide-trophy', '/conquistas', 'secondary'),
       item('Grupos', 'i-lucide-users', '/grupos'),
       item('Minigames', 'i-lucide-gamepad-2', '/minigames', 'tertiary'),
