@@ -134,7 +134,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 }, {
   persist: {
-    storage: sessionStorage,
+    // localStorage sobrevive a fechar o app/reiniciar o celular, so pede login dnv qnd o refresh expira
+    storage: localStorage,
     pick: ['user', 'accessToken', 'refreshToken'], // oq persiste entre reloads
   },
 })
