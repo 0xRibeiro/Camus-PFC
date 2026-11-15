@@ -73,6 +73,10 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 const open = defineModel<boolean>('open', { required: true })
 const auth = useAuthStore()
+const route = useRoute()
+const rotaAmarela = computed(() =>
+  route.path === '/conquistas' || route.path.startsWith('/conquistas/'),
+)
 
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
@@ -83,7 +87,14 @@ const items = computed<NavigationMenuItem[]>(() => {
   if (auth.role === 'aluno') {
     lista.push(
       { label: 'Aquários', icon: 'i-lucide-waves', to: '/aquarios' },
-      { label: 'Conquistas', icon: 'i-lucide-trophy', to: '/conquistas' },
+      {
+        label: 'Conquistas',
+        icon: 'i-lucide-trophy',
+        to: '/conquistas',
+        class: rotaAmarela.value
+          ? '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15'
+          : undefined,
+      },
       { label: 'Grupos', icon: 'i-lucide-users', to: '/grupos' },
       { label: 'Minigames', icon: 'i-lucide-gamepad-2', to: '/minigames' },
     )
