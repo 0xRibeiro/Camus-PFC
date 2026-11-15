@@ -3,11 +3,11 @@
     <picture class="pointer-events-none absolute inset-0 -z-10">
       <source
         media="(min-width: 768px)"
-        srcset="/papeis-de-parede/verde-agua/recuperar-senha-desktop.webp"
+        srcset="/papeis-de-parede/avulsos/recuperar-senha-desktop.webp"
       >
 
       <img
-        src="/papeis-de-parede/verde-agua/recuperar-senha-mobile.webp"
+        src="/papeis-de-parede/avulsos/recuperar-senha-mobile.webp"
         alt=""
         class="block size-full object-cover object-bottom md:object-center"
       >
