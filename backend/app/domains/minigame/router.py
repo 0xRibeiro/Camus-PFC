@@ -3,7 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.domains.minigame import service
-from app.domains.minigame.schema import RespostaInput, ResultadoRead, RodadaRead
+from app.domains.minigame.schema import (
+    PalpiteInput,
+    RespostaInput,
+    ResultadoMaisOuMenosRead,
+    ResultadoRead,
+    RodadaMaisOuMenosRead,
+    RodadaRead,
+)
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.service import get_current_user
 
@@ -26,3 +33,22 @@ async def responder(
     usuario: Usuario = Depends(get_current_user),
 ) -> ResultadoRead:
     return await service.responder(db, usuario, rodada_id, resposta.taxon_id)
+
+
+# devolve a rodada aberta se tiver, por isso n é 201
+@router.post("/meio-peixe-meio-fotografo/rodadas", response_model=RodadaMaisOuMenosRead)
+async def nova_rodada_mais_ou_menos(
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> RodadaMaisOuMenosRead:
+    return await service.nova_rodada_mais_ou_menos(db, usuario)
+
+
+@router.post("/meio-peixe-meio-fotografo/rodadas/{rodada_id}/resposta", response_model=ResultadoMaisOuMenosRead)
+async def responder_mais_ou_menos(
+    rodada_id: int,
+    palpite: PalpiteInput,
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> ResultadoMaisOuMenosRead:
+    return await service.responder_mais_ou_menos(db, usuario, rodada_id, palpite.palpite)

@@ -11,14 +11,53 @@ class MinigameRepository:
     def adicionar(self, rodada: RodadaMinigame) -> None:
         self.db.add(rodada)
 
-    # filtra pelo usuario tbm, ninguem responde rodada dos outros
-    async def buscar_rodada(self, rodada_id: int, usuario_id: int) -> RodadaMinigame | None:
+    # filtra pelo usuario e jogo tbm, ninguem responde rodada dos outros nem de outro jogo
+    async def buscar_rodada(self, rodada_id: int, usuario_id: int, jogo: str) -> RodadaMinigame | None:
         return await self.db.scalar(
             select(RodadaMinigame).where(
                 RodadaMinigame.id == rodada_id,
                 RodadaMinigame.usuario_id == usuario_id,
+                RodadaMinigame.jogo == jogo,
             )
         )
+
+    # rodada sem resposta, recarregar a pagina devolve a msm pergunta
+    async def buscar_pendente(self, usuario_id: int, jogo: str) -> RodadaMinigame | None:
+        return await self.db.scalar(
+            select(RodadaMinigame)
+            .where(
+                RodadaMinigame.usuario_id == usuario_id,
+                RodadaMinigame.jogo == jogo,
+                RodadaMinigame.acertou.is_(None),
+            )
+            .order_by(RodadaMinigame.id.desc())
+            .limit(1)
+        )
+
+    async def buscar_ultima_respondida(self, usuario_id: int, jogo: str) -> RodadaMinigame | None:
+        return await self.db.scalar(
+            select(RodadaMinigame)
+            .where(
+                RodadaMinigame.usuario_id == usuario_id,
+                RodadaMinigame.jogo == jogo,
+                RodadaMinigame.acertou.is_not(None),
+            )
+            .order_by(RodadaMinigame.respondida_em.desc())
+            .limit(1)
+        )
+
+    # do mais novo pro mais velho, pra contar sequencia e recorde
+    async def listar_acertos(self, usuario_id: int, jogo: str) -> list[bool]:
+        resultado = await self.db.execute(
+            select(RodadaMinigame.acertou)
+            .where(
+                RodadaMinigame.usuario_id == usuario_id,
+                RodadaMinigame.jogo == jogo,
+                RodadaMinigame.acertou.is_not(None),
+            )
+            .order_by(RodadaMinigame.respondida_em.desc())
+        )
+        return list(resultado.scalars().all())
 
     # dia no fuso de sp igual a dashboard, se n vira o dia as 21h
     # limite é por jogo e acerto em combo fica de fora
