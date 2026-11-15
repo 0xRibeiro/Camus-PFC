@@ -42,13 +42,13 @@
       <figure class="space-y-2">
         <USkeleton
           v-if="!rodada"
-          class="aspect-4/3 w-full rounded-xl"
+          class="h-[40dvh] min-h-56 w-full rounded-xl"
         />
         <img
           v-else
           :src="rodada.foto_url"
           alt="Foto do animal misterioso"
-          class="aspect-4/3 w-full rounded-xl bg-elevated object-contain"
+          class="h-[40dvh] min-h-56 w-full rounded-xl bg-elevated object-contain"
         >
         <figcaption
           v-if="rodada"
