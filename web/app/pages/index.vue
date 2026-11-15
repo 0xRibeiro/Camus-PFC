@@ -5,7 +5,7 @@
     <picture class="absolute inset-0 -z-20">
       <source media="(max-width: 639px)" srcset="/papeis-de-parede/inicio-mobile.webp">
       <img
-        src="/papeis-de-parede/inicio.webp"
+        src="/papeis-de-parede/azul/inicio.webp"
         alt=""
         fetchpriority="high"
         class="size-full object-cover object-bottom sm:object-right"
