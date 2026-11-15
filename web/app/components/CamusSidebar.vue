@@ -36,8 +36,13 @@
         >
           <NuxtLink
             to="/perfil"
-            class="min-w-0 rounded-md p-0.5 hover:bg-elevated"
-            :class="{ 'flex-1': state === 'expanded' }"
+            class="min-w-0 rounded-md p-0.5"
+            :class="[
+              { 'flex-1': state === 'expanded' },
+              rotaAtual('/perfil')
+                ? 'bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/25 dark:hover:bg-indigo-500/35'
+                : 'hover:bg-elevated',
+            ]"
             aria-label="Meu perfil"
           >
             <UUser
@@ -83,6 +88,9 @@ const destaques = {
   primary: 'before:bg-primary/15',
   secondary: '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15',
   tertiary: '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15',
+  error: '[--ui-primary:var(--ui-error)] before:bg-error/15',
+  laranja: '[--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)] before:bg-orange-500/15',
+  violeta: '[--ui-primary:var(--color-violet-600)] dark:[--ui-primary:var(--color-violet-400)] before:bg-violet-500/15',
 }
 
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
@@ -93,15 +101,15 @@ function item(label: string, icon: string, to: string, cor: keyof typeof destaqu
 
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    item('Trilhas', 'i-lucide-route', '/trilhas'),
+    item('Trilhas', 'i-lucide-route', '/trilhas', 'error'),
     item('Coleção', 'i-lucide-fish', '/colecao'),
   ]
 
   if (auth.role === 'aluno') {
     lista.push(
-      item('Aquários', 'i-lucide-waves', '/aquarios'),
+      item('Aquários', 'i-lucide-waves', '/aquarios', 'violeta'),
       item('Conquistas', 'i-lucide-trophy', '/conquistas', 'secondary'),
-      item('Grupos', 'i-lucide-users', '/grupos'),
+      item('Grupos', 'i-lucide-users', '/grupos', 'laranja'),
       item('Minigames', 'i-lucide-gamepad-2', '/minigames', 'tertiary'),
       item('Ranking', 'i-lucide-medal', '/ranking', 'secondary'),
     )
