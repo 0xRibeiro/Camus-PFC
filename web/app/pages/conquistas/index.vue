@@ -1,170 +1,174 @@
 <template>
-  <div class="mx-auto w-full max-w-6xl space-y-8 [--ui-primary:var(--ui-secondary)]">
-    <div class="relative isolate overflow-hidden rounded-xl bg-[#1b1300] px-6 sm:px-8">
-      <img
-        src="/papeis-de-parede/amarelo/conquistas.webp"
-        alt=""
-        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
-      >
+  <div
+    class="flex-1 bg-[linear-gradient(to_bottom,#fffbeb,#f6e5b4_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#3d2c06,#1b1300_32rem)]"
+  >
+    <div class="mx-auto w-full max-w-6xl space-y-8 [--ui-primary:var(--ui-secondary)]">
+      <div class="relative isolate overflow-hidden rounded-xl bg-[#1b1300] px-6 sm:px-8">
+        <img
+          src="/papeis-de-parede/amarelo/conquistas.webp"
+          alt=""
+          class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+        >
 
-      <div
-        aria-hidden="true"
-        class="absolute inset-0 -z-10 bg-linear-to-r from-[#1b1300]/95 via-[#1b1300]/60 to-transparent"
+        <div
+          aria-hidden="true"
+          class="absolute inset-0 -z-10 bg-linear-to-r from-[#1b1300]/95 via-[#1b1300]/60 to-transparent"
+        />
+
+        <UPageHeader
+          title="Conquistas"
+          description="Conquistas disponíveis atualmente."
+          :ui="{ title: 'text-white', description: 'text-amber-100/85' }"
+        >
+          <template #headline>
+            <div class="flex items-center gap-2 text-sm font-medium text-amber-300">
+              <UIcon
+                name="i-lucide-trophy"
+                class="size-4"
+              />
+              Seu progresso
+            </div>
+          </template>
+        </UPageHeader>
+      </div>
+
+      <!-- xp, extrato e progresso nas trilhas -->
+      <PontuacaoResumo />
+
+      <!-- erro caso as conquistas nao carreguem -->
+      <UAlert
+        v-if="mensagem_de_erro"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        title="Não foi possível carregar as conquistas"
+        :description="mensagem_de_erro"
       />
 
-      <UPageHeader
-        title="Conquistas"
-        description="Conquistas disponíveis atualmente."
-        :ui="{ title: 'text-white', description: 'text-amber-100/85' }"
+      <!-- parte superior onde fica o resumo -->
+      <section class="grid gap-4 sm:grid-cols-3">
+        <UCard>
+          <p class="text-sm text-muted">
+            Desbloqueadas
+          </p>
+          <p class="mt-2 text-3xl font-semibold text-highlighted">
+            {{ ids_conquistas_desbloqueadas.size }}
+          </p>
+        </UCard>
+        <UCard>
+          <p class="text-sm text-muted">
+            Disponíveis para desbloqueio
+          </p>
+          <!-- essa é utilizada para separar as conquistas desbloqueadas das outras -->
+          <p class="mt-2 text-3xl font-semibold text-highlighted">
+            {{ todasConquistas.length - ids_conquistas_desbloqueadas.size }}
+          </p>
+        </UCard>
+        <UCard>
+          <!-- esse progresso é bom para mostrar o quanto falta, principalmente quando tiver muitas conquistas -->
+          <p class="text-sm text-muted">
+            Progresso
+          </p>
+          <p class="mt-2 text-3xl font-semibold text-highlighted">
+            {{ progresso }}%
+          </p>
+          <UProgress
+            :model-value="progresso"
+            class="mt-3"
+          />
+        </UCard>
+      </section>
+
+      <div
+        v-if="carregando"
+        class="grid gap-4 sm:grid-cols-2"
       >
-        <template #headline>
-          <div class="flex items-center gap-2 text-sm font-medium text-amber-300">
-            <UIcon
-              name="i-lucide-trophy"
-              class="size-4"
-            />
-            Seu progresso
+        <UCard
+          v-for="indice in 6"
+          :key="indice"
+        >
+          <div class="flex items-start gap-4">
+            <USkeleton class="size-14 rounded-xl" />
+            <div class="flex-1 space-y-2">
+              <USkeleton class="h-4 w-2/3" />
+              <USkeleton class="h-3 w-full" />
+              <USkeleton class="h-3 w-1/2" />
+            </div>
           </div>
-        </template>
-      </UPageHeader>
-    </div>
+        </UCard>
+      </div>
 
-    <!-- xp, extrato e progresso nas trilhas -->
-    <PontuacaoResumo />
+      <UEmpty
+        v-else-if="!todasConquistas.length && !mensagem_de_erro"
+        icon="i-lucide-trophy"
+        title="Nenhuma conquista cadastrada"
+        description="As conquistas aparecerão aqui quando estiverem disponíveis."
+      />
 
-    <!-- erro caso as conquistas nao carreguem -->
-    <UAlert
-      v-if="mensagem_de_erro"
-      color="error"
-      variant="subtle"
-      icon="i-lucide-circle-alert"
-      title="Não foi possível carregar as conquistas"
-      :description="mensagem_de_erro"
-    />
-
-    <!-- parte superior onde fica o resumo -->
-    <section class="grid gap-4 sm:grid-cols-3">
-      <UCard>
-        <p class="text-sm text-muted">
-          Desbloqueadas
-        </p>
-        <p class="mt-2 text-3xl font-semibold text-highlighted">
-          {{ ids_conquistas_desbloqueadas.size }}
-        </p>
-      </UCard>
-      <UCard>
-        <p class="text-sm text-muted">
-          Disponíveis para desbloqueio
-        </p>
-        <!-- essa é utilizada para separar as conquistas desbloqueadas das outras -->
-        <p class="mt-2 text-3xl font-semibold text-highlighted">
-          {{ todasConquistas.length - ids_conquistas_desbloqueadas.size }}
-        </p>
-      </UCard>
-      <UCard>
-        <!-- esse progresso é bom para mostrar o quanto falta, principalmente quando tiver muitas conquistas -->
-        <p class="text-sm text-muted">
-          Progresso
-        </p>
-        <p class="mt-2 text-3xl font-semibold text-highlighted">
-          {{ progresso }}%
-        </p>
-        <UProgress
-          :model-value="progresso"
-          class="mt-3"
-        />
-      </UCard>
-    </section>
-
-    <div
-      v-if="carregando"
-      class="grid gap-4 sm:grid-cols-2"
-    >
-      <UCard
-        v-for="indice in 6"
-        :key="indice"
+      <section
+        v-else
+        class="grid gap-4 sm:grid-cols-2"
       >
-        <div class="flex items-start gap-4">
-          <USkeleton class="size-14 rounded-xl" />
-          <div class="flex-1 space-y-2">
-            <USkeleton class="h-4 w-2/3" />
-            <USkeleton class="h-3 w-full" />
-            <USkeleton class="h-3 w-1/2" />
-          </div>
-        </div>
-      </UCard>
-    </div>
-
-    <UEmpty
-      v-else-if="!todasConquistas.length && !mensagem_de_erro"
-      icon="i-lucide-trophy"
-      title="Nenhuma conquista cadastrada"
-      description="As conquistas aparecerão aqui quando estiverem disponíveis."
-    />
-
-    <section
-      v-else
-      class="grid gap-4 sm:grid-cols-2"
-    >
-      <!-- aqui tem o for que passa por todas as conquistas e vai colocando os cards de cada uma -->
-      <UCard
-        v-for="conquista in todasConquistas"
-        :key="conquista.id"
-        :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'ring-primary/50' : 'opacity-70'"
-      >
-        <!-- a opacidade muda na linha de cima para distinguir as conquistas desbloqueadas das outras -->
-        <div class="flex items-start gap-4">
-          <div
-            class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-            :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'bg-primary/10 text-primary' : 'bg-elevated text-muted'"
-          >
-            <img
-              v-if="conquista.imagem_dir"
-              :src="conquista.imagem_dir"
-              :alt="conquista.titulo"
-              class="size-full object-cover"
+        <!-- aqui tem o for que passa por todas as conquistas e vai colocando os cards de cada uma -->
+        <UCard
+          v-for="conquista in todasConquistas"
+          :key="conquista.id"
+          :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'ring-primary/50' : 'opacity-70'"
+        >
+          <!-- a opacidade muda na linha de cima para distinguir as conquistas desbloqueadas das outras -->
+          <div class="flex items-start gap-4">
+            <div
+              class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+              :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'bg-primary/10 text-primary' : 'bg-elevated text-muted'"
             >
-            <UIcon
-              v-else
-              name="i-lucide-award"
-              class="size-7"
-            />
-          </div>
-
-          <div class="min-w-0 flex-1">
-            <div class="flex items-start justify-between gap-2">
-              <h2 class="font-semibold text-highlighted">
-                {{ conquista.titulo }}
-              </h2>
-              <UIcon
-                v-if="ids_conquistas_desbloqueadas.has(conquista.id)"
-                name="i-lucide-circle-check"
-                class="size-5 shrink-0 text-primary"
-                aria-label="Conquista desbloqueada"
-              />
+              <img
+                v-if="conquista.imagem_dir"
+                :src="conquista.imagem_dir"
+                :alt="conquista.titulo"
+                class="size-full object-cover"
+              >
               <UIcon
                 v-else
-                name="i-lucide-lock"
-                class="size-4 shrink-0 text-muted"
-                aria-label="Conquista bloqueada"
+                name="i-lucide-award"
+                class="size-7"
               />
             </div>
-            <p class="mt-2 text-sm leading-5 text-muted">
-              {{ conquista.descricao || 'continue utilizando a plataforma para desbloquear.' }}
-            </p>
-            <!-- caso a conquista não tenha descricão o site coloca uma generica -->
-            <UBadge
-              class="mt-3"
-              :color="ids_conquistas_desbloqueadas.has(conquista.id) ? 'primary' : 'neutral'"
-              variant="subtle"
-            >
-              <!-- em cima tem outro operador ternario que distingue as bloqueadas das desbloqueada -->
-              {{ ids_conquistas_desbloqueadas.has(conquista.id) ? 'Desbloqueada' : 'Bloqueada' }}
-            </UBadge>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h2 class="font-semibold text-highlighted">
+                  {{ conquista.titulo }}
+                </h2>
+                <UIcon
+                  v-if="ids_conquistas_desbloqueadas.has(conquista.id)"
+                  name="i-lucide-circle-check"
+                  class="size-5 shrink-0 text-primary"
+                  aria-label="Conquista desbloqueada"
+                />
+                <UIcon
+                  v-else
+                  name="i-lucide-lock"
+                  class="size-4 shrink-0 text-muted"
+                  aria-label="Conquista bloqueada"
+                />
+              </div>
+              <p class="mt-2 text-sm leading-5 text-muted">
+                {{ conquista.descricao || 'continue utilizando a plataforma para desbloquear.' }}
+              </p>
+              <!-- caso a conquista não tenha descricão o site coloca uma generica -->
+              <UBadge
+                class="mt-3"
+                :color="ids_conquistas_desbloqueadas.has(conquista.id) ? 'primary' : 'neutral'"
+                variant="subtle"
+              >
+                <!-- em cima tem outro operador ternario que distingue as bloqueadas das desbloqueada -->
+                {{ ids_conquistas_desbloqueadas.has(conquista.id) ? 'Desbloqueada' : 'Bloqueada' }}
+              </UBadge>
+            </div>
           </div>
-        </div>
-      </UCard>
-    </section>
+        </UCard>
+      </section>
+    </div>
   </div>
 </template>
 

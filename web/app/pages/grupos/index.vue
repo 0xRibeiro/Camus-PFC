@@ -1,8 +1,23 @@
 <template>
-  <div>
-    <h1 class="text-xl font-semibold mb-4">
-      Meus grupos
-    </h1>
+  <div
+    class="flex-1 bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)] [--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)]"
+  >
+    <div class="relative isolate mb-4 flex min-h-36 items-center overflow-hidden rounded-xl bg-[#240f00] px-6 py-8 sm:px-8">
+      <img
+        src="/papeis-de-parede/laranja/grupos.webp"
+        alt=""
+        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
+      >
+
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 bg-linear-to-r from-[#240f00]/95 via-[#240f00]/60 to-transparent"
+      />
+
+      <h1 class="text-xl font-semibold text-white">
+        Meus grupos
+      </h1>
+    </div>
 
     <!-- recados do admin: continuam na tela até a pessoa apertar em "Entendi" -->
     <div
