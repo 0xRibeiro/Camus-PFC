@@ -348,6 +348,17 @@ export const zEspecie = z.enum([
 ]);
 
 /**
+ * EspecieComparadaRead
+ */
+export const zEspecieComparadaRead = z.object({
+    taxon_id: z.int(),
+    nome: z.string(),
+    foto_url: z.string(),
+    foto_atribuicao: z.string(),
+    registros: z.int().nullish()
+});
+
+/**
  * EstadoDispositivo
  */
 export const zEstadoDispositivo = z.enum(['online', 'offline']);
@@ -472,9 +483,17 @@ export const zMotivoCreate = z.object({
 });
 
 /**
+ * OpcaoRead
+ */
+export const zOpcaoRead = z.object({
+    taxon_id: z.int(),
+    nome: z.string()
+});
+
+/**
  * OrigemLancamento
  */
-export const zOrigemLancamento = z.enum(['conteudo']);
+export const zOrigemLancamento = z.enum(['conteudo', 'minigame']);
 
 /**
  * LancamentoRead
@@ -488,6 +507,13 @@ export const zLancamentoRead = z.object({
     pontos: z.int(),
     grupo_id: z.int().nullish(),
     criado_em: z.iso.datetime()
+});
+
+/**
+ * PalpiteInput
+ */
+export const zPalpiteInput = z.object({
+    palpite: z.enum(['mais', 'menos'])
 });
 
 /**
@@ -605,6 +631,18 @@ export const zQuestaoUpdate = z.object({
 });
 
 /**
+ * RankingItemRead
+ */
+export const zRankingItemRead = z.object({
+    posicao: z.int(),
+    usuario_id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    xp_total: z.int()
+});
+
+/**
  * RefreshInput
  */
 export const zRefreshInput = z.object({
@@ -621,10 +659,32 @@ export const zResetPasswordInput = z.object({
 });
 
 /**
+ * RespostaInput
+ */
+export const zRespostaInput = z.object({
+    taxon_id: z.int()
+});
+
+/**
  * RespostaQuizCreate
  */
 export const zRespostaQuizCreate = z.object({
     respostas: z.record(z.string(), z.int())
+});
+
+/**
+ * ResultadoMaisOuMenosRead
+ */
+export const zResultadoMaisOuMenosRead = z.object({
+    acertou: z.boolean(),
+    registros_desafiante: z.int(),
+    nome_cientifico_desafiante: z.string(),
+    pontos: z.int(),
+    combo: z.boolean(),
+    sequencia: z.int(),
+    recorde: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
 });
 
 /**
@@ -635,6 +695,45 @@ export const zResultadoQuizRead = z.object({
     total: z.int(),
     xp_ganho: z.int(),
     correcao: z.array(zCorrecaoQuestaoRead)
+});
+
+/**
+ * ResultadoRead
+ */
+export const zResultadoRead = z.object({
+    acertou: z.boolean(),
+    resposta_taxon_id: z.int(),
+    resposta_nome: z.string(),
+    resposta_nome_cientifico: z.string(),
+    pontos: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
+});
+
+/**
+ * RodadaMaisOuMenosRead
+ */
+export const zRodadaMaisOuMenosRead = z.object({
+    id: z.int(),
+    base: zEspecieComparadaRead,
+    desafiante: zEspecieComparadaRead,
+    sequencia: z.int(),
+    recorde: z.int(),
+    sequencia_para_combo: z.int(),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
+});
+
+/**
+ * RodadaRead
+ */
+export const zRodadaRead = z.object({
+    id: z.int(),
+    foto_url: z.string(),
+    foto_atribuicao: z.string(),
+    opcoes: z.array(zOpcaoRead),
+    acertos_com_xp_hoje: z.int(),
+    limite_acertos_com_xp: z.int()
 });
 
 /**
@@ -1413,11 +1512,50 @@ export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeleteResponse = z.void()
 export const zMeuXpPontuacaoXpGetResponse = zXpRead;
 
 /**
+ * Response Ranking Pontuacao Ranking Get
+ *
+ * Successful Response
+ */
+export const zRankingPontuacaoRankingGetResponse = z.array(zRankingItemRead);
+
+/**
  * Response Meu Extrato Pontuacao Extrato Get
  *
  * Successful Response
  */
 export const zMeuExtratoPontuacaoExtratoGetResponse = z.array(zLancamentoRead);
+
+/**
+ * Successful Response
+ */
+export const zNovaRodadaMinigamesQuemEessePeixeRodadasPostResponse = zRodadaRead;
+
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostBody = zRespostaInput;
+
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostPath = z.object({
+    rodada_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResponderMinigamesQuemEessePeixeRodadasRodadaIdRespostaPostResponse = zResultadoRead;
+
+/**
+ * Successful Response
+ */
+export const zNovaRodadaMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasPostResponse = zRodadaMaisOuMenosRead;
+
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostBody = zPalpiteInput;
+
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostPath = z.object({
+    rodada_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zResponderMaisOuMenosMinigamesMeioPeixeMeioFotografoRodadasRodadaIdRespostaPostResponse = zResultadoMaisOuMenosRead;
 
 /**
  * Response Listar Trilhas Progresso Trilhas Get
@@ -1991,6 +2129,17 @@ export const zMeuXpGruposGrupoIdPontuacaoXpGetPath = z.object({
  * Successful Response
  */
 export const zMeuXpGruposGrupoIdPontuacaoXpGetResponse = zXpRead;
+
+export const zRankingGruposGrupoIdPontuacaoRankingGetPath = z.object({
+    grupo_id: z.int()
+});
+
+/**
+ * Response Ranking Grupos  Grupo Id  Pontuacao Ranking Get
+ *
+ * Successful Response
+ */
+export const zRankingGruposGrupoIdPontuacaoRankingGetResponse = z.array(zRankingItemRead);
 
 export const zMeuExtratoGruposGrupoIdPontuacaoExtratoGetPath = z.object({
     grupo_id: z.int()

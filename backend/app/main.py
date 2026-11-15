@@ -24,6 +24,7 @@ from app.domains.dispositivo.router import admin_router as dispositivo_admin_rou
 from app.domains.grupo.router import router as grupo_router
 from app.domains.grupo.service import grupo_dono, grupo_membro
 
+from app.domains.minigame.router import router as minigame_router
 from app.domains.pontuacao.router import router as pontuacao_router
 from app.domains.progresso.router import router as progresso_router
 from app.domains.trilha.router import (
@@ -73,6 +74,7 @@ app.include_router(aquario_router)
 app.include_router(dispositivo_admin_router)
 app.include_router(grupo_router)
 app.include_router(pontuacao_router)
+app.include_router(minigame_router)
 app.include_router(progresso_router)
 app.include_router(upload_router)
 

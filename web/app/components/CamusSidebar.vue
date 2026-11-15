@@ -74,9 +74,22 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const open = defineModel<boolean>('open', { required: true })
 const auth = useAuthStore()
 const route = useRoute()
-const rotaAmarela = computed(() =>
-  route.path === '/conquistas' || route.path.startsWith('/conquistas/'),
-)
+function rotaAtual(caminho: string) {
+  return route.path === caminho || route.path.startsWith(`${caminho}/`)
+}
+
+// mesma cor que a pagina usa, as classes ficam escritas inteiras pro tailwind achar
+const destaques = {
+  primary: 'before:bg-primary/15',
+  secondary: '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15',
+  tertiary: '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15',
+}
+
+// active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
+function item(label: string, icon: string, to: string, cor: keyof typeof destaques = 'primary'): NavigationMenuItem {
+  const ativo = rotaAtual(to)
+  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined }
+}
 
 const rotaVerde = computed(() =>
   route.path === '/grupos' || route.path.startsWith('/grupos/'),
@@ -84,44 +97,31 @@ const rotaVerde = computed(() =>
 
 const items = computed<NavigationMenuItem[]>(() => {
   const lista: NavigationMenuItem[] = [
-    { label: 'Trilhas', icon: 'i-lucide-route', to: '/trilhas' },
-    { label: 'Coleção', icon: 'i-lucide-fish', to: '/colecao' },
+    item('Trilhas', 'i-lucide-route', '/trilhas'),
+    item('Coleção', 'i-lucide-fish', '/colecao'),
   ]
 
   if (auth.role === 'aluno') {
     lista.push(
-      { label: 'Aquários', icon: 'i-lucide-waves', to: '/aquarios' },
-      {
-        label: 'Conquistas',
-        icon: 'i-lucide-trophy',
-        to: '/conquistas',
-        class: rotaAmarela.value
-          ? '[--ui-primary:var(--ui-secondary)] before:bg-secondary/15'
-          : undefined,
-      },
-      {
-        label: 'Grupos',
-        icon: 'i-lucide-users',
-        to: '/grupos',
-        class: rotaVerde.value
-          ? '[--ui-primary:var(--ui-tertiary)] before:bg-tertiary/15'
-          : undefined,
-      },
-      { label: 'Minigames', icon: 'i-lucide-gamepad-2', to: '/minigames' },
+      item('Aquários', 'i-lucide-waves', '/aquarios'),
+      item('Conquistas', 'i-lucide-trophy', '/conquistas', 'secondary'),
+      item('Grupos', 'i-lucide-users', '/grupos'),
+      item('Minigames', 'i-lucide-gamepad-2', '/minigames', 'tertiary'),
+      item('Ranking', 'i-lucide-medal', '/ranking', 'secondary'),
     )
   }
 
   if (auth.role === 'admin') {
     lista.push(
-      { label: 'Usuários', icon: 'i-lucide-users', to: '/admin/usuarios' },
-      { label: 'Auditoria', icon: 'i-lucide-history', to: '/admin/auditoria' },
-      { label: 'Denúncias', icon: 'i-lucide-flag', to: '/admin/denuncias' },
-      { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin/dashboard' },
+      item('Usuários', 'i-lucide-users', '/admin/usuarios'),
+      item('Auditoria', 'i-lucide-history', '/admin/auditoria'),
+      item('Denúncias', 'i-lucide-flag', '/admin/denuncias'),
+      item('Dashboard', 'i-lucide-layout-dashboard', '/admin/dashboard'),
     )
   }
 
   if (auth.role === 'admin' || auth.role === 'author') {
-    lista.push({ label: 'Gerenciar Trilhas', icon: 'i-lucide-square-text', to: '/author/trilhas' })
+    lista.push(item('Gerenciar Trilhas', 'i-lucide-square-text', '/author/trilhas'))
   }
 
   return lista

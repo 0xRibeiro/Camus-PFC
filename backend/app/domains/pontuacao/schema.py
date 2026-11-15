@@ -9,6 +9,15 @@ class XpRead(BaseModel):
     xp_total: int
 
 
+class RankingItemRead(BaseModel):
+    posicao: int
+    usuario_id: int
+    username: str
+    avatar: str
+    cor_fundo: str
+    xp_total: int
+
+
 class LancamentoRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
