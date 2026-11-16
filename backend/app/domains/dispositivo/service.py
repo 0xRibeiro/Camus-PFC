@@ -164,21 +164,34 @@ async def gravar_leitura(mac: str, leitura: LeituraModulo) -> None:
     await LeituraRepository().gravar(pontos)
 
 
+# uns 120 pontos no grafico, nunca menos q o intervalo do esp
+def calcular_janela(minutos: int) -> int:
+    return max(5, minutos * 60 // 120)
+
+
+def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> SerieLeitura:
+    serial = registro.values["modulo"]
+    nome = registro.values["nome"]
+
+    if serial not in series:
+        series[serial] = {}
+    if nome not in series[serial]:
+        series[serial][nome] = SerieLeitura(nome=nome, unidade=registro.values["unidade"], pontos=[])
+    return series[serial][nome]
+
+
 # junta os pontos do influx por modulo e por nome da leitura
 async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: int) -> list[ModuloIotRead]:
     series: dict[str, dict[str, SerieLeitura]] = {}
+    leituras = LeituraRepository()
 
-    for registro in await LeituraRepository().listar_do_dispositivo(dispositivo.mac, minutos):
-        serial = registro.values["modulo"]
-        nome = registro.values["nome"]
+    for registro in await leituras.listar_do_dispositivo(dispositivo.mac, minutos, calcular_janela(minutos)):
+        serie = serie_do_registro(series, registro)
+        serie.pontos.append(PontoLeitura(tempo=registro.get_time(), valor=registro.get_value()))
 
-        if serial not in series:
-            series[serial] = {}
-
-        if nome not in series[serial]:
-            series[serial][nome] = SerieLeitura(nome=nome, unidade=registro.values["unidade"], pontos=[])
-
-        series[serial][nome].pontos.append(PontoLeitura(tempo=registro.get_time(), valor=registro.get_value()))
+    for registro in await leituras.ultimas_do_dispositivo(dispositivo.mac, minutos):
+        serie = serie_do_registro(series, registro)
+        serie.atual = PontoLeitura(tempo=registro.get_time(), valor=registro.get_value())
 
     modulos = []
     for modulo in await DispositivoRepository(db).listar_modulos(dispositivo.id):

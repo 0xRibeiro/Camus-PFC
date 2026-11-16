@@ -57,14 +57,7 @@ class LeituraRepository:
         async with cliente_influx() as cliente:
             await cliente.write_api().write(bucket=settings.influx_bucket, record=pontos)
 
-    # params so existe no influx cloud, mac vem do banco (hex)
-    async def listar_do_dispositivo(self, mac: str, minutos: int) -> list[FluxRecord]:
-        consulta = f"""
-            from(bucket: "{settings.influx_bucket}")
-              |> range(start: -{minutos}m)
-              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
-        """
-
+    async def consultar(self, consulta: str) -> list[FluxRecord]:
         async with cliente_influx() as cliente:
             tabelas = await cliente.query_api().query(consulta)
 
@@ -73,3 +66,22 @@ class LeituraRepository:
             for registro in tabela.records:
                 registros.append(registro)
         return registros
+
+    # params so existe no influx cloud, mac vem do banco (hex)
+    # media por janela pro grafico n receber milhares de pontos
+    async def listar_do_dispositivo(self, mac: str, minutos: int, janela_segundos: int) -> list[FluxRecord]:
+        return await self.consultar(f"""
+            from(bucket: "{settings.influx_bucket}")
+              |> range(start: -{minutos}m)
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
+              |> aggregateWindow(every: {janela_segundos}s, fn: mean, createEmpty: false)
+        """)
+
+    # leitura mais recente sem media, pro valor de agora
+    async def ultimas_do_dispositivo(self, mac: str, minutos: int) -> list[FluxRecord]:
+        return await self.consultar(f"""
+            from(bucket: "{settings.influx_bucket}")
+              |> range(start: -{minutos}m)
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
+              |> last()
+        """)

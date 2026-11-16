@@ -831,7 +831,8 @@ export const zRoleUsuario = z.enum([
 export const zSerieLeitura = z.object({
     nome: z.string(),
     unidade: z.string(),
-    pontos: z.array(zPontoLeitura)
+    pontos: z.array(zPontoLeitura),
+    atual: zPontoLeitura.nullish()
 });
 
 /**

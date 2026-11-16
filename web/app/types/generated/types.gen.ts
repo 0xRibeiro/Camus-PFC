@@ -1861,6 +1861,7 @@ export type SerieLeitura = {
      * Pontos
      */
     pontos: Array<PontoLeitura>;
+    atual?: PontoLeitura | null;
 };
 
 /**
