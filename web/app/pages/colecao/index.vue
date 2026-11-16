@@ -1,34 +1,13 @@
 <template>
-  <section class="flex-1 bg-[linear-gradient(to_bottom,#143457,#07182f_32rem)] p-4">
+  <section class="flex-1 p-4">
     <div class="mx-auto w-full max-w-6xl space-y-6">
-      <div class="relative isolate overflow-hidden rounded-xl bg-[#07182f] px-6 sm:px-8">
-        <img
-          src="/papeis-de-parede/azul/colecao.webp"
-          alt=""
-          class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
-        >
-
-        <div
-          aria-hidden="true"
-          class="absolute inset-0 -z-10 bg-linear-to-r from-[#07182f]/95 via-[#07182f]/65 to-transparent"
-        />
-
-        <UPageHeader
-          title="Coleção de peixes"
-          description="Procure uma espécie no iNaturalist."
-          :ui="{ title: 'text-white', description: 'text-slate-200' }"
-        >
-          <template #headline>
-            <div class="flex items-center gap-2 text-sm font-medium text-blue-200">
-              <UIcon
-                name="i-lucide-fish"
-                class="size-4"
-              />
-              Coleção
-            </div>
-          </template>
-        </UPageHeader>
-      </div>
+      <CamusBanner
+        titulo="Coleção de peixes"
+        descricao="Procure uma espécie no iNaturalist."
+        imagem="/papeis-de-parede/azul/colecao.webp"
+        headline="Coleção"
+        icone="i-lucide-fish"
+      />
 
       <UCard>
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -60,14 +39,8 @@
         :description="mensagemDeErro"
       />
 
-      <div
-        v-if="carregando"
-        class="grid gap-4 sm:grid-cols-2"
-      >
-        <UCard
-          v-for="indice in 6"
-          :key="indice"
-        >
+      <div v-if="carregando" class="grid gap-4 sm:grid-cols-2">
+        <UCard v-for="indice in 6" :key="indice">
           <USkeleton class="aspect-video w-full rounded-lg" />
 
           <div class="mt-4 space-y-2">
@@ -116,10 +89,7 @@
                 v-else
                 class="flex aspect-video items-center justify-center rounded-lg bg-elevated text-muted"
               >
-                <UIcon
-                  name="i-lucide-image-off"
-                  class="size-8"
-                />
+                <UIcon name="i-lucide-image-off" class="size-8" />
               </div>
 
               <div class="mt-4 min-w-0">
@@ -127,9 +97,7 @@
                   {{ peixe.preferred_common_name || peixe.name }}
                 </h2>
 
-                <p class="mt-1 truncate text-sm italic text-muted">
-                  {{ peixe.name }}
-                </p>
+                <p class="mt-1 truncate text-sm italic text-muted">{{ peixe.name }}</p>
               </div>
             </UCard>
           </div>
@@ -138,14 +106,8 @@
         <UCard>
           <template #header>
             <div class="flex items-center justify-between gap-3">
-              <h2 class="font-semibold text-highlighted">
-                Peixe Selecionado
-              </h2>
-
-              <UIcon
-                name="i-lucide-eye"
-                class="size-5 text-primary"
-              />
+              <h2 class="font-semibold text-highlighted">Peixe Selecionado</h2>
+              <UIcon name="i-lucide-eye" class="size-5 text-primary" />
             </div>
           </template>
 
@@ -161,10 +123,7 @@
               v-else
               class="flex aspect-square items-center justify-center rounded-lg bg-elevated text-muted"
             >
-              <UIcon
-                name="i-lucide-fish"
-                class="size-12"
-              />
+              <UIcon name="i-lucide-fish" class="size-12" />
             </div>
 
             <div class="mt-4 space-y-3">
@@ -173,25 +132,16 @@
                   {{ peixeSelecionado.preferred_common_name || peixeSelecionado.name }}
                 </p>
 
-                <p class="text-sm italic text-muted">
-                  {{ peixeSelecionado.name }}
-                </p>
+                <p class="text-sm italic text-muted">{{ peixeSelecionado.name }}</p>
               </div>
 
               <div class="flex flex-wrap gap-2">
-                <UBadge
-                  color="neutral"
-                  variant="subtle"
-                >
+                <UBadge color="neutral" variant="subtle">
                   {{ new Intl.NumberFormat('pt-BR').format(peixeSelecionado.observations_count ?? 0) }}
                   observações
                 </UBadge>
 
-                <UBadge
-                  v-if="peixeSelecionado.rank"
-                  color="primary"
-                  variant="subtle"
-                >
+                <UBadge v-if="peixeSelecionado.rank" color="primary" variant="subtle">
                   {{ peixeSelecionado.rank }}
                 </UBadge>
               </div>
@@ -221,9 +171,7 @@
         v-if="totalResultados > itensPorPagina && !mensagemDeErro"
         class="flex flex-wrap items-center justify-between gap-3"
       >
-        <p class="text-sm text-muted">
-          Página {{ pagina }} de {{ totalPaginas }}
-        </p>
+        <p class="text-sm text-muted">Página {{ pagina }} de {{ totalPaginas }}</p>
 
         <UPagination
           :page="pagina"

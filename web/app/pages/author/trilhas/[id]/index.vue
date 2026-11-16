@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex-1">
     <!-- volta pra listagem. usa router.back() em vez de rota fixa pq n sabemos
     o path certo daqui - se recarregou a pagina sem historico, cai no fallback -->
     <UButton

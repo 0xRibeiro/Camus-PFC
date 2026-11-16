@@ -1,29 +1,12 @@
 <template>
-  <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#f5edff,#e8d7fa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#39165b,#18012c_32rem)]">
+  <div class="flex-1">
     <div class="mx-auto w-full max-w-6xl space-y-6 px-4 pb-6">
-      <UPageHeader
-        title="Meus aquários"
-        description="Gerencie os aquários vinculados à sua conta."
-        :ui="{
-          root: 'isolate overflow-hidden rounded-xl border-0 bg-[#18012c] px-4 py-8 text-center sm:px-8',
-          wrapper: 'lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]',
-          title: 'text-white lg:col-start-2',
-          description: 'mt-2 text-violet-100',
-          links: 'lg:col-start-3 lg:justify-end',
-        }"
+      <CamusBanner
+        titulo="Meus aquários"
+        descricao="Gerencie os aquários vinculados à sua conta."
+        imagem="/papeis-de-parede/violeta/aquarios.webp"
       >
-        <img
-          src="/papeis-de-parede/violeta/aquarios.webp"
-          alt=""
-          class="pointer-events-none absolute inset-0 -z-20 size-full -scale-x-100 object-cover"
-        >
-
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-r from-[#18012c]/15 via-[#18012c]/75 to-[#18012c]/35"
-        />
-
-        <template #links>
+        <template #acoes>
           <UButton
             label="Entrar em aquário"
             icon="i-lucide-log-in"
@@ -38,26 +21,13 @@
             @click="modalAberto = true"
           />
         </template>
-      </UPageHeader>
+      </CamusBanner>
 
-      <USkeleton
-        v-if="carregando"
-        class="h-24 w-full rounded-lg"
-      />
+      <USkeleton v-if="carregando" class="h-24 w-full rounded-lg" />
 
-      <div
-        v-else-if="erroCarregamento"
-        class="space-y-3"
-      >
-        <UAlert
-          color="error"
-          title="Não foi possível carregar os aquários"
-        />
-        <UButton
-          label="Tentar novamente"
-          variant="outline"
-          @click="carregarAquarios"
-        />
+      <div v-else-if="erroCarregamento" class="space-y-3">
+        <UAlert color="error" title="Não foi possível carregar os aquários" />
+        <UButton label="Tentar novamente" variant="outline" @click="carregarAquarios" />
       </div>
 
       <UEmpty
@@ -67,33 +37,15 @@
         description="Seus aquários aparecerão aqui após o cadastro."
       />
 
-      <div
-        v-else
-        class="space-y-8"
-      >
-        <section
-          v-for="grupo in grupos"
-          :key="grupo.titulo"
-          class="space-y-3"
-        >
-          <h2 class="text-lg font-semibold">
-            {{ grupo.titulo }}
-          </h2>
+      <div v-else class="space-y-8">
+        <section v-for="grupo in grupos" :key="grupo.titulo" class="space-y-3">
+          <h2 class="text-lg font-semibold">{{ grupo.titulo }}</h2>
 
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <UCard
-              v-for="aquario in grupo.aquarios"
-              :key="aquario.id"
-            >
+            <UCard v-for="aquario in grupo.aquarios" :key="aquario.id">
               <div class="flex items-start justify-between gap-2">
-                <h3 class="break-words font-semibold">
-                  {{ aquario.nome }}
-                </h3>
-                <UBadge
-                  :label="aquario.papel ?? 'dono'"
-                  color="neutral"
-                  variant="subtle"
-                />
+                <h3 class="break-words font-semibold">{{ aquario.nome }}</h3>
+                <UBadge :label="aquario.papel ?? 'dono'" color="neutral" variant="subtle" />
               </div>
               <p class="mt-1 text-sm text-muted">
                 {{ aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L` }}
@@ -122,21 +74,11 @@
             class="space-y-4"
             @submit="cadastrarAquario"
           >
-            <UFormField
-              label="Nome"
-              name="nome"
-              required
-            >
-              <UInput
-                v-model="formulario.nome"
-                class="w-full"
-              />
+            <UFormField label="Nome" name="nome" required>
+              <UInput v-model="formulario.nome" class="w-full" />
             </UFormField>
 
-            <UFormField
-              label="Volume em litros (opcional)"
-              name="litros"
-            >
+            <UFormField label="Volume em litros (opcional)" name="litros">
               <UInput
                 v-model="formulario.litros"
                 type="number"
@@ -146,11 +88,7 @@
               />
             </UFormField>
 
-            <UButton
-              type="submit"
-              label="Cadastrar"
-              :loading="cadastrando"
-            />
+            <UButton type="submit" label="Cadastrar" :loading="cadastrando" />
           </UForm>
         </template>
       </UModal>
@@ -181,11 +119,7 @@
                 />
               </UFormField>
 
-              <UButton
-                type="submit"
-                label="Entrar com código"
-                :loading="entrando"
-              />
+              <UButton type="submit" label="Entrar com código" :loading="entrando" />
             </UForm>
 
             <USeparator />
@@ -208,11 +142,7 @@
                 />
               </UFormField>
 
-              <UButton
-                type="submit"
-                label="Entrar com convite"
-                :loading="entrando"
-              />
+              <UButton type="submit" label="Entrar com convite" :loading="entrando" />
             </UForm>
           </div>
         </template>

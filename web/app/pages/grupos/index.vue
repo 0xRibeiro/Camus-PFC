@@ -1,29 +1,12 @@
 <template>
-  <div
-    class="flex-1 bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)] [--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)]"
-  >
-    <div class="relative isolate mb-4 flex min-h-36 items-center overflow-hidden rounded-xl bg-[#240f00] px-6 py-8 sm:px-8">
-      <img
-        src="/papeis-de-parede/laranja/grupos.webp"
-        alt=""
-        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
-      >
-
-      <div
-        aria-hidden="true"
-        class="absolute inset-0 -z-10 bg-linear-to-r from-[#240f00]/95 via-[#240f00]/60 to-transparent"
-      />
-
-      <h1 class="text-xl font-semibold text-white">
-        Meus grupos
-      </h1>
-    </div>
+  <div class="flex-1 p-4">
+    <CamusBanner
+      titulo="Meus grupos"
+      imagem="/papeis-de-parede/laranja/grupos.webp"
+    />
 
     <!-- recados do admin: continuam na tela até a pessoa apertar em "Entendi" -->
-    <div
-      v-if="avisos.length"
-      class="space-y-3 mb-6"
-    >
+    <div v-if="avisos.length" class="space-y-3 mb-6">
       <UAlert
         v-for="aviso in avisos"
         :key="aviso.id"
@@ -39,9 +22,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <UCard>
         <template #header>
-          <p class="font-medium">
-            Criar grupo
-          </p>
+          <p class="font-medium">Criar grupo</p>
         </template>
 
         <UForm
@@ -50,14 +31,8 @@
           class="space-y-4"
           @submit="criarGrupo"
         >
-          <UFormField
-            name="nome"
-            label="Nome do grupo"
-          >
-            <UInput
-              v-model="formCriar.nome"
-              class="w-full"
-            />
+          <UFormField name="nome" label="Nome do grupo">
+            <UInput v-model="formCriar.nome" class="w-full" />
           </UFormField>
 
           <UButton
@@ -71,9 +46,7 @@
 
       <UCard>
         <template #header>
-          <p class="font-medium">
-            Entrar em um grupo
-          </p>
+          <p class="font-medium">Entrar em um grupo</p>
         </template>
 
         <UForm
@@ -82,10 +55,7 @@
           class="space-y-4"
           @submit="entrarGrupo"
         >
-          <UFormField
-            name="convite"
-            label="Código de convite"
-          >
+          <UFormField name="convite" label="Código de convite">
             <UInput
               v-model="formEntrar.convite"
               placeholder="Cole o código recebido"
@@ -107,23 +77,12 @@
       </UCard>
     </div>
 
-    <div
-      v-if="loading"
-      class="flex justify-center py-12"
-    >
-      <UIcon
-        name="i-lucide-loader-circle"
-        class="size-6 animate-spin"
-      />
+    <div v-if="loading" class="flex justify-center py-12">
+      <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
     </div>
 
-    <div
-      v-else-if="erroCarregamento"
-      class="space-y-3"
-    >
-      <p class="text-muted">
-        Não foi possível carregar seus grupos.
-      </p>
+    <div v-else-if="erroCarregamento" class="space-y-3">
+      <p class="text-muted">Não foi possível carregar seus grupos.</p>
       <UButton
         label="Tentar novamente"
         color="neutral"
@@ -132,22 +91,14 @@
       />
     </div>
 
-    <p
-      v-else-if="grupos.length === 0"
-      class="text-muted"
-    >
+    <p v-else-if="grupos.length === 0" class="text-muted">
       Você ainda não participa de nenhum grupo. Crie um ou entre usando um convite.
     </p>
 
     <UPageGrid v-else>
-      <UCard
-        v-for="grupo in grupos"
-        :key="grupo.id"
-      >
+      <UCard v-for="grupo in grupos" :key="grupo.id">
         <div class="flex items-center justify-between gap-3">
-          <h2 class="font-medium break-words min-w-0">
-            {{ grupo.nome }}
-          </h2>
+          <h2 class="font-medium break-words min-w-0">{{ grupo.nome }}</h2>
 
           <UBadge
             :color="grupo.id_dono === auth.user?.id ? 'primary' : 'neutral'"

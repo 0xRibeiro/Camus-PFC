@@ -31,6 +31,8 @@ const items: NavigationMenuItem[] = [
     <UNavigationMenu
       :items="items"
       variant="link"
+      class="w-full min-w-0 justify-center lg:w-auto"
+      :ui="{ list: 'flex-wrap justify-center' }"
     />
 
     <template #right>

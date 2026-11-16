@@ -1,16 +1,14 @@
 <template>
-  <div class="relative isolate -m-4 flex flex-1 items-center justify-center overflow-hidden bg-[#10122e] px-4 py-8 sm:px-10 xl:justify-start xl:px-24 2xl:px-32">
-    <img
+  <div class="relative isolate -m-4 flex flex-1 items-start md:items-center justify-center overflow-hidden bg-(--camus-topo) px-4 pt-8 pb-56 md:pb-8 sm:px-10 xl:justify-start xl:px-24 2xl:px-32">
+    <CamusImagem
       src="/papeis-de-parede/avulsos/lula-gigante.webp"
-      alt=""
-      class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-right-bottom lg:object-center"
-    >
+      class="camus-acesso-arte pointer-events-none absolute inset-0 -z-10"
+      img-class="size-full object-cover object-[center_76%] md:object-right-bottom lg:object-center"
+    />
     <UPageCard class="w-full max-w-2xl">
       <div class="space-y-6">
         <div>
-          <h1 class="text-2xl font-bold">
-            Antes de continuar
-          </h1>
+          <h1 class="text-2xl font-bold">Antes de continuar</h1>
 
           <p class="mt-2 text-muted">
             Para continuar utilizando o Camus, você precisa aceitar os

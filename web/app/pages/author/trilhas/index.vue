@@ -1,10 +1,5 @@
 <template>
-  <div
-    class="-m-4 flex-1 p-4"
-    :class="grupoId
-      ? 'bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)]'
-      : 'bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
-  >
+  <div class="flex-1">
     <!-- esse botão só aparece se estivermos em uma rota de grupo -->
     <UButton
       v-if="grupoId"

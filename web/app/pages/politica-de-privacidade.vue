@@ -1,5 +1,5 @@
 <template>
-  <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#fecaca,#fff1f2)] dark:bg-[linear-gradient(to_bottom,#210007,#64242e)]">
+ <div class="-m-4 flex-1">
     <CamusDocumentos
       imagem-esquerda="/papeis-de-parede/vermelho/privacidade-esquerda.webp"
       imagem-direita="/papeis-de-parede/vermelho/privacidade-direita.webp"

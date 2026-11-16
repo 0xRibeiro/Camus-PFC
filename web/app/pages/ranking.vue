@@ -1,33 +1,12 @@
 <template>
-  <div class="mx-auto w-full max-w-4xl space-y-8 [--ui-primary:var(--ui-secondary)]">
-    <div class="relative isolate overflow-hidden rounded-xl bg-[#1b1300] px-6 sm:px-8">
-      <img
-        src="/papeis-de-parede/amarelo/conquistas.webp"
-        alt=""
-        class="pointer-events-none absolute inset-0 -z-20 size-full object-cover object-[72%_center]"
-      >
-
-      <div
-        aria-hidden="true"
-        class="absolute inset-0 -z-10 bg-linear-to-r from-[#1b1300]/95 via-[#1b1300]/60 to-transparent"
-      />
-
-      <UPageHeader
-        title="Ranking"
-        description="Os 50 exploradores com mais XP no Camus."
-        :ui="{ title: 'text-white', description: 'text-amber-100/85' }"
-      >
-        <template #headline>
-          <div class="flex items-center gap-2 text-sm font-medium text-amber-300">
-            <UIcon
-              name="i-lucide-medal"
-              class="size-4"
-            />
-            Comunidade
-          </div>
-        </template>
-      </UPageHeader>
-    </div>
+  <div class="mx-auto w-full max-w-4xl space-y-8">
+    <CamusBanner
+      titulo="Ranking"
+      descricao="Os 50 exploradores com mais XP no Camus."
+      imagem="/papeis-de-parede/amarelo/conquistas.webp"
+      headline="Comunidade"
+      icone="i-lucide-medal"
+    />
 
     <UAlert
       v-if="erro"
@@ -39,33 +18,18 @@
     />
 
     <!-- carregando -->
-    <div
-      v-else-if="carregando"
-      class="space-y-6"
-    >
+    <div v-else-if="carregando" class="space-y-6">
       <div class="grid grid-cols-3 items-end gap-3">
         <USkeleton class="h-48 rounded-xl" />
         <USkeleton class="h-60 rounded-xl" />
         <USkeleton class="h-40 rounded-xl" />
       </div>
-      <USkeleton
-        v-for="i in 5"
-        :key="i"
-        class="h-14 rounded-xl"
-      />
+      <USkeleton v-for="i in 5" :key="i" class="h-14 rounded-xl" />
     </div>
 
-    <UCard
-      v-else-if="!ranking.length"
-      class="text-center"
-    >
-      <UIcon
-        name="i-lucide-trophy"
-        class="size-10 text-primary"
-      />
-      <p class="mt-2 text-muted">
-        Ninguém ganhou XP ainda. Que tal ser o primeiro?
-      </p>
+    <UCard v-else-if="!ranking.length" class="text-center">
+      <UIcon name="i-lucide-trophy" class="size-10 text-primary" />
+      <p class="mt-2 text-muted">Ninguém ganhou XP ainda. Que tal ser o primeiro?</p>
     </UCard>
 
     <template v-else>
@@ -83,10 +47,7 @@
             class="mb-1 size-7 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] sm:size-9"
           />
 
-          <div
-            class="rounded-full p-1"
-            :class="estiloPodio[item.posicao]?.anel"
-          >
+          <div class="rounded-full p-1" :class="estiloPodio[item.posicao]?.anel">
             <UsuarioAvatar
               :avatar="item.avatar"
               :cor-fundo="item.cor_fundo"
@@ -128,11 +89,7 @@
           <span class="w-7 text-right text-sm font-semibold tabular-nums text-muted">
             {{ item.posicao }}º
           </span>
-          <UsuarioAvatar
-            :avatar="item.avatar"
-            :cor-fundo="item.cor_fundo"
-            :tamanho="36"
-          />
+          <UsuarioAvatar :avatar="item.avatar" :cor-fundo="item.cor_fundo" :tamanho="36" />
           <span class="min-w-0 flex-1 truncate font-medium text-highlighted">
             {{ item.username }}
             <UBadge
