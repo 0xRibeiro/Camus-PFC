@@ -71,6 +71,7 @@
 
         <DashboardConquistas
           :conquistas="dados.conquistas_por_quantidade"
+          :total-alunos="dados.total_alunos"
           class="min-w-0"
         />
       </div>

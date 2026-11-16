@@ -145,6 +145,7 @@ export const zConquistaRead = z.object({
 export const zConquistaResumoRead = z.object({
     id: z.int(),
     titulo: z.string(),
+    imagem_dir: z.string(),
     quantidade: z.int()
 });
 
@@ -881,6 +882,7 @@ export const zDashboardRead = z.object({
     totais: zTotaisPeriodoRead,
     totais_anteriores: zTotaisPeriodoRead,
     conquistas_por_quantidade: z.array(zConquistaResumoRead),
+    total_alunos: z.int(),
     total_trilhas_globais: z.int(),
     total_trilhas_de_grupo: z.int()
 });

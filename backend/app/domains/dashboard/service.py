@@ -82,8 +82,8 @@ async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | Non
     contagens_anteriores = await contar_linhas(repo, inicio - tamanho, inicio - timedelta(days=1))
 
     conquistas = []
-    for conquista_id, titulo, quantidade in await repo.contar_conquistas_por_quantidade():
-        conquistas.append(ConquistaResumoRead(id=conquista_id, titulo=titulo, quantidade=quantidade))
+    for conquista_id, titulo, imagem_dir, quantidade in await repo.contar_conquistas_por_quantidade():
+        conquistas.append(ConquistaResumoRead(id=conquista_id, titulo=titulo, imagem_dir=imagem_dir, quantidade=quantidade))
 
     trilhas_globais, trilhas_de_grupo = await repo.contar_trilhas_por_escopo()
     return DashboardRead(
@@ -91,6 +91,7 @@ async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | Non
         totais=somar_totais(contagens),
         totais_anteriores=somar_totais(contagens_anteriores),
         conquistas_por_quantidade=conquistas,
+        total_alunos=await repo.contar_alunos(),
         total_trilhas_globais=trilhas_globais,
         total_trilhas_de_grupo=trilhas_de_grupo,
     )

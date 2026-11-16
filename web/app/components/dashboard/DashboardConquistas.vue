@@ -1,55 +1,90 @@
 <template>
-  <UCard>
+  <UCard :ui="{ body: 'p-0 sm:p-0' }">
     <template #header>
-      <div>
-        <h2 class="font-medium">
-          Conquistas mais e menos obtidas
-        </h2>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="font-medium">
+            {{ mostrarMais ? 'Conquistas mais obtidas' : 'Conquistas menos obtidas' }}
+          </h2>
 
-        <p class="text-sm text-muted">
-          Ordenadas pela quantidade de usuários que as obtiveram.
-        </p>
+          <p class="text-sm text-muted">
+            Porcentagem dos alunos que já desbloquearam.
+          </p>
+        </div>
+
+        <UFieldGroup size="sm">
+          <UButton
+            label="Mais"
+            icon="i-lucide-trending-up"
+            color="neutral"
+            :variant="mostrarMais ? 'solid' : 'outline'"
+            @click="mostrarMais = true"
+          />
+
+          <UButton
+            label="Menos"
+            icon="i-lucide-trending-down"
+            color="neutral"
+            :variant="mostrarMais ? 'outline' : 'solid'"
+            @click="mostrarMais = false"
+          />
+        </UFieldGroup>
       </div>
     </template>
 
-    <div
+    <ol
       v-if="conquistas.length"
-      class="max-h-64 space-y-5 overflow-y-auto"
+      class="max-h-80 divide-y divide-default overflow-y-auto"
       tabindex="0"
-      role="region"
       aria-label="Lista de Conquistas"
     >
-      <div
-        v-for="conquista in conquistas"
+      <li
+        v-for="(conquista, posicao) in lista"
         :key="conquista.id"
-        class="space-y-2"
+        class="flex items-center gap-3 px-4 py-3 sm:px-6"
       >
-        <div class="flex items-center justify-between gap-3">
-          <p class="min-w-0 break-words font-medium">
-            {{ conquista.titulo }}
-          </p>
+        <span class="w-5 shrink-0 text-right text-sm font-medium text-dimmed">
+          {{ posicao + 1 }}
+        </span>
 
-          <span class="shrink-0 text-sm text-muted">
-            {{ conquista.quantidade.toLocaleString('pt-BR') }}
-            {{ conquista.quantidade === 1 ? 'usuário' : 'usuários' }}
-          </span>
-        </div>
-
-        <div
-          class="h-2 overflow-hidden rounded-full bg-elevated"
-          aria-hidden="true"
-        >
-          <div
-            class="h-full rounded-full bg-primary"
-            :style="{ width: `${conquista.quantidade / maiorQuantidade * 100}%` }"
+        <div class="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary/10 text-secondary">
+          <img
+            v-if="conquista.imagem_dir"
+            :src="conquista.imagem_dir"
+            alt=""
+            class="size-full object-cover"
+          >
+          <UIcon
+            v-else
+            name="i-lucide-trophy"
+            class="size-5"
           />
         </div>
-      </div>
-    </div>
+
+        <div class="min-w-0 flex-1 space-y-1.5">
+          <div class="flex items-baseline justify-between gap-3">
+            <p class="truncate font-medium text-highlighted">
+              {{ conquista.titulo }}
+            </p>
+
+            <span class="shrink-0 text-sm font-semibold tabular-nums">
+              {{ formatarPorcentagem(conquista.porcentagem) }}
+            </span>
+          </div>
+
+          <UProgress
+            :model-value="conquista.porcentagem"
+            :max="1"
+            color="secondary"
+            size="sm"
+          />
+        </div>
+      </li>
+    </ol>
 
     <p
       v-else
-      class="text-sm text-muted"
+      class="p-4 text-sm text-muted sm:p-6"
     >
       Nenhuma conquista cadastrada.
     </p>
@@ -61,8 +96,21 @@ import type { ConquistaResumoRead } from '~/types/generated'
 
 const props = defineProps<{
   conquistas: ConquistaResumoRead[]
+  totalAlunos: number
 }>()
 
-// o mínimo de 1 evita divisão por zero quando nenhuma conquista foi obtida
-const maiorQuantidade = computed(() => Math.max(1, ...props.conquistas.map(conquista => conquista.quantidade)))
+const mostrarMais = ref(true)
+
+const formatarPorcentagem = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 }).format
+
+// ja vem ordenada da api, menos so inverte
+const lista = computed(() => {
+  const comPorcentagem = props.conquistas.map(conquista => ({
+    ...conquista,
+    porcentagem: props.totalAlunos ? conquista.quantidade / props.totalAlunos : 0,
+  }))
+
+  if (mostrarMais.value) return comPorcentagem
+  return comPorcentagem.reverse()
+})
 </script>

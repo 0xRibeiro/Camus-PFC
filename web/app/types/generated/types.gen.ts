@@ -280,6 +280,10 @@ export type ConquistaResumoRead = {
      */
     titulo: string;
     /**
+     * Imagem Dir
+     */
+    imagem_dir: string;
+    /**
      * Quantidade
      */
     quantidade: number;
@@ -584,6 +588,10 @@ export type DashboardRead = {
      * Conquistas Por Quantidade
      */
     conquistas_por_quantidade: Array<ConquistaResumoRead>;
+    /**
+     * Total Alunos
+     */
+    total_alunos: number;
     /**
      * Total Trilhas Globais
      */

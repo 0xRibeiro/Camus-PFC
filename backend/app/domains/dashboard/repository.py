@@ -73,15 +73,20 @@ class DashboardRepository:
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
 
-    async def contar_conquistas_por_quantidade(self) -> list[tuple[int, str, int]]:
+    async def contar_conquistas_por_quantidade(self) -> list[tuple[int, str, str, int]]:
         quantidade = func.count(associacao_conquista_usuario.c.usuario_id)
 
         # esse resultado retorna até conquistas ainda não concedidas como 0. também ordena por mais obtidas primeiro.
-        resultado = await self.db.execute(select(Conquista.id, Conquista.titulo, quantidade).outerjoin(associacao_conquista_usuario,
-        associacao_conquista_usuario.c.conquista_id == Conquista.id).group_by(Conquista.id, Conquista.titulo).order_by(quantidade.desc(),
-        Conquista.titulo, Conquista.id))
+        resultado = await self.db.execute(select(Conquista.id, Conquista.titulo, Conquista.imagem_dir, quantidade)
+        .outerjoin(associacao_conquista_usuario, associacao_conquista_usuario.c.conquista_id == Conquista.id)
+        .group_by(Conquista.id).order_by(quantidade.desc(), Conquista.titulo, Conquista.id))
 
-        return [(conquista_id, titulo, total) for conquista_id, titulo, total in resultado.all()]
+        return list(resultado.tuples().all())
+
+    # conta deletado tbm, a conquista dele continua
+    async def contar_alunos(self) -> int:
+        consulta = select(func.count()).select_from(Usuario).where(Usuario.role == RoleUsuario.aluno)
+        return await self.db.scalar(consulta) or 0
 
     # pegando a data direto do postgres pra garantir que seja a mesma pra todos os cálculos.
     async def buscar_data_atual(self) -> date:

@@ -26,6 +26,7 @@ class TotaisPeriodoRead(BaseModel):
 class ConquistaResumoRead(BaseModel):
     id: int
     titulo: str
+    imagem_dir: str
     quantidade: int
 
 
@@ -36,6 +37,8 @@ class DashboardRead(BaseModel):
     totais_anteriores: TotaisPeriodoRead
 
     conquistas_por_quantidade: list[ConquistaResumoRead]
+    # base da % das conquistas
+    total_alunos: int
 
     # mais dados pra dash, diferenciando entre os tipos de trilhas
     total_trilhas_globais: int
