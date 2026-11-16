@@ -36,6 +36,13 @@
           variant="outline"
           :to="trilhaGrupo"
         />
+        <UButton
+          label="Dashboard"
+          icon="i-lucide-chart-spline"
+          color="neutral"
+          variant="outline"
+          :to="trilhaGrupo ? `${trilhaGrupo}/editar/dashboard` : `/author/trilhas/${trilhaId}/dashboard`"
+        />
         <UBadge
           color="neutral"
           variant="soft"

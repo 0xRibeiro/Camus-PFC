@@ -1,27 +1,77 @@
 <template>
   <UCard>
     <template #header>
-      <h2 class="font-medium">
-        IoT
-      </h2>
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 ring ring-emerald-500/25 ring-inset">
+            <UIcon
+              name="i-lucide-cpu"
+              class="size-5"
+            />
+          </div>
+
+          <div>
+            <h2 class="font-medium">
+              Central IoT
+            </h2>
+            <p class="text-xs text-muted">
+              {{ dispositivo ? 'Lê os sensores e liga o aquecedor' : 'Nenhuma central conectada' }}
+            </p>
+          </div>
+        </div>
+
+        <span
+          v-if="dispositivo"
+          class="flex items-center gap-1.5 text-sm font-medium"
+          :class="online ? 'text-success' : 'text-muted'"
+        >
+          <span class="relative flex size-2.5">
+            <span
+              v-if="online"
+              class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75"
+            />
+            <span
+              class="relative inline-flex size-2.5 rounded-full"
+              :class="online ? 'bg-success' : 'bg-neutral-500'"
+            />
+          </span>
+          {{ online ? 'Online' : 'Offline' }}
+        </span>
+      </div>
     </template>
 
     <div
       v-if="dispositivo"
-      class="space-y-3"
+      class="space-y-4"
     >
-      <div class="flex flex-wrap items-center gap-2">
-        <UBadge
-          :color="dispositivo.estado === 'online' ? 'success' : 'neutral'"
-          :label="dispositivo.estado === 'online' ? 'Online' : 'Offline'"
-          variant="subtle"
-        />
-        <span class="text-sm text-muted">{{ dispositivo.mac }}</span>
-      </div>
+      <dl class="grid grid-cols-2 gap-3 text-sm">
+        <div class="rounded-lg bg-elevated/50 p-3">
+          <dt class="text-xs text-muted">
+            Último contato
+          </dt>
+          <dd class="font-medium">
+            {{ haQuanto(dispositivo.ultimo_contato) }}
+          </dd>
+        </div>
 
-      <p class="text-sm text-muted">
-        Último contato: {{ new Date(dispositivo.ultimo_contato).toLocaleString('pt-BR') }}
-      </p>
+        <div class="rounded-lg bg-elevated/50 p-3">
+          <dt class="text-xs text-muted">
+            Firmware
+          </dt>
+          <dd class="font-medium">
+            {{ dispositivo.firmware ?? '—' }}
+          </dd>
+        </div>
+
+        <div class="col-span-2 rounded-lg bg-elevated/50 p-3">
+          <dt class="text-xs text-muted">
+            Endereço (MAC)
+          </dt>
+          <dd class="font-mono font-medium">
+            {{ macFormatado }}
+          </dd>
+        </div>
+      </dl>
 
       <UButton
         v-if="papel === 'dono'"
@@ -113,6 +163,12 @@ const emit = defineEmits<{ atualizado: [dispositivo: DispositivoRead | null] }>(
 
 const api = useApi()
 const toast = useToast()
+
+const haQuanto = useHaQuanto()
+const online = computed(() => props.dispositivo?.estado === 'online')
+
+// vem sem os dois pontos do topico
+const macFormatado = computed(() => props.dispositivo?.mac.match(/.{1,2}/g)?.join(':').toUpperCase() ?? '')
 
 const formulario = reactive({ codigo: '' })
 const enviando = ref(false)

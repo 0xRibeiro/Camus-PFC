@@ -13,6 +13,7 @@ from app.domains.auditoria.router import router as auditoria_router
 from app.domains.aviso.router import router as aviso_router
 from app.domains.conquistas.router import conquista_router
 from app.domains.dashboard.router import router as dashboard_router
+from app.domains.dashboard.router import trilha_router as dashboard_trilha_router
 from app.domains.denuncia.router import admin_router as denuncia_admin_router
 from app.domains.denuncia.router import router as denuncia_router
 from app.domains.grupo.router import router as grupo_router
@@ -90,6 +91,7 @@ for router in (
     conteudo_router,
     questao_router,
     alternativa_router,
+    dashboard_trilha_router,
 ):
     app.include_router(router)
     app.include_router(

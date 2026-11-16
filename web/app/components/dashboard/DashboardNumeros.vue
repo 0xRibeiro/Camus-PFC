@@ -1,7 +1,7 @@
 <template>
   <UPageGrid class="gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <UPageCard
-      v-for="indicador in indicadores"
+      v-for="indicador in lista"
       :key="indicador.titulo"
       :icon="indicador.icone"
       :title="indicador.titulo"
@@ -9,29 +9,63 @@
       :ui="{
         container: 'gap-y-1.5',
         wrapper: 'items-start',
-        leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25',
+        leading: ['p-2.5 rounded-full ring ring-inset', cores[indicador.cor].fundo],
+        leadingIcon: cores[indicador.cor].icone,
         title: 'font-normal text-muted text-xs uppercase',
       }"
     >
-      <span class="text-3xl font-semibold text-highlighted">
-        {{ indicador.valor.toLocaleString('pt-BR') }}
-      </span>
+      <div class="flex items-center gap-2">
+        <span class="text-3xl font-semibold text-highlighted">
+          {{ indicador.texto }}
+        </span>
+
+        <UBadge
+          v-if="indicador.variacao !== null"
+          :color="indicador.variacao >= 0 ? 'success' : 'error'"
+          variant="subtle"
+          class="text-xs"
+        >
+          {{ indicador.variacao >= 0 ? '+' : '' }}{{ indicador.variacao }}%
+        </UBadge>
+      </div>
     </UPageCard>
   </UPageGrid>
 </template>
 
 <script setup lang="ts">
-import type { DashboardRead } from '~/types/generated'
+type Cor = 'primary' | 'secondary' | 'tertiary' | 'quaternary'
+
+export interface Indicador {
+  titulo: string
+  icone: string
+  cor: Cor
+  valor: number
+  // null n mostra o %
+  anterior: number | null
+  formatar?: (valor: number) => string
+}
 
 const props = defineProps<{
-  dados: DashboardRead
+  indicadores: Indicador[]
 }>()
 
-// recalcula os números quando a página tiver novos dados
-const indicadores = computed(() => [
-  { titulo: 'Usuários cadastrados', icone: 'i-lucide-users', valor: props.dados.total_usuarios },
-  { titulo: 'Grupos de estudo', icone: 'i-lucide-users-round', valor: props.dados.total_grupos },
-  { titulo: 'Conquistas concedidas', icone: 'i-lucide-trophy', valor: props.dados.total_conquistas_concedidas },
-  { titulo: 'Trilhas cadastradas', icone: 'i-lucide-route', valor: props.dados.total_trilhas },
-])
+// classes inteiras pro tailwind achar
+const cores: Record<Cor, { fundo: string, icone: string }> = {
+  primary: { fundo: 'bg-primary/10 ring-primary/25', icone: 'text-primary' },
+  secondary: { fundo: 'bg-secondary/10 ring-secondary/25', icone: 'text-secondary' },
+  tertiary: { fundo: 'bg-tertiary/10 ring-tertiary/25', icone: 'text-tertiary' },
+  quaternary: { fundo: 'bg-quaternary/10 ring-quaternary/25', icone: 'text-quaternary' },
+}
+
+// anterior zerado n tem %
+function variacao(atual: number, anterior: number | null) {
+  if (!anterior) return null
+  return Math.round(((atual - anterior) / anterior) * 100)
+}
+
+const lista = computed(() => props.indicadores.map(indicador => ({
+  ...indicador,
+  texto: indicador.formatar ? indicador.formatar(indicador.valor) : indicador.valor.toLocaleString('pt-BR'),
+  variacao: variacao(indicador.valor, indicador.anterior),
+})))
 </script>

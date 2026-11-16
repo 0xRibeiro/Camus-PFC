@@ -85,7 +85,10 @@ class PontoLeitura(BaseModel):
 class SerieLeitura(BaseModel):
     nome: str
     unidade: str
+    # media por janela
     pontos: list[PontoLeitura]
+    # ultima leitura de vdd
+    atual: PontoLeitura | None = None
 
 
 class ModuloIotRead(BaseModel):

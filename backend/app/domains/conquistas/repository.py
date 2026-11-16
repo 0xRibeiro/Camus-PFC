@@ -46,3 +46,13 @@ class ConquistaRepository:
         )
         await self.db.commit()
         return conquista
+
+    # diz se o usuario ja tem essa conquista
+    async def usuario_tem(self, user_id: int, conquista_id: int) -> bool:
+        existente = await self.db.scalar(
+            select(associacao_conquista_usuario.c.conquista_id).where(
+                associacao_conquista_usuario.c.usuario_id == user_id,
+                associacao_conquista_usuario.c.conquista_id == conquista_id,
+            )
+        )
+        return existente is not None

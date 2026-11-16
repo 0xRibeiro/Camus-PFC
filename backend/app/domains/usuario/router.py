@@ -7,6 +7,7 @@ from app.domains.usuario import service
 from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
+    AvatarRead,
     ForgotPasswordInput,
     RefreshInput,
     ResetPasswordInput,
@@ -90,6 +91,15 @@ async def reset_password(
 @router.get("/avatares", response_model=list[str], tags=["usuarios"])
 async def listar_avatares() -> list[str]:
     return list(AVATARES)
+
+
+# os avatares do ponto de vista de quem tá logado: quais já liberou e quais faltam
+@router.get("/usuarios/me/avatares", response_model=list[AvatarRead], tags=["usuarios"])
+async def listar_meus_avatares(
+    db: AsyncSession = Depends(get_async_session),
+    user: Usuario = Depends(service.get_current_user),
+) -> list[AvatarRead]:
+    return await service.listar_avatares_usuario(db, user)
 
 @router.get("/usuarios/me", response_model=UsuarioRead, tags=["usuarios"])
 async def read_me(user: Usuario = Depends(service.get_current_user)) -> Usuario:

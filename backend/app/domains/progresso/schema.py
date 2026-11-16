@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from app.domains.conquistas.schema import ConquistaRead
 from app.domains.trilha.model import ConteudoTipo
 
 
@@ -72,6 +73,8 @@ class ConteudoAlunoRead(BaseModel):
 ###### concluir e responder
 class ConclusaoRead(BaseModel):
     xp_ganho: int
+    # conquistas ganhas agora, o front usa pra mostrar o toast
+    conquistas_novas: list[ConquistaRead] = []
 
 
 # respostas no formato {questao_id: alternativa_id}
@@ -91,3 +94,5 @@ class ResultadoQuizRead(BaseModel):
     total: int
     xp_ganho: int
     correcao: list[CorrecaoQuestaoRead]
+    # conquistas ganhas agora, o front usa pra mostrar o toast
+    conquistas_novas: list[ConquistaRead] = []

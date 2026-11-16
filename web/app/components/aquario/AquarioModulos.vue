@@ -1,139 +1,102 @@
 <template>
-  <UCard>
-    <template #header>
-      <h2 class="font-medium">
-        Sensores
-      </h2>
-    </template>
+  <section class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-lg font-semibold">
+          Sensores
+        </h2>
 
-    <USkeleton
+        <!-- so a ultima hora atualiza rapido -->
+        <span
+          v-if="minutos === 60"
+          class="flex items-center gap-1.5 text-xs text-muted"
+        >
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
+            <span class="relative inline-flex size-2 rounded-full bg-success" />
+          </span>
+          ao vivo
+        </span>
+      </div>
+
+      <USelect
+        v-model="minutos"
+        :items="periodos"
+        class="w-40"
+      />
+    </div>
+
+    <div
       v-if="carregando"
-      class="h-20 w-full"
-    />
-
-    <p
-      v-else-if="modulos.length === 0"
-      class="text-sm text-muted"
+      class="grid gap-4 lg:grid-cols-2"
     >
-      Nenhum módulo conectado no IoT.
-    </p>
+      <USkeleton class="h-96 w-full rounded-lg" />
+      <USkeleton class="h-96 w-full rounded-lg" />
+    </div>
+
+    <UCard v-else-if="modulos.length === 0">
+      <p class="text-sm text-muted">
+        Nenhum módulo conectado no IoT.
+      </p>
+    </UCard>
 
     <div
       v-else
-      class="space-y-6"
+      class="grid gap-4 lg:grid-cols-2"
     >
-      <div
+      <template
         v-for="modulo in modulos"
         :key="modulo.serial"
-        class="space-y-3"
       >
-        <div class="flex items-center gap-2">
-          <span class="font-medium">{{ NOMES_TIPO[modulo.tipo] ?? 'Módulo' }}</span>
-          <span class="text-xs text-muted">{{ modulo.serial }}</span>
+        <AquarioTemperatura
+          v-if="modulo.tipo === TIPO_TEMPERATURA"
+          :modulo="modulo"
+          :minutos="minutosCarregados"
+          :pode-editar="podeEditar"
+          :pendente="pendentes[modulo.serial]"
+          @comandar="comandar(modulo.serial, $event)"
+        />
 
-          <!-- so atuador tem ligado, fica cinza ate o esp confirmar -->
-          <USwitch
-            v-if="modulo.ligado !== null && modulo.ligado !== undefined"
-            class="ml-auto"
-            :model-value="pendentes[modulo.serial] ?? modulo.ligado"
-            :loading="pendentes[modulo.serial] !== undefined"
-            :disabled="!podeEditar || pendentes[modulo.serial] !== undefined"
-            :label="(pendentes[modulo.serial] ?? modulo.ligado) ? 'Relé ligado' : 'Relé desligado'"
-            @update:model-value="comandar(modulo.serial, $event)"
-          />
-        </div>
-
-        <p
-          v-if="modulo.series.length === 0"
-          class="text-sm text-muted"
-        >
-          Sem leituras na última hora.
-        </p>
-
-        <div
-          v-for="serie in modulo.series"
-          :key="serie.nome"
-          class="space-y-1"
-        >
-          <div class="flex items-baseline justify-between gap-2">
-            <span class="text-3xl font-semibold">
-              {{ ultimo(serie)?.valor.toFixed(1) }} {{ serie.unidade }}
-            </span>
-            <span class="text-xs text-muted">
-              {{ haQuanto(ultimo(serie)?.tempo) }}
-            </span>
-          </div>
-
-          <svg
-            viewBox="0 0 300 60"
-            preserveAspectRatio="none"
-            class="h-16 w-full text-primary"
-          >
-            <polyline
-              :points="linha(serie)"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              vector-effect="non-scaling-stroke"
-            />
-          </svg>
-        </div>
-      </div>
+        <AquarioNivel
+          v-else-if="modulo.tipo === TIPO_DISTANCIA"
+          :modulo="modulo"
+          :minutos="minutosCarregados"
+        />
+      </template>
     </div>
-  </UCard>
+  </section>
 </template>
 
 <script setup lang="ts">
 import { FetchError } from 'ofetch'
-import type { ModuloIotRead, PontoLeitura, SerieLeitura } from '~/types/generated'
+import type { ModuloIotRead } from '~/types/generated'
 
 const props = defineProps<{ aquarioId: number, podeEditar: boolean }>()
 
-const NOMES_TIPO: Record<number, string> = { 1: 'Distância', 2: 'Temperatura' }
+// igual ao TipoModulo do back
+const TIPO_DISTANCIA = 1
+const TIPO_TEMPERATURA = 2
 
 // esp confirma em ~1s, o polling de 5s traz o estado novo
 const ESPERA_CONFIRMACAO_MS = 15000
+
+const periodos = [
+  { label: 'Última hora', value: 60 },
+  { label: 'Últimas 6 horas', value: 360 },
+  { label: 'Últimas 24 horas', value: 1440 },
+]
 
 const api = useApi()
 const toast = useToast()
 const modulos = ref<ModuloIotRead[]>([])
 const carregando = ref(true)
-const agora = useNow({ interval: 1000 })
+const minutos = ref(60)
+
+// rotulo do grafico so muda junto com os dados
+const minutosCarregados = ref(minutos.value)
 
 // serial -> estado pedido, sai qnd o esp confirma ou estoura o tempo
 const pendentes = ref<Record<string, boolean>>({})
-
-function ultimo(serie: SerieLeitura): PontoLeitura | undefined {
-  return serie.pontos[serie.pontos.length - 1]
-}
-
-function haQuanto(tempo: string | undefined): string {
-  if (!tempo) return ''
-
-  const segundos = Math.max(0, Math.round((agora.value.getTime() - new Date(tempo).getTime()) / 1000))
-  if (segundos < 60) return `há ${segundos}s`
-  return `há ${Math.floor(segundos / 60)} min`
-}
-
-// grafico simples, x pela ordem e y entre o menor e o maior valor
-function linha(serie: SerieLeitura): string {
-  let menor = Infinity
-  let maior = -Infinity
-  for (const ponto of serie.pontos) {
-    menor = Math.min(menor, ponto.valor)
-    maior = Math.max(maior, ponto.valor)
-  }
-
-  const faixa = maior - menor || 1
-  const passo = 300 / Math.max(1, serie.pontos.length - 1)
-
-  const coordenadas: string[] = []
-  serie.pontos.forEach((ponto, indice) => {
-    const y = 58 - ((ponto.valor - menor) / faixa) * 56
-    coordenadas.push(`${indice * passo},${y}`)
-  })
-  return coordenadas.join(' ')
-}
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {
@@ -178,8 +141,11 @@ async function comandar(serial: string, ligar: boolean) {
 }
 
 async function carregar() {
+  const pedido = minutos.value
+
   try {
-    modulos.value = await api(`/aquarios/${props.aquarioId}/modulos`)
+    modulos.value = await api(`/aquarios/${props.aquarioId}/modulos`, { query: { minutos: pedido } })
+    minutosCarregados.value = pedido
     limparConfirmados()
   }
   catch {
@@ -190,6 +156,8 @@ async function carregar() {
   }
 }
 
+// estado do aquecedor sempre a cada 5s, periodo longo n muda tao rapido mas o rele precisa
 useIntervalFn(carregar, 5000)
+watch(minutos, carregar)
 onMounted(carregar)
 </script>

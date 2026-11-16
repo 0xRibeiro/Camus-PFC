@@ -1,8 +1,31 @@
 <template>
-  <section class="space-y-4">
+  <UCard :ui="{ body: 'space-y-4' }">
+    <template #header>
+      <div class="flex items-center gap-3">
+        <div class="flex size-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-500 ring ring-sky-500/25 ring-inset">
+          <UIcon
+            name="i-lucide-fish"
+            class="size-5"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-medium">
+            Peixes
+          </h2>
+          <p
+            v-if="peixes"
+            class="text-xs text-muted"
+          >
+            {{ peixes.length }} {{ peixes.length === 1 ? 'peixe' : 'peixes' }} no aquário
+          </p>
+        </div>
+      </div>
+    </template>
+
     <USkeleton
       v-if="carregando"
-      class="h-52 w-full rounded-xl"
+      class="h-40 w-full rounded-xl"
     />
 
     <div
@@ -22,7 +45,8 @@
     </div>
 
     <template v-else>
-      <div class="flex min-h-52 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 p-6">
+      <!-- agua com degrade -->
+      <div class="relative flex min-h-40 items-center justify-center overflow-hidden rounded-xl bg-linear-to-b from-sky-400/15 via-sky-500/15 to-blue-700/30 p-6 ring ring-sky-500/30 ring-inset">
         <p
           v-if="!peixes.length"
           class="text-sm text-muted"
@@ -41,7 +65,7 @@
           >
             <span
               aria-hidden="true"
-              class="block text-3xl"
+              class="block text-4xl"
             >
               {{ emojisPorEspecie[peixe.especie] ?? '🐟' }}
             </span>
@@ -61,7 +85,7 @@
         v-if="podeEditar"
         :schema="zPeixeCreate"
         :state="formulario"
-        class="space-y-3"
+        class="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
         @submit="cadastrarPeixe"
       >
         <UFormField
@@ -91,13 +115,15 @@
 
         <UButton
           type="submit"
-          label="Adicionar peixe"
+          label="Adicionar"
+          icon="i-lucide-plus"
           :loading="cadastrando"
           :disabled="!formulario.nome.trim() || !formulario.especie"
+          class="justify-center"
         />
       </UForm>
     </template>
-  </section>
+  </UCard>
 </template>
 
 <script setup lang="ts">

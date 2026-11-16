@@ -66,6 +66,28 @@ export type AlternativaCreate = {
 };
 
 /**
+ * AlternativaEscolhaRead
+ */
+export type AlternativaEscolhaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Texto
+     */
+    texto: string;
+    /**
+     * Correta
+     */
+    correta: boolean;
+    /**
+     * Escolhas
+     */
+    escolhas: number;
+};
+
+/**
  * AlternativaRead
  */
 export type AlternativaRead = {
@@ -146,6 +168,28 @@ export type AquarioRead = {
 };
 
 /**
+ * AvatarRead
+ */
+export type AvatarRead = {
+    /**
+     * Chave
+     */
+    chave: string;
+    /**
+     * Liberado
+     */
+    liberado: boolean;
+    /**
+     * Conquista Id
+     */
+    conquista_id?: number | null;
+    /**
+     * Conquista
+     */
+    conquista?: string | null;
+};
+
+/**
  * AvisoRead
  */
 export type AvisoRead = {
@@ -188,20 +232,6 @@ export type BodyEnviarImagemImagensPost = {
 };
 
 /**
- * CadastroDiaRead
- */
-export type CadastroDiaRead = {
-    /**
-     * Data
-     */
-    data: string;
-    /**
-     * Quantidade
-     */
-    quantidade: number;
-};
-
-/**
  * CadastroDispositivo
  */
 export type CadastroDispositivo = {
@@ -239,6 +269,10 @@ export type ConclusaoRead = {
      * Xp Ganho
      */
     xp_ganho: number;
+    /**
+     * Conquistas Novas
+     */
+    conquistas_novas?: Array<ConquistaRead>;
 };
 
 /**
@@ -293,6 +327,10 @@ export type ConquistaResumoRead = {
      * Titulo
      */
     titulo: string;
+    /**
+     * Imagem Dir
+     */
+    imagem_dir: string;
     /**
      * Quantidade
      */
@@ -401,6 +439,32 @@ export type ConteudoCreate = {
     artigo_conteudo?: {
         [key: string]: unknown;
     } | null;
+};
+
+/**
+ * ConteudoFunilRead
+ */
+export type ConteudoFunilRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Tipo
+     */
+    tipo: string;
+    /**
+     * Modulo
+     */
+    modulo: string;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
 };
 
 /**
@@ -585,33 +649,63 @@ export type CredencialDispositivo = {
 };
 
 /**
+ * DashboardConteudoRead
+ */
+export type DashboardConteudoRead = {
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Tipo
+     */
+    tipo: string;
+    /**
+     * Trilha Id
+     */
+    trilha_id: number;
+    /**
+     * Evolucao
+     */
+    evolucao: Array<PontoEvolucaoConteudoRead>;
+    totais: TotaisConteudoRead;
+    totais_anteriores: TotaisConteudoRead;
+    /**
+     * Iniciaram Trilha
+     */
+    iniciaram_trilha: number;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
+    /**
+     * Notas
+     */
+    notas: Array<NotaQuizRead>;
+    /**
+     * Questoes
+     */
+    questoes: Array<QuestaoAcertoRead>;
+};
+
+/**
  * DashboardRead
  */
 export type DashboardRead = {
     /**
-     * Total Usuarios
+     * Evolucao
      */
-    total_usuarios: number;
-    /**
-     * Total Grupos
-     */
-    total_grupos: number;
-    /**
-     * Total Conquistas Concedidas
-     */
-    total_conquistas_concedidas: number;
-    /**
-     * Total Trilhas
-     */
-    total_trilhas: number;
-    /**
-     * Cadastros Por Dia
-     */
-    cadastros_por_dia: Array<CadastroDiaRead>;
+    evolucao: Array<PontoEvolucaoRead>;
+    totais: TotaisPeriodoRead;
+    totais_anteriores: TotaisPeriodoRead;
     /**
      * Conquistas Por Quantidade
      */
     conquistas_por_quantidade: Array<ConquistaResumoRead>;
+    /**
+     * Total Alunos
+     */
+    total_alunos: number;
     /**
      * Total Trilhas Globais
      */
@@ -620,6 +714,23 @@ export type DashboardRead = {
      * Total Trilhas De Grupo
      */
     total_trilhas_de_grupo: number;
+};
+
+/**
+ * DashboardTrilhaRead
+ */
+export type DashboardTrilhaRead = {
+    /**
+     * Evolucao
+     */
+    evolucao: Array<PontoEvolucaoTrilhaRead>;
+    totais: TotaisTrilhaRead;
+    totais_anteriores: TotaisTrilhaRead;
+    engajamento: EngajamentoTrilhaRead;
+    /**
+     * Funil
+     */
+    funil: Array<ConteudoFunilRead>;
 };
 
 /**
@@ -888,6 +999,24 @@ export type DocumentoPendente = {
 };
 
 /**
+ * EngajamentoTrilhaRead
+ */
+export type EngajamentoTrilhaRead = {
+    /**
+     * Base
+     */
+    base: number;
+    /**
+     * Iniciaram
+     */
+    iniciaram: number;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
+};
+
+/**
  * Especie
  */
 export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
@@ -1079,6 +1208,14 @@ export type MembroAquarioRead = {
      * Username
      */
     username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
     papel: PapelAquario;
 };
 
@@ -1214,6 +1351,20 @@ export type MotivoCreate = {
 };
 
 /**
+ * NotaQuizRead
+ */
+export type NotaQuizRead = {
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+};
+
+/**
  * OpcaoRead
  */
 export type OpcaoRead = {
@@ -1277,6 +1428,72 @@ export type PeixeRead = {
 };
 
 /**
+ * PontoEvolucaoConteudoRead
+ */
+export type PontoEvolucaoConteudoRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+};
+
+/**
+ * PontoEvolucaoRead
+ */
+export type PontoEvolucaoRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Alunos
+     */
+    alunos: number;
+    /**
+     * Dispositivos
+     */
+    dispositivos: number;
+    /**
+     * Trilhas
+     */
+    trilhas: number;
+    /**
+     * Grupos
+     */
+    grupos: number;
+};
+
+/**
+ * PontoEvolucaoTrilhaRead
+ */
+export type PontoEvolucaoTrilhaRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Novos
+     */
+    novos: number;
+    /**
+     * Terminaram
+     */
+    terminaram: number;
+};
+
+/**
  * PontoLeitura
  */
 export type PontoLeitura = {
@@ -1288,6 +1505,32 @@ export type PontoLeitura = {
      * Valor
      */
     valor: number;
+};
+
+/**
+ * QuestaoAcertoRead
+ */
+export type QuestaoAcertoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Enunciado
+     */
+    enunciado: string;
+    /**
+     * Respostas
+     */
+    respostas: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Alternativas
+     */
+    alternativas: Array<AlternativaEscolhaRead>;
 };
 
 /**
@@ -1533,6 +1776,10 @@ export type ResultadoQuizRead = {
      * Correcao
      */
     correcao: Array<CorrecaoQuestaoRead>;
+    /**
+     * Conquistas Novas
+     */
+    conquistas_novas?: Array<ConquistaRead>;
 };
 
 /**
@@ -1652,6 +1899,7 @@ export type SerieLeitura = {
      * Pontos
      */
     pontos: Array<PontoLeitura>;
+    atual?: PontoLeitura | null;
 };
 
 /**
@@ -1690,6 +1938,76 @@ export type TokenPair = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * TotaisConteudoRead
+ */
+export type TotaisConteudoRead = {
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+    /**
+     * Alunos Quiz
+     */
+    alunos_quiz: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Questoes
+     */
+    questoes: number;
+};
+
+/**
+ * TotaisPeriodoRead
+ */
+export type TotaisPeriodoRead = {
+    /**
+     * Alunos
+     */
+    alunos: number;
+    /**
+     * Dispositivos
+     */
+    dispositivos: number;
+    /**
+     * Trilhas
+     */
+    trilhas: number;
+    /**
+     * Grupos
+     */
+    grupos: number;
+};
+
+/**
+ * TotaisTrilhaRead
+ */
+export type TotaisTrilhaRead = {
+    /**
+     * Alunos Ativos
+     */
+    alunos_ativos: number;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Novos
+     */
+    novos: number;
+    /**
+     * Terminaram
+     */
+    terminaram: number;
 };
 
 /**
@@ -2442,6 +2760,24 @@ export type ListarAvataresAvataresGetResponses = {
 
 export type ListarAvataresAvataresGetResponse = ListarAvataresAvataresGetResponses[keyof ListarAvataresAvataresGetResponses];
 
+export type ListarMeusAvataresUsuariosMeAvataresGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/avatares';
+};
+
+export type ListarMeusAvataresUsuariosMeAvataresGetResponses = {
+    /**
+     * Response Listar Meus Avatares Usuarios Me Avatares Get
+     *
+     * Successful Response
+     */
+    200: Array<AvatarRead>;
+};
+
+export type ListarMeusAvataresUsuariosMeAvataresGetResponse = ListarMeusAvataresUsuariosMeAvataresGetResponses[keyof ListarMeusAvataresUsuariosMeAvataresGetResponses];
+
 export type DeleteMeUsuariosMeDeleteData = {
     body?: never;
     path?: never;
@@ -3019,9 +3355,17 @@ export type ObterDashboardAdminDashboardGetData = {
     path?: never;
     query?: {
         /**
-         * Dias
+         * Inicio
          */
-        dias?: number;
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
     };
     url: '/admin/dashboard';
 };
@@ -5943,6 +6287,186 @@ export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchResponses = {
      */
     200: unknown;
 };
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/trilhas/{id}/dashboard';
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetError = ObterDashboardTrilhaTrilhasIdDashboardGetErrors[keyof ObterDashboardTrilhaTrilhasIdDashboardGetErrors];
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardTrilhaRead;
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetResponse = ObterDashboardTrilhaTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaTrilhasIdDashboardGetResponses];
+
+export type ObterDashboardConteudoConteudosIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/conteudos/{id}/dashboard';
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetError = ObterDashboardConteudoConteudosIdDashboardGetErrors[keyof ObterDashboardConteudoConteudosIdDashboardGetErrors];
+
+export type ObterDashboardConteudoConteudosIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardConteudoRead;
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetResponse = ObterDashboardConteudoConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoConteudosIdDashboardGetResponses];
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/grupos/{grupo_id}/trilhas/{id}/dashboard';
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetError = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors];
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardTrilhaRead;
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses];
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/grupos/{grupo_id}/conteudos/{id}/dashboard';
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetError = ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors[keyof ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors];
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardConteudoRead;
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses];
 
 export type EnviarImagemGruposGrupoIdImagensPostData = {
     body: BodyEnviarImagemGruposGrupoIdImagensPost;

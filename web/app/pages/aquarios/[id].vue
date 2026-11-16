@@ -1,6 +1,6 @@
 <template>
   <div class="flex-1">
-    <div class="mx-auto w-full max-w-4xl space-y-6 p-4">
+    <div class="mx-auto w-full max-w-6xl space-y-6 p-4">
       <UButton
         to="/aquarios"
         label="Voltar aos aquários"
@@ -20,10 +20,37 @@
       />
 
       <template v-else>
-        <UPageHeader
-          :title="aquario.nome"
-          :description="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} L`"
-        />
+        <div class="space-y-3 border-b border-default pb-6">
+          <h1 class="text-3xl font-bold text-highlighted wrap-anywhere">
+            {{ aquario.nome }}
+          </h1>
+
+          <div class="flex flex-wrap gap-2">
+            <UBadge
+              icon="i-lucide-droplets"
+              :label="aquario.litros === null ? 'Volume não informado' : `${aquario.litros} litros`"
+              color="info"
+              variant="subtle"
+              size="lg"
+            />
+
+            <UBadge
+              :icon="aquario.dispositivo ? 'i-lucide-wifi' : 'i-lucide-wifi-off'"
+              :label="textoIot"
+              :color="aquario.dispositivo?.estado === 'online' ? 'success' : 'neutral'"
+              variant="subtle"
+              size="lg"
+            />
+
+            <UBadge
+              :icon="papeis[aquario.papel ?? 'dono'].icone"
+              :label="`Você é ${papeis[aquario.papel ?? 'dono'].nome}`"
+              color="neutral"
+              variant="subtle"
+              size="lg"
+            />
+          </div>
+        </div>
 
         <AquarioModulos
           v-if="aquario.dispositivo"
@@ -59,7 +86,7 @@ import AquarioIot from '~/components/aquario/AquarioIot.vue'
 import AquarioMembros from '~/components/aquario/AquarioMembros.vue'
 import AquarioModulos from '~/components/aquario/AquarioModulos.vue'
 import AquarioPeixes from '~/components/peixes/AquarioPeixes.vue'
-import type { AquarioRead, DispositivoRead } from '~/types/generated'
+import type { AquarioRead, DispositivoRead, PapelAquario } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', key: route => route.path })
 
@@ -67,6 +94,17 @@ const route = useRoute()
 const api = useApi()
 const aquario = ref<AquarioRead | null>(null)
 const carregando = ref(true)
+
+const papeis: Record<PapelAquario, { nome: string, icone: string }> = {
+  dono: { nome: 'dono', icone: 'i-lucide-crown' },
+  operador: { nome: 'operador', icone: 'i-lucide-wrench' },
+  leitor: { nome: 'leitor', icone: 'i-lucide-eye' },
+}
+
+const textoIot = computed(() => {
+  if (!aquario.value?.dispositivo) return 'Sem IoT'
+  return aquario.value.dispositivo.estado === 'online' ? 'IoT online' : 'IoT offline'
+})
 
 function atualizarDispositivo(dispositivo: DispositivoRead | null) {
   if (aquario.value) {

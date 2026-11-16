@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { AlternativaAlunoRead, QuestaoAlunoRead, ResultadoQuizRead } from '~/types/generated'
 
+const conquistasStore = useConquistasStore()
+
 const props = defineProps<{
   conteudoId: number
   questoes: QuestaoAlunoRead[]
@@ -52,6 +54,8 @@ async function onEnviar() {
       method: 'POST',
       body: { respostas: respostas.value },
     })
+    // mostra o toast das conquistas que o backend concedeu agora
+    resposta.conquistas_novas?.forEach(c => conquistasStore.notificarDesbloqueio(c))
     resultado.value = resposta
     emit('respondeu', resposta)
   }

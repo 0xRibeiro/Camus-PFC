@@ -16,7 +16,10 @@
           />
 
           <div class="min-w-0 flex-1 space-y-3">
-            <UFormField label="Nome de usuário" :error="erroUsername">
+            <UFormField
+              label="Nome de usuário"
+              :error="erroUsername"
+            >
               <UInput
                 v-model="username"
                 class="w-full"
@@ -25,13 +28,22 @@
               />
             </UFormField>
 
-            <p class="truncate text-sm text-muted">{{ auth.user?.email }}</p>
-            <UBadge :label="auth.user?.role" variant="subtle" />
+            <p class="truncate text-sm text-muted">
+              {{ auth.user?.email }}
+            </p>
+            <UBadge
+              :label="auth.user?.role"
+              variant="subtle"
+            />
           </div>
 
           <!-- seletor de cor do nuxt ui, abre num popover -->
           <UPopover>
-            <UButton label="Cor de fundo" color="neutral" variant="outline">
+            <UButton
+              label="Cor de fundo"
+              color="neutral"
+              variant="outline"
+            >
               <template #leading>
                 <span
                   class="size-3 rounded-full border border-default"
@@ -68,21 +80,42 @@
 
       <UCard>
         <template #header>
-          <p class="font-medium">Avatar</p>
+          <p class="font-medium">
+            Avatar
+          </p>
         </template>
 
         <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
-          <button
-            v-for="chave in avatares"
-            :key="chave"
-            type="button"
-            class="flex justify-center rounded-xl p-2 transition hover:bg-elevated"
-            :class="chave === avatarEscolhido ? 'ring-2 ring-primary' : ''"
-            :aria-label="chave"
-            @click="avatarEscolhido = chave"
+          <UTooltip
+            v-for="item in avatares"
+            :key="item.chave"
+            :text="`Conquista: ${item.conquista}`"
+            :disabled="item.liberado"
           >
-            <UsuarioAvatar :avatar="chave" :cor-fundo="cor" :tamanho="64" />
-          </button>
+            <button
+              type="button"
+              class="relative flex justify-center rounded-xl p-2 transition"
+              :class="[
+                item.chave === avatarEscolhido ? 'ring-2 ring-primary' : '',
+                item.liberado ? 'hover:bg-elevated' : 'cursor-not-allowed',
+              ]"
+              :aria-label="item.liberado ? item.chave : `${item.chave} (bloqueado)`"
+              :disabled="!item.liberado"
+              @click="avatarEscolhido = item.chave"
+            >
+              <UsuarioAvatar
+                :avatar="item.chave"
+                :cor-fundo="cor"
+                :tamanho="64"
+                :class="item.liberado ? '' : 'opacity-40 grayscale'"
+              />
+              <UIcon
+                v-if="!item.liberado"
+                name="i-lucide-lock"
+                class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2"
+              />
+            </button>
+          </UTooltip>
         </div>
       </UCard>
 
@@ -100,7 +133,9 @@
       <UCard v-if="auth.role !== 'admin'">
         <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <p class="font-medium text-highlighted">Excluir conta</p>
+            <p class="font-medium text-highlighted">
+              Excluir conta
+            </p>
             <p class="text-sm text-muted">
               Seus dados pessoais serão anonimizados e você não conseguirá mais entrar.
             </p>
@@ -121,7 +156,12 @@
         description="Essa ação não pode ser desfeita. Seu nome de usuário e e-mail serão removidos e o acesso encerrado."
       >
         <template #footer="{ close }">
-          <UButton label="Cancelar" color="neutral" variant="outline" @click="close" />
+          <UButton
+            label="Cancelar"
+            color="neutral"
+            variant="outline"
+            @click="close"
+          />
           <UButton
             label="Excluir minha conta"
             color="error"
@@ -141,7 +181,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ConquistaRead } from '~/types/generated'
+import type { AvatarRead, ConquistaRead } from '~/types/generated/types.gen'
 
 // so exige estar logado, qualquer papel
 definePageMeta({ middleware: 'role' })
@@ -151,7 +191,7 @@ const toast = useToast()
 
 const conquistas = useConquistasStore()
 
-const avatares = ref<string[]>([])
+const avatares = ref<AvatarRead[]>([])
 const avatarEscolhido = ref(auth.user?.avatar ?? 'peixe-palhaco')
 
 // a cor salva pode vir #RRGGBBAA, o picker so entende #RRGGBB entao separa o alfa
@@ -219,7 +259,7 @@ const mudou = computed(() =>
 onMounted(async () => {
   const api = useApi()
   try {
-    avatares.value = await api('/avatares')
+    avatares.value = await api('/usuarios/me/avatares')
   }
   catch {
     toast.add({ title: 'Não foi possível carregar os avatares', color: 'error' })

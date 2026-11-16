@@ -6,15 +6,11 @@
       imagem="/papeis-de-parede/azul/admin.webp"
     />
 
-    <div class="mb-6 flex flex-wrap items-end gap-3">
-      <UFormField label="Período dos cadastros">
-        <USelect
-          v-model="dias"
-          :items="periodos"
-          :disabled="loading"
-          class="w-44"
-        />
-      </UFormField>
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <DashboardFiltro
+        v-model:periodo="periodo"
+        v-model:agrupamento="agrupamento"
+      />
 
       <UButton
         label="Atualizar"
@@ -55,7 +51,15 @@
       v-else-if="dados"
       class="space-y-6"
     >
-      <DashboardNumeros :dados="dados" />
+      <DashboardEvolucao
+        :evolucao="dados.evolucao"
+        :linhas="linhas"
+        descricao="Novos cadastros de alunos, dispositivos IoT, trilhas e grupos."
+        :agrupamento="agrupamentoCarregado"
+        class="min-w-0"
+      />
+
+      <DashboardNumeros :indicadores="indicadores" />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DashboardTrilhas
@@ -66,12 +70,8 @@
 
         <DashboardConquistas
           :conquistas="dados.conquistas_por_quantidade"
+          :total-alunos="dados.total_alunos"
           class="min-w-0"
-        />
-
-        <DashboardCadastros
-          :cadastros="dados.cadastros_por_dia"
-          class="min-w-0 lg:col-span-2"
         />
       </div>
     </div>
@@ -79,46 +79,30 @@
 </template>
 
 <script setup lang="ts">
-import { FetchError } from 'ofetch'
+import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
 import type { DashboardRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
-const api = useApi()
-const dados = ref<DashboardRead | null>(null)
-const loading = ref(true)
-const erro = ref('')
+const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, fetchDashboard } = useDashboard<DashboardRead>('/admin/dashboard')
 
-const dias = ref(30)
-
-const periodos = [
-  { label: 'Últimos 7 dias', value: 7 },
-  { label: 'Últimos 30 dias', value: 30 },
-  { label: 'Últimos 90 dias', value: 90 },
+// msm cor nas linhas e nos cards
+const linhas = [
+  { key: 'alunos', label: 'Alunos', color: 'primary' },
+  { key: 'dispositivos', label: 'Dispositivos IoT', color: 'secondary' },
+  { key: 'trilhas', label: 'Trilhas', color: 'tertiary' },
+  { key: 'grupos', label: 'Grupos', color: 'quaternary' },
 ]
 
-async function fetchDashboard() {
-  loading.value = true
-  erro.value = ''
+const indicadores = computed<Indicador[]>(() => {
+  if (!dados.value) return []
+  const { totais, totais_anteriores: anteriores } = dados.value
 
-  try {
-    dados.value = await api('/admin/dashboard', { query: { dias: dias.value } })
-  }
-  catch (error) {
-    erro.value = 'Não foi possível carregar a dashboard'
-
-    if (error instanceof FetchError && typeof error.data?.detail === 'string') {
-      erro.value = error.data.detail
-    }
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-// consulta novamente quando o período selecionado mudar
-watch(dias, fetchDashboard)
-
-// primeira consulta ao abrir a página
-onMounted(fetchDashboard)
+  return [
+    { titulo: 'Alunos novos', icone: 'i-lucide-users', cor: 'primary', valor: totais.alunos, anterior: anteriores.alunos },
+    { titulo: 'Dispositivos IoT novos', icone: 'i-lucide-cpu', cor: 'secondary', valor: totais.dispositivos, anterior: anteriores.dispositivos },
+    { titulo: 'Trilhas novas', icone: 'i-lucide-route', cor: 'tertiary', valor: totais.trilhas, anterior: anteriores.trilhas },
+    { titulo: 'Grupos novos', icone: 'i-lucide-users-round', cor: 'quaternary', valor: totais.grupos, anterior: anteriores.grupos },
+  ]
+})
 </script>

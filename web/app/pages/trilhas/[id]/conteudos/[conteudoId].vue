@@ -3,6 +3,8 @@ import type { JSONContent } from '@tiptap/core'
 import { FetchError } from 'ofetch'
 import type { ConclusaoRead, ConteudoAlunoRead } from '~/types/generated'
 
+const conquistasStore = useConquistasStore()
+
 definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
@@ -51,6 +53,8 @@ async function onConcluir() {
   concluindo.value = true
   try {
     const resposta: ConclusaoRead = await api(`/progresso/conteudos/${conteudoId}/concluir`, { method: 'POST' })
+    // mostra o toast das conquistas que o backend concedeu agora
+    resposta.conquistas_novas?.forEach(c => conquistasStore.notificarDesbloqueio(c))
     conteudo.value.concluido = true
     conteudo.value.atualizado = false
     toast.add({
