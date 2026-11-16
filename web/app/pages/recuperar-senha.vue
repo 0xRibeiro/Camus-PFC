@@ -1,5 +1,11 @@
 <template>
-  <div class="flex flex-1 items-center justify-center">
+  <div class="relative isolate -m-4 flex flex-1 items-start md:items-center justify-center overflow-hidden bg-(--camus-topo) px-4 pt-8 pb-56 md:pb-8">
+    <CamusImagem
+      src="/papeis-de-parede/avulsos/recuperar-senha-desktop.webp"
+      mobile="/papeis-de-parede/avulsos/recuperar-senha-mobile.webp"
+      class="camus-acesso-arte pointer-events-none absolute inset-0 -z-10"
+      img-class="size-full object-cover object-[center_90%] md:object-center"
+    />
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         v-if="etapa === 'email'"
@@ -12,10 +18,7 @@
         @submit="onSubmitEmail"
       >
         <template #footer>
-          <ULink
-            to="/login"
-            class="text-primary font-medium"
-          >Voltar</ULink>.
+          <ULink to="/login" class="text-primary font-medium">Voltar</ULink>.
         </template>
       </UAuthForm>
 

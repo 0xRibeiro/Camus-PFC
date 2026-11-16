@@ -1,17 +1,11 @@
 <template>
-  <div class="relative isolate -m-4 flex flex-1 items-center justify-start overflow-hidden bg-[#07182f] px-4 py-8 sm:px-10 lg:px-20">
-    <picture class="pointer-events-none absolute inset-0 -z-10">
-      <source
-        media="(min-width: 768px)"
-        srcset="/papeis-de-parede/anil/acesso-login.webp"
-      >
-
-      <img
-        src="/papeis-de-parede/anil/acesso.webp"
-        alt=""
-        class="block size-full object-cover object-right-bottom"
-      >
-    </picture>
+  <div class="relative isolate -m-4 flex flex-1 items-start md:items-center justify-start overflow-hidden bg-(--camus-topo) px-4 pt-8 pb-56 md:pb-8 sm:px-10 lg:pr-20 lg:pl-28 xl:pl-32">
+    <CamusImagem
+      src="/papeis-de-parede/anil/acesso-login.webp"
+      mobile="/papeis-de-parede/anil/acesso.webp"
+      class="camus-acesso-arte pointer-events-none absolute inset-0 -z-10"
+      img-class="size-full object-cover object-[center_76%] md:object-right-bottom lg:origin-right lg:scale-110"
+    />
 
     <!-- UPageCard = card pronto do nuxt ui. w-full max-w-md = ocupa td a largura ate uns 448px no max -->
     <UPageCard class="w-full max-w-md">
@@ -27,16 +21,10 @@
       >
         <template #footer>
           <!-- ULink = link do nuxt ui, troca de rota sem recarregar a pagina -->
-          <ULink
-            to="/register"
-            class="text-primary font-medium"
-          >Cadastre-se</ULink>.
+          <ULink to="/register" class="text-primary font-medium">Cadastre-se</ULink>.
           <br>
           <br>
-          <ULink
-            to="/recuperar-senha"
-            class="text-primary font-medium"
-          >Esqueci minha senha</ULink>.
+          <ULink to="/recuperar-senha" class="text-primary font-medium">Esqueci minha senha</ULink>.
         </template>
       </UAuthForm>
     </UPageCard>

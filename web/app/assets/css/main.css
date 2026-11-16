@@ -1,2 +1,163 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+.camus-pagina {
+  background-image: linear-gradient(
+    to bottom,
+    var(--camus-topo, transparent),
+    var(--camus-base, transparent) var(--camus-altura, 32rem)
+  );
+}
+
+.camus-banner-veu {
+  background: linear-gradient(
+    to right,
+    var(--camus-topo) 26%,
+    color-mix(in srgb, var(--camus-topo) 88%, transparent) 52%,
+    transparent 100%
+  );
+}
+
+@media (width < 768px) {
+  .camus-acesso-arte {
+    top: auto;
+    height: 14rem;
+    mask-image: linear-gradient(to bottom, transparent, black 22%);
+  }
+}
+
+.camus-trilhas {
+  --ui-primary: var(--ui-error);
+  --camus-topo: #ffe4e6;
+  --camus-base: #f4c6cd;
+}
+
+.dark .camus-trilhas {
+  --camus-topo: #4a101a;
+  --camus-base: #210007;
+}
+
+.camus-grupos,
+.camus-auditoria {
+  --ui-primary: var(--color-orange-700);
+  --camus-topo: #fff7ed;
+  --camus-base: #fed7aa;
+}
+
+.dark :is(.camus-grupos, .camus-auditoria) {
+  --ui-primary: var(--color-orange-400);
+  --camus-topo: #4b210c;
+  --camus-base: #240f00;
+}
+
+.camus-aquarios,
+.camus-denuncias {
+  --ui-primary: var(--color-violet-600);
+  --camus-topo: #f5edff;
+  --camus-base: #e8d7fa;
+}
+
+.dark :is(.camus-aquarios, .camus-denuncias) {
+  --ui-primary: var(--color-violet-400);
+  --camus-topo: #39165b;
+  --camus-base: #18012c;
+}
+
+.camus-minigames {
+  --ui-primary: var(--ui-tertiary);
+  --camus-topo: #ecfdf5;
+  --camus-base: #a7f3d0;
+}
+
+.dark .camus-minigames {
+  --camus-topo: #103c22;
+  --camus-base: #011f0e;
+}
+
+.camus-ranking,
+.camus-conquistas {
+  --ui-primary: var(--ui-secondary);
+  --camus-topo: #fffbeb;
+  --camus-base: #f6e5b4;
+}
+
+.dark :is(.camus-ranking, .camus-conquistas) {
+  --camus-topo: #3d2c06;
+  --camus-base: #1b1300;
+}
+
+.camus-usuarios,
+.camus-recuperar-senha {
+  --camus-topo: #f0fdfa;
+  --camus-base: #b7ece3;
+}
+
+.camus-usuarios { --ui-primary: var(--color-teal-700); }
+.dark .camus-usuarios { --ui-primary: var(--color-teal-400); }
+
+.dark :is(.camus-usuarios, .camus-recuperar-senha) {
+  --camus-topo: #103b39;
+  --camus-base: #021f21;
+}
+
+.camus-dashboard,
+.camus-colecao {
+  --camus-topo: #f0f9ff;
+  --camus-base: #c7e4f7;
+}
+
+.camus-dashboard { --ui-primary: var(--color-sky-700); }
+
+.dark .camus-dashboard {
+  --ui-primary: var(--color-sky-400);
+  --camus-topo: #15364f;
+  --camus-base: #08192c;
+}
+
+.dark .camus-colecao {
+  --camus-topo: #143457;
+  --camus-base: #07182f;
+}
+
+.camus-perfil,
+.camus-acesso {
+  --camus-topo: #eef2ff;
+  --camus-base: #c7d2fe;
+}
+
+.dark :is(.camus-perfil, .camus-acesso) {
+  --camus-topo: #252050;
+  --camus-base: #0e0133;
+}
+
+.camus-aceite {
+  --camus-topo: #f5edff;
+  --camus-base: #e8d7fa;
+}
+
+.dark .camus-aceite {
+  --camus-topo: #10122e;
+  --camus-base: #10122e;
+}
+
+.camus-termos {
+  --camus-topo: #eff6ff;
+  --camus-base: #93c5fd;
+  --camus-altura: 100%;
+}
+
+.dark .camus-termos {
+  --camus-topo: #1e3a5f;
+  --camus-base: #07182f;
+}
+
+.camus-privacidade {
+  --camus-topo: #fecaca;
+  --camus-base: #fff1f2;
+  --camus-altura: 100%;
+}
+
+.dark .camus-privacidade {
+  --camus-topo: #210007;
+  --camus-base: #64242e;
+}

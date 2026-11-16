@@ -1,8 +1,9 @@
 <template>
   <div>
-    <h1 class="text-xl font-semibold mb-4">
-      Usuários
-    </h1>
+    <CamusBanner
+      titulo="Usuários"
+      imagem="/papeis-de-parede/avulsos/lontra-marinha.webp"
+    />
 
     <UsuarioOnlineList
       :usuarios="usuariosOnline"
@@ -71,6 +72,7 @@
 
     <!-- UTable = tabela pronta do nuxt ui, so precisa de data + columns -->
     <UTable
+      class="rounded-xl bg-default ring ring-default"
       :data="usuarios"
       :columns="columns"
       :loading="loading"

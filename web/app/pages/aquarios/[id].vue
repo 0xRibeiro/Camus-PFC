@@ -1,5 +1,5 @@
 <template>
-  <div class="-m-4 flex-1 bg-[linear-gradient(to_bottom,#f5edff,#e8d7fa_32rem)] p-4 dark:bg-[linear-gradient(to_bottom,#39165b,#18012c_32rem)]">
+  <div class="flex-1">
     <div class="mx-auto w-full max-w-4xl space-y-6 p-4">
       <UButton
         to="/aquarios"

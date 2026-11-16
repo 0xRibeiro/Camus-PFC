@@ -77,7 +77,7 @@ async function onQuizAlterou() {
 </script>
 
 <template>
-  <div>
+  <div class="flex-1">
     <div class="flex items-center justify-between mb-3">
       <UButton
         icon="i-lucide-arrow-left"

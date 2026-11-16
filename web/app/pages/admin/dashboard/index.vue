@@ -1,35 +1,28 @@
 <template>
   <div>
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
-      <div>
-        <h1 class="text-xl font-semibold">
-          Dashboard
-        </h1>
+    <CamusBanner
+      titulo="Dashboard"
+      descricao="Indicadores gerais do Camus."
+      imagem="/papeis-de-parede/azul/admin.webp"
+    />
 
-        <p class="text-sm text-muted">
-          Indicadores gerais do Camus.
-        </p>
-      </div>
-
-      <div class="flex flex-wrap items-end gap-3">
-        <UFormField label="Período dos cadastros">
-          <USelect
-            v-model="dias"
-            :items="periodos"
-            :disabled="loading"
-            class="w-44"
-          />
-        </UFormField>
-
-        <UButton
-          label="Atualizar"
-          icon="i-lucide-refresh-cw"
-          color="neutral"
-          variant="outline"
-          :loading="loading"
-          @click="fetchDashboard"
+    <div class="mb-6 flex flex-wrap items-end gap-3">
+      <UFormField label="Período dos cadastros">
+        <USelect
+          v-model="dias"
+          :items="periodos"
+          :disabled="loading"
+          class="w-44"
         />
-      </div>
+      </UFormField>
+
+      <UButton
+        label="Atualizar"
+        icon="i-lucide-refresh-cw"
+        variant="outline"
+        :loading="loading"
+        @click="fetchDashboard"
+      />
     </div>
 
     <div

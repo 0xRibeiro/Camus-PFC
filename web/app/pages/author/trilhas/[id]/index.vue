@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex-1">
     <!-- volta pra listagem. usa router.back() em vez de rota fixa pq n sabemos
     o path certo daqui - se recarregou a pagina sem historico, cai no fallback -->
     <UButton
@@ -135,10 +135,10 @@
             class="flex items-center justify-between px-4 py-3"
           >
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center size-8 rounded-full bg-primary-50 shrink-0">
+              <div class="flex items-center justify-center size-8 rounded-full bg-primary-10 shrink-0">
                 <UIcon
                   :name="tiposInfo[conteudo.tipo].icon"
-                  class="size-4 text-primary-600"
+                  class="size-4 text-primary"
                 />
               </div>
               <div>
