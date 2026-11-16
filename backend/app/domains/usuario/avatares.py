@@ -12,6 +12,23 @@ AVATARES = (
     "peixe-dourado",
     "cavalo-marinho",
 )
+
+
+# avatares que so liberam depois de ganhar uma conquista
+# a imagem tambem fica no front, igual aos de cima
+AVATARES_BLOQUEADOS = {
+    "peixonauta": 13,
+    "marina": 14,
+    "zico": 15,
+}
+
+# tudo que o usuario pode ter, liberado ou nao
+TODOS_AVATARES = AVATARES + tuple(AVATARES_BLOQUEADOS)
+
+
+
+
+
 AVATAR_PADRAO = AVATARES[0]
 COR_FUNDO_PADRAO = "#0EA5E9"
 

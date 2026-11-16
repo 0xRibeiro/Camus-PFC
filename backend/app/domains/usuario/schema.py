@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from app.domains.usuario.avatares import AVATARES
+from app.domains.usuario.avatares import TODOS_AVATARES
 from app.domains.usuario.model import RoleUsuario
 
 ###### auth: entrada do login e formato dos tokens
@@ -47,6 +47,15 @@ class UsuarioRead(BaseModel):
     cor_fundo: str
 
 
+
+# um avatar do seletor. os bloqueados vem com a conquista que libera cada um
+class AvatarRead(BaseModel):
+    chave: str
+    liberado: bool
+    conquista_id: int | None = None
+    conquista: str | None = None
+
+
 class UsuarioCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr = Field(..., max_length=100)
@@ -74,7 +83,7 @@ class UsuarioUpdate(BaseModel):
     @field_validator("avatar")
     @classmethod
     def valida_avatar(cls, v: str | None) -> str | None:
-        if v is not None and v not in AVATARES:
+        if v is not None and v not in TODOS_AVATARES:
             raise ValueError("avatar inválido")
         return v
 

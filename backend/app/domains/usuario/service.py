@@ -2,7 +2,6 @@ import secrets
 from datetime import datetime, timezone
 
 from fastapi import Depends
-
 from fastapi.security import HTTPAuthorizationCredentials
 from fastcrud.exceptions.http_exceptions import (
     DuplicateValueException,
@@ -32,19 +31,25 @@ from app.core.security import (
 )
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
-from app.domains.usuario.avatares import sortear_avatar, sortear_cor_fundo
+from app.domains.conquistas.repository import ConquistaRepository
 from app.domains.documento_legal import service as documento_legal_service
 from app.domains.documento_legal.model import AceiteDocumentoLegal
+from app.domains.usuario.avatares import (
+    AVATARES,
+    AVATARES_BLOQUEADOS,
+    sortear_avatar,
+    sortear_cor_fundo,
+)
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
+    AvatarRead,
     TokenPair,
     UsuarioAdminUpdate,
     UsuarioCreate,
     UsuarioStaffCreate,
     UsuarioUpdate,
 )
-
 
 ###### cadastro
 
@@ -236,6 +241,27 @@ async def conceder_conquista(db: AsyncSession, user_id: int, conquista_id: int) 
 ###### edicao
 
 
+# monta a lista de avatares mostrando quais o usuário já pode usar.
+# os bloqueados levam junto a conquista que libera cada um
+async def listar_avatares_usuario(db: AsyncSession, user: Usuario) -> list[AvatarRead]:
+    repo = ConquistaRepository(db)
+    avatares = [AvatarRead(chave=chave, liberado=True) for chave in AVATARES]
+
+    for chave, conquista_id in AVATARES_BLOQUEADOS.items():
+        conquista = await repo.buscar(conquista_id)
+        avatares.append(
+            AvatarRead(
+                chave=chave,
+                # se já está usando esse avatar, ele continua liberado
+                liberado=user.avatar == chave or await repo.usuario_tem(user.id, conquista_id),
+                conquista_id=conquista_id,
+                conquista=conquista.titulo if conquista else None,
+            )
+        )
+
+    return avatares
+
+
 # edicao do proprio usuario (/usuarios/me). n mexe em role nem is_active
 async def atualizar_usuario(
     db: AsyncSession, user: Usuario, data: UsuarioUpdate
@@ -250,6 +276,15 @@ async def atualizar_usuario(
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
     if data.avatar is not None:
+        # esses avatares só saem se o usuário já tiver a conquista deles.
+        # quem já está usando um pode mandar o mesmo de novo, sem erro
+        conquista_id = AVATARES_BLOQUEADOS.get(data.avatar)
+        if (
+            conquista_id is not None
+            and data.avatar != user.avatar
+            and not await ConquistaRepository(db).usuario_tem(user.id, conquista_id)
+        ):
+            raise ForbiddenException("Avatar bloqueado: ganhe a conquista para liberar")
         user.avatar = data.avatar
     if data.cor_fundo is not None:
         user.cor_fundo = data.cor_fundo

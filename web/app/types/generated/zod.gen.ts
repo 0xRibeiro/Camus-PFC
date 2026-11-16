@@ -79,6 +79,16 @@ export const zAquarioEntrar = z.object({
 });
 
 /**
+ * AvatarRead
+ */
+export const zAvatarRead = z.object({
+    chave: z.string(),
+    liberado: z.boolean(),
+    conquista_id: z.int().nullish(),
+    conquista: z.string().nullish()
+});
+
+/**
  * AvisoRead
  */
 export const zAvisoRead = z.object({
@@ -124,13 +134,6 @@ export const zComandoModulo = z.object({
 });
 
 /**
- * ConclusaoRead
- */
-export const zConclusaoRead = z.object({
-    xp_ganho: z.int()
-});
-
-/**
  * ConquistaCreate
  */
 export const zConquistaCreate = z.object({
@@ -147,6 +150,14 @@ export const zConquistaRead = z.object({
     titulo: z.string(),
     descricao: z.string().nullish(),
     imagem_dir: z.string().nullish()
+});
+
+/**
+ * ConclusaoRead
+ */
+export const zConclusaoRead = z.object({
+    xp_ganho: z.int(),
+    conquistas_novas: z.array(zConquistaRead).optional().default([])
 });
 
 /**
@@ -776,7 +787,8 @@ export const zResultadoQuizRead = z.object({
     acertos: z.int(),
     total: z.int(),
     xp_ganho: z.int(),
-    correcao: z.array(zCorrecaoQuestaoRead)
+    correcao: z.array(zCorrecaoQuestaoRead),
+    conquistas_novas: z.array(zConquistaRead).optional().default([])
 });
 
 /**
@@ -1324,6 +1336,13 @@ export const zResetPasswordAuthResetPasswordPostResponse = z.void();
  * Successful Response
  */
 export const zListarAvataresAvataresGetResponse = z.array(z.string());
+
+/**
+ * Response Listar Meus Avatares Usuarios Me Avatares Get
+ *
+ * Successful Response
+ */
+export const zListarMeusAvataresUsuariosMeAvataresGetResponse = z.array(zAvatarRead);
 
 /**
  * Successful Response
