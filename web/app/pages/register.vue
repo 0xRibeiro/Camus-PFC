@@ -1,17 +1,11 @@
 <template>
-  <div class="relative isolate -m-4 flex flex-1 items-center justify-end overflow-hidden bg-[#07182f] px-4 py-8 sm:px-10 lg:pl-20 lg:pr-28 xl:pr-32">
-    <picture class="pointer-events-none absolute inset-0 -z-10 -scale-x-100">
-      <source
-        media="(min-width: 768px)"
-        srcset="/papeis-de-parede/anil/acesso-login.webp"
-      >
-
-      <img
-        src="/papeis-de-parede/anil/acesso.webp"
-        alt=""
-        class="block size-full object-cover object-right-bottom lg:origin-right lg:scale-110"
-      >
-    </picture>
+  <div class="relative isolate -m-4 flex flex-1 items-start md:items-center justify-end overflow-hidden bg-(--camus-topo) px-4 pt-8 pb-56 md:pb-8 sm:px-10 lg:pl-20 lg:pr-28 xl:pr-32">
+    <CamusImagem
+      src="/papeis-de-parede/anil/acesso-login.webp"
+      mobile="/papeis-de-parede/anil/acesso.webp"
+      class="camus-acesso-arte pointer-events-none absolute inset-0 -z-10 -scale-x-100"
+      img-class="size-full object-cover object-[center_76%] md:object-right-bottom lg:origin-right lg:scale-110"
+    />
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="schema"
@@ -49,10 +43,7 @@
 
             <div>
               Já tem conta?
-              <ULink
-                to="/login"
-                class="text-primary font-medium"
-              >
+              <ULink to="/login" class="text-primary font-medium">
                 Entrar
               </ULink>.
             </div>
@@ -121,8 +112,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   if (!aceitouTermos.value) {
     toast.add({
       title: 'Aceite necessário',
-      description:
-        'Você precisa aceitar os Termos de Uso e a Política de Privacidade.',
+      description: 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.',
       color: 'error',
     })
     return

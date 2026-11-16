@@ -4,6 +4,7 @@
     title="Camus"
     collapsible="icon"
     rail
+    :menu="{ ui: { overlay: 'z-40', content: 'z-50' } }"
     :ui="{
       header: 'group-data-[state=collapsed]/sidebar:px-3',
       title: 'flex group-data-[state=collapsed]/sidebar:justify-center',
@@ -116,12 +117,14 @@ const destaques = {
   error: '[--ui-primary:var(--ui-error)] before:bg-error/15',
   laranja: '[--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)] before:bg-orange-500/15',
   violeta: '[--ui-primary:var(--color-violet-600)] dark:[--ui-primary:var(--color-violet-400)] before:bg-violet-500/15',
+  verdeAgua: '[--ui-primary:var(--color-teal-700)] dark:[--ui-primary:var(--color-teal-400)] before:bg-teal-500/15',
+  azul: '[--ui-primary:var(--color-sky-700)] dark:[--ui-primary:var(--color-sky-400)] before:bg-sky-500/15',
 }
 
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
 function item(label: string, icon: string, to: string, cor: keyof typeof destaques = 'primary'): NavigationMenuItem {
   const ativo = rotaAtual(to)
-  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined }
+  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined, onSelect: fecharMenuNoCelular}
 }
 
 const items = computed<NavigationMenuItem[]>(() => {
@@ -142,16 +145,16 @@ const items = computed<NavigationMenuItem[]>(() => {
 
   if (auth.role === 'admin') {
     lista.push(
-      item('Usuários', 'i-lucide-users', '/admin/usuarios'),
-      item('Auditoria', 'i-lucide-history', '/admin/auditoria'),
-      item('Denúncias', 'i-lucide-flag', '/admin/denuncias'),
-      item('Dashboard', 'i-lucide-layout-dashboard', '/admin/dashboard'),
-      item('Termos e Política', 'i-lucide-scale', '/admin/documentos-legais'),
+      item('Usuários', 'i-lucide-users', '/admin/usuarios', 'verdeAgua'),
+      item('Auditoria', 'i-lucide-history', '/admin/auditoria', 'laranja'),
+      item('Denúncias', 'i-lucide-flag', '/admin/denuncias', 'violeta'),
+      item('Dashboard', 'i-lucide-layout-dashboard', '/admin/dashboard', 'azul'),
+      item('Termos e Política', 'i-lucide-scale', '/admin/documentos-legais', 'error'),
     )
   }
 
   if (auth.role === 'admin' || auth.role === 'author') {
-    lista.push(item('Gerenciar Trilhas', 'i-lucide-square-text', '/author/trilhas'))
+    lista.push(item('Gerenciar Trilhas', 'i-lucide-square-text', '/author/trilhas', 'error'))
   }
 
   return lista

@@ -1,5 +1,5 @@
 <template>
-  <div class="-m-4 flex flex-1 flex-col bg-[linear-gradient(to_bottom,#eef2ff,#c7d2fe_32rem)] dark:bg-[linear-gradient(to_bottom,#252050,#0e0133_32rem)]">
+  <div class="-m-4 flex flex-1 flex-col">
     <div class="mx-auto w-full max-w-3xl space-y-4 px-4 pt-2 pb-4">
       <UPageHeader
         title="Meu perfil"
@@ -16,10 +16,7 @@
           />
 
           <div class="min-w-0 flex-1 space-y-3">
-            <UFormField
-              label="Nome de usuário"
-              :error="erroUsername"
-            >
+            <UFormField label="Nome de usuário" :error="erroUsername">
               <UInput
                 v-model="username"
                 class="w-full"
@@ -28,22 +25,13 @@
               />
             </UFormField>
 
-            <p class="truncate text-sm text-muted">
-              {{ auth.user?.email }}
-            </p>
-            <UBadge
-              :label="auth.user?.role"
-              variant="subtle"
-            />
+            <p class="truncate text-sm text-muted">{{ auth.user?.email }}</p>
+            <UBadge :label="auth.user?.role" variant="subtle" />
           </div>
 
           <!-- seletor de cor do nuxt ui, abre num popover -->
           <UPopover>
-            <UButton
-              label="Cor de fundo"
-              color="neutral"
-              variant="outline"
-            >
+            <UButton label="Cor de fundo" color="neutral" variant="outline">
               <template #leading>
                 <span
                   class="size-3 rounded-full border border-default"
@@ -80,9 +68,7 @@
 
       <UCard>
         <template #header>
-          <p class="font-medium">
-            Avatar
-          </p>
+          <p class="font-medium">Avatar</p>
         </template>
 
         <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
@@ -95,11 +81,7 @@
             :aria-label="chave"
             @click="avatarEscolhido = chave"
           >
-            <UsuarioAvatar
-              :avatar="chave"
-              :cor-fundo="cor"
-              :tamanho="64"
-            />
+            <UsuarioAvatar :avatar="chave" :cor-fundo="cor" :tamanho="64" />
           </button>
         </div>
       </UCard>
@@ -118,9 +100,7 @@
       <UCard v-if="auth.role !== 'admin'">
         <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <p class="font-medium text-highlighted">
-              Excluir conta
-            </p>
+            <p class="font-medium text-highlighted">Excluir conta</p>
             <p class="text-sm text-muted">
               Seus dados pessoais serão anonimizados e você não conseguirá mais entrar.
             </p>
@@ -141,12 +121,7 @@
         description="Essa ação não pode ser desfeita. Seu nome de usuário e e-mail serão removidos e o acesso encerrado."
       >
         <template #footer="{ close }">
-          <UButton
-            label="Cancelar"
-            color="neutral"
-            variant="outline"
-            @click="close"
-          />
+          <UButton label="Cancelar" color="neutral" variant="outline" @click="close" />
           <UButton
             label="Excluir minha conta"
             color="error"
@@ -157,13 +132,11 @@
       </UModal>
     </div>
 
-    <img
+    <CamusImagem
       src="/papeis-de-parede/anil/perfil.webp"
-      alt=""
-      width="1536"
-      height="512"
-      class="mt-auto h-36 w-full shrink-0 object-cover sm:h-44 lg:h-52"
-    >
+      class="mt-auto w-full shrink-0"
+      img-class="h-auto w-full"
+    />
   </div>
 </template>
 
@@ -197,20 +170,31 @@ const xadrez = 'repeating-conic-gradient(#d4d4d4 0 25%, #fff 0 50%) 0 0 / 8px 8p
 // ↑ ↑ ↓ ↓ ← → ← → b a
 const CONQUISTA_TRANSPARENCIA = 11
 const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a']
+const NEGACIONISMO = ['n', 'e', 'g', 'a', 'c', 'i', 'o', 'n', 'i', 's', 'm', 'o']
 const transparenciaLiberada = ref(false)
 let teclas: string[] = []
 
 useEventListener(window, 'keydown', async (evento: KeyboardEvent) => {
-  if (transparenciaLiberada.value) return
-
   teclas.push(evento.key.toLowerCase())
-  teclas = teclas.slice(-KONAMI.length)
-  if (teclas.join() !== KONAMI.join()) return
+  teclas = teclas.slice(-Math.max(KONAMI.length, NEGACIONISMO.length))
+
+  const digitouKonami = teclas.slice(-KONAMI.length).join() === KONAMI.join()
+  const digitouNegacionismo = teclas.slice(-NEGACIONISMO.length).join() === NEGACIONISMO.join()
+
+  if (!digitouNegacionismo && (!digitouKonami || transparenciaLiberada.value)) return
 
   teclas = []
+
   try {
-    await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
-    transparenciaLiberada.value = true
+    if (digitouNegacionismo) {
+      opacidade.value = 100
+      transparenciaLiberada.value = false
+      await conquistas.desbloquearConquista(12)
+    }
+    else {
+      await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
+      transparenciaLiberada.value = true
+    }
   }
   catch {
     toast.add({ title: 'Quase... tente de novo', color: 'error' })

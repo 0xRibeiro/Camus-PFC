@@ -26,109 +26,84 @@ onMounted(fetchTrilhas)
 </script>
 
 <template>
-  <div
-    class="-m-4 flex-1 p-4 xl:grid xl:grid-cols-[minmax(0,1fr)_clamp(12rem,18vw,17rem)] xl:gap-5"
-    :class="grupoId
-      ? 'bg-[linear-gradient(to_bottom,#fff7ed,#fed7aa_32rem)] dark:bg-[linear-gradient(to_bottom,#4b210c,#240f00_32rem)] [--ui-primary:var(--color-orange-700)] dark:[--ui-primary:var(--color-orange-400)]'
-      : 'bg-[linear-gradient(to_bottom,#ffe4e6,#f4c6cd_32rem)] dark:bg-[linear-gradient(to_bottom,#4a101a,#210007_32rem)]'"
-  >
-    <div class="min-w-0">
-      <UButton
-        v-if="grupoId"
-        label="Voltar ao grupo"
-        icon="i-lucide-arrow-left"
-        variant="link"
-        color="neutral"
-        class="mb-3 px-0"
-        :to="`/grupos/${grupoId}`"
-      />
-
-      <div class="mb-4">
-        <h1 class="text-xl font-semibold">
-          {{ grupoId ? 'Trilhas do grupo' : 'Trilhas' }}
-        </h1>
-        <p class="text-sm text-muted">
-          Escolha uma trilha e siga os conteúdos na ordem.
-        </p>
-      </div>
-
-      <div
-        v-if="loading"
-        class="flex justify-center py-12"
-      >
-        <UIcon
-          name="i-lucide-loader-circle"
-          class="size-6 animate-spin"
+  <div class="grid flex-1 auto-rows-min grid-cols-[minmax(0,1fr)_auto] items-start gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(12rem,18vw,17rem)] xl:gap-x-5">
+    <div class="contents xl:block xl:min-w-0">
+      <div class="min-w-0">
+        <UButton
+          v-if="grupoId"
+          label="Voltar ao grupo"
+          icon="i-lucide-arrow-left"
+          variant="link"
+          color="neutral"
+          class="mb-3 px-0"
+          :to="`/grupos/${grupoId}`"
         />
+
+        <div class="xl:mb-4">
+          <h1 class="text-xl font-semibold">
+            {{ grupoId ? 'Trilhas do grupo' : 'Trilhas' }}
+          </h1>
+          <p class="text-sm text-muted">
+            Escolha uma trilha e siga os conteúdos na ordem.
+          </p>
+        </div>
       </div>
 
-      <p
-        v-else-if="!trilhas.length"
-        class="text-sm text-muted text-center py-12"
-      >
-        Nenhuma trilha disponível ainda.
-      </p>
+      <div class="col-span-2 row-start-2 min-w-0">
+        <div v-if="loading" class="flex justify-center py-12">
+          <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
+        </div>
 
-      <UPageGrid v-else>
-        <UCard
-          v-for="trilha in trilhas"
-          :key="trilha.id"
-        >
-          <NuxtLink
-            :to="grupoId ? `/grupos/${grupoId}/trilhas/${trilha.id}` : `/trilhas/${trilha.id}`"
-            class="block"
-          >
-            <TrilhaImagem
-              :src="trilha.foto"
-              :alt="trilha.titulo"
-            />
+        <p v-else-if="!trilhas.length" class="text-sm text-muted text-center py-12">
+          Nenhuma trilha disponível ainda.
+        </p>
 
-            <div class="mt-3 space-y-1">
-              <UBadge
-                v-if="trilha.tag"
-                :label="infoDaTagTrilha(trilha.tag).label"
-                :color="infoDaTagTrilha(trilha.tag).color"
-                variant="soft"
-                size="sm"
-                class="w-fit"
-              />
-              <p class="font-semibold">
-                {{ trilha.titulo }}
-              </p>
-              <p
-                v-if="trilha.descricao"
-                class="text-sm text-muted line-clamp-2"
-              >
-                {{ trilha.descricao }}
-              </p>
-            </div>
-          </NuxtLink>
+        <UPageGrid v-else>
+          <UCard v-for="trilha in trilhas" :key="trilha.id">
+            <NuxtLink
+              :to="grupoId ? `/grupos/${grupoId}/trilhas/${trilha.id}` : `/trilhas/${trilha.id}`"
+              class="block"
+            >
+              <TrilhaImagem :src="trilha.foto" :alt="trilha.titulo" />
 
-          <!-- progresso da trilha -->
-          <template #footer>
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs text-muted">
-                <span>{{ trilha.concluidos }}/{{ trilha.total }} conteúdos</span>
-                <span>{{ trilha.progresso }}%</span>
+              <div class="mt-3 space-y-1">
+                <UBadge
+                  v-if="trilha.tag"
+                  :label="infoDaTagTrilha(trilha.tag).label"
+                  :color="infoDaTagTrilha(trilha.tag).color"
+                  variant="soft"
+                  size="sm"
+                  class="w-fit"
+                />
+                <p class="font-semibold">{{ trilha.titulo }}</p>
+                <p v-if="trilha.descricao" class="text-sm text-muted line-clamp-2">
+                  {{ trilha.descricao }}
+                </p>
               </div>
-              <UProgress
-                :model-value="trilha.progresso"
-                size="sm"
-              />
-            </div>
-          </template>
-        </UCard>
-      </UPageGrid>
+            </NuxtLink>
+
+            <!-- progresso da trilha -->
+            <template #footer>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-muted">
+                  <span>{{ trilha.concluidos }}/{{ trilha.total }} conteúdos</span>
+                  <span>{{ trilha.progresso }}%</span>
+                </div>
+                <UProgress :model-value="trilha.progresso" size="sm" />
+              </div>
+            </template>
+          </UCard>
+        </UPageGrid>
+      </div>
     </div>
 
-    <img
+    <CamusImagem
       :src="grupoId
         ? '/papeis-de-parede/laranja/trilha-vertical.webp'
         : '/papeis-de-parede/vermelho/trilha-vertical.webp'"
-      alt=""
-      width="480"
-      height="1440"
-      class="hidden h-auto w-full self-start rounded-xl xl:block"
-    >
+      media="(width < 1280px)"
+      class="col-start-2 row-start-1 w-24 sm:w-32 xl:w-full"
+      img-class="h-auto w-full rounded-xl"
+    />
   </div>
 </template>
