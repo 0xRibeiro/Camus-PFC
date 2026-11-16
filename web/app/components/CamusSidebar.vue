@@ -13,23 +13,23 @@
       footer: 'p-3',
     }"
   >
-  <template #title="{ state }">
-  <NuxtLink
-    to="/"
-    aria-label="Camus — página inicial"
-    class="inline-flex shrink-0 rounded-md bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-    @click="fecharMenuNoCelular"
-  >
-    <img
-      src="/logo.png"
-      alt=""
-      width="384"
-      height="384"
-      class="rounded-md"
-      :class="state === 'collapsed' ? 'size-8' : 'size-11'"
-    >
-  </NuxtLink>
-  </template>
+    <template #title="{ state }">
+      <NuxtLink
+        to="/"
+        aria-label="Camus — página inicial"
+        class="inline-flex shrink-0 rounded-md bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+        @click="fecharMenuNoCelular"
+      >
+        <img
+          src="/logo.png"
+          alt=""
+          width="384"
+          height="384"
+          class="rounded-md"
+          :class="state === 'collapsed' ? 'size-8' : 'size-11'"
+        >
+      </NuxtLink>
+    </template>
     <template #default="{ state }">
       <UNavigationMenu
         :items="items"
@@ -124,7 +124,7 @@ const destaques = {
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
 function item(label: string, icon: string, to: string, cor: keyof typeof destaques = 'primary'): NavigationMenuItem {
   const ativo = rotaAtual(to)
-  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined, onSelect: fecharMenuNoCelular}
+  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined, onSelect: fecharMenuNoCelular }
 }
 
 const items = computed<NavigationMenuItem[]>(() => {
