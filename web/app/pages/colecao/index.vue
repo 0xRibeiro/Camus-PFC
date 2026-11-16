@@ -61,7 +61,76 @@
         v-else-if="peixes.length && !mensagemDeErro"
         class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
       >
-        <div>
+        <div
+          ref="detalhesPeixe"
+          class="min-w-0 scroll-mt-4 lg:col-start-2 lg:row-start-1"
+          :class="{ 'hidden lg:block': !peixeSelecionado }"
+        >
+          <UCard>
+            <template #header>
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="font-semibold text-highlighted">Peixe Selecionado</h2>
+                <UIcon name="i-lucide-eye" class="size-5 text-primary" />
+              </div>
+            </template>
+
+            <template v-if="peixeSelecionado">
+              <img
+                v-if="peixeSelecionado.default_photo?.square_url"
+                :src="peixeSelecionado.default_photo.square_url"
+                :alt="`Imagem de ${peixeSelecionado.preferred_common_name || peixeSelecionado.name}`"
+                class="aspect-square w-full rounded-lg object-cover"
+              >
+
+              <div
+                v-else
+                class="flex aspect-square items-center justify-center rounded-lg bg-elevated text-muted"
+              >
+                <UIcon name="i-lucide-fish" class="size-12" />
+              </div>
+
+              <div class="mt-4 space-y-3">
+                <div>
+                  <p class="text-lg font-semibold text-highlighted">
+                    {{ peixeSelecionado.preferred_common_name || peixeSelecionado.name }}
+                  </p>
+
+                  <p class="text-sm italic text-muted">{{ peixeSelecionado.name }}</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <UBadge color="neutral" variant="subtle">
+                    {{ new Intl.NumberFormat('pt-BR').format(peixeSelecionado.observations_count ?? 0) }}
+                    observações
+                  </UBadge>
+
+                  <UBadge v-if="peixeSelecionado.rank" color="primary" variant="subtle">
+                    {{ peixeSelecionado.rank }}
+                  </UBadge>
+                </div>
+
+                <UButton
+                  v-if="peixeSelecionado.wikipedia_url"
+                  label="Ver mais informações"
+                  icon="i-lucide-external-link"
+                  variant="outline"
+                  block
+                  :to="peixeSelecionado.wikipedia_url"
+                  target="_blank"
+                />
+              </div>
+            </template>
+
+            <UEmpty
+              v-else
+              icon="i-lucide-mouse-pointer-click"
+              title="Escolha um peixe"
+              description="Clique em um dos resultados para ver mais detalhes."
+            />
+          </UCard>
+        </div>
+
+        <div class="min-w-0 lg:col-start-1 lg:row-start-1">
           <p class="mb-3 text-sm text-muted">
             Exibindo {{ inicioResultado }} a {{ fimResultado }}
             de {{ totalResultados.toLocaleString('pt-BR') }}
@@ -102,69 +171,6 @@
             </UCard>
           </div>
         </div>
-
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="font-semibold text-highlighted">Peixe Selecionado</h2>
-              <UIcon name="i-lucide-eye" class="size-5 text-primary" />
-            </div>
-          </template>
-
-          <template v-if="peixeSelecionado">
-            <img
-              v-if="peixeSelecionado.default_photo?.square_url"
-              :src="peixeSelecionado.default_photo.square_url"
-              :alt="`Imagem de ${peixeSelecionado.preferred_common_name || peixeSelecionado.name}`"
-              class="aspect-square w-full rounded-lg object-cover"
-            >
-
-            <div
-              v-else
-              class="flex aspect-square items-center justify-center rounded-lg bg-elevated text-muted"
-            >
-              <UIcon name="i-lucide-fish" class="size-12" />
-            </div>
-
-            <div class="mt-4 space-y-3">
-              <div>
-                <p class="text-lg font-semibold text-highlighted">
-                  {{ peixeSelecionado.preferred_common_name || peixeSelecionado.name }}
-                </p>
-
-                <p class="text-sm italic text-muted">{{ peixeSelecionado.name }}</p>
-              </div>
-
-              <div class="flex flex-wrap gap-2">
-                <UBadge color="neutral" variant="subtle">
-                  {{ new Intl.NumberFormat('pt-BR').format(peixeSelecionado.observations_count ?? 0) }}
-                  observações
-                </UBadge>
-
-                <UBadge v-if="peixeSelecionado.rank" color="primary" variant="subtle">
-                  {{ peixeSelecionado.rank }}
-                </UBadge>
-              </div>
-
-              <UButton
-                v-if="peixeSelecionado.wikipedia_url"
-                label="Ver mais informações"
-                icon="i-lucide-external-link"
-                variant="outline"
-                block
-                :to="peixeSelecionado.wikipedia_url"
-                target="_blank"
-              />
-            </div>
-          </template>
-
-          <UEmpty
-            v-else
-            icon="i-lucide-mouse-pointer-click"
-            title="Escolha um peixe"
-            description="Clique em um dos resultados para ver mais detalhes."
-          />
-        </UCard>
       </section>
 
       <div
@@ -214,6 +220,8 @@ interface RespostaTaxa {
 
 const inat = useInat()
 const conquistas = useConquistasStore()
+const detalhesPeixe = useTemplateRef('detalhesPeixe')
+const telaLarga = useMediaQuery('(min-width: 64rem)')
 
 const busca = ref('')
 const termoPesquisado = ref('')
@@ -289,6 +297,11 @@ async function carregarPagina(paginaSolicitada: number) {
 
 async function selecionarPeixe(peixe: Peixe) {
   peixeSelecionado.value = peixe
+
+  if (!telaLarga.value) {
+    await nextTick()
+    detalhesPeixe.value?.scrollIntoView({ block: 'start' })
+  }
 
   await conquistas.desbloquearConquista(7).catch(() => {})
 }
