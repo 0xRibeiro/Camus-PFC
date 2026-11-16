@@ -1,31 +1,22 @@
-
-
 <!-- MODELO PROJETO EM ANDAMENTO -->
-<h1 align="center"> 
-	🐟 Camus - Em contrução 🐟
+<h1 align="center">
+  🐟 Camus - Em construção 🐟
 </h1>
-
 
 <!-- MODELO MENU DE NAVEGAÇÃO -->
 <p align="center">
-  <a href="#-sobre-o-projeto">Sobre</a> • 
-  <a href="#-funcionalidades">Funcionalidades</a> • 
-  <a href="#-layout">Layout</a> • 
-  <a href="#-como-executar-o-projeto">Como executar</a> • 
-  <a href="#-tecnologias">Tecnologias</a> 
+  <a href="#-sobre-o-projeto">Sobre</a> •
+  <a href="#-funcionalidades">Funcionalidades</a> •
+  <a href="#-layout">Layout</a> •
+  <a href="#-como-executar-o-projeto">Como executar</a> •
+  <a href="#-tecnologias">Tecnologias</a>
 </p>
-
-
-
-
-
 
 <!-- MODELO DESCRIÇÃO SOBRE O PROJETO: -->
 ## 🐟 Sobre o projeto
 
 <!-- EXPLICA O MOTIVO DO PROJETO -->
-Camus é um projeto que auxilia no ensino de Oceanografia/Limnologia com foco em ambientes acadêmicos. Ele possui um sistema de trilhas de conteúdo para dividir os temas, cria grupos de estudo para maior coordenação entre os alunos e utiliza de IoT para disponibilizar dashboards de dados de microcosmos em tempo real
-
+O Camus é uma plataforma de apoio ao ensino de oceanografia, limnologia e biologia marinha. Estudantes podem seguir trilhas com artigos, vídeos e quizzes, participar de grupos de estudo e acompanhar seu progresso. A plataforma também oferece uma coleção de espécies integrada ao iNaturalist e permite cadastrar aquários e peixes. Ao vincular um dispositivo IoT a um aquário, é possível acompanhar leituras recentes de temperatura e distância em gráficos.
 
 <!-- LINHA DE DIVISÃO: -->
 ---
@@ -36,12 +27,18 @@ Camus é um projeto que auxilia no ensino de Oceanografia/Limnologia com foco em
 ## 🐡 Funcionalidades
 
 <!-- EXEMPLO DE FUNCIONALIDADES: -->
-- [x] Usuarios staff podem gerenciar conteudos de ensino no app atraves de trilhas e modulos
-- [x] Usuarios alunos podem ganhar conquistas e visualiizar elas em seus perfis podendo acumular e obter conquistas atraves de acoes
-- [ ] Editor de texto estilo notion para conteudos de artigo
-- [ ] visualizador de video integrado para consumo de videos do youtube
-- [ ] gerador de quiz para diferentes tipos de questionarios
-- [ ] sistema de pontuacao e ranking entre usuarios
+- [x] Gerenciamento de trilhas globais e seus módulos por autores e administradores.
+- [x] Editor de artigos com imagens e inclusão de informações sobre espécies do iNaturalist.
+- [x] Reprodução de vídeos do YouTube nas trilhas.
+- [x] Criação de quizzes de múltipla escolha com correção automática.
+- [x] Acompanhamento do progresso, pontos de experiência (XP), conquistas e ranking global.
+- [x] Grupos de estudo com entrada por convite, trilhas privadas e pontuação própria por grupo.
+- [x] Coleção para pesquisar espécies e consultar seus detalhes pelo iNaturalist.
+- [x] Cadastro de aquários e peixes, com opção de compartilhamento e vínculo com dispositivos IoT.
+- [x] Visualização de leituras recentes de temperatura e distância nos aquários vinculados a sensores.
+- [x] Minigames de identificação de peixes e comparação do número de observações entre espécies.
+- [x] Painel administrativo com gerenciamento de usuários, indicadores de uso e registros de auditoria.
+- [x] Interface responsiva com temas claro e escuro e aplicativo para Android.
 
 ---
 
@@ -50,18 +47,13 @@ Camus é um projeto que auxilia no ensino de Oceanografia/Limnologia com foco em
 <!-- EXEMPLO DE LAYOUT: -->
 ## 🐧 Layout
 
-### telas de gerenciamento de conteudo
+### Telas do sistema
 
 <!-- AQUI VOCÊ PASSA O CAMINHO DA IMAGEM -->
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/cc6630cf-ca22-485d-bcea-9e237335da9d" />
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/b77b5f9b-9c9e-45e2-b3e9-7a9aa24066fc" />
-
-### tela de conquistas do usuario
-<img width="400"  alt="image" src="https://github.com/user-attachments/assets/5ae06523-abbe-4885-bbbe-6c1b36b83536" />
-
-
-
----
+<img width="500" height="300" alt="tela de login" src="https://github.com/user-attachments/assets/2f376a08-d22b-4b6c-891a-12dbc504b9d2" />
+<img width="500" height="300" alt="esqueci minha senha" src="https://github.com/user-attachments/assets/5614f327-9821-46fa-a7e6-43d1c875e680" />
+<img width="500" height="300" alt="tela de minigames" src="https://github.com/user-attachments/assets/f4156024-21f7-4f96-8a73-e2ac52451dc3" />
+<img width="500" height="300" alt="tela da API" src="https://github.com/user-attachments/assets/ab7cbae1-4c82-445a-bd1e-9a42ed67839b" />
 
 <!-- ---------------------------------------------------------------------- -->
 
