@@ -4,6 +4,7 @@
     title="Camus"
     collapsible="icon"
     rail
+    :menu="{ ui: { overlay: 'z-40', content: 'z-50' } }"
     :ui="{
       header: 'group-data-[state=collapsed]/sidebar:px-3',
       title: 'flex group-data-[state=collapsed]/sidebar:justify-center',
