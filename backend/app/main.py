@@ -21,6 +21,9 @@ from app.domains.moderacao.router import router as moderacao_router
 
 from app.domains.dispositivo import mqtt as dispositivo_mqtt
 from app.domains.dispositivo.router import admin_router as dispositivo_admin_router
+from app.domains.documento_legal.router import aceite_router as documento_legal_aceite_router
+from app.domains.documento_legal.router import admin_router as documento_legal_admin_router
+from app.domains.documento_legal.router import router as documento_legal_router
 from app.domains.grupo.router import router as grupo_router
 from app.domains.grupo.service import grupo_dono, grupo_membro
 
@@ -72,6 +75,9 @@ app.include_router(dashboard_router)
 app.include_router(auditoria_router)
 app.include_router(aquario_router)
 app.include_router(dispositivo_admin_router)
+app.include_router(documento_legal_admin_router)
+app.include_router(documento_legal_router)
+app.include_router(documento_legal_aceite_router)
 app.include_router(grupo_router)
 app.include_router(pontuacao_router)
 app.include_router(minigame_router)
