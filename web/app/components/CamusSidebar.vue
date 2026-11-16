@@ -124,7 +124,7 @@ const destaques = {
 // active na mao pq o menu so marca a rota exata, ai /minigames/jogo ficava sem cor
 function item(label: string, icon: string, to: string, cor: keyof typeof destaques = 'primary'): NavigationMenuItem {
   const ativo = rotaAtual(to)
-  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined }
+  return { label, icon, to, active: ativo, class: ativo ? destaques[cor] : undefined, onSelect: fecharMenuNoCelular}
 }
 
 const items = computed<NavigationMenuItem[]>(() => {
