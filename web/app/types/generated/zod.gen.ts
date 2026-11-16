@@ -93,14 +93,6 @@ export const zBodyEnviarImagemImagensPost = z.object({
 });
 
 /**
- * CadastroDiaRead
- */
-export const zCadastroDiaRead = z.object({
-    data: z.iso.date(),
-    quantidade: z.int()
-});
-
-/**
  * CadastroDispositivo
  */
 export const zCadastroDispositivo = z.object({
@@ -261,20 +253,6 @@ export const zCorrecaoQuestaoRead = z.object({
 export const zCredencialDispositivo = z.object({
     mac: z.string(),
     senha: z.string()
-});
-
-/**
- * DashboardRead
- */
-export const zDashboardRead = z.object({
-    total_usuarios: z.int(),
-    total_grupos: z.int(),
-    total_conquistas_concedidas: z.int(),
-    total_trilhas: z.int(),
-    cadastros_por_dia: z.array(zCadastroDiaRead),
-    conquistas_por_quantidade: z.array(zConquistaResumoRead),
-    total_trilhas_globais: z.int(),
-    total_trilhas_de_grupo: z.int()
 });
 
 /**
@@ -583,6 +561,17 @@ export const zPeixeRead = z.object({
 });
 
 /**
+ * PontoEvolucaoRead
+ */
+export const zPontoEvolucaoRead = z.object({
+    data: z.iso.date(),
+    alunos: z.int(),
+    dispositivos: z.int(),
+    trilhas: z.int(),
+    grupos: z.int()
+});
+
+/**
  * PontoLeitura
  */
 export const zPontoLeitura = z.object({
@@ -872,6 +861,28 @@ export const zModuloIotRead = z.object({
 export const zTokenPair = z.object({
     access_token: z.string(),
     refresh_token: z.string()
+});
+
+/**
+ * TotaisPeriodoRead
+ */
+export const zTotaisPeriodoRead = z.object({
+    alunos: z.int(),
+    dispositivos: z.int(),
+    trilhas: z.int(),
+    grupos: z.int()
+});
+
+/**
+ * DashboardRead
+ */
+export const zDashboardRead = z.object({
+    evolucao: z.array(zPontoEvolucaoRead),
+    totais: zTotaisPeriodoRead,
+    totais_anteriores: zTotaisPeriodoRead,
+    conquistas_por_quantidade: z.array(zConquistaResumoRead),
+    total_trilhas_globais: z.int(),
+    total_trilhas_de_grupo: z.int()
 });
 
 /**
@@ -1357,7 +1368,13 @@ export const zConquistaUpdateConquistasIdPatchPath = z.object({
 });
 
 export const zObterDashboardAdminDashboardGetQuery = z.object({
-    dias: z.int().gte(1).lte(90).optional().default(30)
+    inicio: z.iso.date().nullish(),
+    fim: z.iso.date().nullish(),
+    agrupamento: z.enum([
+        'dia',
+        'semana',
+        'mes'
+    ]).optional().default('dia')
 });
 
 /**

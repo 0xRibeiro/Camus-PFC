@@ -1,9 +1,11 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.domains.dashboard import service
-from app.domains.dashboard.schema import DashboardRead
+from app.domains.dashboard.schema import Agrupamento, DashboardRead
 from app.domains.usuario.model import RoleUsuario
 from app.domains.usuario.service import exige_role
 
@@ -15,8 +17,9 @@ router = APIRouter(
 )
 
 
-# rota pra obter dados. vou tentar com limita de 90 por enquanto
+# sem datas vai os ultimos 30 dias
 @router.get("", response_model=DashboardRead)
-async def obter_dashboard(dias: int = Query(default=30, ge=1, le=90),
+async def obter_dashboard(inicio: date | None = None, fim: date | None = None,
+    agrupamento: Agrupamento = Query(default="dia"),
     db: AsyncSession = Depends(get_async_session)) -> DashboardRead:
-    return await service.obter_dashboard(db, dias)
+    return await service.obter_dashboard(db, inicio, fim, agrupamento)

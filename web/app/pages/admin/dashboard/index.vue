@@ -6,15 +6,11 @@
       imagem="/papeis-de-parede/azul/admin.webp"
     />
 
-    <div class="mb-6 flex flex-wrap items-end gap-3">
-      <UFormField label="Período dos cadastros">
-        <USelect
-          v-model="dias"
-          :items="periodos"
-          :disabled="loading"
-          class="w-44"
-        />
-      </UFormField>
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <DashboardFiltro
+        v-model:periodo="periodo"
+        v-model:agrupamento="agrupamento"
+      />
 
       <UButton
         label="Atualizar"
@@ -55,7 +51,16 @@
       v-else-if="dados"
       class="space-y-6"
     >
-      <DashboardNumeros :dados="dados" />
+      <DashboardEvolucao
+        :evolucao="dados.evolucao"
+        :agrupamento="agrupamentoCarregado"
+        class="min-w-0"
+      />
+
+      <DashboardNumeros
+        :totais="dados.totais"
+        :anteriores="dados.totais_anteriores"
+      />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DashboardTrilhas
@@ -68,18 +73,15 @@
           :conquistas="dados.conquistas_por_quantidade"
           class="min-w-0"
         />
-
-        <DashboardCadastros
-          :cadastros="dados.cadastros_por_dia"
-          class="min-w-0 lg:col-span-2"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { getLocalTimeZone, today } from '@internationalized/date'
 import { FetchError } from 'ofetch'
+import type { Periodo } from '~/components/dashboard/DashboardFiltro.vue'
 import type { DashboardRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
@@ -89,20 +91,31 @@ const dados = ref<DashboardRead | null>(null)
 const loading = ref(true)
 const erro = ref('')
 
-const dias = ref(30)
+// comeca nos ultimos 30 dias
+const hoje = today(getLocalTimeZone())
+const periodo = ref<Periodo>({ start: hoje.subtract({ days: 29 }), end: hoje })
+const agrupamento = ref<'dia' | 'semana' | 'mes'>('dia')
 
-const periodos = [
-  { label: 'Últimos 7 dias', value: 7 },
-  { label: 'Últimos 30 dias', value: 30 },
-  { label: 'Últimos 90 dias', value: 90 },
-]
+// rotulo do grafico so muda junto com os dados
+const agrupamentoCarregado = ref(agrupamento.value)
 
 async function fetchDashboard() {
+  const { start, end } = periodo.value
+  if (!start) return
+
   loading.value = true
   erro.value = ''
 
   try {
-    dados.value = await api('/admin/dashboard', { query: { dias: dias.value } })
+    // sem fim e um dia so
+    dados.value = await api('/admin/dashboard', {
+      query: {
+        inicio: start.toString(),
+        fim: (end ?? start).toString(),
+        agrupamento: agrupamento.value,
+      },
+    })
+    agrupamentoCarregado.value = agrupamento.value
   }
   catch (error) {
     erro.value = 'Não foi possível carregar a dashboard'
@@ -116,8 +129,8 @@ async function fetchDashboard() {
   }
 }
 
-// consulta novamente quando o período selecionado mudar
-watch(dias, fetchDashboard)
+// consulta novamente quando o período ou agrupamento mudar
+watch([periodo, agrupamento], fetchDashboard)
 
 // primeira consulta ao abrir a página
 onMounted(fetchDashboard)

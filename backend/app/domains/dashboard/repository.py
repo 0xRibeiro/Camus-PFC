@@ -5,9 +5,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
-from app.domains.grupo.model import Grupo
+from app.domains.dispositivo.model import Dispositivo
 from app.domains.trilha.model import Trilha
-from app.domains.usuario.model import Usuario
+from app.domains.usuario.model import RoleUsuario, Usuario
+
+# dia no fuso de sp, o log fica sem fuso
+DIA_DO_LOG = cast(func.timezone("America/Sao_Paulo", func.timezone("UTC", LogAuditoria.criado_em)), Date)
+
+
+def montar_contagem(linhas) -> dict[date, int]:
+    contagem = {}
+    for dia, quantidade in linhas:
+        contagem[dia] = quantidade
+    return contagem
 
 
 # todos podem retornar 0 caso não tenha dados pra não quebrar a dash
@@ -15,30 +25,53 @@ class DashboardRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def contar_usuarios(self) -> int:
-        return await self.db.scalar(select(func.count()).select_from(Usuario)) or 0
-
-    async def contar_grupos(self) -> int:
-        return await self.db.scalar(select(func.count()).select_from(Grupo)) or 0
-
-    async def contar_conquistas_concedidas(self) -> int:
-        return await self.db.scalar(select(func.count()).select_from(associacao_conquista_usuario)) or 0
-
     # atualiza o metodo de contar trilhas pra fornecer dados pra dash
     async def contar_trilhas_por_escopo(self) -> tuple[int, int]:
         resultado = await self.db.execute(select(func.count().filter(Trilha.grupo_id.is_(None)), func.count(Trilha.grupo_id)).select_from(Trilha))
         globais, de_grupo = resultado.one()
         return globais, de_grupo
 
-    async def contar_cadastros_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
-    # usa apenas a parte da data para agrupar os registros
-        dia = cast(func.timezone("America/Sao_Paulo", func.timezone("UTC", LogAuditoria.criado_em)), Date)
+    # criacoes por dia pela auditoria, serve pra trilhas e grupos
+    async def contar_criados_por_dia(self, entidade: str, inicio: date, fim: date) -> dict[date, int]:
+        consulta = (
+            select(DIA_DO_LOG, func.count())
+            .where(
+                LogAuditoria.entidade == entidade,
+                LogAuditoria.acao == AcaoAuditoria.create,
+                DIA_DO_LOG >= inicio,
+                DIA_DO_LOG <= fim,
+            )
+            .group_by(DIA_DO_LOG)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
 
-        # query bem especifica só pra contar os cadastros acontecidos no dia utilizando dados da auditoria.
-        resultado = await self.db.execute(select(dia, func.count()).where(LogAuditoria.entidade == "usuarios",
-        LogAuditoria.acao == AcaoAuditoria.create, dia >= inicio, dia <= fim).group_by(dia).order_by(dia))
+    # join pq log antigo tem outro formato de json
+    async def contar_alunos_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
+        consulta = (
+            select(DIA_DO_LOG, func.count())
+            .join(Usuario, Usuario.id == LogAuditoria.entidade_id)
+            .where(
+                LogAuditoria.entidade == "usuarios",
+                LogAuditoria.acao == AcaoAuditoria.create,
+                Usuario.role == RoleUsuario.aluno,
+                DIA_DO_LOG >= inicio,
+                DIA_DO_LOG <= fim,
+            )
+            .group_by(DIA_DO_LOG)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
 
-        return {data: quantidade for data, quantidade in resultado.all()}
+    async def contar_dispositivos_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
+        dia = cast(func.timezone("America/Sao_Paulo", Dispositivo.criado_em), Date)
+        consulta = (
+            select(dia, func.count())
+            .where(dia >= inicio, dia <= fim)
+            .group_by(dia)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
 
     async def contar_conquistas_por_quantidade(self) -> list[tuple[int, str, int]]:
         quantidade = func.count(associacao_conquista_usuario.c.usuario_id)

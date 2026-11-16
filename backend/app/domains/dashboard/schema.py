@@ -1,12 +1,25 @@
 from datetime import date
+from typing import Literal
 
 from pydantic import BaseModel
 
+Agrupamento = Literal["dia", "semana", "mes"]
 
-# para saber quantos cadastros foram feitos no dia
-class CadastroDiaRead(BaseModel):
+
+# um ponto do grafico, data e o comeco do dia/semana/mes
+class PontoEvolucaoRead(BaseModel):
     data: date
-    quantidade: int
+    alunos: int
+    dispositivos: int
+    trilhas: int
+    grupos: int
+
+
+class TotaisPeriodoRead(BaseModel):
+    alunos: int
+    dispositivos: int
+    trilhas: int
+    grupos: int
 
 
 # para saber quanto cada conquista foi concedida
@@ -15,14 +28,13 @@ class ConquistaResumoRead(BaseModel):
     titulo: str
     quantidade: int
 
-# para fornecer o total de cadastros, conquistas, trilhas e grupos
-class DashboardRead(BaseModel):
-    total_usuarios: int
-    total_grupos: int
-    total_conquistas_concedidas: int
-    total_trilhas: int
 
-    cadastros_por_dia: list[CadastroDiaRead]
+class DashboardRead(BaseModel):
+    evolucao: list[PontoEvolucaoRead]
+    totais: TotaisPeriodoRead
+    # msm tamanho de periodo logo antes, pro %
+    totais_anteriores: TotaisPeriodoRead
+
     conquistas_por_quantidade: list[ConquistaResumoRead]
 
     # mais dados pra dash, diferenciando entre os tipos de trilhas

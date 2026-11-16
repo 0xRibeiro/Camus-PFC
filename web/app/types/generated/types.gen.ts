@@ -188,20 +188,6 @@ export type BodyEnviarImagemImagensPost = {
 };
 
 /**
- * CadastroDiaRead
- */
-export type CadastroDiaRead = {
-    /**
-     * Data
-     */
-    data: string;
-    /**
-     * Quantidade
-     */
-    quantidade: number;
-};
-
-/**
  * CadastroDispositivo
  */
 export type CadastroDispositivo = {
@@ -589,25 +575,11 @@ export type CredencialDispositivo = {
  */
 export type DashboardRead = {
     /**
-     * Total Usuarios
+     * Evolucao
      */
-    total_usuarios: number;
-    /**
-     * Total Grupos
-     */
-    total_grupos: number;
-    /**
-     * Total Conquistas Concedidas
-     */
-    total_conquistas_concedidas: number;
-    /**
-     * Total Trilhas
-     */
-    total_trilhas: number;
-    /**
-     * Cadastros Por Dia
-     */
-    cadastros_por_dia: Array<CadastroDiaRead>;
+    evolucao: Array<PontoEvolucaoRead>;
+    totais: TotaisPeriodoRead;
+    totais_anteriores: TotaisPeriodoRead;
     /**
      * Conquistas Por Quantidade
      */
@@ -1277,6 +1249,32 @@ export type PeixeRead = {
 };
 
 /**
+ * PontoEvolucaoRead
+ */
+export type PontoEvolucaoRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Alunos
+     */
+    alunos: number;
+    /**
+     * Dispositivos
+     */
+    dispositivos: number;
+    /**
+     * Trilhas
+     */
+    trilhas: number;
+    /**
+     * Grupos
+     */
+    grupos: number;
+};
+
+/**
  * PontoLeitura
  */
 export type PontoLeitura = {
@@ -1690,6 +1688,28 @@ export type TokenPair = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * TotaisPeriodoRead
+ */
+export type TotaisPeriodoRead = {
+    /**
+     * Alunos
+     */
+    alunos: number;
+    /**
+     * Dispositivos
+     */
+    dispositivos: number;
+    /**
+     * Trilhas
+     */
+    trilhas: number;
+    /**
+     * Grupos
+     */
+    grupos: number;
 };
 
 /**
@@ -3019,9 +3039,17 @@ export type ObterDashboardAdminDashboardGetData = {
     path?: never;
     query?: {
         /**
-         * Dias
+         * Inicio
          */
-        dias?: number;
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
     };
     url: '/admin/dashboard';
 };
