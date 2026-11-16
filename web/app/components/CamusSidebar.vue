@@ -146,6 +146,7 @@ const items = computed<NavigationMenuItem[]>(() => {
       item('Auditoria', 'i-lucide-history', '/admin/auditoria'),
       item('Denúncias', 'i-lucide-flag', '/admin/denuncias'),
       item('Dashboard', 'i-lucide-layout-dashboard', '/admin/dashboard'),
+      item('Termos e Política', 'i-lucide-scale', '/admin/documentos-legais'),
     )
   }
 
