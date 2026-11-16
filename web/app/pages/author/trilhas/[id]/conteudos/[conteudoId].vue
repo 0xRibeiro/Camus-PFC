@@ -78,7 +78,7 @@ async function onQuizAlterou() {
 
 <template>
   <div class="flex-1">
-    <div class="flex items-center justify-between mb-3">
+    <div class="mb-3 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
       <UButton
         icon="i-lucide-arrow-left"
         label="Trilha"
@@ -90,7 +90,7 @@ async function onQuizAlterou() {
 
       <div
         v-if="conteudo"
-        class="flex items-center gap-4"
+        class="flex flex-wrap items-center gap-x-4 gap-y-2"
       >
         <!-- no quiz vale pro proximo salvar ou excluir de pergunta -->
         <UCheckbox
@@ -123,7 +123,7 @@ async function onQuizAlterou() {
         <p class="text-xs font-medium text-muted uppercase tracking-wide">
           {{ conteudo.tipo === 'artigo' ? 'Artigo' : 'Quiz' }}
         </p>
-        <h1 class="text-xl font-semibold">
+        <h1 class="text-xl font-semibold wrap-anywhere">
           {{ conteudo.titulo }}
         </h1>
       </div>

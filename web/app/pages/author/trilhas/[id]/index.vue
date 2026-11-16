@@ -13,9 +13,9 @@
 
     <div
       v-if="trilha"
-      class="flex items-start justify-between mb-6"
+      class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
     >
-      <div>
+      <div class="min-w-0 wrap-anywhere">
         <p class="text-xs font-medium text-muted uppercase tracking-wide">
           Jornada
         </p>
@@ -27,7 +27,7 @@
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 sm:justify-end">
         <!-- botao novo teste para o dono ver a trilha igual os alunos veriam -->
         <UButton
           v-if="trilhaGrupo && trilha.is_active"
@@ -86,13 +86,13 @@
         :key="modulo.id"
         class="bg-elevated/40 border border-default rounded-xl overflow-hidden"
       >
-        <div class="flex items-center justify-between px-4 py-3">
-          <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
             <UIcon
               name="i-lucide-grip-vertical"
-              class="modulo-drag-handle size-4 text-muted cursor-grab active:cursor-grabbing"
+              class="modulo-drag-handle size-4 shrink-0 text-muted cursor-grab active:cursor-grabbing"
             />
-            <span class="rounded-full bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+            <span class="min-w-0 rounded-full bg-slate-800 px-3 py-1.5 text-xs font-semibold wrap-anywhere text-white">
               {{ modulo.titulo }}{{ indiceModulo === modulos.length - 1 ? ' - Final' : '' }}
             </span>
             <span class="text-xs text-muted">
@@ -101,7 +101,7 @@
             </span>
           </div>
 
-          <div class="flex items-center gap-1">
+          <div class="flex shrink-0 items-center gap-1">
             <UButton
               icon="i-lucide-plus"
               size="xs"
@@ -132,16 +132,16 @@
           <div
             v-for="conteudo in conteudosDoModulo(modulo.id)"
             :key="conteudo.id"
-            class="flex items-center justify-between px-4 py-3"
+            class="flex items-start justify-between gap-2 px-4 py-3 sm:items-center"
           >
-            <div class="flex items-center gap-3">
+            <div class="flex min-w-0 flex-1 items-start gap-2 sm:items-center sm:gap-3">
               <div class="flex items-center justify-center size-8 rounded-full bg-primary-10 shrink-0">
                 <UIcon
                   :name="tiposInfo[conteudo.tipo].icon"
                   class="size-4 text-primary"
                 />
               </div>
-              <div>
+              <div class="min-w-0 wrap-anywhere">
                 <p class="text-sm font-medium">
                   {{ conteudo.titulo }}
                 </p>
@@ -163,9 +163,9 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex shrink-0 items-center gap-1 sm:gap-2">
               <!-- so mostra qual e o tipo, nao da pra trocar clicando -->
-              <div class="hidden sm:flex items-center gap-1.5">
+              <div class="hidden items-center gap-1.5 lg:flex">
                 <span
                   v-for="(info, tipo) in tiposInfo"
                   :key="tipo"
@@ -181,6 +181,7 @@
                 size="xs"
                 color="neutral"
                 variant="ghost"
+                aria-label="Editar conteúdo"
                 @click="abrirEditarConteudo(conteudo)"
               />
               <UButton
@@ -189,6 +190,7 @@
                 size="xs"
                 color="neutral"
                 variant="ghost"
+                :aria-label="conteudo.video_url ? 'Abrir vídeo' : 'Adicionar link do vídeo'"
                 @click="abrirLinkVideo(conteudo)"
               />
               <!-- artigo e quiz abrem a tela de edicao propria -->
@@ -198,6 +200,7 @@
                 size="xs"
                 color="neutral"
                 variant="ghost"
+                :aria-label="conteudo.tipo === 'artigo' ? 'Editar artigo' : 'Editar quiz'"
                 :to="`${trilhaPath}/conteudos/${conteudo.id}`"
               />
               <UButton
@@ -205,6 +208,7 @@
                 size="xs"
                 color="error"
                 variant="ghost"
+                aria-label="Excluir conteúdo"
                 @click="onDeleteConteudo(conteudo)"
               />
             </div>
@@ -272,7 +276,7 @@
             v-if="modoConteudoModal === 'criar'"
             label="Tipo"
           >
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <UButton
                 label="Vídeo"
                 :color="formConteudo.tipo === 'video' ? 'primary' : 'neutral'"

@@ -52,11 +52,11 @@
           label="Imagem"
         >
           <!-- da pra colar um link ou enviar um arquivo, os dois viram url no foto -->
-          <div class="flex gap-2">
+          <div class="flex flex-col items-start gap-2 sm:flex-row">
             <UInput
               v-model="formState.foto"
               placeholder="Cole um link ou envie um arquivo"
-              class="flex-1"
+              class="w-full min-w-0 sm:flex-1"
             />
             <input
               ref="inputFoto"

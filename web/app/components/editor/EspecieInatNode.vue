@@ -89,12 +89,12 @@ function escolherPeixe(peixe: Peixe) {
         Espécie do iNaturalist
       </div>
 
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <UInput
           v-model="busca"
           icon="i-lucide-search"
           placeholder="Nome popular ou científico do peixe"
-          class="flex-1"
+          class="min-w-0 flex-1 basis-40"
           @keydown.enter.prevent="buscarPeixes"
         />
         <UButton
