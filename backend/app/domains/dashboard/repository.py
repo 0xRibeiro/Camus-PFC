@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
 from app.domains.dispositivo.model import Dispositivo
+from app.domains.grupo.model import Grupo, Participacao
 from app.domains.progresso.model import ConclusaoConteudo, TentativaQuiz
-from app.domains.trilha.model import Conteudo, Modulo, Trilha
+from app.domains.trilha.model import Alternativa, Conteudo, Modulo, Questao, Trilha
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 # dia no fuso de sp, o log fica sem fuso
@@ -16,7 +17,8 @@ DIA_DA_CONCLUSAO = cast(func.timezone("America/Sao_Paulo", ConclusaoConteudo.con
 DIA_DA_TENTATIVA = cast(func.timezone("America/Sao_Paulo", TentativaQuiz.criado_em), Date)
 
 
-def montar_contagem(linhas) -> dict[date, int]:
+# chave pode ser dia, conteudo ou aluno
+def montar_contagem(linhas) -> dict:
     contagem = {}
     for dia, quantidade in linhas:
         contagem[dia] = quantidade
@@ -92,10 +94,67 @@ class DashboardRepository:
         return await self.db.scalar(consulta) or 0
 
     # conclusao e tentativa n tem FK, entao filtra pelos conteudos atuais da trilha
-    async def listar_conteudos_da_trilha(self, trilha_id: int) -> list[int]:
-        consulta = select(Conteudo.id).join(Modulo, Modulo.id == Conteudo.modulo_id).where(Modulo.trilha_id == trilha_id)
+    # na ordem q o aluno ve
+    async def listar_conteudos_da_trilha(self, trilha_id: int) -> list[tuple[Conteudo, str]]:
+        consulta = (
+            select(Conteudo, Modulo.titulo)
+            .join(Modulo, Modulo.id == Conteudo.modulo_id)
+            .where(Modulo.trilha_id == trilha_id)
+            .order_by(Modulo.ordem, Conteudo.ordem)
+        )
+        resultado = await self.db.execute(consulta)
+        return list(resultado.tuples().all())
+
+    async def contar_conclusoes_por_conteudo(self, conteudos: list[int]) -> dict[int, int]:
+        consulta = (
+            select(ConclusaoConteudo.conteudo_id, func.count())
+            .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
+            .group_by(ConclusaoConteudo.conteudo_id)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
+
+    # quantos conteudos cada aluno ja concluiu
+    async def contar_conclusoes_por_aluno(self, conteudos: list[int]) -> dict[int, int]:
+        consulta = (
+            select(ConclusaoConteudo.usuario_id, func.count())
+            .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
+            .group_by(ConclusaoConteudo.usuario_id)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
+
+    async def listar_questoes(self, quizzes: list[int]) -> list[Questao]:
+        consulta = select(Questao).where(Questao.conteudo_id.in_(quizzes)).order_by(Questao.conteudo_id, Questao.ordem)
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
+
+    async def listar_alternativas_corretas(self, questoes: list[int]) -> set[int]:
+        consulta = select(Alternativa.id).where(Alternativa.questao_id.in_(questoes), Alternativa.correta.is_(True))
+        resultado = await self.db.scalars(consulta)
+        return set(resultado.all())
+
+    # so a versao atual, a antiga pode ter outras alternativas
+    async def listar_respostas(self, conteudo_id: int, versao: int) -> list[dict]:
+        consulta = select(TentativaQuiz.respostas).where(
+            TentativaQuiz.conteudo_id == conteudo_id,
+            TentativaQuiz.versao_conteudo == versao,
+        )
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
+
+    async def buscar_trilha(self, trilha_id: int) -> Trilha | None:
+        return await self.db.get(Trilha, trilha_id)
+
+    # dono fica de fora, ele so cria
+    async def contar_membros(self, grupo_id: int) -> int:
+        consulta = (
+            select(func.count())
+            .select_from(Participacao)
+            .join(Grupo, Grupo.id == Participacao.id_grupo)
+            .where(Participacao.id_grupo == grupo_id, Participacao.id_usuario != Grupo.id_dono)
+        )
+        return await self.db.scalar(consulta) or 0
 
     async def contar_conclusoes_por_dia(self, conteudos: list[int], inicio: date, fim: date) -> dict[date, int]:
         consulta = (

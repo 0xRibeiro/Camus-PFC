@@ -394,6 +394,32 @@ export type ConteudoCreate = {
 };
 
 /**
+ * ConteudoFunilRead
+ */
+export type ConteudoFunilRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Tipo
+     */
+    tipo: string;
+    /**
+     * Modulo
+     */
+    modulo: string;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
+};
+
+/**
  * ConteudoRead
  */
 export type ConteudoRead = {
@@ -612,6 +638,15 @@ export type DashboardTrilhaRead = {
     evolucao: Array<PontoEvolucaoTrilhaRead>;
     totais: TotaisTrilhaRead;
     totais_anteriores: TotaisTrilhaRead;
+    engajamento: EngajamentoTrilhaRead;
+    /**
+     * Funil
+     */
+    funil: Array<ConteudoFunilRead>;
+    /**
+     * Questoes
+     */
+    questoes: Array<QuestaoAcertoRead>;
 };
 
 /**
@@ -877,6 +912,24 @@ export type DocumentoPendente = {
      * Publicado Em
      */
     publicado_em: string;
+};
+
+/**
+ * EngajamentoTrilhaRead
+ */
+export type EngajamentoTrilhaRead = {
+    /**
+     * Base
+     */
+    base: number;
+    /**
+     * Iniciaram
+     */
+    iniciaram: number;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
 };
 
 /**
@@ -1324,6 +1377,32 @@ export type PontoLeitura = {
      * Valor
      */
     valor: number;
+};
+
+/**
+ * QuestaoAcertoRead
+ */
+export type QuestaoAcertoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Enunciado
+     */
+    enunciado: string;
+    /**
+     * Quiz
+     */
+    quiz: string;
+    /**
+     * Respostas
+     */
+    respostas: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
 };
 
 /**

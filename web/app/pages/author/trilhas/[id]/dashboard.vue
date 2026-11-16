@@ -73,6 +73,25 @@
       />
 
       <DashboardNumeros :indicadores="indicadores" />
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <DashboardEngajamento
+          :engajamento="dados.engajamento"
+          :rotulo-base="grupoId ? 'membros do grupo' : 'alunos'"
+          class="min-w-0"
+        />
+
+        <DashboardFunil
+          :funil="dados.funil"
+          :iniciaram="dados.engajamento.iniciaram"
+          class="min-w-0 lg:col-span-2"
+        />
+      </div>
+
+      <DashboardQuestoes
+        :questoes="dados.questoes"
+        class="min-w-0"
+      />
     </div>
   </div>
 </template>

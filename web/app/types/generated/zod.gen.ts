@@ -159,6 +159,17 @@ export const zConquistaUpdate = z.object({
 });
 
 /**
+ * ConteudoFunilRead
+ */
+export const zConteudoFunilRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    tipo: z.string(),
+    modulo: z.string(),
+    concluiram: z.int()
+});
+
+/**
  * ConteudoTipo
  */
 export const zConteudoTipo = z.enum([
@@ -324,6 +335,15 @@ export const zDenunciaUpdate = z.object({
 export const zDocumentoLegalHistorico = z.object({
     versao: z.int(),
     publicado_em: z.iso.datetime()
+});
+
+/**
+ * EngajamentoTrilhaRead
+ */
+export const zEngajamentoTrilhaRead = z.object({
+    base: z.int(),
+    iniciaram: z.int(),
+    concluiram: z.int()
 });
 
 /**
@@ -587,6 +607,17 @@ export const zPontoEvolucaoTrilhaRead = z.object({
 export const zPontoLeitura = z.object({
     tempo: z.iso.datetime(),
     valor: z.number()
+});
+
+/**
+ * QuestaoAcertoRead
+ */
+export const zQuestaoAcertoRead = z.object({
+    id: z.int(),
+    enunciado: z.string(),
+    quiz: z.string(),
+    respostas: z.int(),
+    acertos: z.int()
 });
 
 /**
@@ -913,7 +944,10 @@ export const zTotaisTrilhaRead = z.object({
 export const zDashboardTrilhaRead = z.object({
     evolucao: z.array(zPontoEvolucaoTrilhaRead),
     totais: zTotaisTrilhaRead,
-    totais_anteriores: zTotaisTrilhaRead
+    totais_anteriores: zTotaisTrilhaRead,
+    engajamento: zEngajamentoTrilhaRead,
+    funil: z.array(zConteudoFunilRead),
+    questoes: z.array(zQuestaoAcertoRead)
 });
 
 /**

@@ -37,10 +37,38 @@ class TotaisTrilhaRead(BaseModel):
     questoes: int
 
 
+# base e membros no grupo ou alunos na global
+class EngajamentoTrilhaRead(BaseModel):
+    base: int
+    iniciaram: int
+    concluiram: int
+
+
+class ConteudoFunilRead(BaseModel):
+    id: int
+    titulo: str
+    tipo: str
+    modulo: str
+    concluiram: int
+
+
+class QuestaoAcertoRead(BaseModel):
+    id: int
+    enunciado: str
+    quiz: str
+    respostas: int
+    acertos: int
+
+
 class DashboardTrilhaRead(BaseModel):
     evolucao: list[PontoEvolucaoTrilhaRead]
     totais: TotaisTrilhaRead
     totais_anteriores: TotaisTrilhaRead
+
+    # esses tres sao de sempre, n do periodo
+    engajamento: EngajamentoTrilhaRead
+    funil: list[ConteudoFunilRead]
+    questoes: list[QuestaoAcertoRead]
 
 
 # para saber quanto cada conquista foi concedida
