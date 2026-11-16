@@ -7,9 +7,12 @@ import { EspecieInat } from '~/components/editor/EspecieInatExtension'
 import { ImageUpload } from '~/components/editor/ImageUploadExtension'
 
 // mostra o artigo pro aluno, msm editor do author so q sem editar
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   conteudo: JSONContent | null | undefined
-}>()
+  ui?: { base?: string, content?: string }
+}>(), {
+  ui: () => ({ base: 'p-4 sm:px-14', content: 'max-w-4xl mx-auto' }),
+})
 
 const conteudoLocal = computed(() => props.conteudo ?? undefined)
 
@@ -39,9 +42,6 @@ const extensions = [
     content-type="json"
     :extensions="extensions"
     :editable="false"
-    :ui="{
-      base: 'p-4 sm:px-14',
-      content: 'max-w-4xl mx-auto',
-    }"
+    :ui="props.ui"
   />
 </template>
