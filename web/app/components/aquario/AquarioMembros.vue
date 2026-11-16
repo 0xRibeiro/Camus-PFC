@@ -1,21 +1,68 @@
 <template>
   <UCard>
     <template #header>
-      <h2 class="font-medium">
-        Quem cuida desse aquário
-      </h2>
+      <div class="flex items-center gap-3">
+        <div class="flex size-10 items-center justify-center rounded-full bg-violet-500/10 text-violet-500 ring ring-violet-500/25 ring-inset">
+          <UIcon
+            name="i-lucide-users"
+            class="size-5"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-medium">
+            Quem cuida desse aquário
+          </h2>
+          <p class="text-xs text-muted">
+            {{ membros.length }} {{ membros.length === 1 ? 'pessoa' : 'pessoas' }}
+          </p>
+        </div>
+      </div>
     </template>
 
     <div class="space-y-4">
-      <UTable
-        :data="membros"
-        :columns="colunas"
-        :loading="carregando"
-      />
+      <div
+        v-if="carregando"
+        class="space-y-3"
+      >
+        <USkeleton
+          v-for="indice in 2"
+          :key="indice"
+          class="h-12 w-full"
+        />
+      </div>
+
+      <ul
+        v-else
+        class="divide-y divide-default"
+      >
+        <li
+          v-for="membro in membros"
+          :key="membro.username"
+          class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+        >
+          <UsuarioAvatar
+            :avatar="membro.avatar"
+            :cor-fundo="membro.cor_fundo"
+            :tamanho="40"
+          />
+
+          <p class="min-w-0 flex-1 truncate font-medium">
+            {{ membro.username }}
+          </p>
+
+          <UBadge
+            :color="papeis[membro.papel].cor"
+            :icon="papeis[membro.papel].icone"
+            :label="papeis[membro.papel].nome"
+            variant="subtle"
+          />
+        </li>
+      </ul>
 
       <div
         v-if="papel === 'dono'"
-        class="space-y-2"
+        class="space-y-2 rounded-lg bg-elevated/50 p-4"
       >
         <p class="text-sm text-muted">
           Gere um convite pra alguém acompanhar o aquário só como leitor. Ele vale por 15 minutos.
@@ -70,7 +117,6 @@
 </template>
 
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import type { ConviteAquarioRead, MembroAquarioRead, PapelAquario } from '~/types/generated'
 
@@ -99,10 +145,11 @@ const tempoRestante = computed(() => {
   return `${minutos}:${String(segundos).padStart(2, '0')}`
 })
 
-const colunas: TableColumn<MembroAquarioRead>[] = [
-  { accessorKey: 'username', header: 'Usuário' },
-  { accessorKey: 'papel', header: 'Papel' },
-]
+const papeis: Record<PapelAquario, { nome: string, icone: string, cor: 'warning' | 'info' | 'neutral' }> = {
+  dono: { nome: 'Dono', icone: 'i-lucide-crown', cor: 'warning' },
+  operador: { nome: 'Operador', icone: 'i-lucide-wrench', cor: 'info' },
+  leitor: { nome: 'Leitor', icone: 'i-lucide-eye', cor: 'neutral' },
+}
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {

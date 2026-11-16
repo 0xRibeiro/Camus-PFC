@@ -27,6 +27,8 @@ class AquarioRead(BaseModel):
 
 class MembroAquarioRead(BaseModel):
     username: str
+    avatar: str
+    cor_fundo: str
     papel: PapelAquario
 
 

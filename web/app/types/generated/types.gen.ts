@@ -1182,6 +1182,14 @@ export type MembroAquarioRead = {
      * Username
      */
     username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
     papel: PapelAquario;
 };
 

@@ -573,6 +573,8 @@ export const zAquarioRead = z.object({
  */
 export const zMembroAquarioRead = z.object({
     username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
     papel: zPapelAquario
 });
 

@@ -53,15 +53,12 @@ class AquarioRepository:
         consulta = select(Aquario).where(or_(Aquario.id_dono == usuario_id, Aquario.id.in_(membro_de))).order_by(Aquario.id)
         return list((await self.db.scalars(consulta)).all())
 
-    async def listar_membros(self, aquario_id: int) -> list[tuple[str, PapelAquario]]:
-        consulta = (select(Usuario.username, AquarioMembro.papel).join(AquarioMembro, AquarioMembro.id_usuario == Usuario.id)
+    async def listar_membros(self, aquario_id: int) -> list[tuple[Usuario, PapelAquario]]:
+        consulta = (select(Usuario, AquarioMembro.papel).join(AquarioMembro, AquarioMembro.id_usuario == Usuario.id)
         .where(AquarioMembro.id_aquario == aquario_id).order_by(Usuario.username))
         resultado = await self.db.execute(consulta)
+        return list(resultado.tuples().all())
 
-        membros = []
-        for username, papel in resultado.all():
-            membros.append((username, papel))
-        return membros
-
-    async def buscar_username(self, usuario_id: int) -> str | None:
-        return await self.db.scalar(select(Usuario.username).where(Usuario.id == usuario_id))
+    # avatar vem junto pra lista de quem cuida
+    async def buscar_usuario(self, usuario_id: int) -> Usuario | None:
+        return await self.db.get(Usuario, usuario_id)

@@ -223,12 +223,14 @@ async def listar_membros(db: AsyncSession, aquario_id: int, usuario_id: int) -> 
 
     membros = []
     if aquario.id_dono is not None:
-        dono = await repo.buscar_username(aquario.id_dono)
+        dono = await repo.buscar_usuario(aquario.id_dono)
         if dono is not None:
-            membros.append(MembroAquarioRead(username=dono, papel=PapelAquario.dono))
+            membros.append(MembroAquarioRead(username=dono.username, avatar=dono.avatar, cor_fundo=dono.cor_fundo,
+                papel=PapelAquario.dono))
 
-    for username, papel in await repo.listar_membros(aquario.id):
-        membros.append(MembroAquarioRead(username=username, papel=papel))
+    for usuario, papel in await repo.listar_membros(aquario.id):
+        membros.append(MembroAquarioRead(username=usuario.username, avatar=usuario.avatar, cor_fundo=usuario.cor_fundo,
+            papel=papel))
     return membros
 
 
