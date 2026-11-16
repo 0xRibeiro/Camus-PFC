@@ -1,8 +1,8 @@
 {
   "name": "camus-web",
-  "version": "0.8.40",
+  "version": "0.8.41",
   "camus": {
-    "versaoMinimaApp": "0.8.40"
+    "versaoMinimaApp": "0.8.41"
   },
   "type": "module",
   "private": true,
