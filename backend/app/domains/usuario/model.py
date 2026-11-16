@@ -1,12 +1,16 @@
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.domains.usuario.avatares import AVATAR_PADRAO, COR_FUNDO_PADRAO
+
+# so pro tipo
+if TYPE_CHECKING:
+    from app.domains.documento_legal.model import AceiteDocumentoLegal
 
 
 class RoleUsuario(enum.Enum):
@@ -52,43 +56,7 @@ class Usuario(Base):
     )
 
 
-    aceites_termos: Mapped[list["AceiteTermos"]] = relationship(
-    "AceiteTermos",
-    back_populates="usuario",
-    cascade="all, delete-orphan"
-    )
-
-
-class AceiteTermos(Base):
-    __tablename__ = "aceites_termos"
-
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        autoincrement=True
-    )
-
-    usuario_id: Mapped[int] = mapped_column(
-        ForeignKey("usuarios.id", ondelete="CASCADE"),
-        nullable=False
-    )
-
-    termos_versao: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False
-    )
-
-    privacidade_versao: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False
-    )
-
-    aceito_em: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
-    )
-
-    usuario: Mapped["Usuario"] = relationship(
-        "Usuario",
-        back_populates="aceites_termos"
+    aceites_documentos: Mapped[list["AceiteDocumentoLegal"]] = relationship(
+        "AceiteDocumentoLegal",
+        cascade="all, delete-orphan",
     )
