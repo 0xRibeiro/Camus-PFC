@@ -67,7 +67,7 @@
       <DashboardEvolucao
         :evolucao="dados.evolucao"
         :linhas="linhas"
-        descricao="Conteúdos concluídos e tentativas de quiz feitas pelos alunos."
+        descricao="Conteúdos concluídos, alunos que começaram e alunos que terminaram a trilha."
         :agrupamento="agrupamentoCarregado"
         class="min-w-0"
       />
@@ -87,18 +87,13 @@
           class="min-w-0 lg:col-span-2"
         />
       </div>
-
-      <DashboardQuestoes
-        :questoes="dados.questoes"
-        class="min-w-0"
-      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
-import type { DashboardTrilhaRead, TotaisTrilhaRead, TrilhaRead } from '~/types/generated'
+import type { DashboardTrilhaRead, TrilhaRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
@@ -116,18 +111,12 @@ onMounted(async () => {
   trilha.value = await api(`/trilhas/${trilhaId}`).catch(() => null)
 })
 
+// msm cor nas linhas e nos cards
 const linhas = [
   { key: 'conclusoes', label: 'Conteúdos concluídos', color: 'primary' },
-  { key: 'tentativas', label: 'Tentativas de quiz', color: 'secondary' },
+  { key: 'novos', label: 'Novos na trilha', color: 'secondary' },
+  { key: 'terminaram', label: 'Terminaram a trilha', color: 'tertiary' },
 ]
-
-const formatarPorcentagem = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 }).format
-
-// sem questao respondida n tem taxa
-function taxaAcerto(totais: TotaisTrilhaRead) {
-  if (!totais.questoes) return null
-  return totais.acertos / totais.questoes
-}
 
 const indicadores = computed<Indicador[]>(() => {
   if (!dados.value) return []
@@ -135,16 +124,9 @@ const indicadores = computed<Indicador[]>(() => {
 
   return [
     { titulo: 'Alunos ativos', icone: 'i-lucide-users', cor: 'quaternary', valor: totais.alunos_ativos, anterior: anteriores.alunos_ativos },
+    { titulo: 'Novos na trilha', icone: 'i-lucide-user-plus', cor: 'secondary', valor: totais.novos, anterior: anteriores.novos },
     { titulo: 'Conteúdos concluídos', icone: 'i-lucide-circle-check', cor: 'primary', valor: totais.conclusoes, anterior: anteriores.conclusoes },
-    { titulo: 'Tentativas de quiz', icone: 'i-lucide-list-checks', cor: 'secondary', valor: totais.tentativas, anterior: anteriores.tentativas },
-    {
-      titulo: 'Taxa de acerto',
-      icone: 'i-lucide-target',
-      cor: 'tertiary',
-      valor: taxaAcerto(totais) ?? 0,
-      anterior: taxaAcerto(anteriores),
-      formatar: valor => totais.questoes ? formatarPorcentagem(valor) : '—',
-    },
+    { titulo: 'Terminaram a trilha', icone: 'i-lucide-flag', cor: 'tertiary', valor: totais.terminaram, anterior: anteriores.terminaram },
   ]
 })
 </script>

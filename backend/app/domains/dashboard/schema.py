@@ -25,16 +25,15 @@ class TotaisPeriodoRead(BaseModel):
 class PontoEvolucaoTrilhaRead(BaseModel):
     data: date
     conclusoes: int
-    tentativas: int
+    novos: int
+    terminaram: int
 
 
-# acertos e questoes juntos pro front tirar a %
 class TotaisTrilhaRead(BaseModel):
     alunos_ativos: int
     conclusoes: int
-    tentativas: int
-    acertos: int
-    questoes: int
+    novos: int
+    terminaram: int
 
 
 # base e membros no grupo ou alunos na global
@@ -52,23 +51,14 @@ class ConteudoFunilRead(BaseModel):
     concluiram: int
 
 
-class QuestaoAcertoRead(BaseModel):
-    id: int
-    enunciado: str
-    quiz: str
-    respostas: int
-    acertos: int
-
-
 class DashboardTrilhaRead(BaseModel):
     evolucao: list[PontoEvolucaoTrilhaRead]
     totais: TotaisTrilhaRead
     totais_anteriores: TotaisTrilhaRead
 
-    # esses tres sao de sempre, n do periodo
+    # esses dois sao de sempre, n do periodo
     engajamento: EngajamentoTrilhaRead
     funil: list[ConteudoFunilRead]
-    questoes: list[QuestaoAcertoRead]
 
 
 # para saber quanto cada conquista foi concedida

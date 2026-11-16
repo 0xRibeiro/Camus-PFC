@@ -598,7 +598,8 @@ export const zPontoEvolucaoRead = z.object({
 export const zPontoEvolucaoTrilhaRead = z.object({
     data: z.iso.date(),
     conclusoes: z.int(),
-    tentativas: z.int()
+    novos: z.int(),
+    terminaram: z.int()
 });
 
 /**
@@ -607,17 +608,6 @@ export const zPontoEvolucaoTrilhaRead = z.object({
 export const zPontoLeitura = z.object({
     tempo: z.iso.datetime(),
     valor: z.number()
-});
-
-/**
- * QuestaoAcertoRead
- */
-export const zQuestaoAcertoRead = z.object({
-    id: z.int(),
-    enunciado: z.string(),
-    quiz: z.string(),
-    respostas: z.int(),
-    acertos: z.int()
 });
 
 /**
@@ -933,9 +923,8 @@ export const zDashboardRead = z.object({
 export const zTotaisTrilhaRead = z.object({
     alunos_ativos: z.int(),
     conclusoes: z.int(),
-    tentativas: z.int(),
-    acertos: z.int(),
-    questoes: z.int()
+    novos: z.int(),
+    terminaram: z.int()
 });
 
 /**
@@ -946,8 +935,7 @@ export const zDashboardTrilhaRead = z.object({
     totais: zTotaisTrilhaRead,
     totais_anteriores: zTotaisTrilhaRead,
     engajamento: zEngajamentoTrilhaRead,
-    funil: z.array(zConteudoFunilRead),
-    questoes: z.array(zQuestaoAcertoRead)
+    funil: z.array(zConteudoFunilRead)
 });
 
 /**

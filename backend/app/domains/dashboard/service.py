@@ -13,11 +13,10 @@ from app.domains.dashboard.schema import (
     EngajamentoTrilhaRead,
     PontoEvolucaoRead,
     PontoEvolucaoTrilhaRead,
-    QuestaoAcertoRead,
     TotaisPeriodoRead,
     TotaisTrilhaRead,
 )
-from app.domains.trilha.model import Conteudo, ConteudoTipo
+from app.domains.trilha.model import Conteudo
 
 # comeco da semana (segunda) ou do mes
 def inicio_do_grupo(dia: date, agrupamento: Agrupamento) -> date:
@@ -109,20 +108,38 @@ async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | Non
 
 async def contar_totais_trilha(repo: DashboardRepository, conteudos: list[int], inicio: date,
     fim: date, contagens: dict[str, dict[date, int]]) -> TotaisTrilhaRead:
-    acertos, questoes = await repo.somar_acertos(conteudos, inicio, fim)
     return TotaisTrilhaRead(
         alunos_ativos=len(await repo.listar_alunos_ativos(conteudos, inicio, fim)),
-        acertos=acertos,
-        questoes=questoes,
         **somar_totais(contagens),
     )
 
 
-async def contar_linhas_trilha(repo: DashboardRepository, conteudos: list[int], inicio: date,
-    fim: date) -> dict[str, dict[date, int]]:
+# novo conta no 1o dia, terminou conta no dia da ultima conclusao
+def contar_novos_e_terminaram(progresso: list[tuple[int, int, date, date]],
+    total_conteudos: int) -> tuple[dict[date, int], dict[date, int]]:
+    novos: dict[date, int] = {}
+    terminaram: dict[date, int] = {}
+    for _, quantidade, primeiro_dia, ultimo_dia in progresso:
+        novos[primeiro_dia] = novos.get(primeiro_dia, 0) + 1
+        if quantidade == total_conteudos:
+            terminaram[ultimo_dia] = terminaram.get(ultimo_dia, 0) + 1
+    return novos, terminaram
+
+
+def filtrar_periodo(por_dia: dict[date, int], inicio: date, fim: date) -> dict[date, int]:
+    filtrado = {}
+    for dia, quantidade in por_dia.items():
+        if inicio <= dia <= fim:
+            filtrado[dia] = quantidade
+    return filtrado
+
+
+async def contar_linhas_trilha(repo: DashboardRepository, conteudos: list[int], novos: dict[date, int],
+    terminaram: dict[date, int], inicio: date, fim: date) -> dict[str, dict[date, int]]:
     return {
         "conclusoes": await repo.contar_conclusoes_por_dia(conteudos, inicio, fim),
-        "tentativas": await repo.contar_tentativas_por_dia(conteudos, inicio, fim),
+        "novos": filtrar_periodo(novos, inicio, fim),
+        "terminaram": filtrar_periodo(terminaram, inicio, fim),
     }
 
 
@@ -137,8 +154,12 @@ async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date 
     for conteudo, _ in lista_conteudos:
         conteudos.append(conteudo.id)
 
-    contagens = await contar_linhas_trilha(repo, conteudos, inicio, fim)
-    contagens_anteriores = await contar_linhas_trilha(repo, conteudos, inicio_anterior, fim_anterior)
+    # progresso de sempre, o periodo filtra dps
+    progresso = await repo.listar_progresso_por_aluno(conteudos)
+    novos, terminaram = contar_novos_e_terminaram(progresso, len(conteudos))
+
+    contagens = await contar_linhas_trilha(repo, conteudos, novos, terminaram, inicio, fim)
+    contagens_anteriores = await contar_linhas_trilha(repo, conteudos, novos, terminaram, inicio_anterior, fim_anterior)
 
     evolucao = []
     for ponto in montar_evolucao(contagens, inicio, fim, agrupamento):
@@ -148,27 +169,21 @@ async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date 
         evolucao=evolucao,
         totais=await contar_totais_trilha(repo, conteudos, inicio, fim, contagens),
         totais_anteriores=await contar_totais_trilha(repo, conteudos, inicio_anterior, fim_anterior, contagens_anteriores),
-        engajamento=await montar_engajamento(repo, trilha_id, conteudos),
+        engajamento=await montar_engajamento(repo, trilha_id, progresso, sum(terminaram.values())),
         funil=await montar_funil(repo, lista_conteudos),
-        questoes=await montar_questoes(repo, lista_conteudos),
     )
 
 
 # terminou e quem concluiu todos os conteudos atuais
-async def montar_engajamento(repo: DashboardRepository, trilha_id: int, conteudos: list[int]) -> EngajamentoTrilhaRead:
+async def montar_engajamento(repo: DashboardRepository, trilha_id: int,
+    progresso: list[tuple[int, int, date, date]], concluiram: int) -> EngajamentoTrilhaRead:
     trilha = await repo.buscar_trilha(trilha_id)
     if trilha is not None and trilha.grupo_id is not None:
         base = await repo.contar_membros(trilha.grupo_id)
     else:
         base = await repo.contar_alunos()
 
-    por_aluno = await repo.contar_conclusoes_por_aluno(conteudos)
-    concluiram = 0
-    for quantidade in por_aluno.values():
-        if conteudos and quantidade == len(conteudos):
-            concluiram += 1
-
-    return EngajamentoTrilhaRead(base=base, iniciaram=len(por_aluno), concluiram=concluiram)
+    return EngajamentoTrilhaRead(base=base, iniciaram=len(progresso), concluiram=concluiram)
 
 
 async def montar_funil(repo: DashboardRepository, lista_conteudos: list[tuple[Conteudo, str]]) -> list[ConteudoFunilRead]:
@@ -187,39 +202,3 @@ async def montar_funil(repo: DashboardRepository, lista_conteudos: list[tuple[Co
             concluiram=conclusoes.get(conteudo.id, 0),
         ))
     return funil
-
-
-# confere cada resposta das tentativas com a alternativa correta
-async def montar_questoes(repo: DashboardRepository, lista_conteudos: list[tuple[Conteudo, str]]) -> list[QuestaoAcertoRead]:
-    quizzes: dict[int, Conteudo] = {}
-    for conteudo, _ in lista_conteudos:
-        if conteudo.tipo == ConteudoTipo.quiz:
-            quizzes[conteudo.id] = conteudo
-
-    questoes = await repo.listar_questoes(list(quizzes))
-    ids_questoes = []
-    for questao in questoes:
-        ids_questoes.append(questao.id)
-    corretas = await repo.listar_alternativas_corretas(ids_questoes)
-
-    # json guarda a chave como texto
-    respostas: dict[str, int] = {}
-    acertos: dict[str, int] = {}
-    for quiz in quizzes.values():
-        for tentativa in await repo.listar_respostas(quiz.id, quiz.versao):
-            for questao_id, alternativa_id in tentativa.items():
-                respostas[questao_id] = respostas.get(questao_id, 0) + 1
-                if alternativa_id in corretas:
-                    acertos[questao_id] = acertos.get(questao_id, 0) + 1
-
-    resultado = []
-    for questao in questoes:
-        chave = str(questao.id)
-        resultado.append(QuestaoAcertoRead(
-            id=questao.id,
-            enunciado=questao.enunciado,
-            quiz=quizzes[questao.conteudo_id].titulo,
-            respostas=respostas.get(chave, 0),
-            acertos=acertos.get(chave, 0),
-        ))
-    return resultado

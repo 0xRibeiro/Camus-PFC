@@ -643,10 +643,6 @@ export type DashboardTrilhaRead = {
      * Funil
      */
     funil: Array<ConteudoFunilRead>;
-    /**
-     * Questoes
-     */
-    questoes: Array<QuestaoAcertoRead>;
 };
 
 /**
@@ -1360,9 +1356,13 @@ export type PontoEvolucaoTrilhaRead = {
      */
     conclusoes: number;
     /**
-     * Tentativas
+     * Novos
      */
-    tentativas: number;
+    novos: number;
+    /**
+     * Terminaram
+     */
+    terminaram: number;
 };
 
 /**
@@ -1377,32 +1377,6 @@ export type PontoLeitura = {
      * Valor
      */
     valor: number;
-};
-
-/**
- * QuestaoAcertoRead
- */
-export type QuestaoAcertoRead = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Enunciado
-     */
-    enunciado: string;
-    /**
-     * Quiz
-     */
-    quiz: string;
-    /**
-     * Respostas
-     */
-    respostas: number;
-    /**
-     * Acertos
-     */
-    acertos: number;
 };
 
 /**
@@ -1842,17 +1816,13 @@ export type TotaisTrilhaRead = {
      */
     conclusoes: number;
     /**
-     * Tentativas
+     * Novos
      */
-    tentativas: number;
+    novos: number;
     /**
-     * Acertos
+     * Terminaram
      */
-    acertos: number;
-    /**
-     * Questoes
-     */
-    questoes: number;
+    terminaram: number;
 };
 
 /**

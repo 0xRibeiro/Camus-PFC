@@ -114,15 +114,20 @@ class DashboardRepository:
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
 
-    # quantos conteudos cada aluno ja concluiu
-    async def contar_conclusoes_por_aluno(self, conteudos: list[int]) -> dict[int, int]:
+    # por aluno quantos concluiu, o 1o dia e o ultimo
+    async def listar_progresso_por_aluno(self, conteudos: list[int]) -> list[tuple[int, int, date, date]]:
         consulta = (
-            select(ConclusaoConteudo.usuario_id, func.count())
+            select(
+                ConclusaoConteudo.usuario_id,
+                func.count(),
+                func.min(DIA_DA_CONCLUSAO),
+                func.max(DIA_DA_CONCLUSAO),
+            )
             .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
             .group_by(ConclusaoConteudo.usuario_id)
         )
         resultado = await self.db.execute(consulta)
-        return montar_contagem(resultado.all())
+        return list(resultado.tuples().all())
 
     async def listar_questoes(self, quizzes: list[int]) -> list[Questao]:
         consulta = select(Questao).where(Questao.conteudo_id.in_(quizzes)).order_by(Questao.conteudo_id, Questao.ordem)
