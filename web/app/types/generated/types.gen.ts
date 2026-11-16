@@ -603,6 +603,18 @@ export type DashboardRead = {
 };
 
 /**
+ * DashboardTrilhaRead
+ */
+export type DashboardTrilhaRead = {
+    /**
+     * Evolucao
+     */
+    evolucao: Array<PontoEvolucaoTrilhaRead>;
+    totais: TotaisTrilhaRead;
+    totais_anteriores: TotaisTrilhaRead;
+};
+
+/**
  * DenunciaAdminRead
  */
 export type DenunciaAdminRead = {
@@ -1283,6 +1295,24 @@ export type PontoEvolucaoRead = {
 };
 
 /**
+ * PontoEvolucaoTrilhaRead
+ */
+export type PontoEvolucaoTrilhaRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+};
+
+/**
  * PontoLeitura
  */
 export type PontoLeitura = {
@@ -1718,6 +1748,32 @@ export type TotaisPeriodoRead = {
      * Grupos
      */
     grupos: number;
+};
+
+/**
+ * TotaisTrilhaRead
+ */
+export type TotaisTrilhaRead = {
+    /**
+     * Alunos Ativos
+     */
+    alunos_ativos: number;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Questoes
+     */
+    questoes: number;
 };
 
 /**
@@ -5979,6 +6035,96 @@ export type AlternativaUpdateGruposGrupoIdAlternativasIdPatchResponses = {
      */
     200: unknown;
 };
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/trilhas/{id}/dashboard';
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetError = ObterDashboardTrilhaTrilhasIdDashboardGetErrors[keyof ObterDashboardTrilhaTrilhasIdDashboardGetErrors];
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardTrilhaRead;
+};
+
+export type ObterDashboardTrilhaTrilhasIdDashboardGetResponse = ObterDashboardTrilhaTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaTrilhasIdDashboardGetResponses];
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/grupos/{grupo_id}/trilhas/{id}/dashboard';
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetError = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetErrors];
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardTrilhaRead;
+};
+
+export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses];
 
 export type EnviarImagemGruposGrupoIdImagensPostData = {
     body: BodyEnviarImagemGruposGrupoIdImagensPost;

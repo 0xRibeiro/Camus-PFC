@@ -53,14 +53,13 @@
     >
       <DashboardEvolucao
         :evolucao="dados.evolucao"
+        :linhas="linhas"
+        descricao="Novos cadastros de alunos, dispositivos IoT, trilhas e grupos."
         :agrupamento="agrupamentoCarregado"
         class="min-w-0"
       />
 
-      <DashboardNumeros
-        :totais="dados.totais"
-        :anteriores="dados.totais_anteriores"
-      />
+      <DashboardNumeros :indicadores="indicadores" />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DashboardTrilhas
@@ -80,59 +79,30 @@
 </template>
 
 <script setup lang="ts">
-import { getLocalTimeZone, today } from '@internationalized/date'
-import { FetchError } from 'ofetch'
-import type { Periodo } from '~/components/dashboard/DashboardFiltro.vue'
+import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
 import type { DashboardRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
-const api = useApi()
-const dados = ref<DashboardRead | null>(null)
-const loading = ref(true)
-const erro = ref('')
+const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, fetchDashboard } = useDashboard<DashboardRead>('/admin/dashboard')
 
-// comeca nos ultimos 30 dias
-const hoje = today(getLocalTimeZone())
-const periodo = ref<Periodo>({ start: hoje.subtract({ days: 29 }), end: hoje })
-const agrupamento = ref<'dia' | 'semana' | 'mes'>('dia')
+// msm cor nas linhas e nos cards
+const linhas = [
+  { key: 'alunos', label: 'Alunos', color: 'primary' },
+  { key: 'dispositivos', label: 'Dispositivos IoT', color: 'secondary' },
+  { key: 'trilhas', label: 'Trilhas', color: 'tertiary' },
+  { key: 'grupos', label: 'Grupos', color: 'quaternary' },
+]
 
-// rotulo do grafico so muda junto com os dados
-const agrupamentoCarregado = ref(agrupamento.value)
+const indicadores = computed<Indicador[]>(() => {
+  if (!dados.value) return []
+  const { totais, totais_anteriores: anteriores } = dados.value
 
-async function fetchDashboard() {
-  const { start, end } = periodo.value
-  if (!start) return
-
-  loading.value = true
-  erro.value = ''
-
-  try {
-    // sem fim e um dia so
-    dados.value = await api('/admin/dashboard', {
-      query: {
-        inicio: start.toString(),
-        fim: (end ?? start).toString(),
-        agrupamento: agrupamento.value,
-      },
-    })
-    agrupamentoCarregado.value = agrupamento.value
-  }
-  catch (error) {
-    erro.value = 'Não foi possível carregar a dashboard'
-
-    if (error instanceof FetchError && typeof error.data?.detail === 'string') {
-      erro.value = error.data.detail
-    }
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-// consulta novamente quando o período ou agrupamento mudar
-watch([periodo, agrupamento], fetchDashboard)
-
-// primeira consulta ao abrir a página
-onMounted(fetchDashboard)
+  return [
+    { titulo: 'Alunos novos', icone: 'i-lucide-users', cor: 'primary', valor: totais.alunos, anterior: anteriores.alunos },
+    { titulo: 'Dispositivos IoT novos', icone: 'i-lucide-cpu', cor: 'secondary', valor: totais.dispositivos, anterior: anteriores.dispositivos },
+    { titulo: 'Trilhas novas', icone: 'i-lucide-route', cor: 'tertiary', valor: totais.trilhas, anterior: anteriores.trilhas },
+    { titulo: 'Grupos novos', icone: 'i-lucide-users-round', cor: 'quaternary', valor: totais.grupos, anterior: anteriores.grupos },
+  ]
+})
 </script>

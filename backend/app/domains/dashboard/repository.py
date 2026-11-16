@@ -6,11 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
 from app.domains.dispositivo.model import Dispositivo
-from app.domains.trilha.model import Trilha
+from app.domains.progresso.model import ConclusaoConteudo, TentativaQuiz
+from app.domains.trilha.model import Conteudo, Modulo, Trilha
 from app.domains.usuario.model import RoleUsuario, Usuario
 
 # dia no fuso de sp, o log fica sem fuso
 DIA_DO_LOG = cast(func.timezone("America/Sao_Paulo", func.timezone("UTC", LogAuditoria.criado_em)), Date)
+DIA_DA_CONCLUSAO = cast(func.timezone("America/Sao_Paulo", ConclusaoConteudo.concluido_em), Date)
+DIA_DA_TENTATIVA = cast(func.timezone("America/Sao_Paulo", TentativaQuiz.criado_em), Date)
 
 
 def montar_contagem(linhas) -> dict[date, int]:
@@ -87,6 +90,68 @@ class DashboardRepository:
     async def contar_alunos(self) -> int:
         consulta = select(func.count()).select_from(Usuario).where(Usuario.role == RoleUsuario.aluno)
         return await self.db.scalar(consulta) or 0
+
+    # conclusao e tentativa n tem FK, entao filtra pelos conteudos atuais da trilha
+    async def listar_conteudos_da_trilha(self, trilha_id: int) -> list[int]:
+        consulta = select(Conteudo.id).join(Modulo, Modulo.id == Conteudo.modulo_id).where(Modulo.trilha_id == trilha_id)
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
+
+    async def contar_conclusoes_por_dia(self, conteudos: list[int], inicio: date, fim: date) -> dict[date, int]:
+        consulta = (
+            select(DIA_DA_CONCLUSAO, func.count())
+            .where(
+                ConclusaoConteudo.conteudo_id.in_(conteudos),
+                DIA_DA_CONCLUSAO >= inicio,
+                DIA_DA_CONCLUSAO <= fim,
+            )
+            .group_by(DIA_DA_CONCLUSAO)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
+
+    async def contar_tentativas_por_dia(self, conteudos: list[int], inicio: date, fim: date) -> dict[date, int]:
+        consulta = (
+            select(DIA_DA_TENTATIVA, func.count())
+            .where(
+                TentativaQuiz.conteudo_id.in_(conteudos),
+                DIA_DA_TENTATIVA >= inicio,
+                DIA_DA_TENTATIVA <= fim,
+            )
+            .group_by(DIA_DA_TENTATIVA)
+        )
+        resultado = await self.db.execute(consulta)
+        return montar_contagem(resultado.all())
+
+    # quem concluiu ou tentou algo no periodo
+    async def listar_alunos_ativos(self, conteudos: list[int], inicio: date, fim: date) -> set[int]:
+        concluiram = await self.db.scalars(
+            select(ConclusaoConteudo.usuario_id).distinct().where(
+                ConclusaoConteudo.conteudo_id.in_(conteudos),
+                DIA_DA_CONCLUSAO >= inicio,
+                DIA_DA_CONCLUSAO <= fim,
+            )
+        )
+        tentaram = await self.db.scalars(
+            select(TentativaQuiz.usuario_id).distinct().where(
+                TentativaQuiz.conteudo_id.in_(conteudos),
+                DIA_DA_TENTATIVA >= inicio,
+                DIA_DA_TENTATIVA <= fim,
+            )
+        )
+        return set(concluiram.all()) | set(tentaram.all())
+
+    # soma de acertos e questoes das tentativas
+    async def somar_acertos(self, conteudos: list[int], inicio: date, fim: date) -> tuple[int, int]:
+        consulta = select(func.sum(TentativaQuiz.acertos), func.sum(TentativaQuiz.total)).where(
+            TentativaQuiz.conteudo_id.in_(conteudos),
+            DIA_DA_TENTATIVA >= inicio,
+            DIA_DA_TENTATIVA <= fim,
+        )
+        acertos, total = (await self.db.execute(consulta)).one()
+        if acertos is None:
+            return 0, 0
+        return acertos, total
 
     # pegando a data direto do postgres pra garantir que seja a mesma pra todos os cálculos.
     async def buscar_data_atual(self) -> date:

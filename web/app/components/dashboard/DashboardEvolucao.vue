@@ -7,7 +7,7 @@
         </h2>
 
         <p class="text-sm text-muted">
-          Novos cadastros de alunos, dispositivos IoT, trilhas e grupos.
+          {{ descricao }}
         </p>
       </div>
     </template>
@@ -29,7 +29,7 @@
         :format="formatarNumero"
         :aspect-ratio="3"
         :initial-width="1152"
-        aria-label="Novos cadastros no período"
+        :aria-label="descricao"
       />
 
       <div class="flex justify-between gap-3 text-xs text-muted">
@@ -48,20 +48,13 @@
 </template>
 
 <script setup lang="ts">
-import type { PontoEvolucaoRead } from '~/types/generated'
-
+// cada dash manda suas linhas, a data vem sempre em data
 const props = defineProps<{
-  evolucao: PontoEvolucaoRead[]
+  evolucao: ({ data: string } & Record<string, unknown>)[]
+  linhas: { key: string, label: string, color: string }[]
+  descricao: string
   agrupamento: 'dia' | 'semana' | 'mes'
 }>()
-
-// msm cor dos cards
-const linhas = [
-  { key: 'alunos', label: 'Alunos', color: 'primary' },
-  { key: 'dispositivos', label: 'Dispositivos IoT', color: 'secondary' },
-  { key: 'trilhas', label: 'Trilhas', color: 'tertiary' },
-  { key: 'grupos', label: 'Grupos', color: 'quaternary' },
-]
 
 const formatarNumero = new Intl.NumberFormat('pt-BR').format
 const formatoMes = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'UTC' })

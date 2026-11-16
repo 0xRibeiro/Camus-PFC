@@ -573,6 +573,15 @@ export const zPontoEvolucaoRead = z.object({
 });
 
 /**
+ * PontoEvolucaoTrilhaRead
+ */
+export const zPontoEvolucaoTrilhaRead = z.object({
+    data: z.iso.date(),
+    conclusoes: z.int(),
+    tentativas: z.int()
+});
+
+/**
  * PontoLeitura
  */
 export const zPontoLeitura = z.object({
@@ -885,6 +894,26 @@ export const zDashboardRead = z.object({
     total_alunos: z.int(),
     total_trilhas_globais: z.int(),
     total_trilhas_de_grupo: z.int()
+});
+
+/**
+ * TotaisTrilhaRead
+ */
+export const zTotaisTrilhaRead = z.object({
+    alunos_ativos: z.int(),
+    conclusoes: z.int(),
+    tentativas: z.int(),
+    acertos: z.int(),
+    questoes: z.int()
+});
+
+/**
+ * DashboardTrilhaRead
+ */
+export const zDashboardTrilhaRead = z.object({
+    evolucao: z.array(zPontoEvolucaoTrilhaRead),
+    totais: zTotaisTrilhaRead,
+    totais_anteriores: zTotaisTrilhaRead
 });
 
 /**
@@ -2228,6 +2257,45 @@ export const zAlternativaUpdateGruposGrupoIdAlternativasIdPatchPath = z.object({
     id: z.int(),
     grupo_id: z.int()
 });
+
+export const zObterDashboardTrilhaTrilhasIdDashboardGetPath = z.object({
+    id: z.int()
+});
+
+export const zObterDashboardTrilhaTrilhasIdDashboardGetQuery = z.object({
+    inicio: z.iso.date().nullish(),
+    fim: z.iso.date().nullish(),
+    agrupamento: z.enum([
+        'dia',
+        'semana',
+        'mes'
+    ]).optional().default('dia')
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardTrilhaTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
+
+export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetQuery = z.object({
+    inicio: z.iso.date().nullish(),
+    fim: z.iso.date().nullish(),
+    agrupamento: z.enum([
+        'dia',
+        'semana',
+        'mes'
+    ]).optional().default('dia')
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
 
 export const zEnviarImagemGruposGrupoIdImagensPostBody = zBodyEnviarImagemGruposGrupoIdImagensPost;
 

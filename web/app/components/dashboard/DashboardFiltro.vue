@@ -54,12 +54,9 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
-
-export interface Periodo {
-  start: CalendarDate | undefined
-  end: CalendarDate | undefined
-}
+import { getLocalTimeZone, today } from '@internationalized/date'
+import type { CalendarDate } from '@internationalized/date'
+import type { Periodo } from '~/composables/useDashboard'
 
 interface Atalho {
   label: string

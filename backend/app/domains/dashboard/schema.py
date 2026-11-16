@@ -22,6 +22,27 @@ class TotaisPeriodoRead(BaseModel):
     grupos: int
 
 
+class PontoEvolucaoTrilhaRead(BaseModel):
+    data: date
+    conclusoes: int
+    tentativas: int
+
+
+# acertos e questoes juntos pro front tirar a %
+class TotaisTrilhaRead(BaseModel):
+    alunos_ativos: int
+    conclusoes: int
+    tentativas: int
+    acertos: int
+    questoes: int
+
+
+class DashboardTrilhaRead(BaseModel):
+    evolucao: list[PontoEvolucaoTrilhaRead]
+    totais: TotaisTrilhaRead
+    totais_anteriores: TotaisTrilhaRead
+
+
 # para saber quanto cada conquista foi concedida
 class ConquistaResumoRead(BaseModel):
     id: int
