@@ -32,10 +32,11 @@ const temaPagina = computed(() => {
   <UApp :portal="temaPagina ? '#camus-portal' : 'body'">
     <div
       id="camus-portal"
+      class="relative z-20"
       :class="temaPagina"
     />
 
-    <div class="flex min-h-dvh flex-col">
+    <div class="isolate flex min-h-dvh flex-col">
       <NuxtLayout>
         <div class="flex min-w-0 flex-1 flex-col">
           <main

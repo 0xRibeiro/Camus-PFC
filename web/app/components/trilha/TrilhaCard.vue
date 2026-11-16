@@ -33,12 +33,12 @@
           class="w-fit"
         />
 
-        <p class="font-semibold">
+        <p class="font-semibold wrap-anywhere">
           {{ trilha.titulo }}
         </p>
         <p
           v-if="trilha.descricao"
-          class="text-sm text-muted line-clamp-2"
+          class="line-clamp-2 text-sm wrap-anywhere text-muted"
         >
           {{ trilha.descricao }}
         </p>
@@ -47,11 +47,11 @@
 
     <!-- rodape do card: contagem de modulo/conteudo + botao editar/excluir -->
     <template #footer>
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-2">
         <span class="flex items-center gap-1 text-xs text-muted">
           <UIcon
             name="i-lucide-layers"
-            class="size-4"
+            class="size-4 shrink-0"
           />
           {{ modulosCount }} módulo{{ modulosCount === 1 ? '' : 's' }}
           · {{ conteudosCount }} conteúdo{{ conteudosCount === 1 ? '' : 's' }}

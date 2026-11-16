@@ -24,19 +24,19 @@
       </template>
     </CamusBanner>
 
-    <div class="flex gap-3 mb-4">
+    <div class="mb-4 flex flex-wrap items-center gap-3 sm:flex-nowrap">
       <UInput
         v-model="busca"
         icon="i-lucide-search"
         placeholder="Buscar trilha..."
-        class="w-full"
+        class="w-full min-w-0 sm:flex-1"
       />
 
       <USelect
         v-model="tagFiltro"
         :items="tagFiltroOptions"
         placeholder="Filtrar por tag"
-        class="w-48"
+        class="min-w-0 flex-1 sm:w-48 sm:flex-none"
       />
 
       <UButton

@@ -75,6 +75,7 @@ const extensions = computed(() => [
       <UEditorToolbar
         :editor="editor"
         :items="toolbarItems"
+        :ui="{ base: 'flex-wrap justify-center' }"
       />
     </div>
 

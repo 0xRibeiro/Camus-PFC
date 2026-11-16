@@ -247,7 +247,7 @@ async function salvarOrdem() {
 
 <template>
   <div class="max-w-3xl mx-auto space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <p class="text-sm text-muted">
         {{ totalSalvas }} pergunta{{ totalSalvas === 1 ? '' : 's' }} salva{{ totalSalvas === 1 ? '' : 's' }}
       </p>
@@ -292,7 +292,7 @@ async function salvarOrdem() {
           class="bg-elevated/40 border border-default rounded-xl p-4 space-y-3"
         >
           <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <UIcon
                 name="i-lucide-grip-vertical"
                 class="questao-drag-handle size-4 text-muted cursor-grab active:cursor-grabbing"
@@ -343,7 +343,7 @@ async function salvarOrdem() {
                 v-model="alternativa.texto"
                 :placeholder="`Alternativa ${indiceAlt + 1}`"
                 :maxlength="200"
-                class="flex-1"
+                class="min-w-0 flex-1"
                 @update:model-value="questao.alterada = true"
               />
               <UButton
@@ -357,7 +357,7 @@ async function salvarOrdem() {
             </div>
           </div>
 
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <UButton
               icon="i-lucide-plus"
               label="Alternativa"
