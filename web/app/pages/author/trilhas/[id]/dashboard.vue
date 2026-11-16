@@ -84,6 +84,7 @@
         <DashboardFunil
           :funil="dados.funil"
           :iniciaram="dados.engajamento.iniciaram"
+          :link-base="`${caminhoTrilha}/dashboard-conteudo`"
           class="min-w-0 lg:col-span-2"
         />
       </div>

@@ -36,6 +36,16 @@ export const zAlternativaCreate = z.object({
 });
 
 /**
+ * AlternativaEscolhaRead
+ */
+export const zAlternativaEscolhaRead = z.object({
+    id: z.int(),
+    texto: z.string(),
+    correta: z.boolean(),
+    escolhas: z.int()
+});
+
+/**
  * AlternativaRead
  */
 export const zAlternativaRead = z.object({
@@ -497,6 +507,14 @@ export const zMotivoCreate = z.object({
 });
 
 /**
+ * NotaQuizRead
+ */
+export const zNotaQuizRead = z.object({
+    acertos: z.int(),
+    quantidade: z.int()
+});
+
+/**
  * OpcaoRead
  */
 export const zOpcaoRead = z.object({
@@ -582,6 +600,15 @@ export const zPeixeRead = z.object({
 });
 
 /**
+ * PontoEvolucaoConteudoRead
+ */
+export const zPontoEvolucaoConteudoRead = z.object({
+    data: z.iso.date(),
+    conclusoes: z.int(),
+    tentativas: z.int()
+});
+
+/**
  * PontoEvolucaoRead
  */
 export const zPontoEvolucaoRead = z.object({
@@ -608,6 +635,17 @@ export const zPontoEvolucaoTrilhaRead = z.object({
 export const zPontoLeitura = z.object({
     tempo: z.iso.datetime(),
     valor: z.number()
+});
+
+/**
+ * QuestaoAcertoRead
+ */
+export const zQuestaoAcertoRead = z.object({
+    id: z.int(),
+    enunciado: z.string(),
+    respostas: z.int(),
+    acertos: z.int(),
+    alternativas: z.array(zAlternativaEscolhaRead)
 });
 
 /**
@@ -892,6 +930,33 @@ export const zModuloIotRead = z.object({
 export const zTokenPair = z.object({
     access_token: z.string(),
     refresh_token: z.string()
+});
+
+/**
+ * TotaisConteudoRead
+ */
+export const zTotaisConteudoRead = z.object({
+    conclusoes: z.int(),
+    tentativas: z.int(),
+    alunos_quiz: z.int(),
+    acertos: z.int(),
+    questoes: z.int()
+});
+
+/**
+ * DashboardConteudoRead
+ */
+export const zDashboardConteudoRead = z.object({
+    titulo: z.string(),
+    tipo: z.string(),
+    trilha_id: z.int(),
+    evolucao: z.array(zPontoEvolucaoConteudoRead),
+    totais: zTotaisConteudoRead,
+    totais_anteriores: zTotaisConteudoRead,
+    iniciaram_trilha: z.int(),
+    concluiram: z.int(),
+    notas: z.array(zNotaQuizRead),
+    questoes: z.array(zQuestaoAcertoRead)
 });
 
 /**
@@ -2299,6 +2364,25 @@ export const zObterDashboardTrilhaTrilhasIdDashboardGetQuery = z.object({
  */
 export const zObterDashboardTrilhaTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
 
+export const zObterDashboardConteudoConteudosIdDashboardGetPath = z.object({
+    id: z.int()
+});
+
+export const zObterDashboardConteudoConteudosIdDashboardGetQuery = z.object({
+    inicio: z.iso.date().nullish(),
+    fim: z.iso.date().nullish(),
+    agrupamento: z.enum([
+        'dia',
+        'semana',
+        'mes'
+    ]).optional().default('dia')
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardConteudoConteudosIdDashboardGetResponse = zDashboardConteudoRead;
+
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetPath = z.object({
     id: z.int(),
     grupo_id: z.int()
@@ -2318,6 +2402,26 @@ export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetQuery = z.ob
  * Successful Response
  */
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
+
+export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetQuery = z.object({
+    inicio: z.iso.date().nullish(),
+    fim: z.iso.date().nullish(),
+    agrupamento: z.enum([
+        'dia',
+        'semana',
+        'mes'
+    ]).optional().default('dia')
+});
+
+/**
+ * Successful Response
+ */
+export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = zDashboardConteudoRead;
 
 export const zEnviarImagemGruposGrupoIdImagensPostBody = zBodyEnviarImagemGruposGrupoIdImagensPost;
 

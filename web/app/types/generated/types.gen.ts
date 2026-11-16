@@ -66,6 +66,28 @@ export type AlternativaCreate = {
 };
 
 /**
+ * AlternativaEscolhaRead
+ */
+export type AlternativaEscolhaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Texto
+     */
+    texto: string;
+    /**
+     * Correta
+     */
+    correta: boolean;
+    /**
+     * Escolhas
+     */
+    escolhas: number;
+};
+
+/**
  * AlternativaRead
  */
 export type AlternativaRead = {
@@ -598,6 +620,46 @@ export type CredencialDispositivo = {
      * Senha
      */
     senha: string;
+};
+
+/**
+ * DashboardConteudoRead
+ */
+export type DashboardConteudoRead = {
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Tipo
+     */
+    tipo: string;
+    /**
+     * Trilha Id
+     */
+    trilha_id: number;
+    /**
+     * Evolucao
+     */
+    evolucao: Array<PontoEvolucaoConteudoRead>;
+    totais: TotaisConteudoRead;
+    totais_anteriores: TotaisConteudoRead;
+    /**
+     * Iniciaram Trilha
+     */
+    iniciaram_trilha: number;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
+    /**
+     * Notas
+     */
+    notas: Array<NotaQuizRead>;
+    /**
+     * Questoes
+     */
+    questoes: Array<QuestaoAcertoRead>;
 };
 
 /**
@@ -1255,6 +1317,20 @@ export type MotivoCreate = {
 };
 
 /**
+ * NotaQuizRead
+ */
+export type NotaQuizRead = {
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+};
+
+/**
  * OpcaoRead
  */
 export type OpcaoRead = {
@@ -1318,6 +1394,24 @@ export type PeixeRead = {
 };
 
 /**
+ * PontoEvolucaoConteudoRead
+ */
+export type PontoEvolucaoConteudoRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+};
+
+/**
  * PontoEvolucaoRead
  */
 export type PontoEvolucaoRead = {
@@ -1377,6 +1471,32 @@ export type PontoLeitura = {
      * Valor
      */
     valor: number;
+};
+
+/**
+ * QuestaoAcertoRead
+ */
+export type QuestaoAcertoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Enunciado
+     */
+    enunciado: string;
+    /**
+     * Respostas
+     */
+    respostas: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Alternativas
+     */
+    alternativas: Array<AlternativaEscolhaRead>;
 };
 
 /**
@@ -1779,6 +1899,32 @@ export type TokenPair = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * TotaisConteudoRead
+ */
+export type TotaisConteudoRead = {
+    /**
+     * Conclusoes
+     */
+    conclusoes: number;
+    /**
+     * Tentativas
+     */
+    tentativas: number;
+    /**
+     * Alunos Quiz
+     */
+    alunos_quiz: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Questoes
+     */
+    questoes: number;
 };
 
 /**
@@ -6128,6 +6274,49 @@ export type ObterDashboardTrilhaTrilhasIdDashboardGetResponses = {
 
 export type ObterDashboardTrilhaTrilhasIdDashboardGetResponse = ObterDashboardTrilhaTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaTrilhasIdDashboardGetResponses];
 
+export type ObterDashboardConteudoConteudosIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/conteudos/{id}/dashboard';
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetError = ObterDashboardConteudoConteudosIdDashboardGetErrors[keyof ObterDashboardConteudoConteudosIdDashboardGetErrors];
+
+export type ObterDashboardConteudoConteudosIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardConteudoRead;
+};
+
+export type ObterDashboardConteudoConteudosIdDashboardGetResponse = ObterDashboardConteudoConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoConteudosIdDashboardGetResponses];
+
 export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetData = {
     body?: never;
     path: {
@@ -6174,6 +6363,53 @@ export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses = {
 };
 
 export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses];
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'dia' | 'semana' | 'mes';
+    };
+    url: '/grupos/{grupo_id}/conteudos/{id}/dashboard';
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetError = ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors[keyof ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetErrors];
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardConteudoRead;
+};
+
+export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses];
 
 export type EnviarImagemGruposGrupoIdImagensPostData = {
     body: BodyEnviarImagemGruposGrupoIdImagensPost;

@@ -56,6 +56,7 @@ export default defineNuxtConfig({
         ['grupo-trilha-editar', `${trilhaGrupo}/editar`, 'author/trilhas/[id]/index'],
         ['grupo-trilha-editar-conteudo', `${trilhaGrupo}/editar/conteudos/:conteudoId`, 'author/trilhas/[id]/conteudos/[conteudoId]'],
         ['grupo-trilha-dashboard', `${trilhaGrupo}/editar/dashboard`, 'author/trilhas/[id]/dashboard'],
+        ['grupo-trilha-dashboard-conteudo', `${trilhaGrupo}/editar/dashboard-conteudo/:conteudoId`, 'author/trilhas/[id]/dashboard-conteudo/[conteudoId]'],
       ] as const) {
         pages.push({
           name,

@@ -134,19 +134,33 @@ class DashboardRepository:
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
 
-    async def listar_alternativas_corretas(self, questoes: list[int]) -> set[int]:
-        consulta = select(Alternativa.id).where(Alternativa.questao_id.in_(questoes), Alternativa.correta.is_(True))
+    async def listar_alternativas(self, questoes: list[int]) -> list[Alternativa]:
+        consulta = select(Alternativa).where(Alternativa.questao_id.in_(questoes)).order_by(Alternativa.id)
         resultado = await self.db.scalars(consulta)
-        return set(resultado.all())
+        return list(resultado.all())
 
     # so a versao atual, a antiga pode ter outras alternativas
-    async def listar_respostas(self, conteudo_id: int, versao: int) -> list[dict]:
-        consulta = select(TentativaQuiz.respostas).where(
+    async def listar_tentativas_da_versao(self, conteudo_id: int, versao: int) -> list[TentativaQuiz]:
+        consulta = select(TentativaQuiz).where(
             TentativaQuiz.conteudo_id == conteudo_id,
             TentativaQuiz.versao_conteudo == versao,
         )
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
+
+    # trilha vem junto pro funil e o voltar
+    async def buscar_conteudo(self, conteudo_id: int) -> tuple[Conteudo, int] | None:
+        consulta = select(Conteudo, Modulo.trilha_id).join(Modulo, Modulo.id == Conteudo.modulo_id).where(Conteudo.id == conteudo_id)
+        resultado = await self.db.execute(consulta)
+        return resultado.tuples().one_or_none()
+
+    async def contar_alunos_que_tentaram(self, conteudo_id: int, inicio: date, fim: date) -> int:
+        consulta = select(func.count(TentativaQuiz.usuario_id.distinct())).where(
+            TentativaQuiz.conteudo_id == conteudo_id,
+            DIA_DA_TENTATIVA >= inicio,
+            DIA_DA_TENTATIVA <= fim,
+        )
+        return await self.db.scalar(consulta) or 0
 
     async def buscar_trilha(self, trilha_id: int) -> Trilha | None:
         return await self.db.get(Trilha, trilha_id)
@@ -206,9 +220,11 @@ class DashboardRepository:
         return set(concluiram.all()) | set(tentaram.all())
 
     # soma de acertos e questoes das tentativas
-    async def somar_acertos(self, conteudos: list[int], inicio: date, fim: date) -> tuple[int, int]:
+    # so a versao atual pra bater com as questoes
+    async def somar_acertos(self, conteudo_id: int, versao: int, inicio: date, fim: date) -> tuple[int, int]:
         consulta = select(func.sum(TentativaQuiz.acertos), func.sum(TentativaQuiz.total)).where(
-            TentativaQuiz.conteudo_id.in_(conteudos),
+            TentativaQuiz.conteudo_id == conteudo_id,
+            TentativaQuiz.versao_conteudo == versao,
             DIA_DA_TENTATIVA >= inicio,
             DIA_DA_TENTATIVA <= fim,
         )

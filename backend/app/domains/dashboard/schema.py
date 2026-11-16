@@ -61,6 +61,60 @@ class DashboardTrilhaRead(BaseModel):
     funil: list[ConteudoFunilRead]
 
 
+class PontoEvolucaoConteudoRead(BaseModel):
+    data: date
+    conclusoes: int
+    tentativas: int
+
+
+# tentativas e acertos so tem no quiz
+class TotaisConteudoRead(BaseModel):
+    conclusoes: int
+    tentativas: int
+    alunos_quiz: int
+    acertos: int
+    questoes: int
+
+
+# quantas tentativas tiraram essa nota
+class NotaQuizRead(BaseModel):
+    acertos: int
+    quantidade: int
+
+
+class AlternativaEscolhaRead(BaseModel):
+    id: int
+    texto: str
+    correta: bool
+    escolhas: int
+
+
+class QuestaoAcertoRead(BaseModel):
+    id: int
+    enunciado: str
+    respostas: int
+    acertos: int
+    alternativas: list[AlternativaEscolhaRead]
+
+
+class DashboardConteudoRead(BaseModel):
+    titulo: str
+    tipo: str
+    trilha_id: int
+
+    evolucao: list[PontoEvolucaoConteudoRead]
+    totais: TotaisConteudoRead
+    totais_anteriores: TotaisConteudoRead
+
+    # de sempre, base do % de quem concluiu
+    iniciaram_trilha: int
+    concluiram: int
+
+    # so versao atual do quiz
+    notas: list[NotaQuizRead]
+    questoes: list[QuestaoAcertoRead]
+
+
 # para saber quanto cada conquista foi concedida
 class ConquistaResumoRead(BaseModel):
     id: int

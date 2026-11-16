@@ -6,7 +6,7 @@
       </h2>
 
       <p class="text-sm text-muted">
-        Quantos dos alunos que começaram a trilha concluíram cada conteúdo, na ordem da trilha.
+        Quantos dos alunos que começaram a trilha concluíram cada conteúdo. Clique pra ver o conteúdo em detalhe.
       </p>
     </template>
 
@@ -19,56 +19,65 @@
       <li
         v-for="(conteudo, posicao) in lista"
         :key="conteudo.id"
-        class="flex items-center gap-3 px-4 py-3 sm:px-6"
       >
-        <span class="w-5 shrink-0 text-right text-sm font-medium text-dimmed">
-          {{ posicao + 1 }}
-        </span>
+        <NuxtLink
+          :to="`${linkBase}/${conteudo.id}`"
+          class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-elevated/50 focus-visible:bg-elevated/50 focus-visible:outline-none sm:px-6"
+        >
+          <span class="w-5 shrink-0 text-right text-sm font-medium text-dimmed">
+            {{ posicao + 1 }}
+          </span>
 
-        <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <UIcon
-            :name="icones[conteudo.tipo] ?? 'i-lucide-file'"
-            class="size-4"
-          />
-        </div>
-
-        <div class="min-w-0 flex-1 space-y-1.5">
-          <div class="flex items-baseline justify-between gap-3">
-            <div class="min-w-0">
-              <p class="truncate font-medium text-highlighted">
-                {{ conteudo.titulo }}
-              </p>
-
-              <p class="truncate text-xs text-muted">
-                {{ conteudo.modulo }}
-              </p>
-            </div>
-
-            <div class="flex shrink-0 items-center gap-2 text-sm">
-              <!-- quanto caiu do conteudo anterior -->
-              <span
-                v-if="conteudo.queda > 0"
-                class="text-xs text-error"
-              >
-                −{{ conteudo.queda }}
-              </span>
-
-              <span class="font-semibold tabular-nums">
-                {{ formatarPorcentagem(conteudo.porcentagem) }}
-              </span>
-
-              <span class="text-muted">
-                · {{ conteudo.concluiram }}
-              </span>
-            </div>
+          <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <UIcon
+              :name="icones[conteudo.tipo] ?? 'i-lucide-file'"
+              class="size-4"
+            />
           </div>
 
-          <UProgress
-            :model-value="conteudo.porcentagem"
-            :max="1"
-            size="sm"
+          <div class="min-w-0 flex-1 space-y-1.5">
+            <div class="flex items-baseline justify-between gap-3">
+              <div class="min-w-0">
+                <p class="truncate font-medium text-highlighted">
+                  {{ conteudo.titulo }}
+                </p>
+
+                <p class="truncate text-xs text-muted">
+                  {{ conteudo.modulo }}
+                </p>
+              </div>
+
+              <div class="flex shrink-0 items-center gap-2 text-sm">
+                <!-- quanto caiu do conteudo anterior -->
+                <span
+                  v-if="conteudo.queda > 0"
+                  class="text-xs text-error"
+                >
+                  −{{ conteudo.queda }}
+                </span>
+
+                <span class="font-semibold tabular-nums">
+                  {{ formatarPorcentagem(conteudo.porcentagem) }}
+                </span>
+
+                <span class="text-muted">
+                  · {{ conteudo.concluiram }}
+                </span>
+              </div>
+            </div>
+
+            <UProgress
+              :model-value="conteudo.porcentagem"
+              :max="1"
+              size="sm"
+            />
+          </div>
+
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="size-4 shrink-0 text-dimmed"
           />
-        </div>
+        </NuxtLink>
       </li>
     </ol>
 
@@ -87,6 +96,8 @@ import type { ConteudoFunilRead } from '~/types/generated'
 const props = defineProps<{
   funil: ConteudoFunilRead[]
   iniciaram: number
+  // rota da dash do conteudo sem o id
+  linkBase: string
 }>()
 
 const icones: Record<string, string> = {
