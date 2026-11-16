@@ -146,6 +146,28 @@ export type AquarioRead = {
 };
 
 /**
+ * AvatarRead
+ */
+export type AvatarRead = {
+    /**
+     * Chave
+     */
+    chave: string;
+    /**
+     * Liberado
+     */
+    liberado: boolean;
+    /**
+     * Conquista Id
+     */
+    conquista_id?: number | null;
+    /**
+     * Conquista
+     */
+    conquista?: string | null;
+};
+
+/**
  * AvisoRead
  */
 export type AvisoRead = {
@@ -239,6 +261,10 @@ export type ConclusaoRead = {
      * Xp Ganho
      */
     xp_ganho: number;
+    /**
+     * Conquistas Novas
+     */
+    conquistas_novas?: Array<ConquistaRead>;
 };
 
 /**
@@ -1533,6 +1559,10 @@ export type ResultadoQuizRead = {
      * Correcao
      */
     correcao: Array<CorrecaoQuestaoRead>;
+    /**
+     * Conquistas Novas
+     */
+    conquistas_novas?: Array<ConquistaRead>;
 };
 
 /**
@@ -2441,6 +2471,24 @@ export type ListarAvataresAvataresGetResponses = {
 };
 
 export type ListarAvataresAvataresGetResponse = ListarAvataresAvataresGetResponses[keyof ListarAvataresAvataresGetResponses];
+
+export type ListarMeusAvataresUsuariosMeAvataresGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/avatares';
+};
+
+export type ListarMeusAvataresUsuariosMeAvataresGetResponses = {
+    /**
+     * Response Listar Meus Avatares Usuarios Me Avatares Get
+     *
+     * Successful Response
+     */
+    200: Array<AvatarRead>;
+};
+
+export type ListarMeusAvataresUsuariosMeAvataresGetResponse = ListarMeusAvataresUsuariosMeAvataresGetResponses[keyof ListarMeusAvataresUsuariosMeAvataresGetResponses];
 
 export type DeleteMeUsuariosMeDeleteData = {
     body?: never;

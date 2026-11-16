@@ -5,7 +5,10 @@ from fastcrud.exceptions.http_exceptions import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.conquistas.repository import ConquistaRepository
+from app.domains.conquistas.schema import ConquistaRead
 from app.domains.pontuacao.model import OrigemLancamento
+from app.domains.pontuacao.repository import PontuacaoRepository
 from app.domains.pontuacao.service import registrar_lancamento, total_ganho_na_origem
 from app.domains.progresso.model import ConclusaoConteudo, TentativaQuiz
 from app.domains.progresso.repository import ProgressoRepository
@@ -292,6 +295,46 @@ async def buscar_conteudo(
     )
 
 
+###### conquistas que liberam avatar
+CONQUISTA_TRILHA_COMPLETA = 13
+CONQUISTA_QUIZ_PERFEITO = 14
+CONQUISTA_XP = 15
+XP_DA_CONQUISTA = 500
+
+
+# roda depois de salvar o progresso e concede as conquistas que destravam avatar.
+# a sequencia é a da trilha do conteudo, a mesma que o buscar_conteudo_liberado devolve
+async def conferir_conquistas_avatar(
+    repo: ProgressoRepository,
+    usuario: Usuario,
+    sequencia: list[Conteudo],
+    quiz_perfeito: bool = False,
+) -> list[ConquistaRead]:
+    conquistas = ConquistaRepository(repo.db)
+    # só entra aqui o que foi concedido agora, pra não repetir o toast
+    novas: list[ConquistaRead] = []
+
+    conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
+    if len(sequencia) > 0 and len(conclusoes) == len(sequencia):
+        nova = await conquistas.conceder(usuario.id, CONQUISTA_TRILHA_COMPLETA)
+        if nova:
+            novas.append(ConquistaRead.model_validate(nova))
+
+    if quiz_perfeito:
+        nova = await conquistas.conceder(usuario.id, CONQUISTA_QUIZ_PERFEITO)
+        if nova:
+            novas.append(ConquistaRead.model_validate(nova))
+
+    # só o xp global conta (grupo_id nulo)
+    xp = await PontuacaoRepository(repo.db).somar_xp(usuario.id, None)
+    if xp >= XP_DA_CONQUISTA:
+        nova = await conquistas.conceder(usuario.id, CONQUISTA_XP)
+        if nova:
+            novas.append(ConquistaRead.model_validate(nova))
+
+    return novas
+
+
 ###### concluir e pagar xp
 # paga so oq falta pra chegar no valor novo, nunca tira ponto
 async def pagar_diferenca(
@@ -355,7 +398,8 @@ async def concluir_conteudo(
     salvar_conclusao(repo, usuario, conteudo, conclusao)
 
     await repo.confirmar()
-    return ConclusaoRead(xp_ganho=xp_ganho)
+    novas = await conferir_conquistas_avatar(repo, usuario, modulos)
+    return ConclusaoRead(xp_ganho=xp_ganho, conquistas_novas=novas)
 
 
 ###### responder quiz
@@ -433,9 +477,13 @@ async def responder_quiz(
         salvar_conclusao(repo, usuario, conteudo, conclusao)
 
     await repo.confirmar()
+    novas = await conferir_conquistas_avatar(
+        repo, usuario, modulos, quiz_perfeito=acertos == total
+    )
     return ResultadoQuizRead(
         acertos=acertos,
         total=total,
         xp_ganho=xp_ganho,
         correcao=correcao,
+        conquistas_novas=novas,
     )

@@ -20,6 +20,10 @@ CONQUISTAS = [
     (10, "Convite a bordo", "Gere um convite para o seu grupo."),
     (11, "A melhor cor", "Camus code?"),
     (12, "Nem tudo é cor", "Luz + Materia + Observador, o resto é resto."),
+    (13, "Peixe astronauta", "Conclua uma trilha inteira."),
+    (14, "Fala com os bichos", "Acerte todas as questões de um quiz."),
+    (15, "Macaco aquático", "Alcance 500 de XP."),
+
 ]
 
 
