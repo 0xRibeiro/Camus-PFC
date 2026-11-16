@@ -10,6 +10,30 @@ export type ClientOptions = {
 export type AcaoAuditoria = 'create' | 'update' | 'delete';
 
 /**
+ * AceiteCreate
+ */
+export type AceiteCreate = {
+    /**
+     * Documento Ids
+     */
+    documento_ids: Array<number>;
+};
+
+/**
+ * AceiteStatus
+ */
+export type AceiteStatus = {
+    /**
+     * Aceitou
+     */
+    aceitou: boolean;
+    /**
+     * Pendentes
+     */
+    pendentes: Array<DocumentoPendente>;
+};
+
+/**
  * AlternativaAlunoRead
  */
 export type AlternativaAlunoRead = {
@@ -746,6 +770,124 @@ export type DispositivoRead = {
 };
 
 /**
+ * DocumentoLegalHistorico
+ */
+export type DocumentoLegalHistorico = {
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Publicado Em
+     */
+    publicado_em: string;
+};
+
+/**
+ * DocumentoLegalPublico
+ */
+export type DocumentoLegalPublico = {
+    tipo: TipoDocumentoLegal;
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Conteudo
+     */
+    conteudo: {
+        [key: string]: unknown;
+    };
+    /**
+     * Publicado Em
+     */
+    publicado_em: string;
+};
+
+/**
+ * DocumentoLegalRead
+ */
+export type DocumentoLegalRead = {
+    /**
+     * Id
+     */
+    id: number;
+    tipo: TipoDocumentoLegal;
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Conteudo
+     */
+    conteudo: {
+        [key: string]: unknown;
+    };
+    /**
+     * Publicado Em
+     */
+    publicado_em: string | null;
+    /**
+     * Criado Por
+     */
+    criado_por: number;
+    /**
+     * Criado Em
+     */
+    criado_em: string;
+};
+
+/**
+ * DocumentoLegalResumo
+ */
+export type DocumentoLegalResumo = {
+    /**
+     * Id
+     */
+    id: number;
+    tipo: TipoDocumentoLegal;
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Publicado Em
+     */
+    publicado_em: string | null;
+    /**
+     * Criado Por
+     */
+    criado_por: number;
+    /**
+     * Autor
+     */
+    autor: string;
+    /**
+     * Criado Em
+     */
+    criado_em: string;
+};
+
+/**
+ * DocumentoPendente
+ */
+export type DocumentoPendente = {
+    /**
+     * Id
+     */
+    id: number;
+    tipo: TipoDocumentoLegal;
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Publicado Em
+     */
+    publicado_em: string;
+};
+
+/**
  * Especie
  */
 export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
@@ -1255,6 +1397,31 @@ export type RankingItemRead = {
 };
 
 /**
+ * RascunhoCreate
+ */
+export type RascunhoCreate = {
+    tipo: TipoDocumentoLegal;
+    /**
+     * Conteudo
+     */
+    conteudo: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * RascunhoUpdate
+ */
+export type RascunhoUpdate = {
+    /**
+     * Conteudo
+     */
+    conteudo: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * RefreshInput
  */
 export type RefreshInput = {
@@ -1500,6 +1667,11 @@ export type SuspensaoCreate = {
      */
     motivo: string;
 };
+
+/**
+ * TipoDocumentoLegal
+ */
+export type TipoDocumentoLegal = 'termos_de_uso' | 'politica_de_privacidade';
 
 /**
  * TipoModulo
@@ -2326,34 +2498,6 @@ export type UpdateMeUsuariosMePatchResponses = {
 };
 
 export type UpdateMeUsuariosMePatchResponse = UpdateMeUsuariosMePatchResponses[keyof UpdateMeUsuariosMePatchResponses];
-
-export type VerificarMeuAceiteUsuariosMeAceiteTermosGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/usuarios/me/aceite-termos';
-};
-
-export type VerificarMeuAceiteUsuariosMeAceiteTermosGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/usuarios/me/aceite-termos';
-};
-
-export type RegistrarMeuAceiteUsuariosMeAceiteTermosPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
 
 export type ListarMinhasConquistasUsuariosMeConquistasGetData = {
     body?: never;
@@ -3378,6 +3522,311 @@ export type CadastrarDispositivoAdminDispositivosPostResponses = {
 };
 
 export type CadastrarDispositivoAdminDispositivosPostResponse = CadastrarDispositivoAdminDispositivosPostResponses[keyof CadastrarDispositivoAdminDispositivosPostResponses];
+
+export type ListarDocumentosAdminDocumentosLegaisGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Tipo
+         */
+        tipo?: TipoDocumentoLegal | null;
+    };
+    url: '/admin/documentos-legais';
+};
+
+export type ListarDocumentosAdminDocumentosLegaisGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarDocumentosAdminDocumentosLegaisGetError = ListarDocumentosAdminDocumentosLegaisGetErrors[keyof ListarDocumentosAdminDocumentosLegaisGetErrors];
+
+export type ListarDocumentosAdminDocumentosLegaisGetResponses = {
+    /**
+     * Response Listar Documentos Admin Documentos Legais Get
+     *
+     * Successful Response
+     */
+    200: Array<DocumentoLegalResumo>;
+};
+
+export type ListarDocumentosAdminDocumentosLegaisGetResponse = ListarDocumentosAdminDocumentosLegaisGetResponses[keyof ListarDocumentosAdminDocumentosLegaisGetResponses];
+
+export type CriarRascunhoAdminDocumentosLegaisPostData = {
+    body: RascunhoCreate;
+    path?: never;
+    query?: never;
+    url: '/admin/documentos-legais';
+};
+
+export type CriarRascunhoAdminDocumentosLegaisPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CriarRascunhoAdminDocumentosLegaisPostError = CriarRascunhoAdminDocumentosLegaisPostErrors[keyof CriarRascunhoAdminDocumentosLegaisPostErrors];
+
+export type CriarRascunhoAdminDocumentosLegaisPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: DocumentoLegalRead;
+};
+
+export type CriarRascunhoAdminDocumentosLegaisPostResponse = CriarRascunhoAdminDocumentosLegaisPostResponses[keyof CriarRascunhoAdminDocumentosLegaisPostResponses];
+
+export type DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Documento Id
+         */
+        documento_id: number;
+    };
+    query?: never;
+    url: '/admin/documentos-legais/{documento_id}';
+};
+
+export type DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteError = DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteErrors[keyof DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteErrors];
+
+export type DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteResponse = DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteResponses[keyof DescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteResponses];
+
+export type BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Documento Id
+         */
+        documento_id: number;
+    };
+    query?: never;
+    url: '/admin/documentos-legais/{documento_id}';
+};
+
+export type BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetError = BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetErrors[keyof BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetErrors];
+
+export type BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentoLegalRead;
+};
+
+export type BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetResponse = BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetResponses[keyof BuscarDocumentoAdminDocumentosLegaisDocumentoIdGetResponses];
+
+export type EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchData = {
+    body: RascunhoUpdate;
+    path: {
+        /**
+         * Documento Id
+         */
+        documento_id: number;
+    };
+    query?: never;
+    url: '/admin/documentos-legais/{documento_id}';
+};
+
+export type EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchError = EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchErrors[keyof EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchErrors];
+
+export type EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentoLegalRead;
+};
+
+export type EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchResponse = EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchResponses[keyof EditarRascunhoAdminDocumentosLegaisDocumentoIdPatchResponses];
+
+export type PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostData = {
+    body?: never;
+    path: {
+        /**
+         * Documento Id
+         */
+        documento_id: number;
+    };
+    query?: never;
+    url: '/admin/documentos-legais/{documento_id}/publicar';
+};
+
+export type PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostError = PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostErrors[keyof PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostErrors];
+
+export type PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentoLegalRead;
+};
+
+export type PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostResponse = PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostResponses[keyof PublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostResponses];
+
+export type ListarHistoricoDocumentosLegaisTipoGetData = {
+    body?: never;
+    path: {
+        tipo: TipoDocumentoLegal;
+    };
+    query?: never;
+    url: '/documentos-legais/{tipo}';
+};
+
+export type ListarHistoricoDocumentosLegaisTipoGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarHistoricoDocumentosLegaisTipoGetError = ListarHistoricoDocumentosLegaisTipoGetErrors[keyof ListarHistoricoDocumentosLegaisTipoGetErrors];
+
+export type ListarHistoricoDocumentosLegaisTipoGetResponses = {
+    /**
+     * Response Listar Historico Documentos Legais  Tipo  Get
+     *
+     * Successful Response
+     */
+    200: Array<DocumentoLegalHistorico>;
+};
+
+export type ListarHistoricoDocumentosLegaisTipoGetResponse = ListarHistoricoDocumentosLegaisTipoGetResponses[keyof ListarHistoricoDocumentosLegaisTipoGetResponses];
+
+export type BuscarAtualDocumentosLegaisTipoAtualGetData = {
+    body?: never;
+    path: {
+        tipo: TipoDocumentoLegal;
+    };
+    query?: never;
+    url: '/documentos-legais/{tipo}/atual';
+};
+
+export type BuscarAtualDocumentosLegaisTipoAtualGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarAtualDocumentosLegaisTipoAtualGetError = BuscarAtualDocumentosLegaisTipoAtualGetErrors[keyof BuscarAtualDocumentosLegaisTipoAtualGetErrors];
+
+export type BuscarAtualDocumentosLegaisTipoAtualGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentoLegalPublico;
+};
+
+export type BuscarAtualDocumentosLegaisTipoAtualGetResponse = BuscarAtualDocumentosLegaisTipoAtualGetResponses[keyof BuscarAtualDocumentosLegaisTipoAtualGetResponses];
+
+export type BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetData = {
+    body?: never;
+    path: {
+        tipo: TipoDocumentoLegal;
+        /**
+         * Versao
+         */
+        versao: number;
+    };
+    query?: never;
+    url: '/documentos-legais/{tipo}/versoes/{versao}';
+};
+
+export type BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetError = BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetErrors[keyof BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetErrors];
+
+export type BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentoLegalPublico;
+};
+
+export type BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetResponse = BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetResponses[keyof BuscarVersaoDocumentosLegaisTipoVersoesVersaoGetResponses];
+
+export type StatusAceiteUsuariosMeAceiteTermosGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type StatusAceiteUsuariosMeAceiteTermosGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AceiteStatus;
+};
+
+export type StatusAceiteUsuariosMeAceiteTermosGetResponse = StatusAceiteUsuariosMeAceiteTermosGetResponses[keyof StatusAceiteUsuariosMeAceiteTermosGetResponses];
+
+export type AceitarDocumentosUsuariosMeAceiteTermosPostData = {
+    body: AceiteCreate;
+    path?: never;
+    query?: never;
+    url: '/usuarios/me/aceite-termos';
+};
+
+export type AceitarDocumentosUsuariosMeAceiteTermosPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AceitarDocumentosUsuariosMeAceiteTermosPostError = AceitarDocumentosUsuariosMeAceiteTermosPostErrors[keyof AceitarDocumentosUsuariosMeAceiteTermosPostErrors];
+
+export type AceitarDocumentosUsuariosMeAceiteTermosPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AceiteStatus;
+};
+
+export type AceitarDocumentosUsuariosMeAceiteTermosPostResponse = AceitarDocumentosUsuariosMeAceiteTermosPostResponses[keyof AceitarDocumentosUsuariosMeAceiteTermosPostResponses];
 
 export type ListarGruposGruposGetData = {
     body?: never;
