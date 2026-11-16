@@ -64,6 +64,8 @@
 </template>
 
 <script setup lang="ts">
+import { FetchError } from 'ofetch'
+
 definePageMeta({
   layout: false,
 })
@@ -73,6 +75,11 @@ const toast = useToast()
 
 const aceito = ref(false)
 const loading = ref(false)
+
+// middleware pula essa pagina
+onMounted(() => {
+  auth.fetchAceiteTermos().catch(() => {})
+})
 
 function voltarParaLogin() {
   auth.logout()
@@ -89,18 +96,31 @@ async function confirmarAceite() {
   try {
     const api = useApi()
 
+    const documentoIds = []
+    for (const documento of auth.aceitePendentes) {
+      documentoIds.push(documento.id)
+    }
+
     await api('/usuarios/me/aceite-termos', {
       method: 'POST',
+      body: { documento_ids: documentoIds },
     })
 
     auth.aceiteTermos = true
+    auth.aceitePendentes = []
 
     await navigateTo('/')
   }
-  catch {
+  catch (error) {
+    // 409 saiu versao nova
+    const mudou = error instanceof FetchError && error.status === 409
+    if (mudou) {
+      await auth.fetchAceiteTermos().catch(() => {})
+    }
+
     toast.add({
-      title: 'Não foi possível registrar o aceite',
-      description: 'Tente novamente.',
+      title: mudou ? 'Os termos foram atualizados' : 'Não foi possível registrar o aceite',
+      description: mudou ? 'Leia a versão nova e aceite de novo.' : 'Tente novamente.',
       color: 'error',
     })
   }

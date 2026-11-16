@@ -28,6 +28,7 @@ import app.domains.pontuacao.model
 import app.domains.progresso.model
 import app.domains.dispositivo.model
 import app.domains.minigame.model
+import app.domains.documento_legal.model
 
 import app.domains.peixe.model
 # this is the Alembic Config object, which provides

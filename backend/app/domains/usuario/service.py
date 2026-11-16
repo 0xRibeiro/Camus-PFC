@@ -33,7 +33,9 @@ from app.core.security import (
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
 from app.domains.usuario.avatares import sortear_avatar, sortear_cor_fundo
-from app.domains.usuario.model import AceiteTermos, RoleUsuario, Usuario
+from app.domains.documento_legal import service as documento_legal_service
+from app.domains.documento_legal.model import AceiteDocumentoLegal
+from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
     TokenPair,
@@ -43,31 +45,6 @@ from app.domains.usuario.schema import (
     UsuarioUpdate,
 )
 
-TERMOS_VERSAO_ATUAL = "2026-09-25"
-PRIVACIDADE_VERSAO_ATUAL = "2026-09-25"
-
-
-async def verificar_aceite_termos(
-    db: AsyncSession,
-    user_id: int,
-) -> bool:
-    return await UsuarioRepository(db).verificou_aceite_termos(
-        user_id,
-        TERMOS_VERSAO_ATUAL,
-        PRIVACIDADE_VERSAO_ATUAL,
-    )
-
-async def registrar_aceite_termos(
-    db: AsyncSession,
-    user: Usuario,
-) -> AceiteTermos:
-    aceite = AceiteTermos(
-        usuario_id=user.id,
-        termos_versao=TERMOS_VERSAO_ATUAL,
-        privacidade_versao=PRIVACIDADE_VERSAO_ATUAL,
-    )
-
-    return await UsuarioRepository(db).registrar_aceite_termos(aceite)
 
 ###### cadastro
 
@@ -91,12 +68,9 @@ async def criar_aluno(db: AsyncSession, data: UsuarioCreate) -> Usuario:
         cor_fundo=sortear_cor_fundo(),
     )
 
-    user.aceites_termos.append(
-        AceiteTermos(
-            termos_versao=TERMOS_VERSAO_ATUAL,
-            privacidade_versao=PRIVACIDADE_VERSAO_ATUAL,
-        )
-    )
+    # aceita as versoes atuais
+    for documento in await documento_legal_service.listar_atuais(db):
+        user.aceites_documentos.append(AceiteDocumentoLegal(documento_id=documento.id))
 
     return await repo.salvar(user)
 

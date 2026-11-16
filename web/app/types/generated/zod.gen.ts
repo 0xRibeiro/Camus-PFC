@@ -12,6 +12,13 @@ export const zAcaoAuditoria = z.enum([
 ]);
 
 /**
+ * AceiteCreate
+ */
+export const zAceiteCreate = z.object({
+    documento_ids: z.array(z.int())
+});
+
+/**
  * AlternativaAlunoRead
  */
 export const zAlternativaAlunoRead = z.object({
@@ -333,6 +340,14 @@ export const zDenunciaUpdate = z.object({
 });
 
 /**
+ * DocumentoLegalHistorico
+ */
+export const zDocumentoLegalHistorico = z.object({
+    versao: z.int(),
+    publicado_em: z.iso.datetime()
+});
+
+/**
  * Especie
  */
 export const zEspecie = z.enum([
@@ -643,6 +658,13 @@ export const zRankingItemRead = z.object({
 });
 
 /**
+ * RascunhoUpdate
+ */
+export const zRascunhoUpdate = z.object({
+    conteudo: z.record(z.string(), z.unknown())
+});
+
+/**
  * RefreshInput
  */
 export const zRefreshInput = z.object({
@@ -760,6 +782,73 @@ export const zSerieLeitura = z.object({
 export const zSuspensaoCreate = z.object({
     dias: z.union([z.literal(14), z.literal(30)]),
     motivo: z.string().min(5).max(500)
+});
+
+/**
+ * TipoDocumentoLegal
+ */
+export const zTipoDocumentoLegal = z.enum(['termos_de_uso', 'politica_de_privacidade']);
+
+/**
+ * DocumentoLegalPublico
+ */
+export const zDocumentoLegalPublico = z.object({
+    tipo: zTipoDocumentoLegal,
+    versao: z.int(),
+    conteudo: z.record(z.string(), z.unknown()),
+    publicado_em: z.iso.datetime()
+});
+
+/**
+ * DocumentoLegalRead
+ */
+export const zDocumentoLegalRead = z.object({
+    id: z.int(),
+    tipo: zTipoDocumentoLegal,
+    versao: z.int(),
+    conteudo: z.record(z.string(), z.unknown()),
+    publicado_em: z.iso.datetime().nullable(),
+    criado_por: z.int(),
+    criado_em: z.iso.datetime()
+});
+
+/**
+ * DocumentoLegalResumo
+ */
+export const zDocumentoLegalResumo = z.object({
+    id: z.int(),
+    tipo: zTipoDocumentoLegal,
+    versao: z.int(),
+    publicado_em: z.iso.datetime().nullable(),
+    criado_por: z.int(),
+    autor: z.string(),
+    criado_em: z.iso.datetime()
+});
+
+/**
+ * DocumentoPendente
+ */
+export const zDocumentoPendente = z.object({
+    id: z.int(),
+    tipo: zTipoDocumentoLegal,
+    versao: z.int(),
+    publicado_em: z.iso.datetime()
+});
+
+/**
+ * AceiteStatus
+ */
+export const zAceiteStatus = z.object({
+    aceitou: z.boolean(),
+    pendentes: z.array(zDocumentoPendente)
+});
+
+/**
+ * RascunhoCreate
+ */
+export const zRascunhoCreate = z.object({
+    tipo: zTipoDocumentoLegal,
+    conteudo: z.record(z.string(), z.unknown())
 });
 
 /**
@@ -1427,6 +1516,104 @@ export const zCadastrarDispositivoAdminDispositivosPostBody = zCadastroDispositi
  * Successful Response
  */
 export const zCadastrarDispositivoAdminDispositivosPostResponse = zCredencialDispositivo;
+
+export const zListarDocumentosAdminDocumentosLegaisGetQuery = z.object({
+    tipo: zTipoDocumentoLegal.nullish()
+});
+
+/**
+ * Response Listar Documentos Admin Documentos Legais Get
+ *
+ * Successful Response
+ */
+export const zListarDocumentosAdminDocumentosLegaisGetResponse = z.array(zDocumentoLegalResumo);
+
+export const zCriarRascunhoAdminDocumentosLegaisPostBody = zRascunhoCreate;
+
+/**
+ * Successful Response
+ */
+export const zCriarRascunhoAdminDocumentosLegaisPostResponse = zDocumentoLegalRead;
+
+export const zDescartarRascunhoAdminDocumentosLegaisDocumentoIdDeletePath = z.object({
+    documento_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zDescartarRascunhoAdminDocumentosLegaisDocumentoIdDeleteResponse = z.void();
+
+export const zBuscarDocumentoAdminDocumentosLegaisDocumentoIdGetPath = z.object({
+    documento_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarDocumentoAdminDocumentosLegaisDocumentoIdGetResponse = zDocumentoLegalRead;
+
+export const zEditarRascunhoAdminDocumentosLegaisDocumentoIdPatchBody = zRascunhoUpdate;
+
+export const zEditarRascunhoAdminDocumentosLegaisDocumentoIdPatchPath = z.object({
+    documento_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zEditarRascunhoAdminDocumentosLegaisDocumentoIdPatchResponse = zDocumentoLegalRead;
+
+export const zPublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostPath = z.object({
+    documento_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zPublicarRascunhoAdminDocumentosLegaisDocumentoIdPublicarPostResponse = zDocumentoLegalRead;
+
+export const zListarHistoricoDocumentosLegaisTipoGetPath = z.object({
+    tipo: zTipoDocumentoLegal
+});
+
+/**
+ * Response Listar Historico Documentos Legais  Tipo  Get
+ *
+ * Successful Response
+ */
+export const zListarHistoricoDocumentosLegaisTipoGetResponse = z.array(zDocumentoLegalHistorico);
+
+export const zBuscarAtualDocumentosLegaisTipoAtualGetPath = z.object({
+    tipo: zTipoDocumentoLegal
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarAtualDocumentosLegaisTipoAtualGetResponse = zDocumentoLegalPublico;
+
+export const zBuscarVersaoDocumentosLegaisTipoVersoesVersaoGetPath = z.object({
+    tipo: zTipoDocumentoLegal,
+    versao: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zBuscarVersaoDocumentosLegaisTipoVersoesVersaoGetResponse = zDocumentoLegalPublico;
+
+/**
+ * Successful Response
+ */
+export const zStatusAceiteUsuariosMeAceiteTermosGetResponse = zAceiteStatus;
+
+export const zAceitarDocumentosUsuariosMeAceiteTermosPostBody = zAceiteCreate;
+
+/**
+ * Successful Response
+ */
+export const zAceitarDocumentosUsuariosMeAceiteTermosPostResponse = zAceiteStatus;
 
 /**
  * Response Listar Grupos Grupos Get

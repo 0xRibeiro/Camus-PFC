@@ -1,4 +1,4 @@
-import type { ForgotPasswordInput, ResetPasswordInput, UsuarioCreate, UsuarioLogin, UsuarioRead } from '~/types/generated'
+import type { AceiteStatus, DocumentoPendente, ForgotPasswordInput, ResetPasswordInput, UsuarioCreate, UsuarioLogin, UsuarioRead } from '~/types/generated'
 
 // store de auth, guarda quem ta logado e os tokens
 export const useAuthStore = defineStore('auth', () => {
@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
   const aceiteTermos = ref<boolean | null>(null)
+  const aceitePendentes = ref<DocumentoPendente[]>([])
   const isAuthenticated = computed(() => !!accessToken.value)
   const role = computed(() => {
     if (!user.value) return null
@@ -20,9 +21,10 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchAceiteTermos() {
     const api = useApi()
 
-    const resposta = await api('/usuarios/me/aceite-termos')
+    const resposta: AceiteStatus = await api('/usuarios/me/aceite-termos')
 
     aceiteTermos.value = resposta.aceitou
+    aceitePendentes.value = resposta.pendentes
   }
   // login so devolve token, entao busca o usuario dps
   async function login(credentials: UsuarioLogin) {
@@ -114,6 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = null
     refreshToken.value = null
     aceiteTermos.value = null
+    aceitePendentes.value = []
   }
 
   return {
@@ -121,6 +124,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     refreshToken,
     aceiteTermos,
+    aceitePendentes,
     isAuthenticated,
     role,
     login,
