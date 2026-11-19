@@ -1,6 +1,9 @@
 import secrets
 
+import httpx
+from fastapi import HTTPException, status
 from fastcrud.exceptions.http_exceptions import (
+    BadRequestException,
     DuplicateValueException,
     ForbiddenException,
     NotFoundException,
@@ -20,8 +23,9 @@ from app.domains.dispositivo import service as dispositivo_service
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.dispositivo.repository import DispositivoRepository
 from app.domains.dispositivo.schema import CodigoDispositivo, ComandoModulo, DispositivoRead, ModuloIotRead
+from app.domains.minigame import inat
 from app.domains.peixe.model import Peixe
-from app.domains.peixe.schema import PeixeCreate
+from app.domains.peixe.schema import PeixeCreate, PeixeUpdate
 
 CONVITE_VALIDADE_SEGUNDOS = 900
 
@@ -101,8 +105,67 @@ async def cadastrar_peixe(db: AsyncSession, aquario_id: int, data: PeixeCreate, 
     aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
     exigir_edicao(papel)
 
-    peixe = Peixe(aquario_id=aquario.id, nome=data.nome, especie=data.especie)
-    return await repo.criar_peixe(peixe)
+    try:
+        taxon = await inat.buscar_taxon(data.taxon_id)
+    except httpx.HTTPError:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Não foi possível falar com o iNaturalist")
+
+    if taxon is None:
+        raise NotFoundException("Espécie não encontrada no iNaturalist")
+
+    # msm grupos da colecao, n deixa cadastrar passarinho no aquario
+    if taxon["grupo"] is None:
+        raise BadRequestException("Essa espécie não é de aquário")
+
+    peixe = Peixe(
+        aquario_id=aquario.id,
+        taxon_id=taxon["taxon_id"],
+        nome_popular=taxon["nome_popular"],
+        nome_cientifico=taxon["nome_cientifico"],
+        foto_url=taxon["foto_url"],
+        foto_credito=taxon["foto_credito"],
+        quantidade=data.quantidade,
+        apelido=data.apelido,
+    )
+    return await repo.salvar_peixe(peixe)
+
+
+async def buscar_peixe_editavel(repo: AquarioRepository, aquario_id: int, peixe_id: int, usuario_id: int) -> Peixe:
+    aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
+    exigir_edicao(papel)
+
+    peixe = await repo.buscar_peixe(aquario.id, peixe_id)
+    if peixe is None:
+        raise NotFoundException("Peixe não encontrado")
+
+    return peixe
+
+
+# com 1 so muda o nome, com mais de 1 so a quantidade
+async def editar_peixe(db: AsyncSession, aquario_id: int, peixe_id: int, data: PeixeUpdate, usuario_id: int) -> Peixe:
+    repo = AquarioRepository(db)
+    peixe = await buscar_peixe_editavel(repo, aquario_id, peixe_id, usuario_id)
+    enviados = data.model_fields_set
+
+    if peixe.quantidade == 1:
+        if "quantidade" in enviados:
+            raise BadRequestException("Com 1 peixe só dá pra mudar o nome")
+        # mandar apelido null apaga o nome
+        peixe.apelido = data.apelido
+    else:
+        if "apelido" in enviados:
+            raise BadRequestException("Com mais de 1 peixe só dá pra mudar a quantidade")
+        if data.quantidade is None:
+            raise BadRequestException("Informe a quantidade")
+        peixe.quantidade = data.quantidade
+
+    return await repo.salvar_peixe(peixe)
+
+
+async def remover_peixe(db: AsyncSession, aquario_id: int, peixe_id: int, usuario_id: int) -> None:
+    repo = AquarioRepository(db)
+    peixe = await buscar_peixe_editavel(repo, aquario_id, peixe_id, usuario_id)
+    await repo.remover_peixe(peixe)
 
 
 # so o dono conecta, e so iot livre

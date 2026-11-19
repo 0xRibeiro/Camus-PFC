@@ -100,3 +100,31 @@ async def sortear_foto(taxon_id: int) -> dict | None:
     if not fotos:
         return None
     return random.choice(fotos)
+
+
+# usado no cadastro de peixe do aquario, pega a 1a foto c licenca livre
+async def buscar_taxon(taxon_id: int) -> dict | None:
+    dados = await buscar(f"/taxa/{taxon_id}", {"locale": "pt-BR"})
+    if not dados["results"]:
+        return None
+
+    taxon = dados["results"][0]
+    nome = taxon.get("preferred_common_name") or taxon["name"]
+
+    foto_url = None
+    foto_credito = None
+    for item in taxon.get("taxon_photos", []):
+        foto = item["photo"]
+        if foto.get("license_code") and foto.get("medium_url"):
+            foto_url = foto["medium_url"]
+            foto_credito = foto["attribution"]
+            break
+
+    return {
+        "taxon_id": taxon["id"],
+        "nome_popular": nome[0].upper() + nome[1:],
+        "nome_cientifico": taxon["name"],
+        "grupo": achar_grupo(taxon.get("ancestor_ids", [])),
+        "foto_url": foto_url,
+        "foto_credito": foto_credito,
+    }
