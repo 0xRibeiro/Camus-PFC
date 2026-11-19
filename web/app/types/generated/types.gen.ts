@@ -1017,11 +1017,6 @@ export type EngajamentoTrilhaRead = {
 };
 
 /**
- * Especie
- */
-export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
-
-/**
  * EspecieComparadaRead
  */
 export type EspecieComparadaRead = {
@@ -1403,13 +1398,17 @@ export type PapelAquario = 'dono' | 'operador' | 'leitor';
  */
 export type PeixeCreate = {
     /**
-     * Nome
+     * Taxon Id
      */
-    nome: string;
+    taxon_id: number;
     /**
-     * Especie
+     * Quantidade
      */
-    especie: 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon';
+    quantidade?: number;
+    /**
+     * Apelido
+     */
+    apelido?: string | null;
 };
 
 /**
@@ -1421,10 +1420,47 @@ export type PeixeRead = {
      */
     id: number;
     /**
-     * Nome
+     * Taxon Id
      */
-    nome: string;
-    especie: Especie;
+    taxon_id: number;
+    /**
+     * Nome Popular
+     */
+    nome_popular: string;
+    /**
+     * Nome Cientifico
+     */
+    nome_cientifico: string;
+    /**
+     * Foto Url
+     */
+    foto_url: string | null;
+    /**
+     * Foto Credito
+     */
+    foto_credito: string | null;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+    /**
+     * Apelido
+     */
+    apelido: string | null;
+};
+
+/**
+ * PeixeUpdate
+ */
+export type PeixeUpdate = {
+    /**
+     * Quantidade
+     */
+    quantidade?: number | null;
+    /**
+     * Apelido
+     */
+    apelido?: string | null;
 };
 
 /**
@@ -3811,6 +3847,74 @@ export type CadastrarPeixeAquariosAquarioIdPeixesPostResponses = {
 };
 
 export type CadastrarPeixeAquariosAquarioIdPeixesPostResponse = CadastrarPeixeAquariosAquarioIdPeixesPostResponses[keyof CadastrarPeixeAquariosAquarioIdPeixesPostResponses];
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+        /**
+         * Peixe Id
+         */
+        peixe_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes/{peixe_id}';
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteError = RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors[keyof RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors];
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponse = RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses[keyof RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses];
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchData = {
+    body: PeixeUpdate;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+        /**
+         * Peixe Id
+         */
+        peixe_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes/{peixe_id}';
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchError = EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors[keyof EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors];
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: PeixeRead;
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponse = EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses[keyof EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses];
 
 export type BuscarAquarioAquariosAquarioIdGetData = {
     body?: never;
