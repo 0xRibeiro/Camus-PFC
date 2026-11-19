@@ -62,6 +62,14 @@
           :modulo="modulo"
           :minutos="minutosCarregados"
         />
+
+        <!-- 2 sensores, ocupa a linha toda -->
+        <AquarioQualidade
+          v-else-if="modulo.tipo === TIPO_QUALIDADE_AGUA"
+          :modulo="modulo"
+          :minutos="minutosCarregados"
+          class="lg:col-span-2"
+        />
       </template>
     </div>
   </section>
@@ -76,6 +84,7 @@ const props = defineProps<{ aquarioId: number, podeEditar: boolean }>()
 // igual ao TipoModulo do back
 const TIPO_DISTANCIA = 1
 const TIPO_TEMPERATURA = 2
+const TIPO_QUALIDADE_AGUA = 3
 
 // esp confirma em ~1s, o polling de 5s traz o estado novo
 const ESPERA_CONFIRMACAO_MS = 15000

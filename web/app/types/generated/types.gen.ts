@@ -1960,7 +1960,7 @@ export type TipoDocumentoLegal = 'termos_de_uso' | 'politica_de_privacidade';
 /**
  * TipoModulo
  */
-export type TipoModulo = 1 | 2;
+export type TipoModulo = 1 | 2 | 3;
 
 /**
  * TokenPair

@@ -16,6 +16,7 @@ class EstadoDispositivo(enum.Enum):
 class TipoModulo(enum.IntEnum):
     distancia = 1
     temperatura = 2
+    qualidade_agua = 3
 
 
 # esp central, criado sozinho qnd chega o 1o status dele no mqtt
