@@ -15,18 +15,22 @@ namespace barramento {
   struct Catalogo {
     uint8_t tipo;
     const char* nome;
-    const char* leitura;
-    const char* unidade;
-    float escala;
+    uint8_t quantidade;
+    InfoLeitura leituras[MAX_VALORES];
     bool atuador;
   };
 
-  // escala: valor bruto / escala = valor real
   // atuador: tem rele, responde COMANDO e ESTADO
   const Catalogo CATALOGO[] = {
-    { (uint8_t) TipoModulo::DISTANCIA, "Distancia", "distancia", "cm", 10, false },
-    { (uint8_t) TipoModulo::TEMPERATURA, "Temperatura", "temperatura", "C", 100, true },
+    { (uint8_t) TipoModulo::DISTANCIA, "Distancia", 1, { { "distancia", "Distancia", "cm", 10, 1 } }, false },
+    { (uint8_t) TipoModulo::TEMPERATURA, "Temperatura", 1, { { "temperatura", "Temperatura", "C", 100, 1 } }, true },
+    { (uint8_t) TipoModulo::QUALIDADE_AGUA, "Qualidade agua", 2, {
+      { "tds", "TDS", "ppm", 1, 0 },
+      { "turbidez", "Turbidez", "NTU", 10, 1 },
+    }, false },
   };
+
+  const InfoLeitura LEITURA_VAZIA = { "", "", "", 1, 0 };
 
   Modulo modulos[MAX_MODULOS];
   int total = 0;
@@ -103,15 +107,19 @@ namespace barramento {
       novo.tipo = id[1];
       novo.serial = ((uint32_t) id[2] << 24) | ((uint32_t) id[3] << 16) | ((uint32_t) id[4] << 8) | id[5];
       novo.temValor = false;
-      novo.valor = 0;
       novo.ligado = false;
+      for (int v = 0; v < MAX_VALORES; v++) {
+        novo.valores[v] = 0;
+      }
 
       // mantem o ultimo valor de quem ja tava
       int antigo = buscarEm(modulos, total, novo.serial);
       if (antigo >= 0) {
         novo.temValor = modulos[antigo].temValor;
-        novo.valor = modulos[antigo].valor;
         novo.ligado = modulos[antigo].ligado;
+        for (int v = 0; v < MAX_VALORES; v++) {
+          novo.valores[v] = modulos[antigo].valores[v];
+        }
       }
       quantidadeAchados++;
     }
@@ -167,12 +175,15 @@ namespace barramento {
     json["serial"] = serial;
     json["tipo"] = modulo.tipo;
 
-    JsonObject leitura = json["leituras"].add<JsonObject>();
-    leitura["nome"] = catalogo->leitura;
-    leitura["valor"] = modulo.valor;
-    leitura["unidade"] = catalogo->unidade;
+    JsonArray leituras = json["leituras"].to<JsonArray>();
+    for (int v = 0; v < catalogo->quantidade; v++) {
+      JsonObject leitura = leituras.add<JsonObject>();
+      leitura["nome"] = catalogo->leituras[v].nome;
+      leitura["valor"] = modulo.valores[v];
+      leitura["unidade"] = catalogo->leituras[v].unidade;
+    }
 
-    char mensagem[160];
+    char mensagem[320];
     serializeJson(json, mensagem);
     mqtt::publicar("leituras", mensagem, false);
   }
@@ -190,9 +201,16 @@ namespace barramento {
         continue;
       }
 
-      // so o 1o valor por enquanto
-      int16_t bruto = (resposta[2] << 8) | resposta[3];
-      modulos[i].valor = bruto / catalogo->escala;
+      // modulo diz quantos mandou, mas so usa os q o catalogo conhece
+      uint8_t quantidade = resposta[1];
+      if (quantidade < catalogo->quantidade) {
+        continue;
+      }
+
+      for (int v = 0; v < catalogo->quantidade; v++) {
+        int16_t bruto = (resposta[2 + v * 2] << 8) | resposta[3 + v * 2];
+        modulos[i].valores[v] = bruto / catalogo->leituras[v].escala;
+      }
       modulos[i].temValor = true;
       versaoAtual++;
       publicarLeitura(modulos[i], catalogo);
@@ -309,12 +327,20 @@ namespace barramento {
     return catalogo->nome;
   }
 
-  const char* unidadeTipo(uint8_t tipo) {
+  int quantidadeLeituras(uint8_t tipo) {
     const Catalogo* catalogo = buscarCatalogo(tipo);
     if (catalogo == nullptr) {
-      return "";
+      return 0;
     }
-    return catalogo->unidade;
+    return catalogo->quantidade;
+  }
+
+  const InfoLeitura& leituraTipo(uint8_t tipo, int indice) {
+    const Catalogo* catalogo = buscarCatalogo(tipo);
+    if (catalogo == nullptr || indice >= catalogo->quantidade) {
+      return LEITURA_VAZIA;
+    }
+    return catalogo->leituras[indice];
   }
 
   bool atuadorTipo(uint8_t tipo) {

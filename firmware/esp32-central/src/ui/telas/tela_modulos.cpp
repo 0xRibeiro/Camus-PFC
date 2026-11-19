@@ -47,19 +47,40 @@ void TelaModulos::desenhar() {
       }
     }
 
-    display::tft.setTextSize(2);
+    int quantidade = barramento::quantidadeLeituras(modulo.tipo);
     display::tft.setTextColor(ST77XX_CYAN);
-    display::tft.setCursor(4, y + 10);
 
-    if (modulo.temValor) {
-      display::tft.print(modulo.valor, 1);
-      display::tft.print(" ");
-      display::tft.print(barramento::unidadeTipo(modulo.tipo));
-    } else {
+    if (!modulo.temValor) {
+      display::tft.setTextSize(2);
+      display::tft.setCursor(4, y + 10);
       display::tft.print("...");
+    } else if (quantidade == 1) {
+      const barramento::InfoLeitura& leitura = barramento::leituraTipo(modulo.tipo, 0);
+      display::tft.setTextSize(2);
+      display::tft.setCursor(4, y + 10);
+      display::tft.print(modulo.valores[0], leitura.casas);
+      display::tft.print(" ");
+      display::tft.print(leitura.unidade);
+    } else {
+      // mais de um valor n cabe grande, vai um por linha
+      display::tft.setTextSize(1);
+      for (int v = 0; v < quantidade; v++) {
+        const barramento::InfoLeitura& leitura = barramento::leituraTipo(modulo.tipo, v);
+        display::tft.setCursor(4, y + 10 + v * 10);
+        display::tft.print(leitura.rotulo);
+        display::tft.print(": ");
+        display::tft.print(modulo.valores[v], leitura.casas);
+        display::tft.print(" ");
+        display::tft.print(leitura.unidade);
+      }
     }
 
-    y += 30;
+    // 2 linhas pequenas ou 1 grande = 30px, mais q isso cresce
+    if (quantidade > 2) {
+      y += 10 + quantidade * 10;
+    } else {
+      y += 30;
+    }
   }
 }
 
