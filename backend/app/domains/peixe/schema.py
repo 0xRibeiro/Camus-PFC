@@ -17,7 +17,7 @@ class PeixeCreate(BaseModel):
         return self
 
 
-# com 1 so muda o nome, com mais de 1 so a quantidade (regra fica no service)
+# nome so vale qnd o resultado e 1 peixe (regra fica no service)
 class PeixeUpdate(BaseModel):
     quantidade: int | None = Field(default=None, ge=1, le=999)
     apelido: Apelido | None = None

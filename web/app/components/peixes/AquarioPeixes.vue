@@ -20,6 +20,14 @@
             {{ totalPeixes }} {{ totalPeixes === 1 ? 'peixe' : 'peixes' }} no aquário
           </p>
         </div>
+
+        <UButton
+          v-if="podeEditar && peixes"
+          label="Adicionar peixe"
+          icon="i-lucide-plus"
+          class="ml-auto"
+          @click="abrirCadastro"
+        />
       </div>
     </template>
 
@@ -120,123 +128,269 @@
         </ul>
       </div>
 
-      <form
-        v-if="podeEditar"
-        class="flex flex-col gap-3 sm:flex-row sm:items-end"
-        @submit.prevent="cadastrarPeixe"
-      >
-        <UFormField
-          label="Espécie"
-          required
-          class="flex-1"
-        >
-          <UInputMenu
-            v-model="especie"
-            v-model:search-term="termo"
-            :items="resultados"
-            :loading="buscando"
-            ignore-filter
-            placeholder="Busque no iNaturalist, ex. palhaço"
-            icon="i-lucide-search"
-            class="w-full"
-          >
-            <template #empty>
-              {{ termo.trim().length < 2 ? 'Digite pelo menos 2 letras' : 'Nenhuma espécie encontrada' }}
-            </template>
-          </UInputMenu>
-        </UFormField>
-
-        <UFormField
-          label="Quantidade"
-          required
-          class="sm:w-32"
-        >
-          <UInputNumber
-            v-model="quantidade"
-            :min="1"
-            :max="999"
-            class="w-full"
-          />
-        </UFormField>
-
-        <UFormField
-          v-if="quantidade === 1"
-          label="Nome do pet"
-          class="flex-1"
-        >
-          <UInput
-            v-model="apelido"
-            placeholder="Ex. Nemo (opcional)"
-            maxlength="50"
-            class="w-full"
-          />
-        </UFormField>
-
-        <UButton
-          type="submit"
-          label="Adicionar"
-          icon="i-lucide-plus"
-          :loading="cadastrando"
-          :disabled="!especie || !quantidade"
-          class="justify-center"
-        />
-      </form>
     </template>
 
     <UModal
-      v-model:open="edicaoAberta"
-      :title="editando?.apelido ?? editando?.nome_popular"
-      :description="editando?.nome_cientifico"
-      :dismissible="!salvando && !removendo"
+      v-model:open="cadastroAberto"
+      title="Adicionar peixe"
+      :description="especie ? 'Diga quantos você tem' : 'Busque a espécie no iNaturalist'"
+      :dismissible="!cadastrando"
+      :ui="{ content: 'sm:max-w-3xl' }"
     >
       <template #body>
+        <!-- passo 1: busca -->
+        <div
+          v-if="!especie"
+          class="space-y-4"
+        >
+          <UInput
+            v-model="termo"
+            placeholder="Ex. palhaço, neon, betta..."
+            icon="i-lucide-search"
+            size="xl"
+            :loading="buscando"
+            autofocus
+            class="w-full"
+          />
+
+          <div class="h-[50vh] overflow-y-auto">
+            <p
+              v-if="termo.trim().length < 2"
+              class="py-16 text-center text-sm text-muted"
+            >
+              Digite o nome do peixe pra buscar.
+            </p>
+
+            <p
+              v-else-if="!buscando && !resultados.length"
+              class="py-16 text-center text-sm text-muted"
+            >
+              Nenhuma espécie encontrada.
+            </p>
+
+            <ul
+              v-else
+              class="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            >
+              <li
+                v-for="opcao in resultados"
+                :key="opcao.id"
+              >
+                <button
+                  type="button"
+                  class="w-full cursor-pointer overflow-hidden rounded-xl text-left ring ring-default transition hover:ring-2 hover:ring-primary"
+                  @click="especie = opcao"
+                >
+                  <USkeleton
+                    v-if="carregandoFoto(opcao.id)"
+                    class="aspect-square w-full rounded-none"
+                  />
+
+                  <img
+                    v-else-if="fotos[opcao.id]"
+                    :src="fotos[opcao.id]?.medium_url"
+                    :alt="opcao.nome"
+                    :title="fotos[opcao.id]?.attribution"
+                    loading="lazy"
+                    class="aspect-square w-full object-cover"
+                  >
+
+                  <span
+                    v-else
+                    class="flex aspect-square w-full items-center justify-center bg-sky-500/10 text-sky-500"
+                  >
+                    <UIcon
+                      name="i-lucide-fish"
+                      class="size-10"
+                    />
+                  </span>
+
+                  <span class="block p-2">
+                    <span class="block truncate text-sm font-medium">{{ opcao.nome }}</span>
+                    <span class="block truncate text-xs text-muted italic">{{ opcao.nome_cientifico }}</span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- passo 2: quantidade e nome -->
+        <form
+          v-else
+          class="grid gap-6 sm:grid-cols-[16rem_1fr]"
+          @submit.prevent="cadastrarPeixe"
+        >
+          <div class="overflow-hidden rounded-xl ring ring-default">
+            <USkeleton
+              v-if="carregandoFoto(especie.id)"
+              class="aspect-square w-full rounded-none"
+            />
+
+            <img
+              v-else-if="fotos[especie.id]"
+              :src="fotos[especie.id]?.medium_url"
+              :alt="especie.nome"
+              :title="fotos[especie.id]?.attribution"
+              class="aspect-square w-full object-cover"
+            >
+
+            <span
+              v-else
+              class="flex aspect-square w-full items-center justify-center bg-sky-500/10 text-sky-500"
+            >
+              <UIcon
+                name="i-lucide-fish"
+                class="size-12"
+              />
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div>
+              <p class="text-lg font-medium">
+                {{ especie.nome }}
+              </p>
+              <p class="text-sm text-muted italic">
+                {{ especie.nome_cientifico }}
+              </p>
+            </div>
+
+            <UFormField
+              label="Quantidade"
+              required
+            >
+              <UInputNumber
+                v-model="quantidade"
+                :min="1"
+                :max="999"
+                class="w-40"
+              />
+            </UFormField>
+
+            <!-- com mais de 1 fica travado, n some -->
+            <UFormField
+              label="Nome do pet"
+              :description="quantidade === 1 ? 'Opcional' : 'Só dá pra dar nome quando é 1 peixe'"
+            >
+              <UInput
+                v-model="apelido"
+                placeholder="Ex. Nemo"
+                maxlength="50"
+                :disabled="quantidade !== 1"
+                class="w-full"
+              />
+            </UFormField>
+
+            <div class="mt-auto flex flex-wrap justify-between gap-2">
+              <UButton
+                label="Trocar espécie"
+                icon="i-lucide-arrow-left"
+                variant="ghost"
+                color="neutral"
+                :disabled="cadastrando"
+                @click="especie = undefined"
+              />
+
+              <UButton
+                type="submit"
+                label="Adicionar"
+                icon="i-lucide-plus"
+                :loading="cadastrando"
+                :disabled="!quantidade"
+              />
+            </div>
+          </div>
+        </form>
+      </template>
+    </UModal>
+
+    <UModal
+      v-model:open="edicaoAberta"
+      title="Editar peixe"
+      :dismissible="!salvando && !removendo"
+      :ui="{ content: 'sm:max-w-3xl' }"
+    >
+      <template #body>
+        <!-- msm layout do passo 2 do cadastro -->
         <form
           v-if="editando"
-          class="space-y-4"
+          class="grid gap-6 sm:grid-cols-[16rem_1fr]"
           @submit.prevent="salvarEdicao"
         >
-          <!-- com 1 so muda o nome, com mais so a quantidade -->
-          <UFormField
-            v-if="editando.quantidade === 1"
-            label="Nome do pet"
-          >
-            <UInput
-              v-model="apelidoEdicao"
-              placeholder="Sem nome"
-              maxlength="50"
-              class="w-full"
-            />
-          </UFormField>
+          <div class="overflow-hidden rounded-xl ring ring-default">
+            <img
+              v-if="editando.foto_url"
+              :src="editando.foto_url"
+              :alt="editando.nome_popular"
+              :title="editando.foto_credito ?? undefined"
+              class="aspect-square w-full object-cover"
+            >
 
-          <UFormField
-            v-else
-            label="Quantidade"
-          >
-            <UInputNumber
-              v-model="quantidadeEdicao"
-              :min="1"
-              :max="999"
-              class="w-full"
-            />
-          </UFormField>
+            <span
+              v-else
+              class="flex aspect-square w-full items-center justify-center bg-sky-500/10 text-sky-500"
+            >
+              <UIcon
+                name="i-lucide-fish"
+                class="size-12"
+              />
+            </span>
+          </div>
 
-          <div class="flex flex-wrap justify-between gap-2">
-            <UButton
-              label="Remover do aquário"
-              icon="i-lucide-trash-2"
-              color="error"
-              variant="ghost"
-              :loading="removendo"
-              :disabled="salvando"
-              @click="removerPeixe"
-            />
+          <div class="flex flex-col gap-4">
+            <div>
+              <p class="text-lg font-medium">
+                {{ editando.nome_popular }}
+              </p>
+              <p class="text-sm text-muted italic">
+                {{ editando.nome_cientifico }}
+              </p>
+            </div>
 
-            <UButton
-              type="submit"
-              label="Salvar"
-              :loading="salvando"
-              :disabled="removendo || (editando.quantidade > 1 && !quantidadeEdicao)"
-            />
+            <UFormField
+              label="Quantidade"
+              required
+            >
+              <UInputNumber
+                v-model="quantidadeEdicao"
+                :min="1"
+                :max="999"
+                class="w-40"
+              />
+            </UFormField>
+
+            <UFormField
+              label="Nome do pet"
+              :description="quantidadeEdicao === 1 ? 'Opcional' : 'Só dá pra dar nome quando é 1 peixe'"
+            >
+              <UInput
+                v-model="apelidoEdicao"
+                placeholder="Ex. Nemo"
+                maxlength="50"
+                :disabled="quantidadeEdicao !== 1"
+                class="w-full"
+              />
+            </UFormField>
+
+            <div class="mt-auto flex flex-wrap justify-between gap-2">
+              <UButton
+                label="Remover do aquário"
+                icon="i-lucide-trash-2"
+                color="error"
+                variant="ghost"
+                :loading="removendo"
+                :disabled="salvando"
+                @click="removerPeixe"
+              />
+
+              <UButton
+                type="submit"
+                label="Salvar"
+                :loading="salvando"
+                :disabled="removendo || !quantidadeEdicao"
+              />
+            </div>
           </div>
         </form>
       </template>
@@ -245,30 +399,28 @@
 </template>
 
 <script setup lang="ts">
-import type { InputMenuItem } from '@nuxt/ui'
 import type { PeixeRead, PeixeUpdate } from '~/types/generated'
+import type { TaxonInat } from '~/utils/inaturalista'
 import { TAXONS_COLECAO } from '~/utils/inaturalista'
 
 const props = withDefaults(defineProps<{ aquarioId: number, podeEditar?: boolean }>(), { podeEditar: true })
 
-// so o q a gente usa do /taxa/autocomplete
-interface TaxonInat {
+interface OpcaoEspecie {
   id: number
-  name: string
-  preferred_common_name?: string
-  default_photo?: { square_url?: string }
+  nome: string
+  nome_cientifico: string
 }
-
-type OpcaoEspecie = InputMenuItem & { id: number, label: string }
 
 const api = useApi()
 const inat = useInat()
 const toast = useToast()
+const { fotos, carregar: carregarFotos, carregando: carregandoFoto } = useFotosLivres()
 
 const carregando = ref(true)
 const cadastrando = ref(false)
 const peixes = ref<PeixeRead[] | null>(null)
 
+const cadastroAberto = ref(false)
 const termo = ref('')
 const buscando = ref(false)
 const resultados = ref<OpcaoEspecie[]>([])
@@ -306,13 +458,15 @@ async function carregarPeixes() {
 // msm grupos da colecao, nome popular em pt
 async function buscarEspecies() {
   const busca = termo.value.trim()
-  // qnd escolhe um item o termo vira o label, n precisa buscar dnv
-  if (busca.length < 2 || busca === especie.value?.label) return
+  if (busca.length < 2) {
+    resultados.value = []
+    return
+  }
 
   buscando.value = true
   try {
     const resposta = await inat<{ results?: TaxonInat[] }>('/taxa/autocomplete', {
-      query: { q: busca, taxon_id: TAXONS_COLECAO, locale: 'pt-BR', is_active: true, per_page: 8 },
+      query: { q: busca, taxon_id: TAXONS_COLECAO, locale: 'pt-BR', is_active: true, per_page: 12 },
     })
 
     const opcoes: OpcaoEspecie[] = []
@@ -320,12 +474,13 @@ async function buscarEspecies() {
       const nome = taxon.preferred_common_name ?? taxon.name
       opcoes.push({
         id: taxon.id,
-        label: nome.charAt(0).toUpperCase() + nome.slice(1),
-        description: taxon.name,
-        avatar: taxon.default_photo?.square_url ? { src: taxon.default_photo.square_url, alt: nome } : undefined,
+        nome: nome.charAt(0).toUpperCase() + nome.slice(1),
+        nome_cientifico: taxon.name,
       })
     }
     resultados.value = opcoes
+    // n espera, os cards ficam no skeleton ate a foto chegar
+    carregarFotos(resposta.results ?? [])
   }
   catch {
     toast.add({ title: 'Não foi possível buscar no iNaturalist', color: 'error' })
@@ -337,6 +492,16 @@ async function buscarEspecies() {
 
 // espera parar de digitar pra n estourar o limite do iNat
 watchDebounced(termo, buscarEspecies, { debounce: 350 })
+
+// sempre abre limpo no passo da busca
+function abrirCadastro() {
+  especie.value = undefined
+  termo.value = ''
+  resultados.value = []
+  quantidade.value = 1
+  apelido.value = ''
+  cadastroAberto.value = true
+}
 
 async function cadastrarPeixe() {
   if (cadastrando.value || peixes.value === null || !especie.value || !quantidade.value) return
@@ -354,11 +519,7 @@ async function cadastrarPeixe() {
     })
 
     peixes.value.push(peixe)
-    especie.value = undefined
-    termo.value = ''
-    resultados.value = []
-    quantidade.value = 1
-    apelido.value = ''
+    cadastroAberto.value = false
     toast.add({ title: 'Peixe adicionado', color: 'success' })
   }
   catch {
@@ -384,15 +545,12 @@ function trocarNaLista(peixe: PeixeRead) {
 }
 
 async function salvarEdicao() {
-  if (!editando.value || salvando.value) return
+  if (!editando.value || salvando.value || !quantidadeEdicao.value) return
 
-  let body: PeixeUpdate
-  if (editando.value.quantidade === 1) {
-    body = { apelido: apelidoEdicao.value.trim() || null }
-  }
-  else {
-    if (!quantidadeEdicao.value) return
-    body = { quantidade: quantidadeEdicao.value }
+  // com mais de 1 o back apaga o nome
+  const body: PeixeUpdate = {
+    quantidade: quantidadeEdicao.value,
+    apelido: quantidadeEdicao.value === 1 ? apelidoEdicao.value.trim() || null : null,
   }
 
   salvando.value = true

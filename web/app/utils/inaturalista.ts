@@ -29,3 +29,24 @@ export const GRUPOS_COLECAO = [
 
 // transforma os ids no formato usado pelo filtro da iNaturalist.
 export const TAXONS_COLECAO = GRUPOS_COLECAO.map(grupo => grupo.id).join(',')
+
+export interface FotoInat {
+  medium_url?: string
+  license_code?: string | null
+  attribution?: string
+}
+
+// so o q a gente usa dos taxons do iNat
+export interface TaxonInat {
+  id: number
+  name: string
+  preferred_common_name?: string
+  default_photo?: FotoInat | null
+  taxon_photos?: { photo: FotoInat }[]
+}
+
+// sem license_code = todos os direitos reservados, n pode usar
+export function fotoLivre(foto?: FotoInat | null): FotoInat | null {
+  if (foto?.license_code && foto.medium_url) return foto
+  return null
+}

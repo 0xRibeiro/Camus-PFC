@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import type { NodeViewProps } from '@tiptap/vue-3'
 import { NodeViewWrapper } from '@tiptap/vue-3'
+import type { TaxonInat } from '~/utils/inaturalista'
 
 const props = defineProps<NodeViewProps>()
 
 // mesmo formato q a colecao recebe da api do iNat
-interface Peixe {
-  id: number
-  name: string
-  preferred_common_name?: string
+interface Peixe extends TaxonInat {
   observations_count?: number
   wikipedia_url?: string
-  default_photo?: { medium_url?: string, square_url?: string }
 }
 
 interface RespostaTaxa {
@@ -19,6 +16,7 @@ interface RespostaTaxa {
 }
 
 const inat = useInat()
+const { fotos, carregar: carregarFotos, carregando: carregandoFoto } = useFotosLivres()
 const busca = ref('')
 const peixes = ref<Peixe[]>([])
 const carregando = ref(false)
@@ -43,6 +41,7 @@ async function buscarPeixes() {
       },
     })
     peixes.value = resposta.results ?? []
+    carregarFotos(peixes.value)
     if (peixes.value.length === 0) erro.value = 'Nenhum peixe encontrado'
   }
   catch {
@@ -57,7 +56,7 @@ function escolherPeixe(peixe: Peixe) {
     taxonId: peixe.id,
     nome: peixe.name,
     nomePopular: peixe.preferred_common_name ?? null,
-    foto: peixe.default_photo?.medium_url ?? null,
+    foto: fotos.value[peixe.id]?.medium_url ?? null,
     observacoes: peixe.observations_count ?? 0,
     wikipedia: peixe.wikipedia_url ?? null,
   })
@@ -119,14 +118,21 @@ function escolherPeixe(peixe: Peixe) {
           v-for="peixe in peixes"
           :key="peixe.id"
           type="button"
-          class="flex items-center gap-3 rounded-lg border border-default p-2 text-left hover:bg-elevated"
+          class="flex items-center gap-3 rounded-lg border border-default p-2 text-left hover:bg-elevated disabled:cursor-wait"
+          :disabled="carregandoFoto(peixe.id)"
           @click="escolherPeixe(peixe)"
         >
+          <!-- espera a foto livre chegar pq ela vai salva no card -->
+          <USkeleton
+            v-if="carregandoFoto(peixe.id)"
+            class="size-10 shrink-0 rounded"
+          />
           <img
-            v-if="peixe.default_photo?.square_url"
-            :src="peixe.default_photo.square_url"
+            v-else-if="fotos[peixe.id]"
+            :src="fotos[peixe.id]?.medium_url"
             :alt="peixe.name"
-            class="size-10 rounded object-cover"
+            :title="fotos[peixe.id]?.attribution"
+            class="size-10 shrink-0 rounded object-cover"
           >
           <div class="min-w-0">
             <p class="truncate text-sm font-medium">

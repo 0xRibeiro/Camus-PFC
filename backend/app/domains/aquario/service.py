@@ -141,23 +141,24 @@ async def buscar_peixe_editavel(repo: AquarioRepository, aquario_id: int, peixe_
     return peixe
 
 
-# com 1 so muda o nome, com mais de 1 so a quantidade
+# quantidade sempre muda, nome so qnd fica 1. se passar de 1 perde o nome
 async def editar_peixe(db: AsyncSession, aquario_id: int, peixe_id: int, data: PeixeUpdate, usuario_id: int) -> Peixe:
     repo = AquarioRepository(db)
     peixe = await buscar_peixe_editavel(repo, aquario_id, peixe_id, usuario_id)
     enviados = data.model_fields_set
 
-    if peixe.quantidade == 1:
-        if "quantidade" in enviados:
-            raise BadRequestException("Com 1 peixe só dá pra mudar o nome")
-        # mandar apelido null apaga o nome
-        peixe.apelido = data.apelido
-    else:
-        if "apelido" in enviados:
-            raise BadRequestException("Com mais de 1 peixe só dá pra mudar a quantidade")
+    if "quantidade" in enviados:
         if data.quantidade is None:
             raise BadRequestException("Informe a quantidade")
         peixe.quantidade = data.quantidade
+
+    if peixe.quantidade > 1:
+        if data.apelido is not None:
+            raise BadRequestException("Só dá pra dar nome quando é 1 peixe")
+        peixe.apelido = None
+    elif "apelido" in enviados:
+        # mandar apelido null apaga o nome
+        peixe.apelido = data.apelido
 
     return await repo.salvar_peixe(peixe)
 
