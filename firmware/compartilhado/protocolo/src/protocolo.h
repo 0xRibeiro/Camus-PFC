@@ -8,10 +8,12 @@ const uint8_t PROTOCOLO_VERSAO = 1;
 enum class TipoModulo : uint8_t {
   DISTANCIA = 1,
   TEMPERATURA = 2,
+  QUALIDADE_AGUA = 3,
 };
 
 const uint8_t ENDERECO_DISTANCIA = 0x10;
 const uint8_t ENDERECO_TEMPERATURA = 0x11;
+const uint8_t ENDERECO_QUALIDADE_AGUA = 0x12;
 
 // 0x08 reservado
 const uint8_t ENDERECO_PRIMEIRO = 0x09;

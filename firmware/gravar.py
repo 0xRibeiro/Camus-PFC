@@ -7,6 +7,7 @@
 #   uv run firmware/gravar.py esp --porta /dev/ttyUSB1 --ambiente producao
 #   uv run firmware/gravar.py distancia --porta /dev/ttyUSB0
 #   uv run firmware/gravar.py temperatura --porta /dev/ttyUSB0
+#   uv run firmware/gravar.py qualidade-agua --porta /dev/ttyUSB0
 
 import argparse
 import getpass
@@ -26,6 +27,7 @@ PASTA_ESP = PASTA / "esp32-central"
 MODULOS = {
     "distancia": PASTA / "modulo-distancia",
     "temperatura": PASTA / "modulo-temperatura",
+    "qualidade-agua": PASTA / "modulo-qualidade-agua",
 }
 
 # mesmo nome dos envs do platformio.ini do esp
