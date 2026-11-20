@@ -1,33 +1,27 @@
 #include <Arduino.h>
-#include <EEPROM.h>
-#include <Wire.h>
-#include <protocolo.h>
+#include <modulo.h>
 
+// os 2 sensores sao analogicos, soltam uma tensao de 0 a 5v no fio
 #define TDS A0
 #define TURBIDEZ A1
 
-// a0 tem sensor agora, o a7 fica solto pro sorteio do serial
+// a0 ja tem sensor, o a7 fica solto pro sorteio do serial
 #define PINO_SEMENTE A7
 
 #define INTERVALO_MS 5000
+
+// 30 amostras a cada 40ms = ultimo 1,2s de leituras
 #define AMOSTRA_MS 40
 #define AMOSTRAS 30
 
-// adc de 10 bits no 5v do nano
-#define TENSAO_REF 5.0
-#define ADC_MAX 1024.0
+// analogRead vai de 0 a 1023, 1024 seria os 5v
+#define TENSAO_MAXIMA 5.0
+#define ESCALA_ANALOGICA 1024.0
 
-// sem sensor de temperatura aqui, compensa como se fosse 25c
+// sem sensor de temperatura aqui, compensa como se a agua tivesse sempre 25 c
 #define TEMPERATURA_TDS 25.0
 
-uint32_t serial = 0;
-
-// escritas no loop, lidas na interrupcao do i2c
-volatile uint8_t registrador = 0;
-volatile int16_t tdsPpm = 0;
-volatile int16_t turbidezNtu = 0;
-volatile bool temNova = false;
-
+// anel de amostras, a mais nova entra no lugar da mais velha
 int amostrasTds[AMOSTRAS];
 int amostrasTurbidez[AMOSTRAS];
 int posicao = 0;
@@ -36,74 +30,23 @@ bool encheu = false;
 unsigned long ultimaAmostra = 0;
 unsigned long ultimaMedida = 0;
 
-void carregarSerial() {
-  EEPROM.get(0, serial);
+// ---- amostras ----
 
-  // eeprom
-  if (serial != 0xFFFFFFFF && serial != 0) {
-    return;
-  }
+void guardarAmostra() {
+  amostrasTds[posicao] = analogRead(TDS);
+  amostrasTurbidez[posicao] = analogRead(TURBIDEZ);
 
-  // ruido do pino solto + tempo, so pra n repetir entre placas
-  uint32_t semente = micros();
-  for (int i = 0; i < 32; i++) {
-    semente = (semente << 1) ^ analogRead(PINO_SEMENTE);
-  }
-  randomSeed(semente);
-
-  serial = ((uint32_t) random(0x10000) << 16) | random(0x10000);
-  EEPROM.put(0, serial);
-}
-
-void aoReceber(int quantidade) {
-  registrador = Wire.read();
-
-  while (Wire.available()) {
-    Wire.read();
+  posicao++;
+  if (posicao == AMOSTRAS) {
+    posicao = 0;
+    encheu = true;
   }
 }
 
-void responderIdentificacao() {
-  uint8_t resposta[TAM_IDENTIFICACAO];
-  resposta[0] = PROTOCOLO_VERSAO;
-  resposta[1] = (uint8_t) TipoModulo::QUALIDADE_AGUA;
-  resposta[2] = serial >> 24;
-  resposta[3] = serial >> 16;
-  resposta[4] = serial >> 8;
-  resposta[5] = serial;
-  resposta[6] = crc8(resposta, TAM_IDENTIFICACAO - 1);
-  Wire.write(resposta, TAM_IDENTIFICACAO);
-}
-
-// ordem igual ao catalogo do esp: tds, turbidez
-void responderLeitura() {
-  uint8_t resposta[TAM_LEITURA] = {0};
-  resposta[0] = temNova;
-  resposta[1] = 2;
-  resposta[2] = tdsPpm >> 8;
-  resposta[3] = tdsPpm;
-  resposta[4] = turbidezNtu >> 8;
-  resposta[5] = turbidezNtu;
-  resposta[TAM_LEITURA - 1] = crc8(resposta, TAM_LEITURA - 1);
-  Wire.write(resposta, TAM_LEITURA);
-
-  temNova = false;
-}
-
-// roda na interrupcao, so responde
-void aoPedir() {
-  if (registrador == REG_IDENTIFICACAO) {
-    responderIdentificacao();
-  } else if (registrador == REG_LEITURA) {
-    responderLeitura();
-  }
-}
-
-// mediana tira os picos de ruido do adc
-float tensaoMediana(const int* amostras) {
-  int ordenadas[AMOSTRAS];
+// copia e ordena do menor pro maior, cada numero anda pra tras ate achar o lugar dele
+void ordenar(const int origem[], int ordenadas[]) {
   for (int i = 0; i < AMOSTRAS; i++) {
-    ordenadas[i] = amostras[i];
+    ordenadas[i] = origem[i];
   }
 
   for (int i = 1; i < AMOSTRAS; i++) {
@@ -115,11 +58,19 @@ float tensaoMediana(const int* amostras) {
     }
     ordenadas[j + 1] = atual;
   }
-
-  return ordenadas[AMOSTRAS / 2] * TENSAO_REF / ADC_MAX;
 }
 
-// curva da dfrobot (sen0244), resultado em ppm
+// mediana = a do meio depois de ordenar, pico de ruido vai pra ponta e fica de fora
+float tensaoMediana(const int amostras[]) {
+  int ordenadas[AMOSTRAS];
+  ordenar(amostras, ordenadas);
+  return ordenadas[AMOSTRAS / 2] * TENSAO_MAXIMA / ESCALA_ANALOGICA;
+}
+
+// ---- conversao ----
+
+// tds = sais e minerais dissolvidos, em ppm = partes por milhao.
+// curva do fabricante, dfrobot sen0244
 int16_t calcularTds(float tensao) {
   float compensada = tensao / (1.0 + 0.02 * (TEMPERATURA_TDS - 25.0));
   float ppm = (133.42 * compensada * compensada * compensada
@@ -132,7 +83,9 @@ int16_t calcularTds(float tensao) {
   return ppm;
 }
 
-// curva da dfrobot (sen0189), so vale de 2,5v a 4,2v. ntu x10
+// turbidez = o quanto a agua ta turva, em ntu, vai x10.
+// curva do fabricante dfrobot sen0189, so vale de 2,5v a 4,2v:
+// acima disso e agua limpa = 0, abaixo e o maximo da escala = 3000 ntu
 int16_t calcularTurbidez(float tensao) {
   if (tensao >= 4.2) {
     return 0;
@@ -148,49 +101,16 @@ int16_t calcularTurbidez(float tensao) {
   return ntu * 10;
 }
 
-void setup() {
-  Serial.begin(115200);
+// ---- medida ----
 
-  carregarSerial();
-  Serial.print("serial: ");
-  Serial.println(serial, HEX);
-
-  Wire.begin(ENDERECO_QUALIDADE_AGUA);
-  // tira o pull-up de 5v, o barramento fica no 3v3 do esp
-  digitalWrite(SDA, LOW);
-  digitalWrite(SCL, LOW);
-  Wire.onReceive(aoReceber);
-  Wire.onRequest(aoPedir);
-}
-
-void loop() {
-  if (millis() - ultimaAmostra >= AMOSTRA_MS) {
-    ultimaAmostra = millis();
-    amostrasTds[posicao] = analogRead(TDS);
-    amostrasTurbidez[posicao] = analogRead(TURBIDEZ);
-
-    posicao++;
-    if (posicao == AMOSTRAS) {
-      posicao = 0;
-      encheu = true;
-    }
-  }
-
-  if (!encheu || millis() - ultimaMedida < INTERVALO_MS) {
-    return;
-  }
-  ultimaMedida = millis();
-
+void medirEEntregar() {
   float tensaoTds = tensaoMediana(amostrasTds);
   float tensaoTurbidez = tensaoMediana(amostrasTurbidez);
   int16_t tds = calcularTds(tensaoTds);
   int16_t turbidez = calcularTurbidez(tensaoTurbidez);
 
-  noInterrupts();
-  tdsPpm = tds;
-  turbidezNtu = turbidez;
-  temNova = true;
-  interrupts();
+  // ordem igual ao catalogo da esp: tds, turbidez
+  modulo::entregarLeitura(tds, turbidez);
 
   Serial.print("tds v: ");
   Serial.print(tensaoTds, 2);
@@ -200,4 +120,22 @@ void loop() {
   Serial.print(tensaoTurbidez, 2);
   Serial.print(" ntu x10: ");
   Serial.println(turbidez);
+}
+
+void setup() {
+  modulo::iniciar(TipoModulo::QUALIDADE_AGUA, ENDERECO_QUALIDADE_AGUA, PINO_SEMENTE);
+}
+
+// amostra o tempo todo, mas so mede a cada 5s e com o anel cheio
+void loop() {
+  if (millis() - ultimaAmostra >= AMOSTRA_MS) {
+    ultimaAmostra = millis();
+    guardarAmostra();
+  }
+
+  if (!encheu || millis() - ultimaMedida < INTERVALO_MS) {
+    return;
+  }
+  ultimaMedida = millis();
+  medirEEntregar();
 }
