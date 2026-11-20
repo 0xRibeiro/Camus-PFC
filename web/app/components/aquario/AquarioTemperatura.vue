@@ -28,12 +28,12 @@
     </div>
 
     <p class="text-4xl font-semibold text-highlighted tabular-nums">
-      {{ serie?.atual ? formatar(serie.atual.valor) : '—' }}
+      {{ textoAtual(serie, formatar) }}
     </p>
 
     <AquarioGrafico
       v-if="serie"
-      :pontos="serie.pontos"
+      :serie="serie"
       rotulo="Temperatura"
       cor="var(--color-orange-500)"
       :minutos="minutos"

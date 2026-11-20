@@ -30,7 +30,7 @@
     <div class="flex flex-wrap items-end justify-between gap-2">
       <div>
         <p class="text-4xl font-semibold text-highlighted tabular-nums">
-          {{ serie?.atual ? formatar(serie.atual.valor) : '—' }}
+          {{ textoAtual(serie, formatar) }}
         </p>
         <p class="text-sm text-muted">
           do sensor até a água
@@ -50,7 +50,7 @@
 
     <AquarioGrafico
       v-if="serie"
-      :pontos="serie.pontos"
+      :serie="serie"
       rotulo="Distância até a água"
       cor="var(--color-sky-500)"
       :minutos="minutos"

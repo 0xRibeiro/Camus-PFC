@@ -39,7 +39,7 @@
             {{ medida.titulo }}
           </p>
           <p class="text-4xl font-semibold text-highlighted tabular-nums">
-            {{ medida.serie?.atual ? medida.formatar(medida.serie.atual.valor) : '—' }}
+            {{ textoAtual(medida.serie, medida.formatar) }}
           </p>
           <p class="text-sm text-muted">
             {{ medida.descricao }}
@@ -48,7 +48,7 @@
 
         <AquarioGrafico
           v-if="medida.serie"
-          :pontos="medida.serie.pontos"
+          :serie="medida.serie"
           :rotulo="medida.titulo"
           :cor="medida.cor"
           :minutos="minutos"
