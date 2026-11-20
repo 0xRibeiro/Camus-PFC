@@ -52,6 +52,7 @@
           :rotulo="medida.titulo"
           :cor="medida.cor"
           :minutos="minutos"
+          :fim="fim"
           :formatar="medida.formatar"
         />
 
@@ -69,7 +70,8 @@
 <script setup lang="ts">
 import type { ModuloIotRead } from '~/types/generated'
 
-const props = defineProps<{ modulo: ModuloIotRead, minutos: number }>()
+// fim do periodo no historico, sem ele e agora
+const props = defineProps<{ modulo: ModuloIotRead, minutos: number, fim?: number }>()
 
 const haQuanto = useHaQuanto()
 const formatoTds = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 })

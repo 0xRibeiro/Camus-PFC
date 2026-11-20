@@ -79,6 +79,8 @@ const props = defineProps<{
   rotulo: string
   cor: string
   minutos: number
+  // fim do periodo no historico, sem ele e agora
+  fim?: number
   formatar: (valor: number) => string
   // maior valor fica embaixo, pro nivel subir qnd a distancia cai
   invertido?: boolean
@@ -89,14 +91,15 @@ const MINUTO = 60 * 1000
 const HORA = 60 * MINUTO
 const DIA = 24 * HORA
 
-// linha = coluna de referencia, rotulo = horario escrito embaixo. ~12 linhas em qualquer periodo
-const MARCAS: Record<number, { linha: number, rotulo: number }> = {
-  60: { linha: 5 * MINUTO, rotulo: 15 * MINUTO },
-  360: { linha: 30 * MINUTO, rotulo: HORA },
-  1440: { linha: 2 * HORA, rotulo: 6 * HORA },
-  10080: { linha: 12 * HORA, rotulo: DIA },
-  43200: { linha: 2 * DIA, rotulo: 7 * DIA },
-}
+// linha = coluna de referencia, rotulo = horario escrito embaixo. ~12 linhas em qualquer periodo.
+// usa a primeira q o periodo cabe, no historico o periodo pode ter qlqr tamanho
+const MARCAS = [
+  { ate: 60, linha: 5 * MINUTO, rotulo: 15 * MINUTO },
+  { ate: 360, linha: 30 * MINUTO, rotulo: HORA },
+  { ate: 1440, linha: 2 * HORA, rotulo: 6 * HORA },
+  { ate: 10080, linha: 12 * HORA, rotulo: DIA },
+  { ate: Infinity, linha: 2 * DIA, rotulo: 7 * DIA },
+]
 
 // dia 0 do Date foi numa quinta, 4 dias depois e segunda. semana comeca na segunda
 const SEGUNDA = 4 * DIA
@@ -106,7 +109,7 @@ const SEGUNDA = 4 * DIA
 const fim = computed(() => {
   // le a serie so pra recalcular a cada busca nova
   void props.serie
-  return Date.now()
+  return props.fim ?? Date.now()
 })
 const inicio = computed(() => fim.value - props.minutos * MINUTO)
 
@@ -124,7 +127,12 @@ function horariosRedondos(passo: number) {
   return horarios
 }
 
-const marcas = computed(() => MARCAS[props.minutos] ?? { linha: props.minutos * MINUTO / 12, rotulo: props.minutos * MINUTO / 4 })
+const marcas = computed(() => {
+  for (const marca of MARCAS) {
+    if (props.minutos <= marca.ate) return marca
+  }
+  return MARCAS[MARCAS.length - 1]!
+})
 const linhas = computed(() => horariosRedondos(marcas.value.linha))
 const rotulos = computed(() => horariosRedondos(marcas.value.rotulo))
 
@@ -138,9 +146,17 @@ function formatarRotulo(tempo: number) {
   return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
+// ponto por dia, a hora seria sempre 00:00
+const pontoPorDia = computed(() => {
+  const [primeiro, segundo] = props.serie.pontos
+  if (!primeiro || !segundo) return false
+  return new Date(segundo.tempo).getTime() - new Date(primeiro.tempo).getTime() >= DIA
+})
+
 // segundo so faz falta na ultima hora, dia so a partir de 7 dias
 function formatarTooltip(tempo: number) {
   const data = new Date(tempo)
+  if (pontoPorDia.value) return data.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
   if (props.minutos <= 60) return data.toLocaleTimeString('pt-BR')
   if (props.minutos <= 1440) return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   return data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })

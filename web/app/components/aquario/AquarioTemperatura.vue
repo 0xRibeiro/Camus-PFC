@@ -37,6 +37,7 @@
       rotulo="Temperatura"
       cor="var(--color-orange-500)"
       :minutos="minutos"
+      :fim="fim"
       :formatar="formatar"
     />
 
@@ -99,7 +100,9 @@ const props = withDefaults(defineProps<{
   podeEditar: boolean
   // estado pedido enquanto o esp n confirma
   pendente?: boolean
-}>(), { pendente: undefined })
+  // fim do periodo no historico, sem ele e agora
+  fim?: number
+}>(), { pendente: undefined, fim: undefined })
 
 const emit = defineEmits<{ comandar: [ligar: boolean] }>()
 

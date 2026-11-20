@@ -54,6 +54,7 @@
       rotulo="Distância até a água"
       cor="var(--color-sky-500)"
       :minutos="minutos"
+      :fim="fim"
       :formatar="formatar"
       :titulos-estatisticas="['Mais cheio', 'Média', 'Mais vazio']"
       invertido
@@ -82,6 +83,8 @@ import type { ModuloIotRead } from '~/types/generated'
 const props = defineProps<{
   modulo: ModuloIotRead
   minutos: number
+  // fim do periodo no historico, sem ele e agora
+  fim?: number
 }>()
 
 const haQuanto = useHaQuanto()
