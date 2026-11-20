@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from influxdb_client import Point
 from influxdb_client.client.flux_table import FluxRecord
 from sqlalchemy import delete, func, select
@@ -7,6 +9,11 @@ from app.core.config import settings
 from app.core.influx import cliente_influx
 from app.domains.aquario.model import AquarioMembro, PapelAquario
 from app.domains.dispositivo.model import Dispositivo, ModuloIot
+
+
+# flux aceita o horario direto, desde q seja utc com Z no final
+def tempo_flux(tempo: datetime) -> str:
+    return tempo.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class DispositivoRepository:
@@ -74,25 +81,27 @@ class LeituraRepository:
 
     # params so existe no influx cloud, mac vem do banco (hex) e a condicao das constantes do service.
     # cada resultado vem com o nome no yield:
-    # pontos = media das validas por janela, vazia vira null
+    # pontos = media das validas por janela, vazia vira null. horario e o comeco da janela, o dia 14 fica no dia 14
     # erros = janelas q tiveram leitura fora da faixa
     # minimo, media e maximo = das validas no periodo todo
-    async def listar_do_dispositivo(self, mac: str, minutos: int, janela_segundos: int, condicao_valida: str) -> list[FluxRecord]:
+    # deslocamento empurra as janelas pra de 1 dia comecar na meia-noite daqui e n na de utc
+    async def listar_do_dispositivo(self, mac: str, inicio: datetime, fim: datetime, janela_segundos: int,
+        condicao_valida: str, deslocamento_segundos: int) -> list[FluxRecord]:
         return await self.consultar(f"""
             dados = from(bucket: "{settings.influx_bucket}")
-              |> range(start: -{minutos}m)
+              |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
               |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
               |> map(fn: (r) => ({{r with valido: {condicao_valida}}}))
 
             validos = dados |> filter(fn: (r) => r.valido, onEmpty: "keep")
 
             validos
-              |> aggregateWindow(every: {janela_segundos}s, fn: mean, createEmpty: true)
+              |> aggregateWindow(every: {janela_segundos}s, offset: {deslocamento_segundos}s, fn: mean, createEmpty: true, timeSrc: "_start")
               |> yield(name: "pontos")
 
             dados
               |> filter(fn: (r) => not r.valido)
-              |> aggregateWindow(every: {janela_segundos}s, fn: count, createEmpty: false)
+              |> aggregateWindow(every: {janela_segundos}s, offset: {deslocamento_segundos}s, fn: count, createEmpty: false, timeSrc: "_start")
               |> yield(name: "erros")
 
             validos |> min() |> yield(name: "minimo")
@@ -100,11 +109,11 @@ class LeituraRepository:
             validos |> max() |> yield(name: "maximo")
         """)
 
-    # leitura mais recente sem media, pro valor de agora
-    async def ultimas_do_dispositivo(self, mac: str, minutos: int) -> list[FluxRecord]:
+    # leitura mais recente do periodo sem media, pro valor grande do card
+    async def ultimas_do_dispositivo(self, mac: str, inicio: datetime, fim: datetime) -> list[FluxRecord]:
         return await self.consultar(f"""
             from(bucket: "{settings.influx_bucket}")
-              |> range(start: -{minutos}m)
+              |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
               |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
               |> last()
         """)

@@ -1601,7 +1601,14 @@ export const zListarModulosAquariosAquarioIdModulosGetPath = z.object({
 });
 
 export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
-    minutos: z.int().gte(1).lte(43200).optional().default(60)
+    minutos: z.int().gte(1).lte(43200).optional().default(60),
+    inicio: z.iso.datetime().nullish(),
+    fim: z.iso.datetime().nullish(),
+    agrupamento: z.enum([
+        'auto',
+        'hora',
+        'dia'
+    ]).optional().default('auto')
 });
 
 /**

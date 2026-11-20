@@ -1,4 +1,5 @@
 import secrets
+from datetime import datetime
 
 import httpx
 from fastapi import HTTPException, status
@@ -228,14 +229,16 @@ async def desconectar_dispositivo(db: AsyncSession, aquario_id: int, usuario_id:
     await dispositivo_service.tirar_do_aquario(db, dispositivo)
 
 
-async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, minutos: int) -> list[ModuloIotRead]:
+async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, minutos: int, inicio: datetime | None,
+    fim: datetime | None, agrupamento: str) -> list[ModuloIotRead]:
     aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    de, ate = dispositivo_service.resolver_periodo(minutos, inicio, fim)
     dispositivo = await DispositivoRepository(db).buscar_do_aquario(aquario.id)
 
     if dispositivo is None:
         return []
 
-    return await dispositivo_service.listar_modulos(db, dispositivo, minutos)
+    return await dispositivo_service.listar_modulos(db, dispositivo, de, ate, agrupamento)
 
 
 # leitor so ve, dono e operador ligam/desligam

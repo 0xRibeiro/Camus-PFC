@@ -3676,6 +3676,18 @@ export type ListarModulosAquariosAquarioIdModulosGetData = {
          * Minutos
          */
         minutos?: number;
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'auto' | 'hora' | 'dia';
     };
     url: '/aquarios/{aquario_id}/modulos';
 };

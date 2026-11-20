@@ -1,5 +1,6 @@
 import secrets
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from fastcrud.exceptions.http_exceptions import NotFoundException
@@ -215,11 +216,31 @@ def condicao_valida_flux() -> str:
 
 ###### series
 
-# 1h vai cru de 5 em 5s, o resto em uns 360 pontos
-def calcular_janela(minutos: int) -> int:
-    if minutos <= 60:
+# dia do grafico comeca na meia-noite daqui. o influx do nix n tem os fusos instalados,
+# entao vai so a diferenca pra utc, q no brasil e fixa desde q acabou o horario de verao
+FUSO = ZoneInfo("America/Sao_Paulo")
+
+
+# meia-noite daqui e 03:00 utc, entao empurra as janelas 3h
+def deslocamento_fuso() -> int:
+    diferenca = datetime.now(FUSO).utcoffset() or timedelta()
+    return int(-diferenca.total_seconds())
+
+# influx so guarda 30 dias, folga de 1 dia pro "ultimos 30 dias" do calendario
+PERIODO_MAXIMO = timedelta(days=31)
+
+
+# 1h vai cru de 5 em 5s, o resto em uns 360 pontos. hora e dia e a pessoa q escolhe
+def calcular_janela(inicio: datetime, fim: datetime, agrupamento: str) -> int:
+    if agrupamento == "hora":
+        return 3600
+    if agrupamento == "dia":
+        return 86400
+
+    segundos = int((fim - inicio).total_seconds())
+    if segundos <= 3600:
         return 5
-    return minutos * 60 // 360
+    return max(5, segundos // 360)
 
 
 def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> SerieLeitura:
@@ -234,9 +255,9 @@ def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> S
 
 
 # janela vazia vira trecho, emendando as vizinhas do msm tipo
-def adicionar_trecho(serie: SerieLeitura, fim: datetime, janela: timedelta, erro: bool) -> None:
+def adicionar_trecho(serie: SerieLeitura, inicio: datetime, janela: timedelta, erro: bool) -> None:
     tipo = "erro" if erro else "sem_leitura"
-    inicio = fim - janela
+    fim = inicio + janela
 
     if serie.trechos and serie.trechos[-1].tipo == tipo and serie.trechos[-1].fim == inicio:
         serie.trechos[-1].fim = fim
@@ -260,17 +281,31 @@ def limpar_trechos(serie: SerieLeitura) -> None:
     serie.trechos = trechos
 
 
+# tela principal manda so os minutos, o historico manda inicio e fim do calendario
+def resolver_periodo(minutos: int, inicio: datetime | None, fim: datetime | None) -> tuple[datetime, datetime]:
+    if inicio is None or fim is None:
+        agora = datetime.now(UTC)
+        return agora - timedelta(minutes=minutos), agora
+
+    if fim <= inicio:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "O fim do período tem que ser depois do início")
+    if fim - inicio > PERIODO_MAXIMO:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "As leituras ficam guardadas por 30 dias")
+    return inicio, fim
+
+
 # junta os pontos do influx por modulo e por nome da leitura
-async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: int) -> list[ModuloIotRead]:
+async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: datetime, fim: datetime,
+    agrupamento: str) -> list[ModuloIotRead]:
     series: dict[str, dict[str, SerieLeitura]] = {}
     leituras = LeituraRepository()
-    janela = calcular_janela(minutos)
-    registros = await leituras.listar_do_dispositivo(dispositivo.mac, minutos, janela, condicao_valida_flux())
+    janela = calcular_janela(inicio, fim, agrupamento)
+    registros = await leituras.listar_do_dispositivo(dispositivo.mac, inicio, fim, janela, condicao_valida_flux(), deslocamento_fuso())
 
     # a ultima janela ainda ta acontecendo, vazia nela n e desligado
     janela_atual = datetime.now(UTC) - timedelta(seconds=janela)
 
-    # (serial, nome, fim da janela) q teve leitura fora da faixa
+    # (serial, nome, comeco da janela) q teve leitura fora da faixa
     janelas_com_erro = set()
     for registro in registros:
         if registro.values["result"] == "erros":
@@ -298,7 +333,7 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: in
         elif resultado == "maximo":
             serie.maximo = valor
 
-    for registro in await leituras.ultimas_do_dispositivo(dispositivo.mac, minutos):
+    for registro in await leituras.ultimas_do_dispositivo(dispositivo.mac, inicio, fim):
         serie = serie_do_registro(series, registro)
         serie.atual = PontoLeitura(tempo=registro.get_time(), valor=registro.get_value())
         serie.atual_erro = not leitura_valida(serie.nome, serie.atual.valor)
