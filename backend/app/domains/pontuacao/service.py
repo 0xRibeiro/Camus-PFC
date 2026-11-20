@@ -1,9 +1,14 @@
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.pontuacao.repository import PontuacaoRepository
-from app.domains.pontuacao.schema import LancamentoRead, RankingItemRead, XpRead
+from app.domains.pontuacao.schema import LancamentoRead, RankingItemRead, XpDiaRead, XpRead
 from app.domains.usuario.model import RoleUsuario, Usuario
+
+FUSO = ZoneInfo("America/Sao_Paulo")
 
 
 def registrar_lancamento(db: AsyncSession, usuario: Usuario, origem_tipo: OrigemLancamento, origem_id: int, pontos: int,  versao: int = 1, grupo_id: int | None = None) -> LancamentoPontos | None:
@@ -30,8 +35,28 @@ async def total_ganho_na_origem(
 
 
 async def meu_xp(db: AsyncSession, usuario: Usuario) -> XpRead:
-    total = await PontuacaoRepository(db).somar_xp(usuario.id, db.info.get("grupo_id"))
-    return XpRead(xp_total=total)
+    repo = PontuacaoRepository(db)
+    grupo_id = db.info.get("grupo_id")
+    total = await repo.somar_xp(usuario.id, grupo_id)
+
+    # quem tem 0 nem aparece no ranking
+    posicao = None
+    if grupo_id is None and usuario.role == RoleUsuario.aluno and total > 0:
+        posicao = await repo.contar_na_frente(usuario, total) + 1
+    return XpRead(xp_total=total, posicao=posicao)
+
+
+# xp ganho em cada dia ate hoje, dia sem nada volta 0 pro grafico n pular
+async def meu_xp_por_dia(db: AsyncSession, usuario: Usuario, dias: int) -> list[XpDiaRead]:
+    hoje = datetime.now(FUSO).date()
+    inicio = hoje - timedelta(days=dias - 1)
+    pontos = await PontuacaoRepository(db).somar_por_dia(usuario.id, db.info.get("grupo_id"), inicio)
+
+    lista = []
+    for indice in range(dias):
+        dia = inicio + timedelta(days=indice)
+        lista.append(XpDiaRead(data=dia, pontos=pontos.get(dia, 0)))
+    return lista
 
 
 LIMITE_RANKING = 50
