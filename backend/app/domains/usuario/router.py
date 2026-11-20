@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
-from app.domains.conquistas.schema import ConquistaRead
+from app.domains.conquistas.schema import ConquistaRead, ConquistaUsuarioRead
 from app.domains.usuario import service
 from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario, Usuario
@@ -108,7 +108,7 @@ async def read_me(user: Usuario = Depends(service.get_current_user)) -> Usuario:
 
 @router.get(
     "/usuarios/me/conquistas",
-    response_model=list[ConquistaRead],
+    response_model=list[ConquistaUsuarioRead],
     tags=["conquistas"],
 )
 async def listar_minhas_conquistas(

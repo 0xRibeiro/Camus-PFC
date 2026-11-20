@@ -32,6 +32,7 @@ from app.core.security import (
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
 from app.domains.conquistas.repository import ConquistaRepository
+from app.domains.conquistas.schema import ConquistaUsuarioRead
 from app.domains.documento_legal import service as documento_legal_service
 from app.domains.documento_legal.model import AceiteDocumentoLegal
 from app.domains.usuario.avatares import (
@@ -229,8 +230,14 @@ async def listar_usuarios_online(db: AsyncSession) -> list[Usuario]:
     return await UsuarioRepository(db).buscar_varios(ids)
 
 
-async def listar_conquistas_usuario(db: AsyncSession, user_id: int):
-    return await UsuarioRepository(db).listar_conquistas(user_id)
+async def listar_conquistas_usuario(db: AsyncSession, user_id: int) -> list[ConquistaUsuarioRead]:
+    linhas = await UsuarioRepository(db).listar_conquistas(user_id)
+    conquistas = []
+    for conquista, desbloqueada_em in linhas:
+        item = ConquistaUsuarioRead.model_validate(conquista)
+        item.desbloqueada_em = desbloqueada_em
+        conquistas.append(item)
+    return conquistas
 
 # metodo faz algumas checagens para não dar conquistas não existentes
 # ou duplicadas

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,14 +48,18 @@ class UsuarioRepository:
     # no repository da conquista para mostrar quais usuarios tem cada,
     # mas conclui que não tem necessidade. Só se no futuro fizermos
     # estatiscas nas conquistas.
-    async def listar_conquistas(self, user_id: int) -> list[Conquista]:
+    # mais nova primeiro, junto com a data q ganhou
+    async def listar_conquistas(self, user_id: int) -> list[tuple[Conquista, datetime | None]]:
         resultado = await self.db.execute(
-            select(Conquista)
+            select(Conquista, associacao_conquista_usuario.c.desbloqueada_em)
             .join(
                 associacao_conquista_usuario,
                 associacao_conquista_usuario.c.conquista_id == Conquista.id,
             )
             .where(associacao_conquista_usuario.c.usuario_id == user_id)
-            .order_by(Conquista.id)
+            .order_by(associacao_conquista_usuario.c.desbloqueada_em.desc(), Conquista.id)
         )
-        return list(resultado.scalars().all())
+        conquistas = []
+        for conquista, desbloqueada_em in resultado.all():
+            conquistas.append((conquista, desbloqueada_em))
+        return conquistas
