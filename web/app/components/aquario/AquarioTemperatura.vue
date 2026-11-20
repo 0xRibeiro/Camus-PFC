@@ -43,6 +43,8 @@
       :minutos="minutos"
       :fim="fim"
       :formatar="formatar"
+      :ligado="modulo.periodos_ligado"
+      rotulo-ligado="Aquecedor ligado"
     />
 
     <p
@@ -52,9 +54,10 @@
       Sem leituras nesse período.
     </p>
 
-    <!-- rele do modulo de temperatura e o aquecedor -->
+    <!-- rele do modulo de temperatura e o aquecedor. no historico n tem, la e so pra ver -->
+
     <div
-      v-if="modulo.ligado !== null && modulo.ligado !== undefined"
+      v-if="modulo.ligado !== null && modulo.ligado !== undefined && fim === undefined"
       class="flex flex-wrap items-center justify-between gap-3 rounded-xl p-4 ring ring-inset transition-colors"
       :class="ligadoNaTela ? 'bg-orange-500/10 ring-orange-500/40' : 'bg-elevated/50 ring-default'"
     >

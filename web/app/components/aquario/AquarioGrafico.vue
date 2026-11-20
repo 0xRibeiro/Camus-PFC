@@ -20,9 +20,16 @@
       </UChart>
 
       <div
-        v-if="semLeitura.length || erros.length"
+        v-if="semLeitura.length || erros.length || faixasLigado.length"
         class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted"
       >
+        <span
+          v-if="faixasLigado.length"
+          class="flex items-center gap-1.5"
+        >
+          <span class="size-2.5 rounded-sm bg-rose-500/30" />
+          {{ rotuloLigado }}
+        </span>
         <span
           v-if="semLeitura.length"
           class="flex items-center gap-1.5"
@@ -85,6 +92,9 @@ const props = defineProps<{
   // maior valor fica embaixo, pro nivel subir qnd a distancia cai
   invertido?: boolean
   titulosEstatisticas?: [string, string, string]
+  // qnd o rele tava ligado, vira fundo mais forte no grafico
+  ligado?: { inicio: string, fim: string }[]
+  rotuloLigado?: string
 }>()
 
 const MINUTO = 60 * 1000
@@ -172,6 +182,14 @@ const trechos = computed(() => {
   return lista
 })
 
+const faixasLigado = computed(() => {
+  const lista = []
+  for (const intervalo of props.ligado ?? []) {
+    lista.push({ inicio: new Date(intervalo.inicio).getTime(), fim: new Date(intervalo.fim).getTime() })
+  }
+  return lista
+})
+
 const semLeitura = computed(() => trechos.value.filter(trecho => trecho.tipo === 'sem_leitura'))
 const erros = computed(() => trechos.value.filter(trecho => trecho.tipo === 'erro'))
 
@@ -204,7 +222,7 @@ const eixo = computed(() => {
 ///// grafico
 
 // faixa do chao ate o teto do grafico, cada tipo de trecho com sua cor
-function faixa(lista: typeof trechos.value, cor: string, opacidade: number) {
+function faixa(lista: { inicio: number, fim: number }[], cor: string, opacidade: number) {
   const [menorEixo, maiorEixo] = eixo.value
   return decorative(rect(lista, {
     x1: 'inicio',
@@ -226,6 +244,7 @@ const definicao = computed(() => {
   return defineChart({
     marks: [
       decorative(ruleX(linhas.value, { stroke: 'var(--ui-border)', strokeOpacity: 1 })),
+      faixa(faixasLigado.value, 'var(--color-rose-500)', 0.15),
       faixa(semLeitura.value, 'var(--color-neutral-500)', 0.2),
       faixa(erros.value, 'var(--color-amber-500)', 0.3),
       decorative(areaY(dados.value, { x: 'tempo', y1: () => chao, y2: 'valor', curve: curva, fill: 'url(#area)', fillOpacity: 1 })),
