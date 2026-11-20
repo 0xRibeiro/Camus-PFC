@@ -1,8 +1,11 @@
 <template>
   <div class="-m-4 flex flex-1 flex-col">
-    <div class="mx-auto w-full max-w-5xl space-y-4 px-4 pt-6 pb-4">
+    <div
+      class="mx-auto w-full max-w-5xl space-y-4 px-4 pt-6 pb-4"
+      :style="tema"
+    >
       <!-- cabecalho com o avatar, a edicao fica no modal -->
-      <UCard>
+      <UCard :class="card">
         <div class="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
           <UsuarioAvatar
             :avatar="auth.user?.avatar ?? 'peixe-palhaco'"
@@ -35,16 +38,22 @@
 
       <!-- so aluno ganha xp global, autor e admin ficam so com a edicao -->
       <template v-if="auth.role === 'aluno'">
-        <section
-          class="grid gap-4 sm:grid-cols-3"
-          :style="corDoPerfil"
-        >
+        <section class="grid gap-4 sm:grid-cols-3">
           <UCard
             v-for="numero in numeros"
             :key="numero.titulo"
+            :class="card"
           >
             <div class="flex items-center gap-3">
-              <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-lg text-primary"
+                :class="{
+                  'ring ring-default': estilo === 'xadrez',
+                  'bg-white/30 ring ring-white/60 backdrop-blur-sm dark:bg-white/10 dark:ring-white/20': estilo === 'vidro',
+                  'bg-primary/10': !estilo,
+                }"
+                :style="estilo === 'xadrez' ? { background: XADREZ } : {}"
+              >
                 <UIcon
                   :name="numero.icone"
                   class="size-5"
@@ -69,7 +78,7 @@
           </UCard>
         </section>
 
-        <PerfilXp :style="corDoPerfil" />
+        <PerfilXp />
 
         <div class="grid gap-4 lg:grid-cols-2">
           <PerfilConquistas :conquistas="minhasConquistas" />
@@ -115,30 +124,7 @@ const minhasConquistas = ref<ConquistaUsuarioRead[]>([])
 const totalConquistas = ref(0)
 const trilhas = ref<TrilhaResumoRead[]>([])
 
-function matizDaCor(hex: string) {
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
-  const maior = Math.max(r, g, b)
-  const menor = Math.min(r, g, b)
-  const diferenca = maior - menor
-
-  if (diferenca < 0.08) return null
-
-  let matiz
-  if (maior === r) matiz = ((g - b) / diferenca) % 6
-  else if (maior === g) matiz = (b - r) / diferenca + 2
-  else matiz = (r - g) / diferenca + 4
-
-  return Math.round(matiz * 60 + 360) % 360
-}
-
-// troca o primary so nos cards e no grafico
-const corDoPerfil = computed(() => {
-  const matiz = matizDaCor(auth.user?.cor_fundo ?? '#0EA5E9')
-  if (matiz === null) return {}
-  return { '--ui-primary': `hsl(${matiz} 75% 50%)` }
-})
+const { estilo, tema, card } = usePerfilVisual()
 
 const numeros = computed(() => [
   { titulo: 'XP total', icone: 'i-lucide-sparkles', valor: xp.value?.xp_total ?? 0 },

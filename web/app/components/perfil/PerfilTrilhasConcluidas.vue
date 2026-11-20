@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="card">
     <template #header>
       <h2 class="font-medium">
         Últimas trilhas concluídas
@@ -66,6 +66,8 @@ const props = defineProps<{
   trilhas: TrilhaResumoRead[]
   carregando: boolean
 }>()
+
+const { card } = usePerfilVisual()
 
 // a ultima conclusao de uma trilha completa é qnd ela terminou
 const concluidas = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="card">
     <template #header>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -20,6 +20,40 @@
         />
       </div>
     </template>
+
+    <!-- o chart n tem pattern, entao o xadrez fica aqui e a area usa pelo id -->
+    <svg
+      v-if="estilo === 'xadrez'"
+      class="absolute size-0"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern
+          id="xadrez-xp"
+          width="10"
+          height="10"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect
+            width="10"
+            height="10"
+            style="fill: var(--ui-bg)"
+          />
+          <rect
+            width="5"
+            height="5"
+            style="fill: var(--ui-border-accented)"
+          />
+          <rect
+            x="5"
+            y="5"
+            width="5"
+            height="5"
+            style="fill: var(--ui-border-accented)"
+          />
+        </pattern>
+      </defs>
+    </svg>
 
     <USkeleton
       v-if="carregando"
@@ -51,6 +85,8 @@ import { decorative } from '@tanstack/charts/mark/decorative'
 import { scaleLinear } from '@tanstack/charts/scales/linear'
 import { chartCurves } from '#ui/utils/chart'
 import type { XpDiaRead } from '~/types/generated'
+
+const { estilo, card } = usePerfilVisual()
 
 const DIA = 24 * 60 * 60 * 1000
 const COR = 'var(--ui-primary)'
@@ -122,6 +158,21 @@ function formatarDia(tempo: number) {
   return new Date(tempo).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })
 }
 
+// xadrez: quadriculado embaixo da linha e um degrade do fundo por cima, pra ele sumir descendo
+// vidro: area branca fosca
+function areas(curva: typeof chartCurves.monotone) {
+  if (estilo.value === 'vidro') {
+    return [decorative(areaY(dados.value, { x: 'tempo', y1: () => 0, y2: 'pontos', curve: curva, fill: 'url(#area-xp-vidro)', fillOpacity: 1 }))]
+  }
+  if (estilo.value !== 'xadrez') {
+    return [decorative(areaY(dados.value, { x: 'tempo', y1: () => 0, y2: 'pontos', curve: curva, fill: 'url(#area-xp)', fillOpacity: 1 }))]
+  }
+  return [
+    decorative(areaY(dados.value, { x: 'tempo', y1: () => 0, y2: 'pontos', curve: curva, fill: 'url(#xadrez-xp)', fillOpacity: 1 })),
+    decorative(areaY(dados.value, { x: 'tempo', y1: () => 0, y2: 'pontos', curve: curva, fill: 'url(#area-xp-some)', fillOpacity: 1 })),
+  ]
+}
+
 const definicao = computed(() => {
   const curva = chartCurves.monotone
   const inicio = dados.value[0]?.tempo ?? Date.now() - DIA
@@ -129,10 +180,19 @@ const definicao = computed(() => {
 
   return defineChart({
     marks: [
-      decorative(areaY(dados.value, { x: 'tempo', y1: () => 0, y2: 'pontos', curve: curva, fill: 'url(#area-xp)', fillOpacity: 1 })),
-      lineY(dados.value, { x: 'tempo', y: 'pontos', curve: curva, stroke: COR, strokeWidth: 2 }),
+      ...areas(curva),
+      // no vidro a linha fica tracejada, meio fantasma
+      lineY(dados.value, { x: 'tempo', y: 'pontos', curve: curva, stroke: COR, strokeWidth: 2, strokeDasharray: estilo.value === 'vidro' ? '6 4' : undefined }),
       // bolinha de cada dia, menor no de 30 pra n virar uma linha grossa
-      dot(dados.value, { x: 'tempo', y: 'pontos', r: Number(dias.value) <= 7 ? 5 : 3, fill: 'var(--ui-bg)', stroke: COR, strokeWidth: 2 }),
+      dot(dados.value, {
+        x: 'tempo',
+        y: 'pontos',
+        r: Number(dias.value) <= 7 ? 5 : 3,
+        fill: estilo.value === 'vidro' ? 'white' : 'var(--ui-bg)',
+        fillOpacity: estilo.value === 'vidro' ? 0.5 : 1,
+        stroke: COR,
+        strokeWidth: 2,
+      }),
       crosshair({ x: true, y: false }),
     ],
     scales: {
@@ -154,6 +214,26 @@ const definicao = computed(() => {
       stops: [
         { offset: 0, color: COR, opacity: 0.3 },
         { offset: 1, color: COR, opacity: 0.02 },
+      ],
+    }, {
+      id: 'area-xp-vidro',
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 1,
+      stops: [
+        { offset: 0, color: 'white', opacity: 0.55 },
+        { offset: 1, color: 'white', opacity: 0.05 },
+      ],
+    }, {
+      id: 'area-xp-some',
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 1,
+      stops: [
+        { offset: 0, color: 'var(--ui-bg)', opacity: 0 },
+        { offset: 1, color: 'var(--ui-bg)', opacity: 0.9 },
       ],
     }],
     focus: 'group-x',

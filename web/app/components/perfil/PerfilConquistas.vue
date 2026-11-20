@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="card">
     <template #header>
       <div class="flex items-center justify-between gap-3">
         <h2 class="font-medium">
@@ -73,6 +73,8 @@ import type { ConquistaUsuarioRead } from '~/types/generated'
 const props = defineProps<{
   conquistas: ConquistaUsuarioRead[]
 }>()
+
+const { card } = usePerfilVisual()
 
 const ultimas = computed(() => props.conquistas.slice(0, 3))
 

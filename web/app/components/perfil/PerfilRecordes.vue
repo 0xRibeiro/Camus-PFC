@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="card">
     <template #header>
       <div class="flex items-center justify-between gap-3">
         <h2 class="font-medium">
@@ -84,6 +84,8 @@ const ROTAS: Record<string, string> = {
   quem_e_esse_peixe: '/minigames/quem-e-esse-peixe',
   meio_peixe_meio_fotografo: '/minigames/meio-peixe-meio-fotografo',
 }
+
+const { card } = usePerfilVisual()
 
 const recordes = ref<RecordeRead[]>([])
 const carregando = ref(true)

@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="card">
     <template #header>
       <div class="flex items-center justify-between gap-3">
         <h2 class="font-medium">
@@ -97,6 +97,8 @@ const props = defineProps<{
 }>()
 
 const LIMITE = 5
+
+const { card } = usePerfilVisual()
 
 // comecou e n terminou, a q mexeu por ultimo fica no topo
 const emAndamento = computed(() => {
