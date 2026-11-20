@@ -68,15 +68,15 @@
     >
       <template
         v-for="modulo in modulos"
-        :key="modulo.serial"
+        :key="modulo.serial ?? modulo.tipo"
       >
         <AquarioTemperatura
           v-if="modulo.tipo === TIPO_TEMPERATURA"
           :modulo="modulo"
           :minutos="minutosCarregados"
           :pode-editar="podeEditar"
-          :pendente="pendentes[modulo.serial]"
-          @comandar="comandar(modulo.serial, $event)"
+          :pendente="pendentes[modulo.serial ?? '']"
+          @comandar="comandar(modulo.serial ?? '', $event)"
         />
 
         <AquarioNivel
@@ -152,7 +152,8 @@ function mensagemErro(error: unknown, padrao: string): string {
 // tira do pendente quem ja ta no estado pedido
 function limparConfirmados() {
   for (const modulo of modulos.value) {
-    if (pendentes.value[modulo.serial] === modulo.ligado) {
+    // ao vivo todo modulo tem serial, so o removido do historico vem sem
+    if (modulo.serial && pendentes.value[modulo.serial] === modulo.ligado) {
       delete pendentes.value[modulo.serial]
     }
   }

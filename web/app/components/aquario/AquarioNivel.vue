@@ -10,8 +10,15 @@
         </div>
 
         <div>
-          <h3 class="font-medium">
+          <h3 class="flex items-center gap-2 font-medium">
             Nível da água
+            <UBadge
+              v-if="modulo.removido"
+              label="Removido"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+            />
           </h3>
         </div>
       </div>

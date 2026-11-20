@@ -32,7 +32,7 @@
         >
           <template
             v-for="modulo in modulos"
-            :key="modulo.serial"
+            :key="modulo.serial ?? `removido-${modulo.tipo}`"
           >
             <!-- aquecedor n liga por aqui, so na tela de cima -->
             <AquarioTemperatura
