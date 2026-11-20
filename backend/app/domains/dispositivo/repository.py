@@ -1,6 +1,6 @@
 from influxdb_client import Point
 from influxdb_client.client.flux_table import FluxRecord
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -36,6 +36,11 @@ class DispositivoRepository:
         resultado = await self.db.execute(delete(AquarioMembro).where(AquarioMembro.id_aquario == id_aquario)
         .where(AquarioMembro.papel == PapelAquario.operador).returning(AquarioMembro.id_usuario))
         return len(resultado.all())
+
+    async def contar_operadores(self, id_aquario: int) -> int:
+        resultado = await self.db.execute(select(func.count()).select_from(AquarioMembro)
+        .where(AquarioMembro.id_aquario == id_aquario).where(AquarioMembro.papel == PapelAquario.operador))
+        return resultado.scalar_one()
 
     async def buscar_modulo(self, serial: str) -> ModuloIot | None:
         resultado = await self.db.execute(select(ModuloIot).where(ModuloIot.serial == serial))

@@ -20,6 +20,7 @@ from app.domains.dispositivo.schema import (
     ListaModulos,
     ModuloIotRead,
     PontoLeitura,
+    RespostaContagem,
     RespostaDesvinculo,
     RespostaVinculo,
     SerieLeitura,
@@ -112,6 +113,18 @@ async def desvincular_todos(db: AsyncSession, mac: str) -> RespostaDesvinculo:
 
     removidos = await tirar_do_aquario(db, dispositivo)
     return RespostaDesvinculo(removidos=removidos)
+
+
+# +1 do dono, esp fora de aquario n tem ninguem
+async def contar_vinculados(db: AsyncSession, mac: str) -> RespostaContagem:
+    repo = DispositivoRepository(db)
+    dispositivo = await repo.buscar_por_mac(mac)
+
+    if dispositivo is None or dispositivo.id_aquario is None:
+        return RespostaContagem(vinculados=0)
+
+    operadores = await repo.contar_operadores(dispositivo.id_aquario)
+    return RespostaContagem(vinculados=operadores + 1)
 
 
 # o q n veio na lista fica sem dispositivo

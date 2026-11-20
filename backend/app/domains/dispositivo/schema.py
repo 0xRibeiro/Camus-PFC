@@ -16,7 +16,7 @@ class StatusDispositivo(BaseModel):
 
 # camus/dispositivos/<mac>/vinculo/pedido
 class PedidoVinculo(BaseModel):
-    acao: Literal["gerar_codigo", "desvincular_todos"]
+    acao: Literal["gerar_codigo", "desvincular_todos", "contar_vinculados"]
 
 
 # camus/dispositivos/<mac>/vinculo/resposta
@@ -29,6 +29,12 @@ class RespostaVinculo(BaseModel):
 class RespostaDesvinculo(BaseModel):
     acao: Literal["desvincular_todos"] = "desvincular_todos"
     removidos: int
+
+
+# dono + operadores, quem perde acesso se desvincular
+class RespostaContagem(BaseModel):
+    acao: Literal["contar_vinculados"] = "contar_vinculados"
+    vinculados: int
 
 
 class CadastroDispositivo(BaseModel):
