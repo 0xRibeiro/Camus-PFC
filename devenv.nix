@@ -47,6 +47,20 @@
   # config do cli do influx fica no projeto, n bate com o ~/.influxdbv2 de outros projetos
   env.INFLUX_CONFIGS_PATH = "${config.env.DEVENV_STATE}/influx-configs";
 
+  # leituras ficam 30 dias, igual producao. espera o influx setup se ainda n rodou
+  processes.influxdb-retencao = {
+    after = [ "devenv:processes:influxdb-server" ];
+    exec = ''
+      # msm token q o backend usa
+      token=$(grep '^INFLUX_TOKEN=' "$DEVENV_ROOT/backend/.env" | cut -d= -f2-)
+
+      until id=$(influx bucket list --org camus --token "$token" --name leituras --hide-headers 2>/dev/null | cut -f1) && [ -n "$id" ]; do
+        sleep 5
+      done
+      influx bucket update --id "$id" --retention 30d --shard-group-duration 1d --token "$token"
+    '';
+  };
+
   # broker do iot, aberto na rede pro esp
   # senha fixa do admin, o plugin so usa no 1o start (quando o json ainda n existe)
   env.MOSQUITTO_DYNSEC_PASSWORD = "camus-dev";
