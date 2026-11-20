@@ -180,6 +180,17 @@ export const zConquistaUpdate = z.object({
 });
 
 /**
+ * ConquistaUsuarioRead
+ */
+export const zConquistaUsuarioRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    imagem_dir: z.string().nullish(),
+    desbloqueada_em: z.iso.datetime().nullish()
+});
+
+/**
  * ConteudoFunilRead
  */
 export const zConteudoFunilRead = z.object({
@@ -738,6 +749,17 @@ export const zRascunhoUpdate = z.object({
 });
 
 /**
+ * RecordeRead
+ */
+export const zRecordeRead = z.object({
+    jogo: z.string(),
+    titulo: z.string(),
+    recorde: z.int(),
+    acertos: z.int(),
+    respondidas: z.int()
+});
+
+/**
  * RefreshInput
  */
 export const zRefreshInput = z.object({
@@ -1052,6 +1074,8 @@ export const zTrilhaAlunoRead = z.object({
     concluidos: z.int(),
     total: z.int(),
     progresso: z.int(),
+    proximo_conteudo_id: z.int().nullish(),
+    proximo_conteudo_titulo: z.string().nullish(),
     modulos: z.array(zModuloAlunoRead)
 });
 
@@ -1088,7 +1112,9 @@ export const zTrilhaResumoRead = z.object({
     tag: z.string().nullish(),
     concluidos: z.int(),
     total: z.int(),
-    progresso: z.int()
+    progresso: z.int(),
+    proximo_conteudo_id: z.int().nullish(),
+    proximo_conteudo_titulo: z.string().nullish()
 });
 
 /**
@@ -1185,10 +1211,19 @@ export const zHttpValidationError = z.object({
 });
 
 /**
+ * XpDiaRead
+ */
+export const zXpDiaRead = z.object({
+    data: z.iso.date(),
+    pontos: z.int()
+});
+
+/**
  * XpRead
  */
 export const zXpRead = z.object({
-    xp_total: z.int()
+    xp_total: z.int(),
+    posicao: z.int().nullish()
 });
 
 /**
@@ -1388,7 +1423,7 @@ export const zUpdateMeUsuariosMePatchResponse = zUsuarioRead;
  *
  * Successful Response
  */
-export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaUsuarioRead);
 
 export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.object({
     conquista_id: z.int()
@@ -1906,6 +1941,17 @@ export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeleteResponse = z.void()
  */
 export const zMeuXpPontuacaoXpGetResponse = zXpRead;
 
+export const zMeuXpPorDiaPontuacaoXpDiasGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(7)
+});
+
+/**
+ * Response Meu Xp Por Dia Pontuacao Xp Dias Get
+ *
+ * Successful Response
+ */
+export const zMeuXpPorDiaPontuacaoXpDiasGetResponse = z.array(zXpDiaRead);
+
 /**
  * Response Ranking Pontuacao Ranking Get
  *
@@ -1919,6 +1965,13 @@ export const zRankingPontuacaoRankingGetResponse = z.array(zRankingItemRead);
  * Successful Response
  */
 export const zMeuExtratoPontuacaoExtratoGetResponse = z.array(zLancamentoRead);
+
+/**
+ * Response Meus Recordes Minigames Recordes Get
+ *
+ * Successful Response
+ */
+export const zMeusRecordesMinigamesRecordesGetResponse = z.array(zRecordeRead);
 
 /**
  * Successful Response
@@ -2602,6 +2655,21 @@ export const zMeuXpGruposGrupoIdPontuacaoXpGetPath = z.object({
  * Successful Response
  */
 export const zMeuXpGruposGrupoIdPontuacaoXpGetResponse = zXpRead;
+
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(7)
+});
+
+/**
+ * Response Meu Xp Por Dia Grupos  Grupo Id  Pontuacao Xp Dias Get
+ *
+ * Successful Response
+ */
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponse = z.array(zXpDiaRead);
 
 export const zRankingGruposGrupoIdPontuacaoRankingGetPath = z.object({
     grupo_id: z.int()

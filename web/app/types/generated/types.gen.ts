@@ -356,6 +356,32 @@ export type ConquistaUpdate = {
 };
 
 /**
+ * ConquistaUsuarioRead
+ */
+export type ConquistaUsuarioRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Descricao
+     */
+    descricao?: string | null;
+    /**
+     * Imagem Dir
+     */
+    imagem_dir?: string | null;
+    /**
+     * Desbloqueada Em
+     */
+    desbloqueada_em?: string | null;
+};
+
+/**
  * ConteudoAlunoRead
  */
 export type ConteudoAlunoRead = {
@@ -1727,6 +1753,32 @@ export type RascunhoUpdate = {
 };
 
 /**
+ * RecordeRead
+ */
+export type RecordeRead = {
+    /**
+     * Jogo
+     */
+    jogo: string;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Recorde
+     */
+    recorde: number;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Respondidas
+     */
+    respondidas: number;
+};
+
+/**
  * RefreshInput
  */
 export type RefreshInput = {
@@ -2147,6 +2199,14 @@ export type TrilhaAlunoRead = {
      */
     progresso: number;
     /**
+     * Proximo Conteudo Id
+     */
+    proximo_conteudo_id?: number | null;
+    /**
+     * Proximo Conteudo Titulo
+     */
+    proximo_conteudo_titulo?: string | null;
+    /**
      * Modulos
      */
     modulos: Array<ModuloAlunoRead>;
@@ -2240,6 +2300,14 @@ export type TrilhaResumoRead = {
      * Progresso
      */
     progresso: number;
+    /**
+     * Proximo Conteudo Id
+     */
+    proximo_conteudo_id?: number | null;
+    /**
+     * Proximo Conteudo Titulo
+     */
+    proximo_conteudo_titulo?: string | null;
 };
 
 /**
@@ -2441,6 +2509,20 @@ export type ValidationError = {
 };
 
 /**
+ * XpDiaRead
+ */
+export type XpDiaRead = {
+    /**
+     * Data
+     */
+    data: string;
+    /**
+     * Pontos
+     */
+    pontos: number;
+};
+
+/**
  * XpRead
  */
 export type XpRead = {
@@ -2448,6 +2530,10 @@ export type XpRead = {
      * Xp Total
      */
     xp_total: number;
+    /**
+     * Posicao
+     */
+    posicao?: number | null;
 };
 
 /**
@@ -2948,7 +3034,7 @@ export type ListarMinhasConquistasUsuariosMeConquistasGetResponses = {
      *
      * Successful Response
      */
-    200: Array<ConquistaRead>;
+    200: Array<ConquistaUsuarioRead>;
 };
 
 export type ListarMinhasConquistasUsuariosMeConquistasGetResponse = ListarMinhasConquistasUsuariosMeConquistasGetResponses[keyof ListarMinhasConquistasUsuariosMeConquistasGetResponses];
@@ -4622,6 +4708,38 @@ export type MeuXpPontuacaoXpGetResponses = {
 
 export type MeuXpPontuacaoXpGetResponse = MeuXpPontuacaoXpGetResponses[keyof MeuXpPontuacaoXpGetResponses];
 
+export type MeuXpPorDiaPontuacaoXpDiasGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Dias
+         */
+        dias?: number;
+    };
+    url: '/pontuacao/xp/dias';
+};
+
+export type MeuXpPorDiaPontuacaoXpDiasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MeuXpPorDiaPontuacaoXpDiasGetError = MeuXpPorDiaPontuacaoXpDiasGetErrors[keyof MeuXpPorDiaPontuacaoXpDiasGetErrors];
+
+export type MeuXpPorDiaPontuacaoXpDiasGetResponses = {
+    /**
+     * Response Meu Xp Por Dia Pontuacao Xp Dias Get
+     *
+     * Successful Response
+     */
+    200: Array<XpDiaRead>;
+};
+
+export type MeuXpPorDiaPontuacaoXpDiasGetResponse = MeuXpPorDiaPontuacaoXpDiasGetResponses[keyof MeuXpPorDiaPontuacaoXpDiasGetResponses];
+
 export type RankingPontuacaoRankingGetData = {
     body?: never;
     path?: never;
@@ -4657,6 +4775,24 @@ export type MeuExtratoPontuacaoExtratoGetResponses = {
 };
 
 export type MeuExtratoPontuacaoExtratoGetResponse = MeuExtratoPontuacaoExtratoGetResponses[keyof MeuExtratoPontuacaoExtratoGetResponses];
+
+export type MeusRecordesMinigamesRecordesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/minigames/recordes';
+};
+
+export type MeusRecordesMinigamesRecordesGetResponses = {
+    /**
+     * Response Meus Recordes Minigames Recordes Get
+     *
+     * Successful Response
+     */
+    200: Array<RecordeRead>;
+};
+
+export type MeusRecordesMinigamesRecordesGetResponse = MeusRecordesMinigamesRecordesGetResponses[keyof MeusRecordesMinigamesRecordesGetResponses];
 
 export type NovaRodadaMinigamesQuemEessePeixeRodadasPostData = {
     body?: never;
@@ -6941,6 +7077,43 @@ export type MeuXpGruposGrupoIdPontuacaoXpGetResponses = {
 };
 
 export type MeuXpGruposGrupoIdPontuacaoXpGetResponse = MeuXpGruposGrupoIdPontuacaoXpGetResponses[keyof MeuXpGruposGrupoIdPontuacaoXpGetResponses];
+
+export type MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetData = {
+    body?: never;
+    path: {
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: {
+        /**
+         * Dias
+         */
+        dias?: number;
+    };
+    url: '/grupos/{grupo_id}/pontuacao/xp/dias';
+};
+
+export type MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetError = MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetErrors[keyof MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetErrors];
+
+export type MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponses = {
+    /**
+     * Response Meu Xp Por Dia Grupos  Grupo Id  Pontuacao Xp Dias Get
+     *
+     * Successful Response
+     */
+    200: Array<XpDiaRead>;
+};
+
+export type MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponse = MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponses[keyof MeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponses];
 
 export type RankingGruposGrupoIdPontuacaoRankingGetData = {
     body?: never;
