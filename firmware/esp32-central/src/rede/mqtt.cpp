@@ -65,8 +65,15 @@ namespace mqtt {
   void aoConectar() {
     conectado = true;
 
-    char mensagem[48];
-    snprintf(mensagem, sizeof(mensagem), "{\"estado\":\"online\",\"firmware\":\"%s\"}", FIRMWARE_VERSAO);
+    // rede vai pro dono ver no site em qual wifi a central ta. json pelo ArduinoJson pq nome de rede pode ter aspas
+    JsonDocument json;
+    json["estado"] = "online";
+    json["firmware"] = FIRMWARE_VERSAO;
+    json["rede"] = WiFi.SSID();
+
+    // nome de rede tem no maximo 32 letras, sobra espaco
+    char mensagem[128];
+    serializeJson(json, mensagem, sizeof(mensagem));
     esp_mqtt_client_publish(cliente, topicoStatus, mensagem, 0, 0, 1);
 
     esp_mqtt_client_subscribe(cliente, topicoResposta, 0);
