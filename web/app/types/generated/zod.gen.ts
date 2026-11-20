@@ -391,6 +391,7 @@ export const zDispositivoRead = z.object({
     mac: z.string(),
     estado: zEstadoDispositivo,
     firmware: z.string().nullable(),
+    rede: z.string().nullish(),
     ultimo_contato: z.iso.datetime()
 });
 

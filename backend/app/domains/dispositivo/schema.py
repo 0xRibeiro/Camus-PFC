@@ -10,8 +10,9 @@ from app.domains.dispositivo.model import EstadoDispositivo, TipoModulo
 class StatusDispositivo(BaseModel):
     estado: EstadoDispositivo
 
-    # o offline do testamento n manda versao
+    # o offline do testamento n manda versao nem rede
     firmware: str | None = None
+    rede: str | None = None
 
 
 # camus/dispositivos/<mac>/vinculo/pedido
@@ -139,4 +140,6 @@ class DispositivoRead(BaseModel):
     mac: str
     estado: EstadoDispositivo
     firmware: str | None
+    # so o dono recebe, pros outros vai None
+    rede: str | None = None
     ultimo_contato: datetime

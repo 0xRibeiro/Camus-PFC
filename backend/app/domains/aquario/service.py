@@ -76,6 +76,10 @@ async def montar_read(db: AsyncSession, aquario: Aquario, papel: PapelAquario) -
     if dispositivo is not None:
         dispositivo_read = DispositivoRead.model_validate(dispositivo)
 
+        # nome do wifi da casa e coisa do dono
+        if papel != PapelAquario.dono:
+            dispositivo_read.rede = None
+
     return AquarioRead(id=aquario.id, nome=aquario.nome, litros=aquario.litros, papel=papel, dispositivo=dispositivo_read)
 
 

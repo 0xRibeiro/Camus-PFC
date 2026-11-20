@@ -43,9 +43,11 @@ async def registrar_status(db: AsyncSession, mac: str, status: StatusDispositivo
     dispositivo.estado = status.estado
     dispositivo.ultimo_contato = datetime.now(UTC)
 
-    # offline n manda versao, mantem a ultima
+    # offline n manda versao nem rede, mantem a ultima
     if status.firmware is not None:
         dispositivo.firmware = status.firmware
+    if status.rede is not None:
+        dispositivo.rede = status.rede
 
     return await repo.salvar(dispositivo)
 

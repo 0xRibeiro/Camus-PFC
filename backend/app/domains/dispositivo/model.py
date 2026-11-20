@@ -33,6 +33,9 @@ class Dispositivo(Base):
     # ultima versao q chegou, o offline n manda
     firmware: Mapped[str | None] = mapped_column(String(20))
 
+    # wifi q a central conectou, nome de rede tem no maximo 32 letras
+    rede: Mapped[str | None] = mapped_column(String(32))
+
     ultimo_contato: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

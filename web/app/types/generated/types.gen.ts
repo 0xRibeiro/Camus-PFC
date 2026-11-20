@@ -875,6 +875,10 @@ export type DispositivoRead = {
      */
     firmware: string | null;
     /**
+     * Rede
+     */
+    rede?: string | null;
+    /**
      * Ultimo Contato
      */
     ultimo_contato: string;
