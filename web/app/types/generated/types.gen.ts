@@ -1935,7 +1935,27 @@ export type SerieLeitura = {
      * Pontos
      */
     pontos: Array<PontoLeitura>;
+    /**
+     * Trechos
+     */
+    trechos?: Array<TrechoLeitura>;
+    /**
+     * Minimo
+     */
+    minimo?: number | null;
+    /**
+     * Media
+     */
+    media?: number | null;
+    /**
+     * Maximo
+     */
+    maximo?: number | null;
     atual?: PontoLeitura | null;
+    /**
+     * Atual Erro
+     */
+    atual_erro?: boolean;
 };
 
 /**
@@ -2044,6 +2064,24 @@ export type TotaisTrilhaRead = {
      * Terminaram
      */
     terminaram: number;
+};
+
+/**
+ * TrechoLeitura
+ */
+export type TrechoLeitura = {
+    /**
+     * Inicio
+     */
+    inicio: string;
+    /**
+     * Fim
+     */
+    fim: string;
+    /**
+     * Tipo
+     */
+    tipo: 'sem_leitura' | 'erro';
 };
 
 /**

@@ -1,5 +1,5 @@
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from fastcrud.exceptions.http_exceptions import NotFoundException
@@ -25,6 +25,7 @@ from app.domains.dispositivo.schema import (
     RespostaVinculo,
     SerieLeitura,
     StatusDispositivo,
+    TrechoLeitura,
 )
 
 CODIGO_VALIDADE_SEGUNDOS = 300
@@ -177,9 +178,48 @@ async def gravar_leitura(mac: str, leitura: LeituraModulo) -> None:
     await LeituraRepository().gravar(pontos)
 
 
-# uns 120 pontos no grafico, nunca menos q o intervalo do esp
+###### leituras validas
+
+# faixa q cada sensor consegue medir, fora disso e erro de leitura
+LIMITES_LEITURA = {
+    "distancia": (2, 400),
+    "temperatura": (-55, 125),
+    "tds": (0, 1000),
+    "turbidez": (0, 3000),
+}
+
+# ds18b20 manda 85 cravado qnd a leitura falha
+TEMPERATURA_ERRO = 85.0
+
+# buraco menor q isso e atraso normal do esp, n desligado
+SEM_LEITURA_MINIMO = timedelta(seconds=30)
+
+
+def leitura_valida(nome: str, valor: float) -> bool:
+    if nome == "temperatura" and valor == TEMPERATURA_ERRO:
+        return False
+    if nome not in LIMITES_LEITURA:
+        return True
+
+    minimo, maximo = LIMITES_LEITURA[nome]
+    return minimo <= valor <= maximo
+
+
+# msm regra do leitura_valida, escrita em flux pra rodar dentro do influx
+def condicao_valida_flux() -> str:
+    invalido = f'(r.nome == "temperatura" and r._value == {TEMPERATURA_ERRO})'
+    for nome, (minimo, maximo) in LIMITES_LEITURA.items():
+        invalido += f' or (r.nome == "{nome}" and (r._value < {float(minimo)} or r._value > {float(maximo)}))'
+    return f"not ({invalido})"
+
+
+###### series
+
+# 1h vai cru de 5 em 5s, o resto em uns 360 pontos
 def calcular_janela(minutos: int) -> int:
-    return max(5, minutos * 60 // 120)
+    if minutos <= 60:
+        return 5
+    return minutos * 60 // 360
 
 
 def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> SerieLeitura:
@@ -193,18 +233,79 @@ def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> S
     return series[serial][nome]
 
 
+# janela vazia vira trecho, emendando as vizinhas do msm tipo
+def adicionar_trecho(serie: SerieLeitura, fim: datetime, janela: timedelta, erro: bool) -> None:
+    tipo = "erro" if erro else "sem_leitura"
+    inicio = fim - janela
+
+    if serie.trechos and serie.trechos[-1].tipo == tipo and serie.trechos[-1].fim == inicio:
+        serie.trechos[-1].fim = fim
+        return
+    serie.trechos.append(TrechoLeitura(inicio=inicio, fim=fim, tipo=tipo))
+
+
+# sem leitura curtinho e so o esp atrasando, erro aparece sempre.
+# erros separados so por um buraco curto viram um trecho so
+def limpar_trechos(serie: SerieLeitura) -> None:
+    trechos = []
+    for trecho in serie.trechos:
+        if trecho.tipo == "sem_leitura" and trecho.fim - trecho.inicio <= SEM_LEITURA_MINIMO:
+            continue
+
+        anterior = trechos[-1] if trechos else None
+        if anterior and anterior.tipo == trecho.tipo == "erro" and trecho.inicio - anterior.fim <= SEM_LEITURA_MINIMO:
+            anterior.fim = trecho.fim
+        else:
+            trechos.append(trecho)
+    serie.trechos = trechos
+
+
 # junta os pontos do influx por modulo e por nome da leitura
 async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, minutos: int) -> list[ModuloIotRead]:
     series: dict[str, dict[str, SerieLeitura]] = {}
     leituras = LeituraRepository()
+    janela = calcular_janela(minutos)
+    registros = await leituras.listar_do_dispositivo(dispositivo.mac, minutos, janela, condicao_valida_flux())
 
-    for registro in await leituras.listar_do_dispositivo(dispositivo.mac, minutos, calcular_janela(minutos)):
+    # a ultima janela ainda ta acontecendo, vazia nela n e desligado
+    janela_atual = datetime.now(UTC) - timedelta(seconds=janela)
+
+    # (serial, nome, fim da janela) q teve leitura fora da faixa
+    janelas_com_erro = set()
+    for registro in registros:
+        if registro.values["result"] == "erros":
+            janelas_com_erro.add((registro.values["modulo"], registro.values["nome"], registro.get_time()))
+
+    for registro in registros:
+        resultado = registro.values["result"]
+        if resultado == "erros":
+            continue
+
         serie = serie_do_registro(series, registro)
-        serie.pontos.append(PontoLeitura(tempo=registro.get_time(), valor=registro.get_value()))
+        valor = registro.get_value()
+
+        if resultado == "pontos" and valor is None and registro.get_time() > janela_atual:
+            continue
+        if resultado == "pontos" and valor is None:
+            erro = (registro.values["modulo"], serie.nome, registro.get_time()) in janelas_com_erro
+            adicionar_trecho(serie, registro.get_time(), timedelta(seconds=janela), erro)
+        elif resultado == "pontos":
+            serie.pontos.append(PontoLeitura(tempo=registro.get_time(), valor=valor))
+        elif resultado == "minimo":
+            serie.minimo = valor
+        elif resultado == "media":
+            serie.media = valor
+        elif resultado == "maximo":
+            serie.maximo = valor
 
     for registro in await leituras.ultimas_do_dispositivo(dispositivo.mac, minutos):
         serie = serie_do_registro(series, registro)
         serie.atual = PontoLeitura(tempo=registro.get_time(), valor=registro.get_value())
+        serie.atual_erro = not leitura_valida(serie.nome, serie.atual.valor)
+
+    for series_do_serial in series.values():
+        for serie in series_do_serial.values():
+            limpar_trechos(serie)
 
     modulos = []
     for modulo in await DispositivoRepository(db).listar_modulos(dispositivo.id):

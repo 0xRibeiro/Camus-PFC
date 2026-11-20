@@ -60,7 +60,7 @@ async def desconectar_dispositivo(aquario_id: int, db: AsyncSession = Depends(ge
 
 # modulos do iot com as leituras dos ultimos minutos
 @router.get("/{aquario_id}/modulos", response_model=list[ModuloIotRead])
-async def listar_modulos(aquario_id: int, minutos: int = Query(60, ge=1, le=1440), db: AsyncSession = Depends(get_async_session),
+async def listar_modulos(aquario_id: int, minutos: int = Query(60, ge=1, le=43200), db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> list[ModuloIotRead]:
     return await service.listar_modulos(db, aquario_id, usuario.id, minutos)
 

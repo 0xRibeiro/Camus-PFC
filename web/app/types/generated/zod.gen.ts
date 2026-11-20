@@ -833,16 +833,6 @@ export const zRoleUsuario = z.enum([
 ]);
 
 /**
- * SerieLeitura
- */
-export const zSerieLeitura = z.object({
-    nome: z.string(),
-    unidade: z.string(),
-    pontos: z.array(zPontoLeitura),
-    atual: zPontoLeitura.nullish()
-});
-
-/**
  * SuspensaoCreate
  */
 export const zSuspensaoCreate = z.object({
@@ -927,16 +917,6 @@ export const zTipoModulo = z.union([
 ]);
 
 /**
- * ModuloIotRead
- */
-export const zModuloIotRead = z.object({
-    serial: z.string(),
-    tipo: zTipoModulo,
-    series: z.array(zSerieLeitura),
-    ligado: z.boolean().nullish()
-});
-
-/**
  * TokenPair
  */
 export const zTokenPair = z.object({
@@ -1013,6 +993,40 @@ export const zDashboardTrilhaRead = z.object({
     totais_anteriores: zTotaisTrilhaRead,
     engajamento: zEngajamentoTrilhaRead,
     funil: z.array(zConteudoFunilRead)
+});
+
+/**
+ * TrechoLeitura
+ */
+export const zTrechoLeitura = z.object({
+    inicio: z.iso.datetime(),
+    fim: z.iso.datetime(),
+    tipo: z.enum(['sem_leitura', 'erro'])
+});
+
+/**
+ * SerieLeitura
+ */
+export const zSerieLeitura = z.object({
+    nome: z.string(),
+    unidade: z.string(),
+    pontos: z.array(zPontoLeitura),
+    trechos: z.array(zTrechoLeitura).optional().default([]),
+    minimo: z.number().nullish(),
+    media: z.number().nullish(),
+    maximo: z.number().nullish(),
+    atual: zPontoLeitura.nullish(),
+    atual_erro: z.boolean().optional().default(false)
+});
+
+/**
+ * ModuloIotRead
+ */
+export const zModuloIotRead = z.object({
+    serial: z.string(),
+    tipo: zTipoModulo,
+    series: z.array(zSerieLeitura),
+    ligado: z.boolean().nullish()
 });
 
 /**
@@ -1587,7 +1601,7 @@ export const zListarModulosAquariosAquarioIdModulosGetPath = z.object({
 });
 
 export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
-    minutos: z.int().gte(1).lte(1440).optional().default(60)
+    minutos: z.int().gte(1).lte(43200).optional().default(60)
 });
 
 /**

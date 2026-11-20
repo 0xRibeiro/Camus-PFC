@@ -88,13 +88,28 @@ class PontoLeitura(BaseModel):
     valor: float
 
 
+# sem_leitura = iot desligado, erro = sensor mandou valor fora da faixa
+class TrechoLeitura(BaseModel):
+    inicio: datetime
+    fim: datetime
+    tipo: Literal["sem_leitura", "erro"]
+
+
 class SerieLeitura(BaseModel):
     nome: str
     unidade: str
-    # media por janela
+    # media das leituras validas por janela
     pontos: list[PontoLeitura]
+    trechos: list[TrechoLeitura] = []
+
+    # das leituras validas de vdd, n das medias
+    minimo: float | None = None
+    media: float | None = None
+    maximo: float | None = None
+
     # ultima leitura de vdd
     atual: PontoLeitura | None = None
+    atual_erro: bool = False
 
 
 class ModuloIotRead(BaseModel):

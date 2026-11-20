@@ -72,14 +72,32 @@ class LeituraRepository:
                 registros.append(registro)
         return registros
 
-    # params so existe no influx cloud, mac vem do banco (hex)
-    # media por janela pro grafico n receber milhares de pontos
-    async def listar_do_dispositivo(self, mac: str, minutos: int, janela_segundos: int) -> list[FluxRecord]:
+    # params so existe no influx cloud, mac vem do banco (hex) e a condicao das constantes do service.
+    # cada resultado vem com o nome no yield:
+    # pontos = media das validas por janela, vazia vira null
+    # erros = janelas q tiveram leitura fora da faixa
+    # minimo, media e maximo = das validas no periodo todo
+    async def listar_do_dispositivo(self, mac: str, minutos: int, janela_segundos: int, condicao_valida: str) -> list[FluxRecord]:
         return await self.consultar(f"""
-            from(bucket: "{settings.influx_bucket}")
+            dados = from(bucket: "{settings.influx_bucket}")
               |> range(start: -{minutos}m)
-              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
-              |> aggregateWindow(every: {janela_segundos}s, fn: mean, createEmpty: false)
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
+              |> map(fn: (r) => ({{r with valido: {condicao_valida}}}))
+
+            validos = dados |> filter(fn: (r) => r.valido, onEmpty: "keep")
+
+            validos
+              |> aggregateWindow(every: {janela_segundos}s, fn: mean, createEmpty: true)
+              |> yield(name: "pontos")
+
+            dados
+              |> filter(fn: (r) => not r.valido)
+              |> aggregateWindow(every: {janela_segundos}s, fn: count, createEmpty: false)
+              |> yield(name: "erros")
+
+            validos |> min() |> yield(name: "minimo")
+            validos |> mean() |> yield(name: "media")
+            validos |> max() |> yield(name: "maximo")
         """)
 
     # leitura mais recente sem media, pro valor de agora
