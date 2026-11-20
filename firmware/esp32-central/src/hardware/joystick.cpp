@@ -40,8 +40,9 @@ namespace joystick {
 
     // diagonal vai pela ordem
     if (apertado) return Evento::CLIQUE;
-    if (horizontal < JOY_LIMITE_BAIXO) return Evento::ESQUERDA;
-    if (horizontal > JOY_LIMITE_ALTO) return Evento::DIREITA;
+    // joystick fica de ponta-cabeça junto com a tela
+    if (horizontal > JOY_LIMITE_ALTO) return Evento::ESQUERDA;
+    if (horizontal < JOY_LIMITE_BAIXO) return Evento::DIREITA;
     if (vertical > JOY_LIMITE_ALTO) return Evento::CIMA;
     if (vertical < JOY_LIMITE_BAIXO) return Evento::BAIXO;
     return Evento::NENHUM;

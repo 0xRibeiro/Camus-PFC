@@ -13,7 +13,8 @@ namespace buzzer {
   void tocar(const Nota* notas, int quantidade);
   void atualizar();
 
-  // pega o tamanho do array de notas
+  // template descobre sozinho quantas notas o som tem,
+  // da pra chamar so tocar(sons::ERRO) sem passar a quantidade
   template <int N>
   void tocar(const Nota (&notas)[N]) {
     tocar(notas, N);

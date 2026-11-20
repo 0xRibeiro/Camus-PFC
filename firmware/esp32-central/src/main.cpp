@@ -9,7 +9,7 @@
 #include "rede/mqtt.h"
 #include "rede/wifi.h"
 #include "ui/navbar.h"
-#include "ui/navegacao.h"
+#include "ui/telas.h"
 
 void setup() {
   Serial.begin(115200);
@@ -24,12 +24,12 @@ void setup() {
   // o script de gravacao confere o mac por aqui
   Serial.printf("mac: %s\n", mqtt::identificador());
   barramento::iniciar();
-  navegacao::iniciar();
+  telas::iniciar();
 }
 
 void loop() {
   joystick::Evento evento = joystick::atualizar();
-  navegacao::atualizar(evento);
+  telas::atualizar(evento);
   buzzer::atualizar();
   credencial::atualizar();
 
@@ -52,7 +52,7 @@ void loop() {
     navbar::definirBroker(false);
   }
 
-  // comando chega na task do mqtt, o i2c roda aqui no loop
+  // comando chega na task do mqtt, mas o i2c so roda aqui no loop
   if (mqtt::chegouComando()) {
     barramento::comandar(mqtt::serialComando(), mqtt::ligarComando());
   }
