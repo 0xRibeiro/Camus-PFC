@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from influxdb_client import Point
 from influxdb_client.client.flux_table import FluxRecord
@@ -110,6 +110,16 @@ class LeituraRepository:
             validos |> min() |> yield(name: "minimo")
             validos |> mean() |> yield(name: "media")
             validos |> max() |> yield(name: "maximo")
+        """)
+
+    # mudancas do rele em ordem, comecando 30 dias antes pra saber se ja tava ligado no comeco do periodo
+    async def listar_rele(self, mac: str, inicio: datetime, fim: datetime) -> list[FluxRecord]:
+        return await self.consultar(f"""
+            from(bucket: "{settings.influx_bucket}")
+              |> range(start: {tempo_flux(inicio - timedelta(days=30))}, stop: {tempo_flux(fim)})
+              |> filter(fn: (r) => r._measurement == "rele" and r.dispositivo == "{mac}" and r._field == "ligado")
+              |> group(columns: ["tipo"])
+              |> sort(columns: ["_time"])
         """)
 
     # leitura mais recente do periodo sem media, pro valor grande do card.

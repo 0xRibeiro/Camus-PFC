@@ -1132,6 +1132,20 @@ export type ImagemRead = {
 };
 
 /**
+ * IntervaloLigado
+ */
+export type IntervaloLigado = {
+    /**
+     * Inicio
+     */
+    inicio: string;
+    /**
+     * Fim
+     */
+    fim: string;
+};
+
+/**
  * LancamentoRead
  */
 export type LancamentoRead = {
@@ -1301,6 +1315,10 @@ export type ModuloIotRead = {
      * Ligado
      */
     ligado?: boolean | null;
+    /**
+     * Periodos Ligado
+     */
+    periodos_ligado?: Array<IntervaloLigado>;
     /**
      * Removido
      */

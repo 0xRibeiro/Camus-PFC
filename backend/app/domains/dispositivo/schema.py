@@ -113,6 +113,12 @@ class SerieLeitura(BaseModel):
     atual_erro: bool = False
 
 
+# tempo q o rele ficou ligado dentro do periodo pedido
+class IntervaloLigado(BaseModel):
+    inicio: datetime
+    fim: datetime
+
+
 class ModuloIotRead(BaseModel):
     # None qnd e um tipo q so tem leitura antiga, nenhum modulo dele ta conectado agora
     serial: str | None
@@ -121,6 +127,8 @@ class ModuloIotRead(BaseModel):
 
     # None = n tem rele
     ligado: bool | None = None
+    # so os do msm tipo, vira a faixa do aquecedor no grafico
+    periodos_ligado: list[IntervaloLigado] = []
 
     # so aparece no historico, leituras de um modulo q ja tiraram da central
     removido: bool = False

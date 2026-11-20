@@ -436,6 +436,14 @@ export const zImagemRead = z.object({
 });
 
 /**
+ * IntervaloLigado
+ */
+export const zIntervaloLigado = z.object({
+    inicio: z.iso.datetime(),
+    fim: z.iso.datetime()
+});
+
+/**
  * LogAuditoriaRead
  */
 export const zLogAuditoriaRead = z.object({
@@ -1028,6 +1036,7 @@ export const zModuloIotRead = z.object({
     tipo: zTipoModulo,
     series: z.array(zSerieLeitura),
     ligado: z.boolean().nullish(),
+    periodos_ligado: z.array(zIntervaloLigado).optional().default([]),
     removido: z.boolean().optional().default(false)
 });
 

@@ -19,6 +19,7 @@ from app.domains.dispositivo.schema import (
     CredencialDispositivo,
     LeituraModulo,
     ListaModulos,
+    IntervaloLigado,
     ModuloIotRead,
     PontoLeitura,
     RespostaContagem,
@@ -142,6 +143,8 @@ async def registrar_modulos(db: AsyncSession, mac: str, lista: ListaModulos) -> 
     agora = datetime.now(UTC)
     alterados = []
     seriais = set()
+    # mudancas do rele vao pro influx, pro grafico mostrar qnd o aquecedor ficou ligado
+    mudancas_rele = []
 
     for item in lista.modulos:
         seriais.add(item.serial)
@@ -149,6 +152,9 @@ async def registrar_modulos(db: AsyncSession, mac: str, lista: ListaModulos) -> 
 
         if modulo is None:
             modulo = ModuloIot(serial=item.serial)
+
+        if item.ligado is not None and item.ligado != modulo.ligado:
+            mudancas_rele.append(ponto_rele(mac, item.serial, item.tipo, item.ligado, agora))
 
         modulo.tipo = item.tipo
         modulo.ligado = item.ligado
@@ -158,10 +164,26 @@ async def registrar_modulos(db: AsyncSession, mac: str, lista: ListaModulos) -> 
 
     for modulo in await repo.listar_modulos(dispositivo.id):
         if modulo.serial not in seriais:
+            # tiraram o modulo com o rele ligado, o aquecedor desligou junto
+            if modulo.ligado:
+                mudancas_rele.append(ponto_rele(mac, modulo.serial, modulo.tipo, False, agora))
             modulo.id_dispositivo = None
             alterados.append(modulo)
 
     await repo.salvar_modulos(alterados)
+    if mudancas_rele:
+        await LeituraRepository().gravar(mudancas_rele)
+
+
+def ponto_rele(mac: str, serial: str, tipo: int, ligado: bool, tempo: datetime) -> Point:
+    return (
+        Point("rele")
+        .tag("dispositivo", mac)
+        .tag("modulo", serial)
+        .tag("tipo", str(int(tipo)))
+        .field("ligado", ligado)
+        .time(tempo)
+    )
 
 
 async def gravar_leitura(mac: str, leitura: LeituraModulo) -> None:
@@ -284,6 +306,36 @@ def limpar_trechos(serie: SerieLeitura) -> None:
     serie.trechos = trechos
 
 
+# liga abre um intervalo, desliga fecha. o q tava ligado antes do inicio comeca no inicio,
+# o q ainda ta ligado vai ate o fim
+def intervalos_ligado(registros, inicio: datetime, fim: datetime) -> dict[int, list[IntervaloLigado]]:
+    intervalos: dict[int, list[IntervaloLigado]] = {}
+    ligou_em: dict[int, datetime] = {}
+
+    for registro in registros:
+        tipo = int(registro.values["tipo"])
+        tempo = registro.get_time()
+
+        if registro.get_value() and tipo not in ligou_em:
+            ligou_em[tipo] = tempo
+        elif not registro.get_value() and tipo in ligou_em:
+            adicionar_intervalo(intervalos, tipo, ligou_em.pop(tipo), tempo, inicio, fim)
+
+    for tipo, tempo in ligou_em.items():
+        adicionar_intervalo(intervalos, tipo, tempo, fim, inicio, fim)
+    return intervalos
+
+
+# corta no periodo pedido, o q ficou todo fora nem entra
+def adicionar_intervalo(intervalos: dict[int, list[IntervaloLigado]], tipo: int, ligou: datetime, desligou: datetime,
+    inicio: datetime, fim: datetime) -> None:
+    if desligou <= inicio or ligou >= fim:
+        return
+    if tipo not in intervalos:
+        intervalos[tipo] = []
+    intervalos[tipo].append(IntervaloLigado(inicio=max(ligou, inicio), fim=min(desligou, fim)))
+
+
 # tela principal manda so os minutos, o historico manda inicio e fim do calendario
 def resolver_periodo(minutos: int, inicio: datetime | None, fim: datetime | None) -> tuple[datetime, datetime]:
     if inicio is None or fim is None:
@@ -346,13 +398,16 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: dat
         for serie in series_do_tipo.values():
             limpar_trechos(serie)
 
+    ligados = intervalos_ligado(await leituras.listar_rele(dispositivo.mac, inicio, fim), inicio, fim)
+
     # conectados agora, com o rele de cada um
     modulos = []
     tipos_conectados = set()
     for modulo in await DispositivoRepository(db).listar_modulos(dispositivo.id):
         tipos_conectados.add(modulo.tipo)
         series_do_modulo = list(series.get(modulo.tipo, {}).values())
-        modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo, ligado=modulo.ligado))
+        modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo, ligado=modulo.ligado,
+            periodos_ligado=ligados.get(modulo.tipo, [])))
 
     # tela ao vivo so mostra o q ta conectado, o resto e coisa do historico
     if not historico:
@@ -360,7 +415,8 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: dat
 
     for tipo, series_do_tipo in series.items():
         if tipo not in tipos_conectados:
-            modulos.append(ModuloIotRead(serial=None, tipo=tipo, series=list(series_do_tipo.values()), removido=True))
+            modulos.append(ModuloIotRead(serial=None, tipo=tipo, series=list(series_do_tipo.values()), removido=True,
+                periodos_ligado=ligados.get(tipo, [])))
 
     # msm ordem da tela ao vivo, q vem do banco por tipo
     modulos.sort(key=lambda modulo: modulo.tipo)
