@@ -47,8 +47,6 @@ class RecordeRead(BaseModel):
     jogo: str
     titulo: str
     recorde: int
-    acertos: int
-    respondidas: int
 
 
 class PalpiteInput(BaseModel):

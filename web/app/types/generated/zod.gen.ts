@@ -754,9 +754,7 @@ export const zRascunhoUpdate = z.object({
 export const zRecordeRead = z.object({
     jogo: z.string(),
     titulo: z.string(),
-    recorde: z.int(),
-    acertos: z.int(),
-    respondidas: z.int()
+    recorde: z.int()
 });
 
 /**
@@ -1076,6 +1074,7 @@ export const zTrilhaAlunoRead = z.object({
     progresso: z.int(),
     proximo_conteudo_id: z.int().nullish(),
     proximo_conteudo_titulo: z.string().nullish(),
+    ultima_atividade_em: z.iso.datetime().nullish(),
     modulos: z.array(zModuloAlunoRead)
 });
 
@@ -1114,7 +1113,8 @@ export const zTrilhaResumoRead = z.object({
     total: z.int(),
     progresso: z.int(),
     proximo_conteudo_id: z.int().nullish(),
-    proximo_conteudo_titulo: z.string().nullish()
+    proximo_conteudo_titulo: z.string().nullish(),
+    ultima_atividade_em: z.iso.datetime().nullish()
 });
 
 /**

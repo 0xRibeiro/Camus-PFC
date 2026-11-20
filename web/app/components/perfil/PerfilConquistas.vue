@@ -25,14 +25,15 @@
 
     <ul
       v-else
-      class="space-y-3"
+      class="space-y-2"
     >
       <li
         v-for="conquista in ultimas"
         :key="conquista.id"
-        class="flex items-center gap-3"
+        class="relative flex items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-yellow-400/20 via-amber-300/10 to-transparent p-2 ring ring-amber-400/30"
       >
-        <div class="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 text-primary">
+        <!-- medalha dourada com brilho -->
+        <div class="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 text-white shadow-md shadow-amber-500/40 ring-2 ring-yellow-200/60">
           <img
             v-if="conquista.imagem_dir"
             :src="conquista.imagem_dir"
@@ -41,21 +42,25 @@
           >
           <UIcon
             v-else
-            name="i-lucide-award"
-            class="size-6"
+            name="i-lucide-trophy"
+            class="size-5 drop-shadow"
           />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium text-highlighted">
+          <p class="truncate text-sm font-semibold text-highlighted">
             {{ conquista.titulo }}
           </p>
           <p
             v-if="conquista.desbloqueada_em"
-            class="text-xs text-muted"
+            class="text-xs text-amber-700 dark:text-amber-300"
           >
             {{ formatarData(conquista.desbloqueada_em) }}
           </p>
         </div>
+        <UIcon
+          name="i-lucide-sparkles"
+          class="size-4 shrink-0 text-amber-500"
+        />
       </li>
     </ul>
   </UCard>

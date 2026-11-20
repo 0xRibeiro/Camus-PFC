@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 from app.domains.conquistas.schema import ConquistaRead
@@ -38,6 +40,7 @@ class TrilhaResumoRead(BaseModel):
     # None qnd ja concluiu tudo
     proximo_conteudo_id: int | None = None
     proximo_conteudo_titulo: str | None = None
+    ultima_atividade_em: datetime | None = None
 
 
 class TrilhaAlunoRead(TrilhaResumoRead):

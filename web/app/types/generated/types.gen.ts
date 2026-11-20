@@ -1768,14 +1768,6 @@ export type RecordeRead = {
      * Recorde
      */
     recorde: number;
-    /**
-     * Acertos
-     */
-    acertos: number;
-    /**
-     * Respondidas
-     */
-    respondidas: number;
 };
 
 /**
@@ -2207,6 +2199,10 @@ export type TrilhaAlunoRead = {
      */
     proximo_conteudo_titulo?: string | null;
     /**
+     * Ultima Atividade Em
+     */
+    ultima_atividade_em?: string | null;
+    /**
      * Modulos
      */
     modulos: Array<ModuloAlunoRead>;
@@ -2308,6 +2304,10 @@ export type TrilhaResumoRead = {
      * Proximo Conteudo Titulo
      */
     proximo_conteudo_titulo?: string | null;
+    /**
+     * Ultima Atividade Em
+     */
+    ultima_atividade_em?: string | null;
 };
 
 /**

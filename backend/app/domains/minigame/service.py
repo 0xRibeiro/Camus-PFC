@@ -170,16 +170,9 @@ async def meus_recordes(db: AsyncSession, usuario: Usuario) -> list[RecordeRead]
     repo = MinigameRepository(db)
     recordes = []
     for jogo, titulo in TITULOS_JOGOS.items():
-        respostas = await repo.listar_acertos(usuario.id, jogo)
         # [1] é o recorde, a sequencia atual n importa aqui
-        recorde = calcular_sequencias(respostas)[1]
-
-        acertos = 0
-        for acertou in respostas:
-            if acertou:
-                acertos += 1
-
-        recordes.append(RecordeRead(jogo=jogo, titulo=titulo, recorde=recorde, acertos=acertos, respondidas=len(respostas)))
+        recorde = calcular_sequencias(await repo.listar_acertos(usuario.id, jogo))[1]
+        recordes.append(RecordeRead(jogo=jogo, titulo=titulo, recorde=recorde))
     return recordes
 
 

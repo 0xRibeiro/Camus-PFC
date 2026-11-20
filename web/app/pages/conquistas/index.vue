@@ -9,9 +9,6 @@
         icone="i-lucide-trophy"
       />
 
-      <!-- xp, extrato e progresso nas trilhas -->
-      <PontuacaoResumo />
-
       <!-- erro caso as conquistas nao carreguem -->
       <UAlert
         v-if="mensagem_de_erro"
@@ -70,7 +67,7 @@
       <section v-else class="grid gap-4 sm:grid-cols-2">
         <!-- aqui tem o for que passa por todas as conquistas e vai colocando os cards de cada uma -->
         <UCard
-          v-for="conquista in todasConquistas"
+          v-for="conquista in conquistasOrdenadas"
           :key="conquista.id"
           :class="ids_conquistas_desbloqueadas.has(conquista.id) ? 'ring-primary/50' : 'opacity-70'"
         >
@@ -109,14 +106,21 @@
                 {{ conquista.descricao || 'continue utilizando a plataforma para desbloquear.' }}
               </p>
               <!-- caso a conquista não tenha descricão o site coloca uma generica -->
-              <UBadge
-                class="mt-3"
-                :color="ids_conquistas_desbloqueadas.has(conquista.id) ? 'primary' : 'neutral'"
-                variant="subtle"
-              >
-                <!-- em cima tem outro operador ternario que distingue as bloqueadas das desbloqueada -->
-                {{ ids_conquistas_desbloqueadas.has(conquista.id) ? 'Desbloqueada' : 'Bloqueada' }}
-              </UBadge>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <UBadge
+                  :color="ids_conquistas_desbloqueadas.has(conquista.id) ? 'primary' : 'neutral'"
+                  variant="subtle"
+                >
+                  <!-- em cima tem outro operador ternario que distingue as bloqueadas das desbloqueada -->
+                  {{ ids_conquistas_desbloqueadas.has(conquista.id) ? 'Desbloqueada' : 'Bloqueada' }}
+                </UBadge>
+                <span
+                  v-if="datas.get(conquista.id)"
+                  class="text-xs text-muted"
+                >
+                  em {{ formatarData(datas.get(conquista.id)!) }}
+                </span>
+              </div>
             </div>
           </div>
         </UCard>
@@ -126,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ConquistaRead } from '~/types/generated'
+import type { ConquistaRead, ConquistaUsuarioRead } from '~/types/generated'
 
 // verifica a role do usuario
 definePageMeta({ middleware: 'role' })
@@ -137,6 +141,8 @@ type RespostaListaConquistas = ConquistaRead[] | { data?: ConquistaRead[] }
 const api = useApi()
 const todasConquistas = ref<ConquistaRead[]>([])
 const ids_conquistas_desbloqueadas = ref(new Set<number>())
+// id -> quando desbloqueou
+const datas = ref(new Map<number, string | null>())
 const carregando = ref(true)
 const mensagem_de_erro = ref('')
 
@@ -145,6 +151,24 @@ const progresso = computed(() => {
   if (!todasConquistas.value.length) return 0
   return Math.round((ids_conquistas_desbloqueadas.value.size / todasConquistas.value.length) * 100)
 })
+
+// desbloqueadas primeiro (mais nova no topo, o back ja manda assim) e as bloqueadas no fim
+const conquistasOrdenadas = computed(() => {
+  const desbloqueadas: ConquistaRead[] = []
+  const bloqueadas: ConquistaRead[] = []
+  for (const conquista of todasConquistas.value) {
+    if (!ids_conquistas_desbloqueadas.value.has(conquista.id)) bloqueadas.push(conquista)
+  }
+  for (const id of datas.value.keys()) {
+    const conquista = todasConquistas.value.find(item => item.id === id)
+    if (conquista) desbloqueadas.push(conquista)
+  }
+  return [...desbloqueadas, ...bloqueadas]
+})
+
+function formatarData(data: string) {
+  return new Date(data).toLocaleDateString('pt-BR')
+}
 
 function obterItens(resposta: RespostaListaConquistas) {
   return Array.isArray(resposta) ? resposta : resposta.data || []
@@ -158,11 +182,18 @@ async function buscarConquistas() {
   try {
     const [resposta_todas_conquistas, resposta_conquistas_desbloqueadas] = await Promise.all([
       api('/conquistas') as Promise<RespostaListaConquistas>,
-      api('/usuarios/me/conquistas') as Promise<ConquistaRead[]>,
+      api('/usuarios/me/conquistas') as Promise<ConquistaUsuarioRead[]>,
     ])
 
     todasConquistas.value = obterItens(resposta_todas_conquistas)
     ids_conquistas_desbloqueadas.value = new Set(resposta_conquistas_desbloqueadas.map(conquista => conquista.id))
+
+    // map guarda a ordem q chegou, entao serve pra ordenar tbm
+    const novasDatas = new Map<number, string | null>()
+    for (const conquista of resposta_conquistas_desbloqueadas) {
+      novasDatas.set(conquista.id, conquista.desbloqueada_em ?? null)
+    }
+    datas.value = novasDatas
     carregando.value = false
   }
   catch {

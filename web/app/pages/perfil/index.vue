@@ -35,7 +35,10 @@
 
       <!-- so aluno ganha xp global, autor e admin ficam so com a edicao -->
       <template v-if="auth.role === 'aluno'">
-        <section class="grid gap-4 sm:grid-cols-3">
+        <section
+          class="grid gap-4 sm:grid-cols-3"
+          :style="corDoPerfil"
+        >
           <UCard
             v-for="numero in numeros"
             :key="numero.titulo"
@@ -66,14 +69,24 @@
           </UCard>
         </section>
 
-        <PerfilXp />
+        <PerfilXp :style="corDoPerfil" />
 
         <div class="grid gap-4 lg:grid-cols-2">
           <PerfilConquistas :conquistas="minhasConquistas" />
           <PerfilRecordes />
         </div>
 
-        <PerfilTrilhas />
+        <div class="grid gap-4 lg:grid-cols-3">
+          <PerfilTrilhas
+            :trilhas="trilhas"
+            :carregando="carregando"
+            class="lg:col-span-2"
+          />
+          <PerfilTrilhasConcluidas
+            :trilhas="trilhas"
+            :carregando="carregando"
+          />
+        </div>
       </template>
     </div>
 
@@ -88,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ConquistaRead, ConquistaUsuarioRead, XpRead } from '~/types/generated'
+import type { ConquistaRead, ConquistaUsuarioRead, TrilhaResumoRead, XpRead } from '~/types/generated'
 
 // so exige estar logado, qualquer papel
 definePageMeta({ middleware: 'role' })
@@ -100,6 +113,32 @@ const carregando = ref(true)
 const xp = ref<XpRead | null>(null)
 const minhasConquistas = ref<ConquistaUsuarioRead[]>([])
 const totalConquistas = ref(0)
+const trilhas = ref<TrilhaResumoRead[]>([])
+
+function matizDaCor(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const maior = Math.max(r, g, b)
+  const menor = Math.min(r, g, b)
+  const diferenca = maior - menor
+
+  if (diferenca < 0.08) return null
+
+  let matiz
+  if (maior === r) matiz = ((g - b) / diferenca) % 6
+  else if (maior === g) matiz = (b - r) / diferenca + 2
+  else matiz = (r - g) / diferenca + 4
+
+  return Math.round(matiz * 60 + 360) % 360
+}
+
+// troca o primary so nos cards e no grafico
+const corDoPerfil = computed(() => {
+  const matiz = matizDaCor(auth.user?.cor_fundo ?? '#0EA5E9')
+  if (matiz === null) return {}
+  return { '--ui-primary': `hsl(${matiz} 75% 50%)` }
+})
 
 const numeros = computed(() => [
   { titulo: 'XP total', icone: 'i-lucide-sparkles', valor: xp.value?.xp_total ?? 0 },
@@ -111,12 +150,14 @@ onMounted(async () => {
   if (auth.role !== 'aluno') return
   const api = useApi()
   try {
-    const [respostaXp, respostaMinhas, respostaTodas] = await Promise.all([
+    const [respostaXp, respostaMinhas, respostaTodas, respostaTrilhas] = await Promise.all([
       api('/pontuacao/xp') as Promise<XpRead>,
       api('/usuarios/me/conquistas') as Promise<ConquistaUsuarioRead[]>,
       // o fastcrud manda a lista dentro de data
       api('/conquistas') as Promise<{ data: ConquistaRead[] }>,
+      api('/progresso/trilhas') as Promise<TrilhaResumoRead[]>,
     ])
+    trilhas.value = respostaTrilhas
     xp.value = respostaXp
     minhasConquistas.value = respostaMinhas
     totalConquistas.value = respostaTodas.data.length

@@ -144,6 +144,12 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
                 proximo = conteudo
                 break
 
+        # conclusao mais recente, ordena o perfil e vira a data de qnd terminou a trilha
+        ultima_atividade = None
+        for conclusao in conclusoes.values():
+            if ultima_atividade is None or conclusao.concluido_em > ultima_atividade:
+                ultima_atividade = conclusao.concluido_em
+
         resumos.append(
             TrilhaResumoRead(
                 id=trilha.id,
@@ -156,6 +162,7 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
                 progresso=calcular_porcentagem(concluidos, total),
                 proximo_conteudo_id=proximo.id if proximo else None,
                 proximo_conteudo_titulo=proximo.titulo if proximo else None,
+                ultima_atividade_em=ultima_atividade,
             )
         )
 
