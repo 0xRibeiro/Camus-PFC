@@ -31,25 +31,13 @@
       </span>
     </div>
 
-    <div class="flex flex-wrap items-end justify-between gap-2">
-      <div>
-        <p class="text-4xl font-semibold text-highlighted tabular-nums">
-          {{ textoAtual(serie, formatar, fim === undefined) }}
-        </p>
-        <p class="text-sm text-muted">
-          do sensor até a água
-        </p>
-      </div>
-
-      <!-- distancia menor e agua mais alta -->
-      <UBadge
-        v-if="variacao !== null"
-        :color="Math.abs(variacao) < 0.5 ? 'neutral' : variacao > 0 ? 'info' : 'warning'"
-        variant="subtle"
-        :icon="Math.abs(variacao) < 0.5 ? 'i-lucide-minus' : variacao > 0 ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
-      >
-        {{ textoVariacao }}
-      </UBadge>
+    <div>
+      <p class="text-4xl font-semibold text-highlighted tabular-nums">
+        {{ textoAtual(serie, formatar, fim === undefined) }}
+      </p>
+      <p class="text-sm text-muted">
+        do sensor até a água
+      </p>
     </div>
 
     <AquarioGrafico
@@ -91,20 +79,4 @@ const serie = computed(() => props.modulo.series.find(item => item.nome === 'dis
 function formatar(valor: number) {
   return `${formatoDistancia.format(valor)} cm`
 }
-
-// positivo e agua subindo no periodo
-const variacao = computed(() => {
-  const pontos = serie.value?.pontos ?? []
-  const primeiro = pontos[0]
-  const ultimo = pontos.at(-1)
-  if (!primeiro || !ultimo || pontos.length < 2) return null
-  return primeiro.valor - ultimo.valor
-})
-
-const textoVariacao = computed(() => {
-  if (variacao.value === null) return ''
-  if (Math.abs(variacao.value) < 0.5) return 'Nível estável'
-  const quanto = formatar(Math.abs(variacao.value))
-  return variacao.value > 0 ? `Subiu ${quanto}` : `Baixou ${quanto}`
-})
 </script>
