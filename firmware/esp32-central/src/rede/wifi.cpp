@@ -15,7 +15,7 @@ namespace wifi {
   // "Camus-XXXX" + \0
   char nomeHotspot[11];
 
-  // 8 é o mínimo do WPA2, + \0
+  // 8 letras é o mínimo q o wifi aceita de senha, +1 do \0
   char senhaHotspot[9];
 
   // sem 0/o e 1/l/i pra n confundir lendo na telinha
@@ -35,7 +35,8 @@ namespace wifi {
     senhaHotspot[8] = '\0';
   }
 
-  // tenta a última rede salva na NVS
+  // tenta a última rede salva na memória da esp q n apaga qnd desliga.
+  // WIFI_STA = a esp entra numa rede, em vez de criar uma
   void iniciar() {
     WiFi.mode(WIFI_STA);
     WiFi.begin();

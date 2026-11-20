@@ -28,15 +28,15 @@ void TelaModulos::desenhar() {
   }
 
   for (int i = 0; i < barramento::quantidade(); i++) {
-    const barramento::Modulo& modulo = barramento::modulo(i);
+    barramento::Modulo modulo = barramento::pegarModulo(i);
 
     display::tft.setTextSize(1);
     display::tft.setTextColor(ST77XX_WHITE);
     display::tft.setCursor(4, y);
-    display::tft.print(barramento::nomeTipo(modulo.tipo));
+    display::tft.print(barramento::nomeTipo(modulo));
 
     // estado do rele do lado do nome
-    if (barramento::atuadorTipo(modulo.tipo)) {
+    if (barramento::ehAtuador(modulo)) {
       display::tft.setCursor(100, y);
       if (modulo.ligado) {
         display::tft.setTextColor(ST77XX_GREEN);
@@ -47,7 +47,7 @@ void TelaModulos::desenhar() {
       }
     }
 
-    int quantidade = barramento::quantidadeLeituras(modulo.tipo);
+    int quantidade = barramento::quantidadeLeituras(modulo);
     display::tft.setTextColor(ST77XX_CYAN);
 
     if (!modulo.temValor) {
@@ -55,7 +55,7 @@ void TelaModulos::desenhar() {
       display::tft.setCursor(4, y + 10);
       display::tft.print("...");
     } else if (quantidade == 1) {
-      const barramento::InfoLeitura& leitura = barramento::leituraTipo(modulo.tipo, 0);
+      barramento::InfoLeitura leitura = barramento::leitura(modulo, 0);
       display::tft.setTextSize(2);
       display::tft.setCursor(4, y + 10);
       display::tft.print(modulo.valores[0], leitura.casas);
@@ -65,7 +65,7 @@ void TelaModulos::desenhar() {
       // mais de um valor n cabe grande, vai um por linha
       display::tft.setTextSize(1);
       for (int v = 0; v < quantidade; v++) {
-        const barramento::InfoLeitura& leitura = barramento::leituraTipo(modulo.tipo, v);
+        barramento::InfoLeitura leitura = barramento::leitura(modulo, v);
         display::tft.setCursor(4, y + 10 + v * 10);
         display::tft.print(leitura.rotulo);
         display::tft.print(": ");
