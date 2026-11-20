@@ -19,12 +19,28 @@
         </span>
       </div>
 
-      <USelect
-        v-model="minutos"
-        :items="periodos"
-        class="w-40"
-      />
+      <div class="flex flex-wrap items-center gap-2">
+        <UTabs
+          v-model="minutos"
+          :items="periodos"
+          :content="false"
+          size="sm"
+        />
+
+        <UButton
+          label="Histórico"
+          icon="i-lucide-history"
+          color="neutral"
+          variant="outline"
+          @click="historicoAberto = true"
+        />
+      </div>
     </div>
+
+    <AquarioHistorico
+      v-model:open="historicoAberto"
+      :aquario-id="aquarioId"
+    />
 
     <div
       v-if="carregando"
@@ -90,10 +106,13 @@ const TIPO_QUALIDADE_AGUA = 3
 const ESPERA_CONFIRMACAO_MS = 15000
 
 const periodos = [
-  { label: 'Última hora', value: 60 },
-  { label: 'Últimas 6 horas', value: 360 },
-  { label: 'Últimas 24 horas', value: 1440 },
+  { label: '1 h', value: 60 },
+  { label: '6 h', value: 360 },
+  { label: '24 h', value: 1440 },
 ]
+
+// 7 e 30 dias ficam no modal, buscam so qnd abre
+const historicoAberto = ref(false)
 
 const api = useApi()
 const toast = useToast()

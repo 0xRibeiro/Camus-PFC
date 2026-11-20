@@ -92,13 +92,14 @@
 <script setup lang="ts">
 import type { ModuloIotRead } from '~/types/generated'
 
-const props = defineProps<{
+// sem o default o vue transforma o pendente q n foi passado em false, e o card ficava "desligando"
+const props = withDefaults(defineProps<{
   modulo: ModuloIotRead
   minutos: number
   podeEditar: boolean
   // estado pedido enquanto o esp n confirma
   pendente?: boolean
-}>()
+}>(), { pendente: undefined })
 
 const emit = defineEmits<{ comandar: [ligar: boolean] }>()
 
