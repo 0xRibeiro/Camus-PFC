@@ -13,9 +13,6 @@
           <h3 class="font-medium">
             Qualidade da água
           </h3>
-          <p class="text-xs text-muted">
-            Módulo {{ modulo.serial }}
-          </p>
         </div>
       </div>
 
@@ -39,7 +36,7 @@
             {{ medida.titulo }}
           </p>
           <p class="text-4xl font-semibold text-highlighted tabular-nums">
-            {{ textoAtual(medida.serie, medida.formatar) }}
+            {{ textoAtual(medida.serie, medida.formatar, fim === undefined) }}
           </p>
           <p class="text-sm text-muted">
             {{ medida.descricao }}

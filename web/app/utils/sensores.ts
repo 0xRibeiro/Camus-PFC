@@ -45,9 +45,20 @@ export function calcularEixo(nome: string, menor: number, maior: number): [numbe
   return [Math.floor(inicio / passo) * passo, Math.ceil(fim / passo) * passo]
 }
 
-// valor grande do card, leitura fora da faixa n aparece como numero
-export function textoAtual(serie: SerieLeitura | undefined, formatar: (valor: number) => string) {
+// esp manda de 5 em 5s, mais q isso sem leitura e iot desligado. msm tempo do backend pra faixa cinza
+const LEITURA_ANTIGA_MS = 30 * 1000
+
+// leitura de agora, a ultima q chegou pode ser de muito tempo atras
+export function leituraRecente(serie: SerieLeitura | undefined) {
+  if (!serie?.atual) return false
+  return Date.now() - new Date(serie.atual.tempo).getTime() <= LEITURA_ANTIGA_MS
+}
+
+// valor grande do card, leitura fora da faixa n aparece como numero.
+// na tela ao vivo, valor velho n aparece pq a agua pode ter mudado desde entao
+export function textoAtual(serie: SerieLeitura | undefined, formatar: (valor: number) => string, aoVivo = true) {
   if (!serie?.atual) return '—'
+  if (aoVivo && !leituraRecente(serie)) return 'Offline'
   if (serie.atual_erro) return 'Erro de leitura'
   return formatar(serie.atual.valor)
 }

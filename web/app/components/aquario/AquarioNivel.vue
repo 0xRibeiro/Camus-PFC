@@ -13,9 +13,6 @@
           <h3 class="font-medium">
             Nível da água
           </h3>
-          <p class="text-xs text-muted">
-            Módulo {{ modulo.serial }}
-          </p>
         </div>
       </div>
 
@@ -30,7 +27,7 @@
     <div class="flex flex-wrap items-end justify-between gap-2">
       <div>
         <p class="text-4xl font-semibold text-highlighted tabular-nums">
-          {{ textoAtual(serie, formatar) }}
+          {{ textoAtual(serie, formatar, fim === undefined) }}
         </p>
         <p class="text-sm text-muted">
           do sensor até a água
@@ -65,14 +62,6 @@
       class="text-sm text-muted"
     >
       Sem leituras nesse período.
-    </p>
-
-    <p class="flex items-start gap-2 text-xs text-muted">
-      <UIcon
-        name="i-lucide-info"
-        class="mt-0.5 size-3.5 shrink-0"
-      />
-      O sensor fica em cima do aquário e mede até a superfície. Quanto menor a distância, mais cheio. No gráfico, a linha sobe quando a água sobe.
     </p>
   </UCard>
 </template>

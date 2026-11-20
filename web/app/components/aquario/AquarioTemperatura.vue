@@ -13,9 +13,6 @@
           <h3 class="font-medium">
             Temperatura da água
           </h3>
-          <p class="text-xs text-muted">
-            Módulo {{ modulo.serial }}
-          </p>
         </div>
       </div>
 
@@ -28,7 +25,7 @@
     </div>
 
     <p class="text-4xl font-semibold text-highlighted tabular-nums">
-      {{ textoAtual(serie, formatar) }}
+      {{ textoAtual(serie, formatar, fim === undefined) }}
     </p>
 
     <AquarioGrafico

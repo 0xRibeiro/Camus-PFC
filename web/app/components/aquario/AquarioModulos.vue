@@ -6,16 +6,22 @@
           Sensores
         </h2>
 
-        <!-- so a ultima hora atualiza rapido -->
+        <!-- so a ultima hora atualiza rapido, e so e ao vivo se o iot ta mandando leitura -->
         <span
-          v-if="minutos === 60"
+          v-if="minutos === 60 && !carregando"
           class="flex items-center gap-1.5 text-xs text-muted"
         >
           <span class="relative flex size-2">
-            <span class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
-            <span class="relative inline-flex size-2 rounded-full bg-success" />
+            <span
+              v-if="aoVivo"
+              class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75"
+            />
+            <span
+              class="relative inline-flex size-2 rounded-full"
+              :class="aoVivo ? 'bg-success' : 'bg-neutral-500'"
+            />
           </span>
-          ao vivo
+          {{ aoVivo ? 'ao vivo' : 'sem leituras agora' }}
         </span>
       </div>
 
@@ -113,6 +119,16 @@ const periodos = [
 
 // 7 e 30 dias ficam no modal, buscam so qnd abre
 const historicoAberto = ref(false)
+
+// algum sensor mandou leitura agora pouco
+const aoVivo = computed(() => {
+  for (const modulo of modulos.value) {
+    for (const serie of modulo.series) {
+      if (leituraRecente(serie)) return true
+    }
+  }
+  return false
+})
 
 const api = useApi()
 const toast = useToast()
