@@ -137,6 +137,13 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
         concluidos = contar_concluidos(list(status.values()))
         total = len(sequencia)
 
+        # primeiro q falta, pro botao de continuar
+        proximo = None
+        for conteudo in sequencia:
+            if not status[conteudo.id].concluido:
+                proximo = conteudo
+                break
+
         resumos.append(
             TrilhaResumoRead(
                 id=trilha.id,
@@ -147,6 +154,8 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
                 concluidos=concluidos,
                 total=total,
                 progresso=calcular_porcentagem(concluidos, total),
+                proximo_conteudo_id=proximo.id if proximo else None,
+                proximo_conteudo_titulo=proximo.titulo if proximo else None,
             )
         )
 

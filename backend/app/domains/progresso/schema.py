@@ -35,6 +35,9 @@ class TrilhaResumoRead(BaseModel):
     concluidos: int
     total: int
     progresso: int
+    # None qnd ja concluiu tudo
+    proximo_conteudo_id: int | None = None
+    proximo_conteudo_titulo: str | None = None
 
 
 class TrilhaAlunoRead(TrilhaResumoRead):

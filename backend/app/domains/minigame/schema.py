@@ -42,6 +42,15 @@ class RodadaMaisOuMenosRead(BaseModel):
     limite_acertos_com_xp: int
 
 
+# um por jogo, pro perfil
+class RecordeRead(BaseModel):
+    jogo: str
+    titulo: str
+    recorde: int
+    acertos: int
+    respondidas: int
+
+
 class PalpiteInput(BaseModel):
     palpite: Literal["mais", "menos"]
 

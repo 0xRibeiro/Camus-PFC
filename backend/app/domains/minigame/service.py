@@ -7,9 +7,10 @@ from fastcrud.exceptions.http_exceptions import BadRequestException, NotFoundExc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.minigame import inat
-from app.domains.minigame.model import JOGO_MEIO_PEIXE_MEIO_FOTOGRAFO, JOGO_QUEM_E_ESSE_PEIXE, RodadaMinigame
+from app.domains.minigame.model import JOGO_MEIO_PEIXE_MEIO_FOTOGRAFO, JOGO_QUEM_E_ESSE_PEIXE, TITULOS_JOGOS, RodadaMinigame
 from app.domains.minigame.repository import MinigameRepository
 from app.domains.minigame.schema import (
+    RecordeRead,
     ResultadoMaisOuMenosRead,
     ResultadoRead,
     RodadaMaisOuMenosRead,
@@ -162,6 +163,24 @@ def calcular_sequencias(acertos: list[bool]) -> tuple[int, int]:
         else:
             seguidos = 0
     return atual, recorde
+
+
+###### recordes pro perfil
+async def meus_recordes(db: AsyncSession, usuario: Usuario) -> list[RecordeRead]:
+    repo = MinigameRepository(db)
+    recordes = []
+    for jogo, titulo in TITULOS_JOGOS.items():
+        respostas = await repo.listar_acertos(usuario.id, jogo)
+        # [1] é o recorde, a sequencia atual n importa aqui
+        recorde = calcular_sequencias(respostas)[1]
+
+        acertos = 0
+        for acertou in respostas:
+            if acertou:
+                acertos += 1
+
+        recordes.append(RecordeRead(jogo=jogo, titulo=titulo, recorde=recorde, acertos=acertos, respondidas=len(respostas)))
+    return recordes
 
 
 def montar_comparada(especie: dict, foto: dict) -> dict:

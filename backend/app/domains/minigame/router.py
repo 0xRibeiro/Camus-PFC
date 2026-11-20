@@ -5,6 +5,7 @@ from app.core.database import get_async_session
 from app.domains.minigame import service
 from app.domains.minigame.schema import (
     PalpiteInput,
+    RecordeRead,
     RespostaInput,
     ResultadoMaisOuMenosRead,
     ResultadoRead,
@@ -15,6 +16,14 @@ from app.domains.usuario.model import Usuario
 from app.domains.usuario.service import get_current_user
 
 router = APIRouter(prefix="/minigames", tags=["minigames"])
+
+
+@router.get("/recordes", response_model=list[RecordeRead])
+async def meus_recordes(
+    db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user),
+) -> list[RecordeRead]:
+    return await service.meus_recordes(db, usuario)
 
 
 @router.post("/quem-e-esse-peixe/rodadas", response_model=RodadaRead, status_code=201)
