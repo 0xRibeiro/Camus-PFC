@@ -1024,10 +1024,11 @@ export const zSerieLeitura = z.object({
  * ModuloIotRead
  */
 export const zModuloIotRead = z.object({
-    serial: z.string(),
+    serial: z.string().nullable(),
     tipo: zTipoModulo,
     series: z.array(zSerieLeitura),
-    ligado: z.boolean().nullish()
+    ligado: z.boolean().nullish(),
+    removido: z.boolean().optional().default(false)
 });
 
 /**

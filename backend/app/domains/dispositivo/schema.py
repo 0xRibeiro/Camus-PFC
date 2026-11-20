@@ -114,12 +114,16 @@ class SerieLeitura(BaseModel):
 
 
 class ModuloIotRead(BaseModel):
-    serial: str
+    # None qnd e um tipo q so tem leitura antiga, nenhum modulo dele ta conectado agora
+    serial: str | None
     tipo: TipoModulo
     series: list[SerieLeitura]
 
     # None = n tem rele
     ligado: bool | None = None
+
+    # so aparece no historico, leituras de um modulo q ja tiraram da central
+    removido: bool = False
 
 
 # body da rota de comando

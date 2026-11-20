@@ -242,7 +242,9 @@ async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, min
     if dispositivo is None:
         return []
 
-    return await dispositivo_service.listar_modulos(db, dispositivo, de, ate, agrupamento)
+    # historico e qnd vem o periodo do calendario
+    historico = inicio is not None and fim is not None
+    return await dispositivo_service.listar_modulos(db, dispositivo, de, ate, agrupamento, historico)
 
 
 # leitor so ve, dono e operador ligam/desligam

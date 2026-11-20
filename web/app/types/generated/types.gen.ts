@@ -1291,7 +1291,7 @@ export type ModuloIotRead = {
     /**
      * Serial
      */
-    serial: string;
+    serial: string | null;
     tipo: TipoModulo;
     /**
      * Series
@@ -1301,6 +1301,10 @@ export type ModuloIotRead = {
      * Ligado
      */
     ligado?: boolean | null;
+    /**
+     * Removido
+     */
+    removido?: boolean;
 };
 
 /**

@@ -245,15 +245,16 @@ def calcular_janela(inicio: datetime, fim: datetime, agrupamento: str) -> int:
     return max(5, segundos // 360)
 
 
-def serie_do_registro(series: dict[str, dict[str, SerieLeitura]], registro) -> SerieLeitura:
-    serial = registro.values["modulo"]
+# series ficam por tipo de modulo, n por serial, a consulta ja junta os modulos do msm tipo
+def serie_do_registro(series: dict[int, dict[str, SerieLeitura]], registro) -> SerieLeitura:
+    tipo = int(registro.values["tipo"])
     nome = registro.values["nome"]
 
-    if serial not in series:
-        series[serial] = {}
-    if nome not in series[serial]:
-        series[serial][nome] = SerieLeitura(nome=nome, unidade=registro.values["unidade"], pontos=[])
-    return series[serial][nome]
+    if tipo not in series:
+        series[tipo] = {}
+    if nome not in series[tipo]:
+        series[tipo][nome] = SerieLeitura(nome=nome, unidade=registro.values["unidade"], pontos=[])
+    return series[tipo][nome]
 
 
 # janela vazia vira trecho, emendando as vizinhas do msm tipo
@@ -296,10 +297,11 @@ def resolver_periodo(minutos: int, inicio: datetime | None, fim: datetime | None
     return inicio, fim
 
 
-# junta os pontos do influx por modulo e por nome da leitura
+# junta os pontos do influx por tipo de modulo e por nome da leitura.
+# no historico tipo sem modulo conectado aparece msm assim, como removido
 async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: datetime, fim: datetime,
-    agrupamento: str) -> list[ModuloIotRead]:
-    series: dict[str, dict[str, SerieLeitura]] = {}
+    agrupamento: str, historico: bool) -> list[ModuloIotRead]:
+    series: dict[int, dict[str, SerieLeitura]] = {}
     leituras = LeituraRepository()
     janela = calcular_janela(inicio, fim, agrupamento)
     registros = await leituras.listar_do_dispositivo(dispositivo.mac, inicio, fim, janela, condicao_valida_flux(), deslocamento_fuso())
@@ -307,11 +309,11 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: dat
     # a ultima janela ainda ta acontecendo, vazia nela n e desligado
     janela_atual = datetime.now(UTC) - timedelta(seconds=janela)
 
-    # (serial, nome, comeco da janela) q teve leitura fora da faixa
+    # (tipo, nome, comeco da janela) q teve leitura fora da faixa
     janelas_com_erro = set()
     for registro in registros:
         if registro.values["result"] == "erros":
-            janelas_com_erro.add((registro.values["modulo"], registro.values["nome"], registro.get_time()))
+            janelas_com_erro.add((registro.values["tipo"], registro.values["nome"], registro.get_time()))
 
     for registro in registros:
         resultado = registro.values["result"]
@@ -324,7 +326,7 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: dat
         if resultado == "pontos" and valor is None and registro.get_time() > janela_atual:
             continue
         if resultado == "pontos" and valor is None:
-            erro = (registro.values["modulo"], serie.nome, registro.get_time()) in janelas_com_erro
+            erro = (registro.values["tipo"], serie.nome, registro.get_time()) in janelas_com_erro
             adicionar_trecho(serie, registro.get_time(), timedelta(seconds=janela), erro)
         elif resultado == "pontos":
             serie.pontos.append(PontoLeitura(tempo=registro.get_time(), valor=valor))
@@ -340,17 +342,28 @@ async def listar_modulos(db: AsyncSession, dispositivo: Dispositivo, inicio: dat
         serie.atual = PontoLeitura(tempo=registro.get_time(), valor=registro.get_value())
         serie.atual_erro = not leitura_valida(serie.nome, serie.atual.valor)
 
-    for series_do_serial in series.values():
-        for serie in series_do_serial.values():
+    for series_do_tipo in series.values():
+        for serie in series_do_tipo.values():
             limpar_trechos(serie)
 
+    # conectados agora, com o rele de cada um
     modulos = []
+    tipos_conectados = set()
     for modulo in await DispositivoRepository(db).listar_modulos(dispositivo.id):
-        series_do_modulo = []
-        for serie in series.get(modulo.serial, {}).values():
-            series_do_modulo.append(serie)
-
+        tipos_conectados.add(modulo.tipo)
+        series_do_modulo = list(series.get(modulo.tipo, {}).values())
         modulos.append(ModuloIotRead(serial=modulo.serial, tipo=modulo.tipo, series=series_do_modulo, ligado=modulo.ligado))
+
+    # tela ao vivo so mostra o q ta conectado, o resto e coisa do historico
+    if not historico:
+        return modulos
+
+    for tipo, series_do_tipo in series.items():
+        if tipo not in tipos_conectados:
+            modulos.append(ModuloIotRead(serial=None, tipo=tipo, series=list(series_do_tipo.values()), removido=True))
+
+    # msm ordem da tela ao vivo, q vem do banco por tipo
+    modulos.sort(key=lambda modulo: modulo.tipo)
     return modulos
 
 

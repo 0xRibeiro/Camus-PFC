@@ -80,6 +80,8 @@ class LeituraRepository:
         return registros
 
     # params so existe no influx cloud, mac vem do banco (hex) e a condicao das constantes do service.
+    # junta por tipo e n por modulo, trocou o sensor de temperatura e continua sendo a temperatura do aquario.
+    # 2 modulos do msm tipo ao msm tempo viram a media dos dois.
     # cada resultado vem com o nome no yield:
     # pontos = media das validas por janela, vazia vira null. horario e o comeco da janela, o dia 14 fica no dia 14
     # erros = janelas q tiveram leitura fora da faixa
@@ -91,6 +93,7 @@ class LeituraRepository:
             dados = from(bucket: "{settings.influx_bucket}")
               |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
               |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
+              |> group(columns: ["tipo", "nome", "unidade"])
               |> map(fn: (r) => ({{r with valido: {condicao_valida}}}))
 
             validos = dados |> filter(fn: (r) => r.valido, onEmpty: "keep")
@@ -109,11 +112,14 @@ class LeituraRepository:
             validos |> max() |> yield(name: "maximo")
         """)
 
-    # leitura mais recente do periodo sem media, pro valor grande do card
+    # leitura mais recente do periodo sem media, pro valor grande do card.
+    # ultima de cada modulo, dps fica so a mais nova de cada tipo
     async def ultimas_do_dispositivo(self, mac: str, inicio: datetime, fim: datetime) -> list[FluxRecord]:
         return await self.consultar(f"""
             from(bucket: "{settings.influx_bucket}")
               |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
-              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
               |> last()
+              |> group(columns: ["tipo", "nome", "unidade"])
+              |> max(column: "_time")
         """)
