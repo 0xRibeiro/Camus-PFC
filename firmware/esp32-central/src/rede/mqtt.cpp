@@ -32,8 +32,9 @@ namespace mqtt {
   bool temCodigo = false;
   char codigoRecebido[7];
   int validadeRecebida = 0;
+  bool temContagem = false;
+  int vinculadosRecebidos = 0;
   bool temDesvinculo = false;
-  int removidosRecebidos = 0;
 
   // ultimo comando, o loop le e manda pro modulo
   bool temComando = false;
@@ -78,14 +79,16 @@ namespace mqtt {
     temComando = true;
   }
 
-  // resposta do vinculo: ou o codigo gerado ou quantos foram desvinculados
+  // resposta do vinculo, a acao diz qual pedido foi respondido
   void guardarResposta(JsonDocument& json) {
     if (json["acao"] == "gerar_codigo") {
       strlcpy(codigoRecebido, json["codigo"] | "", sizeof(codigoRecebido));
       validadeRecebida = json["expira_em"];
       temCodigo = true;
+    } else if (json["acao"] == "contar_vinculados") {
+      vinculadosRecebidos = json["vinculados"];
+      temContagem = true;
     } else if (json["acao"] == "desvincular_todos") {
-      removidosRecebidos = json["removidos"];
       temDesvinculo = true;
     }
   }
@@ -186,6 +189,10 @@ namespace mqtt {
     esp_mqtt_client_publish(cliente, topicoPedido, "{\"acao\":\"gerar_codigo\"}", 0, 0, 0);
   }
 
+  void pedirContagem() {
+    esp_mqtt_client_publish(cliente, topicoPedido, "{\"acao\":\"contar_vinculados\"}", 0, 0, 0);
+  }
+
   void pedirDesvincularTodos() {
     esp_mqtt_client_publish(cliente, topicoPedido, "{\"acao\":\"desvincular_todos\"}", 0, 0, 0);
   }
@@ -194,6 +201,12 @@ namespace mqtt {
   bool chegouCodigo() {
     bool chegou = temCodigo;
     temCodigo = false;
+    return chegou;
+  }
+
+  bool chegouContagem() {
+    bool chegou = temContagem;
+    temContagem = false;
     return chegou;
   }
 
@@ -217,8 +230,8 @@ namespace mqtt {
     return validadeRecebida;
   }
 
-  int removidos() {
-    return removidosRecebidos;
+  int vinculados() {
+    return vinculadosRecebidos;
   }
 
   uint32_t serialComando() {

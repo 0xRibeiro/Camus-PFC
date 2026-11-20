@@ -122,7 +122,8 @@ namespace telas {
 
   // ---- tela de vinculo ----
 
-  enum class Vinculo { MENU, ESPERANDO, CODIGO, CONFIRMAR, RESULTADO };
+  // gerando, contando e desvinculando esperam a resposta do backend
+  enum class Vinculo { MENU, GERANDO, CODIGO, CONTANDO, CONFIRMAR, DESVINCULANDO };
   Vinculo vinculo = Vinculo::MENU;
 
   // 0 = gerar codigo, 1 = desvincular todos
@@ -196,29 +197,19 @@ namespace telas {
     }
   }
 
-  void desenharEsperando() {
+  void desenharEsperando(const char* texto) {
     escreverEm(TOPO, 1, ST77XX_WHITE);
-    if (opcao == 0) {
-      display::tft.print("Gerando codigo...");
-    } else {
-      display::tft.print("Desvinculando...");
-    }
+    display::tft.print(texto);
   }
 
+  // quantos perdem acesso ja aparece antes do sim
   void desenharPerguntaDesvincular() {
     escreverEm(TOPO, 1, ST77XX_WHITE);
     display::tft.print("Desvincular todos?");
     escreverEm(TOPO + 12, 1, ST77XX_WHITE);
-    display::tft.print("Ninguem fica vinculado");
+    display::tft.print(mqtt::vinculados());
+    display::tft.print(" vinculado(s)");
     desenharConfirmacao();
-  }
-
-  void desenharResultado() {
-    escreverEm(TOPO, 1, ST77XX_WHITE);
-    display::tft.print(mqtt::removidos());
-    display::tft.print(" usuario(s) removido(s)");
-    escreverEm(TOPO + 70, 1, ST77XX_WHITE);
-    display::tft.print("Clique pra voltar");
   }
 
   void desenharCodigo() {
@@ -240,14 +231,16 @@ namespace telas {
 
     if (vinculo == Vinculo::MENU) {
       desenharMenu();
-    } else if (vinculo == Vinculo::ESPERANDO) {
-      desenharEsperando();
-    } else if (vinculo == Vinculo::CONFIRMAR) {
-      desenharPerguntaDesvincular();
-    } else if (vinculo == Vinculo::RESULTADO) {
-      desenharResultado();
+    } else if (vinculo == Vinculo::GERANDO) {
+      desenharEsperando("Gerando codigo...");
     } else if (vinculo == Vinculo::CODIGO) {
       desenharCodigo();
+    } else if (vinculo == Vinculo::CONTANDO) {
+      desenharEsperando("Contando...");
+    } else if (vinculo == Vinculo::CONFIRMAR) {
+      desenharPerguntaDesvincular();
+    } else if (vinculo == Vinculo::DESVINCULANDO) {
+      desenharEsperando("Desvinculando...");
     }
   }
 
@@ -265,14 +258,21 @@ namespace telas {
     mqtt::chegouCodigo();
     mqtt::pedirCodigo();
     pedidoEm = millis();
-    mudarVinculo(Vinculo::ESPERANDO);
+    mudarVinculo(Vinculo::GERANDO);
+  }
+
+  void pedirContagem() {
+    mqtt::chegouContagem();
+    mqtt::pedirContagem();
+    pedidoEm = millis();
+    mudarVinculo(Vinculo::CONTANDO);
   }
 
   void pedirDesvinculo() {
     mqtt::chegouDesvinculo();
     mqtt::pedirDesvincularTodos();
     pedidoEm = millis();
-    mudarVinculo(Vinculo::ESPERANDO);
+    mudarVinculo(Vinculo::DESVINCULANDO);
   }
 
   void eventoNoMenu(joystick::Evento evento) {
@@ -290,8 +290,7 @@ namespace telas {
     } else if (opcao == 0) {
       pedirCodigo();
     } else {
-      confirmaSim = false;
-      mudarVinculo(Vinculo::CONFIRMAR);
+      pedirContagem();
     }
   }
 
@@ -313,28 +312,49 @@ namespace telas {
   }
 
   void eventoVinculo(joystick::Evento evento) {
-    bool mostrandoResposta = vinculo == Vinculo::CODIGO || vinculo == Vinculo::RESULTADO;
-
     if (vinculo == Vinculo::MENU) {
       eventoNoMenu(evento);
     } else if (vinculo == Vinculo::CONFIRMAR) {
       eventoNaConfirmacao(evento);
-    } else if (mostrandoResposta && evento == joystick::Evento::CLIQUE) {
+    } else if (vinculo == Vinculo::CODIGO && evento == joystick::Evento::CLIQUE) {
       mudarVinculo(Vinculo::MENU);
     }
   }
 
-  // backend respondeu ou passou do tempo de espera
-  void esperarResposta() {
-    if (opcao == 0 && mqtt::chegouCodigo()) {
+  // backend n respondeu a tempo, volta pro menu com erro
+  void desistirSeDemorou() {
+    if (millis() - pedidoEm > VINCULO_ESPERA_MS) {
+      buzzer::tocar(sons::ERRO);
+      mudarVinculo(Vinculo::MENU);
+    }
+  }
+
+  void esperarCodigo() {
+    if (mqtt::chegouCodigo()) {
       codigoChegouEm = millis();
       segundosDesenhados = mqtt::validade();
       mudarVinculo(Vinculo::CODIGO);
-    } else if (opcao == 1 && mqtt::chegouDesvinculo()) {
-      mudarVinculo(Vinculo::RESULTADO);
-    } else if (millis() - pedidoEm > VINCULO_ESPERA_MS) {
-      buzzer::tocar(sons::ERRO);
+    } else {
+      desistirSeDemorou();
+    }
+  }
+
+  // confirmacao sempre comeca no nao
+  void esperarContagem() {
+    if (mqtt::chegouContagem()) {
+      confirmaSim = false;
+      mudarVinculo(Vinculo::CONFIRMAR);
+    } else {
+      desistirSeDemorou();
+    }
+  }
+
+  void esperarDesvinculo() {
+    if (mqtt::chegouDesvinculo()) {
+      buzzer::tocar(sons::CONFIRMADO);
       mudarVinculo(Vinculo::MENU);
+    } else {
+      desistirSeDemorou();
     }
   }
 
@@ -354,10 +374,14 @@ namespace telas {
       if (mqtt::estaConectado() != conectadoDesenhado) {
         desenharVinculo();
       }
-    } else if (vinculo == Vinculo::ESPERANDO) {
-      esperarResposta();
+    } else if (vinculo == Vinculo::GERANDO) {
+      esperarCodigo();
     } else if (vinculo == Vinculo::CODIGO) {
       contarValidade();
+    } else if (vinculo == Vinculo::CONTANDO) {
+      esperarContagem();
+    } else if (vinculo == Vinculo::DESVINCULANDO) {
+      esperarDesvinculo();
     }
   }
 
