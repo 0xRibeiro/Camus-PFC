@@ -11,6 +11,7 @@ from app.domains.aquario.schema import (
     AquarioCreate,
     AquarioEntrar,
     AquarioRead,
+    AquarioUpdate,
     ConviteAquarioRead,
     MembroAquarioRead,
 )
@@ -113,6 +114,12 @@ async def editar_peixe(aquario_id: int, peixe_id: int, data: PeixeUpdate, db: As
 async def remover_peixe(aquario_id: int, peixe_id: int, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> None:
     await service.remover_peixe(db, aquario_id, peixe_id, usuario.id)
+
+# troca nome e/ou litros, so o dono
+@router.patch("/{aquario_id}", response_model=AquarioRead)
+async def editar_aquario(aquario_id: int, data: AquarioUpdate, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> AquarioRead:
+    return await service.editar_aquario(db, aquario_id, data, usuario.id)
 
 # rota para buscar um aquario do usuario, caso ele nao seja dono de nenhum retorna 404
 @router.get("/{aquario_id}", response_model=AquarioRead)

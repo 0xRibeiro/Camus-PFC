@@ -17,6 +17,7 @@ from app.domains.aquario.repository import AquarioRepository
 from app.domains.aquario.schema import (
     AquarioEntrar,
     AquarioRead,
+    AquarioUpdate,
     ConviteAquarioRead,
     MembroAquarioRead,
 )
@@ -96,6 +97,27 @@ async def listar_aquarios(db: AsyncSession, usuario_id: int) -> list[AquarioRead
 
 async def buscar_aquario(db: AsyncSession, aquario_id: int, usuario_id: int) -> AquarioRead:
     aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    return await montar_read(db, aquario, papel)
+
+
+# nome e litros sao configuracao do aquario, so o dono mexe. operador e leitor so veem
+async def editar_aquario(db: AsyncSession, aquario_id: int, data: AquarioUpdate, usuario_id: int) -> AquarioRead:
+    repo = AquarioRepository(db)
+    aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
+    if papel != PapelAquario.dono:
+        raise ForbiddenException("Só o dono pode editar o aquário")
+
+    enviados = data.model_fields_set
+
+    if "nome" in enviados:
+        if data.nome is None:
+            raise BadRequestException("Informe o nome")
+        aquario.nome = data.nome
+
+    if "litros" in enviados:
+        aquario.litros = data.litros
+
+    aquario = await repo.salvar(aquario)
     return await montar_read(db, aquario, papel)
 
 

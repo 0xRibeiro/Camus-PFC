@@ -103,6 +103,14 @@ export const zAquarioEntrar = z.object({
 });
 
 /**
+ * AquarioUpdate
+ */
+export const zAquarioUpdate = z.object({
+    nome: z.string().min(1).max(50).nullish(),
+    litros: z.int().gt(0).nullish()
+});
+
+/**
  * AvatarRead
  */
 export const zAvatarRead = z.object({
@@ -1886,6 +1894,17 @@ export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
  * Successful Response
  */
 export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
+
+export const zEditarAquarioAquariosAquarioIdPatchBody = zAquarioUpdate;
+
+export const zEditarAquarioAquariosAquarioIdPatchPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zEditarAquarioAquariosAquarioIdPatchResponse = zAquarioRead;
 
 export const zCadastrarDispositivoAdminDispositivosPostBody = zCadastroDispositivo;
 

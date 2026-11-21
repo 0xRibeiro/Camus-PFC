@@ -12,6 +12,12 @@ class AquarioCreate(BaseModel):
     litros: int | None = Field(default=None, gt=0)
 
 
+# so o que vier e alterado. litros null apaga os litros (eles sao opcionais na criacao tb)
+class AquarioUpdate(BaseModel):
+    nome: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)] | None = None
+    litros: int | None = Field(default=None, gt=0)
+
+
 # aqui não retorna o id do dono porque não precisa disso no front
 class AquarioRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
