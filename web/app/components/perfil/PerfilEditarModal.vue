@@ -106,9 +106,9 @@
           </div>
         </div>
 
-        <!-- excluir conta (soft delete: os dados pessoais sao anonimizados) -->
+        <!-- excluir conta (soft delete: os dados pessoais sao anonimizados). so aluno -->
         <div
-          v-if="auth.role !== 'admin'"
+          v-if="auth.role === 'aluno'"
           class="flex flex-col items-start justify-between gap-3 rounded-lg border border-error/30 p-3 sm:flex-row sm:items-center"
         >
           <div>

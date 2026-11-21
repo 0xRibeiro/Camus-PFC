@@ -2606,7 +2606,6 @@ export type UsuarioAdminUpdate = {
      * Password
      */
     password?: string | null;
-    role?: RoleUsuario | null;
     /**
      * Is Active
      */

@@ -151,7 +151,7 @@ async def delete_me(
     user: Usuario = Depends(service.get_current_user),
     db: AsyncSession = Depends(get_async_session),
 ) -> None:
-    await service.deletar_usuario(db, user)
+    await service.deletar_propria_conta(db, user)
 
 
 ### admin (gestão de contas)

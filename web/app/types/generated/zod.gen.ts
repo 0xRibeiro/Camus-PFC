@@ -1230,7 +1230,6 @@ export const zUsuarioAdminUpdate = z.object({
     username: z.string().min(3).max(50).nullish(),
     email: z.email().max(100).nullish(),
     password: z.string().min(8).max(128).nullish(),
-    role: zRoleUsuario.nullish(),
     is_active: z.boolean().nullish()
 });
 

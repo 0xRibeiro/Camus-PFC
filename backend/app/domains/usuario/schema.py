@@ -96,7 +96,7 @@ class UsuarioUpdate(BaseModel):
         return v.upper() if v is not None else v
     
 
-###### schemas usados so pelo admin (tem role/is_active q o usuario normal n mexe)
+###### schemas usados so pelo admin (role na criacao e is_active, q o usuario normal n mexe)
 
 class UsuarioStaffCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
@@ -117,5 +117,5 @@ class UsuarioAdminUpdate(BaseModel):
     username: str | None = Field(default=None, min_length=3, max_length=50)
     email: EmailStr | None = Field(default=None, max_length=100)
     password: str | None = Field(default=None, min_length=8, max_length=128)
-    role: RoleUsuario | None = None
+    # sem role: o papel e o da criacao da conta e n muda mais
     is_active: bool | None = None

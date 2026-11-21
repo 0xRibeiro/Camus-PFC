@@ -298,7 +298,7 @@ async def atualizar_usuario(
     return await UsuarioRepository(db).salvar(user)
 
 
-# edicao feita pelo admin: pode mudar role e is_active tbm
+# edicao feita pelo admin: pode mudar is_active tbm, o papel nunca muda
 async def atualizar_usuario_admin(
     db: AsyncSession, user_id: int, data: UsuarioAdminUpdate
 ) -> Usuario:
@@ -309,14 +309,16 @@ async def atualizar_usuario_admin(
         user.email = data.email
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
-    # papel so troca entre author e admin. aluno continua aluno e ninguem vira aluno
-    if data.role is not None and data.role != user.role:
-        if user.role == RoleUsuario.aluno or data.role == RoleUsuario.aluno:
-            raise ForbiddenException("Só é possível trocar o papel entre author e admin")
-        user.role = data.role
     if data.is_active is not None:
         user.is_active = data.is_active
     return await UsuarioRepository(db).salvar(user)
+
+
+# pelo perfil so o aluno exclui a propria conta. author e admin passam pelo admin
+async def deletar_propria_conta(db: AsyncSession, user: Usuario) -> None:
+    if user.role != RoleUsuario.aluno:
+        raise ForbiddenException("Só alunos podem excluir a própria conta")
+    await deletar_usuario(db, user)
 
 
 # soft delete: em vez de apagar a linha, sobrescreve os dados pessoais e marca
