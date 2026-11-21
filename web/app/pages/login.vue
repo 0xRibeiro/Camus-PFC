@@ -62,11 +62,11 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
     await auth.login(payload.data)
     await navigateTo('/')
   }
-  catch {
-    // login errado (401) ou back fora do ar, avisa na tela
+  catch (error) {
+    // login errado (401), muitas tentativas (429) ou back fora do ar, avisa na tela
     toast.add({
       title: 'Não foi possível entrar',
-      description: 'Confira seu email e senha.',
+      description: mensagemDeLimite(error) ?? 'Confira seu email e senha.',
       color: 'error',
     })
   }

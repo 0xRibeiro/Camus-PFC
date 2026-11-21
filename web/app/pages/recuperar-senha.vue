@@ -71,10 +71,10 @@ async function onSubmitEmail(payload: FormSubmitEvent<SchemaEmail>) {
     email.value = payload.data.email
     etapa.value = 'codigo'
   }
-  catch {
+  catch (error) {
     toast.add({
       title: 'Não foi possível enviar o código',
-      description: 'Verifique o email e tente de novo.',
+      description: mensagemDeLimite(error) ?? 'Verifique o email e tente de novo.',
       color: 'error',
     })
   }
@@ -97,10 +97,10 @@ async function onSubmitCodigo(payload: FormSubmitEvent<SchemaCodigo>) {
     await auth.resetPassword({ email: email.value, ...payload.data })
     await navigateTo('/login')
   }
-  catch {
+  catch (error) {
     toast.add({
       title: 'Não foi possível redefinir a senha',
-      description: 'Confira o código e tente de novo.',
+      description: mensagemDeLimite(error) ?? 'Confira o código e tente de novo.',
       color: 'error',
     })
   }
