@@ -261,7 +261,7 @@
               size="xs"
               :loading="removendoMembro === item.usuario_id"
               :disabled="removendoMembro !== null"
-              @click="removerMembro(item)"
+              @click="abrirRemoverMembro(item)"
             />
           </template>
         </RankingLista>
@@ -297,6 +297,32 @@
             color="error"
             :loading="removendo"
             @click="confirmarSaida"
+          />
+        </template>
+      </UModal>
+
+      <UModal
+        v-model:open="confirmandoRemocao"
+        title="Remover aluno"
+        :description="membroParaRemover
+          ? `Remover ${membroParaRemover.username} do grupo? A pessoa perde o acesso às trilhas do grupo e só volta com um convite válido.`
+          : ''"
+        :dismissible="removendoMembro === null"
+        :close="removendoMembro === null"
+      >
+        <template #footer="{ close }">
+          <UButton
+            label="Cancelar"
+            color="neutral"
+            variant="outline"
+            :disabled="removendoMembro !== null"
+            @click="close"
+          />
+          <UButton
+            label="Remover"
+            color="error"
+            :loading="removendoMembro !== null"
+            @click="removerMembro"
           />
         </template>
       </UModal>
@@ -478,9 +504,18 @@ async function confirmarSaida() {
   }
 }
 
-async function removerMembro(aluno: RankingItemRead) {
-  if (removendoMembro.value !== null) return
-  if (!window.confirm(`Remover ${aluno.username} do grupo?`)) return
+// a lixeira so abre o modal, quem remove de fato e o botao de confirmar
+const confirmandoRemocao = ref(false)
+const membroParaRemover = ref<RankingItemRead | null>(null)
+
+function abrirRemoverMembro(aluno: RankingItemRead) {
+  membroParaRemover.value = aluno
+  confirmandoRemocao.value = true
+}
+
+async function removerMembro() {
+  const aluno = membroParaRemover.value
+  if (!aluno || removendoMembro.value !== null) return
 
   removendoMembro.value = aluno.usuario_id
   erroRemocao.value = ''
@@ -496,6 +531,8 @@ async function removerMembro(aluno: RankingItemRead) {
   }
   finally {
     removendoMembro.value = null
+    // fecha tb no erro, a msg aparece embaixo do ranking
+    confirmandoRemocao.value = false
   }
 }
 onMounted(fetchGrupo)

@@ -365,14 +365,20 @@ async def deletar_propria_conta(db: AsyncSession, user: Usuario) -> None:
     await deletar_usuario(db, user)
 
 
+# admin exclui qualquer papel, so n a propria conta (senao podia sumir o ultimo admin)
+async def deletar_pelo_admin(db: AsyncSession, admin: Usuario, user_id: int) -> None:
+    if admin.id == user_id:
+        raise ForbiddenException("Você não pode excluir a própria conta")
+    user = await buscar_usuario(db, user_id)
+    await deletar_usuario(db, user)
+
+
 # soft delete: em vez de apagar a linha, sobrescreve os dados pessoais e marca
 # deletado_em. a conta fica inutilizavel (senha trocada por uma aleatoria que
 # ninguem sabe, is_active false) mas o registro continua no banco. o trigger
 # de auditoria pega isso como UPDATE e guarda o antes/depois no logs_auditoria,
 # entao fica provado que a conta existiu e quando foi encerrada
 async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
-    if user.role == RoleUsuario.admin:
-        raise ForbiddenException("contas de administrador não podem ser excluídas")
     if user.deletado_em is not None:
         return  # ja tava deletado, n faz nada
 

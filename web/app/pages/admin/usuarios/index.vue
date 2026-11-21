@@ -67,7 +67,7 @@
               variant="subtle"
               size="sm"
               class="w-32 justify-center"
-              @click="mostrarAtivos = !mostrarAtivos"
+              @click="alternarStatus"
             />
           </div>
         </div>
@@ -162,6 +162,23 @@
                 </div>
               </template>
 
+              <!-- a propria conta e as ja excluidas n tem botao -->
+              <template #acoes-cell="{ row }">
+                <UTooltip
+                  v-if="row.original.id !== auth.user?.id && !row.original.deletado_em"
+                  text="Excluir conta"
+                >
+                  <UButton
+                    icon="i-lucide-trash-2"
+                    aria-label="Excluir conta"
+                    color="error"
+                    variant="ghost"
+                    size="sm"
+                    @click="abrirExcluir(row.original)"
+                  />
+                </UTooltip>
+              </template>
+
               <template #ultimo_acesso_em-cell="{ row }">
                 <span :class="row.original.ultimo_acesso_em ? 'text-toned' : 'text-dimmed italic'">
                   {{ formatarAcesso(row.original.ultimo_acesso_em) }}
@@ -235,6 +252,28 @@
       v-model:open="criando"
       @criado="usuarios.push($event)"
     />
+
+    <UModal
+      v-model:open="showDeleteModal"
+      title="Excluir conta"
+      :description="descricaoExclusao"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer="{ close }">
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Excluir"
+          color="error"
+          :loading="excluindo"
+          @click="confirmarExclusao"
+        />
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -307,10 +346,11 @@ onMounted(fetchUsuariosOnline)
 // que bater com o nome do campo la no UsuarioAdminRead (username, email, is_active).
 // largura fixa pra as tabelas dos 3 papeis ficarem alinhadas umas com as outras
 const columns: TableColumn<UsuarioAdminRead>[] = [
-  { accessorKey: 'username', header: 'Usuário', meta: { class: { th: 'w-[30%]', td: 'truncate' } } },
-  { accessorKey: 'email', header: 'Email', meta: { class: { th: 'w-[30%]', td: 'truncate' } } },
-  { accessorKey: 'ultimo_acesso_em', header: 'Último acesso', meta: { class: { th: 'w-[24%]' } } },
+  { accessorKey: 'username', header: 'Usuário', meta: { class: { th: 'w-[28%]', td: 'truncate' } } },
+  { accessorKey: 'email', header: 'Email', meta: { class: { th: 'w-[28%]', td: 'truncate' } } },
+  { accessorKey: 'ultimo_acesso_em', header: 'Último acesso', meta: { class: { th: 'w-[20%]' } } },
   { accessorKey: 'is_active', header: 'Status', meta: { class: { th: 'w-[16%]' } } },
+  { id: 'acoes', header: '', meta: { class: { th: 'w-[8%]', td: 'text-right' } } },
 ]
 
 function formatarAcesso(data: string | null | undefined) {
@@ -360,6 +400,12 @@ function alternarPapel(role: Papel) {
   papeisFiltro.value = restantes
 }
 
+// trocar o status limpa a busca, conta excluida fica com o nome anonimizado
+function alternarStatus() {
+  mostrarAtivos.value = !mostrarAtivos.value
+  busca.value = ''
+}
+
 function limparFiltros() {
   busca.value = ''
   papeisFiltro.value = []
@@ -398,4 +444,38 @@ function paginaDoGrupo(role: Papel, lista: UsuarioAdminRead[]) {
 
 // abre o modal de cadastro, o novo entra na lista sem buscar tudo de novo
 const criando = ref(false)
+
+// ------- exclusao de conta (soft delete no back, a linha vira "Excluída")
+const auth = useAuthStore()
+const showDeleteModal = ref(false)
+const excluindo = ref(false)
+const usuarioParaExcluir = ref<UsuarioAdminRead | null>(null)
+
+const descricaoExclusao = computed(() => {
+  if (!usuarioParaExcluir.value) return ''
+  return `Excluir a conta de "${usuarioParaExcluir.value.username}"? Os dados pessoais são apagados e a pessoa não consegue mais entrar. Não dá pra desfazer.`
+})
+
+function abrirExcluir(usuario: UsuarioAdminRead) {
+  usuarioParaExcluir.value = usuario
+  showDeleteModal.value = true
+}
+
+async function confirmarExclusao() {
+  if (!usuarioParaExcluir.value) return
+
+  excluindo.value = true
+  try {
+    await api(`/admin/usuarios/${usuarioParaExcluir.value.id}`, { method: 'DELETE' })
+    showDeleteModal.value = false
+    // busca de novo pq o back troca nome e email da conta excluida
+    await fetchUsuarios()
+  }
+  catch {
+    toast.add({ title: 'Não foi possível excluir a conta', color: 'error' })
+  }
+  finally {
+    excluindo.value = false
+  }
+}
 </script>

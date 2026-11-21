@@ -225,7 +225,7 @@ async def atualizar_staff(
 @admin_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_usuario(
     user_id: int,
+    admin: Usuario = Depends(service.get_current_user),
     db: AsyncSession = Depends(get_async_session),
 ) -> None:
-    user = await service.buscar_usuario(db, user_id)
-    await service.deletar_usuario(db, user)
+    await service.deletar_pelo_admin(db, admin, user_id)
