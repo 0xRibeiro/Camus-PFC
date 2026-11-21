@@ -7,6 +7,8 @@ export default defineAppConfig({
       secondary: 'amber',
       tertiary: 'emerald',
       quaternary: 'indigo',
+      quinary: 'sky',
+      senary: 'fuchsia',
       neutral: 'neutral',
     },
   },

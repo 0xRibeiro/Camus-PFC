@@ -38,6 +38,7 @@
         <UFormField
           name="tag"
           label="Tag"
+          required
         >
           <USelect
             v-model="formState.tag"
@@ -108,6 +109,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { TrilhaRead } from '~/types/generated'
+import { z } from 'zod'
 import { zTrilhaCreate } from '~/types/generated/zod.gen'
 
 // --- v-model:open ---
@@ -148,7 +150,10 @@ for (const item of TRILHA_TAGS) {
 // do schema gerado (ele tem mais campos, tipo descricao, que a gente n usa nesse
 // formulario) - assim a validacao desses 2 campos continua vindo do back,
 // sem eu duplicar a regra (tipo "minimo 3 caracteres") escrevendo ela de novo aqui
-const formSchema = zTrilhaCreate.pick({ titulo: true, descricao: true, tag: true, foto: true })
+// a tag o back ainda aceita vazia, mas aqui na tela fica obrigatoria
+const formSchema = zTrilhaCreate.pick({ titulo: true, descricao: true, tag: true, foto: true }).extend({
+  tag: z.string({ error: 'Selecione uma tag' }).min(1, 'Selecione uma tag'),
+})
 
 // esse e o estado real do formulario - o que a pessoa ta digitando agora.
 // diferente da prop "trilha" (que so muda quando o pai manda um valor novo),

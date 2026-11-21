@@ -144,20 +144,11 @@
         :key="secao.chave"
         class="space-y-3"
       >
-        <div
+        <TrilhaSecaoTag
           v-if="agruparPorTag"
-          class="flex items-center gap-2"
-        >
-          <UBadge
-            :label="rotuloSecao(secao.chave)"
-            :color="corSecao(secao.chave)"
-            variant="soft"
-          />
-          <span class="text-xs text-muted">
-            {{ secao.trilhas.length }} trilha{{ secao.trilhas.length === 1 ? '' : 's' }}
-          </span>
-          <USeparator class="flex-1" />
-        </div>
+          :chave="secao.chave"
+          :quantidade="secao.trilhas.length"
+        />
 
         <UPageGrid>
           <TrilhaCard
@@ -239,39 +230,7 @@ const tagFiltro = ref('')
 const statusFiltro = ref<'todas' | 'ativas' | 'desativadas'>('todas')
 const agruparPorTag = ref(true)
 
-// trilha sem tag cai nessa chave
-const SEM_TAG = 'sem-tag'
-
-function rotuloSecao(chave: string) {
-  if (chave === SEM_TAG) return 'Sem tag'
-  return infoDaTagTrilha(chave).label
-}
-
-function corSecao(chave: string): CorTagTrilha {
-  if (chave === SEM_TAG) return 'neutral'
-  return infoDaTagTrilha(chave).color
-}
-
-// ordem alfabetica, com "outro" e "sem tag" sempre no fim
-function pesoSecao(chave: string) {
-  if (chave === SEM_TAG) return 2
-  if (chave === 'outro') return 1
-  return 0
-}
-
-function compararSecoes(a: string, b: string) {
-  const diferenca = pesoSecao(a) - pesoSecao(b)
-  if (diferenca !== 0) return diferenca
-  return rotuloSecao(a).localeCompare(rotuloSecao(b), 'pt-BR')
-}
-
-const tagFiltroOptions: { label: string, value: string, chip: { color: CorTagTrilha } }[] = []
-const chavesTags = [SEM_TAG]
-for (const item of TRILHA_TAGS) chavesTags.push(item.value)
-chavesTags.sort(compararSecoes)
-for (const chave of chavesTags) {
-  tagFiltroOptions.push({ label: rotuloSecao(chave), value: chave, chip: { color: corSecao(chave) } })
-}
+const tagFiltroOptions = opcoesFiltroTagTrilha()
 
 const totalAtivas = computed(() => {
   let total = 0
@@ -310,8 +269,7 @@ const trilhasFiltradas = computed(() => {
     let descricao = ''
     if (trilha.descricao) descricao = trilha.descricao
 
-    let tag = SEM_TAG
-    if (trilha.tag) tag = trilha.tag
+    const tag = chaveDaTagTrilha(trilha.tag)
 
     const bateBusca = trilha.titulo.toLowerCase().includes(buscaLower)
       || descricao.toLowerCase().includes(buscaLower)
@@ -335,8 +293,7 @@ const secoes = computed(() => {
 
   const porTag = new Map<string, TrilhaRead[]>()
   for (const trilha of trilhasFiltradas.value) {
-    let chave = SEM_TAG
-    if (trilha.tag) chave = trilha.tag
+    const chave = chaveDaTagTrilha(trilha.tag)
 
     let lista = porTag.get(chave)
     if (!lista) {
@@ -347,7 +304,7 @@ const secoes = computed(() => {
   }
 
   const chaves = Array.from(porTag.keys())
-  chaves.sort(compararSecoes)
+  chaves.sort(compararSecoesTrilha)
 
   const resultado: { chave: string, trilhas: TrilhaRead[] }[] = []
   for (const chave of chaves) {

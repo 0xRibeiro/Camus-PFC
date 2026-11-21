@@ -15,7 +15,7 @@ export default defineNuxtConfig({
   ui: {
     // array de nome das cores semanticas q as adicionais sao definidas no web/app/app.config.ts
     theme: {
-      colors: ['primary', 'secondary', 'tertiary', 'quaternary', 'info', 'success', 'warning', 'error'],
+      colors: ['primary', 'secondary', 'tertiary', 'quaternary', 'quinary', 'senary', 'info', 'success', 'warning', 'error'],
     },
   },
   runtimeConfig: {

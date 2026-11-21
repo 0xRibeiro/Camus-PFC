@@ -22,11 +22,22 @@
     <!-- progresso da trilha -->
     <template #footer>
       <div class="space-y-1">
-        <div class="flex justify-between text-xs text-muted">
-          <span>{{ trilha.concluidos }}/{{ trilha.total }} conteúdos</span>
+        <div class="flex justify-between gap-2 text-xs text-muted">
+          <span class="flex items-center gap-1">
+            <UIcon
+              name="i-lucide-layers"
+              class="size-4 shrink-0"
+            />
+            {{ modulos }} módulo{{ modulos === 1 ? '' : 's' }}
+            · {{ trilha.concluidos }}/{{ trilha.total }} conteúdos
+          </span>
           <span>{{ trilha.progresso }}%</span>
         </div>
-        <UProgress :model-value="trilha.progresso" size="sm" />
+        <UProgress
+          :model-value="trilha.progresso"
+          :color="trilha.progresso === 100 ? 'success' : 'primary'"
+          size="sm"
+        />
       </div>
     </template>
   </UCard>
@@ -35,8 +46,10 @@
 <script setup lang="ts">
 import type { TrilhaResumoRead } from '~/types/generated'
 
-defineProps<{
+const props = defineProps<{
   to: string
   trilha: TrilhaResumoRead
 }>()
+
+const modulos = computed(() => props.trilha.total_modulos ?? 0)
 </script>
