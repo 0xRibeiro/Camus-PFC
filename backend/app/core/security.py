@@ -1,10 +1,12 @@
 import secrets
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 import jwt
 from fastapi.security import HTTPBearer
 from pwdlib import PasswordHash
+from pydantic import StringConstraints
 
 from app.core.config import settings
 from app.core.redis import redis_client
@@ -65,8 +67,33 @@ async def revogar_refresh_token(token: str) -> None:
 
 
 # codigo numerico de 6 digitos pra recuperacao de senha, guardado no redis por email
+###### codigos de 6 numeros
+# todo codigo q a pessoa digita no sistema e assim: vinculo do iot, convite de
+# aquario, convite de grupo e recuperar senha. um formato so pra tudo
+
+# tipo pros schemas: so aceita 6 numeros (com espaco nas pontas tirado antes)
+CodigoSeisDigitos = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=6, max_length=6, pattern=r"^\d{6}$")
+]
+
+
+# secrets em vez de random pq o codigo da acesso a coisa (aquario, grupo, conta)
+def sortear_codigo() -> str:
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+# guarda o valor no redis com um codigo q ainda n ta em uso naquele prefixo.
+# nx: so grava se a chave n existir, ai dois convites validos nunca tem o msm codigo
+async def gerar_codigo_unico(prefixo: str, valor: str, validade_segundos: int) -> str:
+    while True:
+        codigo = sortear_codigo()
+        gravou = await redis_client.set(f"{prefixo}:{codigo}", valor, ex=validade_segundos, nx=True)
+        if gravou:
+            return codigo
+
+
 async def criar_codigo_reset(email: str) -> str:
-    codigo = f"{secrets.randbelow(1_000_000):06d}"
+    codigo = sortear_codigo()
     await redis_client.set(f"reset:{email}", codigo, ex=900)  # 15 min
     return codigo
 

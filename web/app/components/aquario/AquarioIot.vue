@@ -92,7 +92,7 @@
 
     <UForm
       v-else-if="papel === 'dono'"
-      :schema="zCodigoDispositivo"
+      :schema="schemaCodigo"
       :state="formulario"
       class="space-y-3"
       @submit="conectar"
@@ -109,6 +109,7 @@
           v-model="formulario.codigo"
           placeholder="000000"
           maxlength="6"
+          inputmode="numeric"
           class="w-full sm:w-40"
         />
       </UFormField>
@@ -157,8 +158,8 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
+import { z } from 'zod'
 import type { CodigoDispositivo, DispositivoRead, PapelAquario } from '~/types/generated'
-import { zCodigoDispositivo } from '~/types/generated/zod.gen'
 
 const props = defineProps<{
   aquarioId: number
@@ -177,6 +178,7 @@ const online = computed(() => props.dispositivo?.estado === 'online')
 // vem sem os dois pontos do topico
 
 const formulario = reactive({ codigo: '' })
+const schemaCodigo = z.object({ codigo: zCodigoSeisDigitos })
 const enviando = ref(false)
 const confirmarAberto = ref(false)
 

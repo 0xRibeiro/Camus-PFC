@@ -2,6 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
+from app.core.security import CodigoSeisDigitos
 from app.domains.aquario.model import PapelAquario
 from app.domains.dispositivo.schema import DispositivoRead
 
@@ -46,4 +47,5 @@ class ConviteAquarioRead(BaseModel):
 class AquarioEntrar(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    convite: str = Field(..., min_length=12, max_length=12)
+    # 6 numeros, o msm formato de todo codigo do sistema
+    convite: CodigoSeisDigitos

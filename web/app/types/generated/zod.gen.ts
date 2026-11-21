@@ -99,7 +99,7 @@ export const zAquarioCreate = z.object({
  * AquarioEntrar
  */
 export const zAquarioEntrar = z.object({
-    convite: z.string().length(12)
+    convite: z.string().length(6).regex(/^\d{6}$/)
 });
 
 /**
@@ -155,7 +155,7 @@ export const zCadastroDispositivo = z.object({
  * CodigoDispositivo
  */
 export const zCodigoDispositivo = z.object({
-    codigo: z.string().length(6)
+    codigo: z.string().length(6).regex(/^\d{6}$/)
 });
 
 /**
@@ -464,7 +464,7 @@ export const zGrupoCreate = z.object({
  * GrupoEntrar
  */
 export const zGrupoEntrar = z.object({
-    convite: z.string().length(12)
+    convite: z.string().length(6).regex(/^\d{6}$/)
 });
 
 /**
@@ -813,7 +813,7 @@ export const zRefreshInput = z.object({
  */
 export const zResetPasswordInput = z.object({
     email: z.email(),
-    code: z.string(),
+    code: z.string().length(6).regex(/^\d{6}$/),
     password: z.string().min(8).max(128)
 });
 

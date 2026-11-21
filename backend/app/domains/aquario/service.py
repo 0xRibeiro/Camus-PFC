@@ -1,4 +1,3 @@
-import secrets
 from datetime import datetime
 
 import httpx
@@ -12,6 +11,7 @@ from fastcrud.exceptions.http_exceptions import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.redis import redis_client
+from app.core.security import gerar_codigo_unico
 from app.domains.aquario.model import Aquario, PapelAquario
 from app.domains.aquario.repository import AquarioRepository
 from app.domains.aquario.schema import (
@@ -284,12 +284,8 @@ async def comandar_modulo(db: AsyncSession, aquario_id: int, usuario_id: int, se
 async def gerar_convite(db: AsyncSession, aquario_id: int, usuario_id: int) -> ConviteAquarioRead:
     aquario = await buscar_aquario_do_usuario(AquarioRepository(db), aquario_id, usuario_id)
 
-    while True:
-        convite = secrets.token_urlsafe(9)
-        criado = await redis_client.set(f"aquario:convite:{convite}", str(aquario.id), ex=CONVITE_VALIDADE_SEGUNDOS, nx=True)
-
-        if criado:
-            return ConviteAquarioRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
+    convite = await gerar_codigo_unico("aquario:convite", str(aquario.id), CONVITE_VALIDADE_SEGUNDOS)
+    return ConviteAquarioRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
 
 
 # convite sempre entra como leitor

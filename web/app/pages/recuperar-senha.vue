@@ -83,7 +83,7 @@ async function onSubmitEmail(payload: FormSubmitEvent<SchemaEmail>) {
   }
 }
 
-const schemaCodigo = zResetPasswordInput.omit({ email: true })
+const schemaCodigo = zResetPasswordInput.omit({ email: true }).extend({ code: zCodigoSeisDigitos })
 type SchemaCodigo = z.output<typeof schemaCodigo>
 
 const fieldsCodigo: AuthFormField[] = [

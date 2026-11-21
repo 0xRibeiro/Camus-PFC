@@ -50,7 +50,7 @@
         </template>
 
         <UForm
-          :schema="zGrupoEntrar"
+          :schema="schemaEntrar"
           :state="formEntrar"
           class="space-y-4"
           @submit="entrarGrupo"
@@ -58,8 +58,10 @@
           <UFormField name="convite" label="Código de convite">
             <UInput
               v-model="formEntrar.convite"
-              placeholder="Cole o código recebido"
-              class="w-full"
+              placeholder="000000"
+              maxlength="6"
+              inputmode="numeric"
+              class="w-full sm:w-40"
             />
           </UFormField>
 
@@ -157,7 +159,8 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
 import type { AvisoRead, GrupoRead } from '~/types/generated/types.gen'
-import { zGrupoCreate, zGrupoEntrar } from '~/types/generated/zod.gen'
+import { z } from 'zod'
+import { zGrupoCreate } from '~/types/generated/zod.gen'
 
 definePageMeta({ middleware: 'role', roles: ['aluno'] })
 
@@ -201,6 +204,7 @@ const secoes = computed(() => {
 
 const formCriar = reactive({ nome: '' })
 const formEntrar = reactive({ convite: '' })
+const schemaEntrar = z.object({ convite: zCodigoSeisDigitos })
 
 const criando = ref(false)
 const entrando = ref(false)

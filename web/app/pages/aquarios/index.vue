@@ -101,7 +101,7 @@
         <template #body>
           <div class="space-y-6">
             <UForm
-              :schema="zCodigoDispositivo"
+              :schema="schemaCodigo"
               :state="formCodigo"
               class="space-y-3"
               @submit="entrarComCodigo"
@@ -115,6 +115,7 @@
                   v-model="formCodigo.codigo"
                   placeholder="000000"
                   maxlength="6"
+                  inputmode="numeric"
                   class="w-full sm:w-40"
                 />
               </UFormField>
@@ -125,7 +126,7 @@
             <USeparator />
 
             <UForm
-              :schema="zAquarioEntrar"
+              :schema="schemaConvite"
               :state="formConvite"
               class="space-y-3"
               @submit="entrarComConvite"
@@ -137,8 +138,10 @@
               >
                 <UInput
                   v-model="formConvite.convite"
-                  placeholder="Cole o código recebido"
-                  class="w-full"
+                  placeholder="000000"
+                  maxlength="6"
+                  inputmode="numeric"
+                  class="w-full sm:w-40"
                 />
               </UFormField>
 
@@ -156,7 +159,6 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { z } from 'zod'
 import type { AquarioEntrar, AquarioRead, CodigoDispositivo } from '~/types/generated'
-import { zAquarioEntrar, zCodigoDispositivo } from '~/types/generated/zod.gen'
 
 definePageMeta({ middleware: 'role' })
 
@@ -175,6 +177,9 @@ const entrarAberto = ref(false)
 const entrando = ref(false)
 const formCodigo = reactive({ codigo: '' })
 const formConvite = reactive({ convite: '' })
+// os dois codigos tem 6 numeros, igual todo codigo do sistema
+const schemaCodigo = z.object({ codigo: zCodigoSeisDigitos })
+const schemaConvite = z.object({ convite: zCodigoSeisDigitos })
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {

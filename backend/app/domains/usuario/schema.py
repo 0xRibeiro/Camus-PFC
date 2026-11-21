@@ -3,6 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from app.core.security import CodigoSeisDigitos
 from app.domains.usuario.avatares import TODOS_AVATARES
 from app.domains.usuario.model import RoleUsuario
 
@@ -28,7 +29,7 @@ class ForgotPasswordInput(BaseModel):
 
 class ResetPasswordInput(BaseModel):  
     email: EmailStr
-    code: str
+    code: CodigoSeisDigitos
     password: str = Field(..., min_length=8, max_length=128)
 
 
