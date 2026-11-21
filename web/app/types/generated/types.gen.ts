@@ -184,6 +184,48 @@ export type AlunoDetalheRead = {
 };
 
 /**
+ * AlunoQuizRead
+ */
+export type AlunoQuizRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Concluido Em
+     */
+    concluido_em: string;
+    /**
+     * Acertos
+     */
+    acertos: number;
+    /**
+     * Questoes
+     */
+    questoes: number;
+    /**
+     * Versao Antiga
+     */
+    versao_antiga?: boolean;
+    /**
+     * Respostas
+     */
+    respostas?: Array<RespostaDoAlunoRead>;
+};
+
+/**
  * AlunoTrilhaRead
  */
 export type AlunoTrilhaRead = {
@@ -6976,6 +7018,38 @@ export type ObterDashboardConteudoConteudosIdDashboardGetResponses = {
 
 export type ObterDashboardConteudoConteudosIdDashboardGetResponse = ObterDashboardConteudoConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoConteudosIdDashboardGetResponses];
 
+export type ListarAlunosDoQuizConteudosIdAlunosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/conteudos/{id}/alunos';
+};
+
+export type ListarAlunosDoQuizConteudosIdAlunosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarAlunosDoQuizConteudosIdAlunosGetError = ListarAlunosDoQuizConteudosIdAlunosGetErrors[keyof ListarAlunosDoQuizConteudosIdAlunosGetErrors];
+
+export type ListarAlunosDoQuizConteudosIdAlunosGetResponses = {
+    /**
+     * Response Listar Alunos Do Quiz Conteudos  Id  Alunos Get
+     *
+     * Successful Response
+     */
+    200: Array<AlunoQuizRead>;
+};
+
+export type ListarAlunosDoQuizConteudosIdAlunosGetResponse = ListarAlunosDoQuizConteudosIdAlunosGetResponses[keyof ListarAlunosDoQuizConteudosIdAlunosGetResponses];
+
 export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetData = {
     body?: never;
     path: {
@@ -7179,6 +7253,42 @@ export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses 
 };
 
 export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses[keyof ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponses];
+
+export type ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/conteudos/{id}/alunos';
+};
+
+export type ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetError = ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetErrors[keyof ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetErrors];
+
+export type ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponses = {
+    /**
+     * Response Listar Alunos Do Quiz Grupos  Grupo Id  Conteudos  Id  Alunos Get
+     *
+     * Successful Response
+     */
+    200: Array<AlunoQuizRead>;
+};
+
+export type ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponse = ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponses[keyof ListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponses];
 
 export type EnviarImagemGruposGrupoIdImagensPostData = {
     body: BodyEnviarImagemGruposGrupoIdImagensPost;

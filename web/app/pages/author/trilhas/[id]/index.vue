@@ -501,6 +501,7 @@
         <DashboardConteudo
           v-if="conteudoDesempenho"
           :conteudo-id="conteudoDesempenho.id"
+          :com-alunos="trilhaDeGrupo"
           @criado-em="desempenhoCriadoEm = $event"
         />
       </template>
@@ -543,6 +544,8 @@ definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => r
 const route = useRoute()
 const api = useApi()
 const grupoId = route.params.grupoId
+// a dashboard do quiz so mostra os alunos no grupo
+const trilhaDeGrupo = Boolean(grupoId)
 const router = useRouter()
 const trilhaId = Number(route.params.id)
 const trilhaGrupo = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}` : null

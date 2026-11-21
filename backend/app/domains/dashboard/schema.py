@@ -93,6 +93,20 @@ class AlunoDetalheRead(AlunoTrilhaRead):
     conteudos: list[ConteudoDoAlunoRead]
 
 
+# so quiz de trilha de grupo, cada membro q fez com a tentativa dele
+class AlunoQuizRead(BaseModel):
+    id: int
+    username: str
+    avatar: str
+    cor_fundo: str
+    concluido_em: datetime
+    acertos: int
+    questoes: int
+    versao_antiga: bool = False
+    # vazio na versao antiga
+    respostas: list[RespostaDoAlunoRead] = []
+
+
 # numeros q aparecem do lado de cada quiz na tela da trilha, de sempre e n do periodo
 class ResumoConteudoRead(BaseModel):
     id: int

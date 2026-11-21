@@ -809,6 +809,21 @@ export const zRespostaDoAlunoRead = z.object({
 });
 
 /**
+ * AlunoQuizRead
+ */
+export const zAlunoQuizRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluido_em: z.iso.datetime(),
+    acertos: z.int(),
+    questoes: z.int(),
+    versao_antiga: z.boolean().optional().default(false),
+    respostas: z.array(zRespostaDoAlunoRead).optional().default([])
+});
+
+/**
  * ConteudoDoAlunoRead
  */
 export const zConteudoDoAlunoRead = z.object({
@@ -2615,6 +2630,17 @@ export const zObterDashboardConteudoConteudosIdDashboardGetQuery = z.object({
  */
 export const zObterDashboardConteudoConteudosIdDashboardGetResponse = zDashboardConteudoRead;
 
+export const zListarAlunosDoQuizConteudosIdAlunosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Listar Alunos Do Quiz Conteudos  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDoQuizConteudosIdAlunosGetResponse = z.array(zAlunoQuizRead);
+
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetPath = z.object({
     id: z.int(),
     grupo_id: z.int()
@@ -2689,6 +2715,18 @@ export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetQuery = 
  * Successful Response
  */
 export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = zDashboardConteudoRead;
+
+export const zListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Alunos Do Quiz Grupos  Grupo Id  Conteudos  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponse = z.array(zAlunoQuizRead);
 
 export const zEnviarImagemGruposGrupoIdImagensPostBody = zBodyEnviarImagemGruposGrupoIdImagensPost;
 

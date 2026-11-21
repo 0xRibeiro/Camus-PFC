@@ -76,18 +76,27 @@
           class="min-w-0 lg:col-span-2"
         />
       </div>
+
+      <!-- so no grupo o dono ve cada aluno, igual na dashboard da trilha -->
+      <DashboardQuizAlunos
+        v-if="comAlunos"
+        :conteudo-id="conteudoId"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
+import DashboardQuizAlunos from '~/components/dashboard/DashboardQuizAlunos.vue'
 import type { DashboardConteudoRead } from '~/types/generated'
 import { parseDate } from '@internationalized/date'
 
 // modal da tela da trilha e da dashboard da trilha usam esse msm
 const props = defineProps<{
   conteudoId: number
+  // trilha de grupo mostra os alunos
+  comAlunos?: boolean
 }>()
 
 const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, periodoAnterior, inicioTotal, fetchDashboard } = useDashboard<DashboardConteudoRead>(`/conteudos/${props.conteudoId}/dashboard`)

@@ -8,6 +8,7 @@ from app.domains.dashboard import service
 from app.domains.dashboard.schema import (
     Agrupamento,
     AlunoDetalheRead,
+    AlunoQuizRead,
     AlunoTrilhaRead,
     DashboardConteudoRead,
     DashboardRead,
@@ -74,3 +75,10 @@ async def obter_dashboard_conteudo(id: int, inicio: date | None = None, fim: dat
     agrupamento: Agrupamento = Query(default="dia"),
     db: AsyncSession = Depends(get_async_session)) -> DashboardConteudoRead:
     return await service.obter_dashboard_conteudo(db, id, inicio, fim, agrupamento)
+
+
+# so quiz de trilha de grupo, o dono ve a nota de cada membro
+@trilha_router.get("/conteudos/{id}/alunos", response_model=list[AlunoQuizRead],
+    dependencies=[Depends(gerenciar_trilhas), Depends(validar_item(Conteudo))])
+async def listar_alunos_do_quiz(id: int, db: AsyncSession = Depends(get_async_session)) -> list[AlunoQuizRead]:
+    return await service.listar_alunos_do_quiz(db, id)

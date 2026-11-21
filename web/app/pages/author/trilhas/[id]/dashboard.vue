@@ -144,6 +144,7 @@
         <DashboardConteudo
           v-if="quizAberto"
           :conteudo-id="quizAberto.id"
+          :com-alunos="!!grupoId"
           @criado-em="quizCriadoEm = $event"
         />
       </template>

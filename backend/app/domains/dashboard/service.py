@@ -10,6 +10,7 @@ from app.domains.dashboard.schema import (
     Agrupamento,
     AlternativaEscolhaRead,
     AlunoDetalheRead,
+    AlunoQuizRead,
     AlunoTrilhaRead,
     ConquistaResumoRead,
     ConteudoDoAlunoRead,
@@ -640,3 +641,50 @@ async def obter_aluno_da_trilha(db: AsyncSession, trilha_id: int, usuario_id: in
         ultima_atividade=ultima,
         conteudos=itens,
     )
+
+
+# membros q fizeram, com a nota e as respostas desse quiz. de sempre e n do periodo
+async def listar_alunos_do_quiz(db: AsyncSession, conteudo_id: int) -> list[AlunoQuizRead]:
+    repo = DashboardRepository(db)
+    encontrado = await repo.buscar_conteudo(conteudo_id)
+    if encontrado is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conteúdo não encontrado")
+    conteudo, trilha_id = encontrado
+    if conteudo.tipo != ConteudoTipo.quiz:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Só quiz tem dashboard")
+    grupo_id = await buscar_grupo_da_trilha(repo, trilha_id)
+
+    tentativas_por_aluno: dict[int, list[TentativaQuiz]] = {}
+    for tentativa in await repo.listar_tentativas_dos_quizzes([conteudo_id]):
+        tentativas_por_aluno.setdefault(tentativa.usuario_id, []).append(tentativa)
+
+    questoes = await repo.listar_questoes([conteudo_id])
+    ids_questoes = []
+    for questao in questoes:
+        ids_questoes.append(questao.id)
+
+    alternativas_por_questao: dict[int, list[Alternativa]] = {}
+    for alternativa in await repo.listar_alternativas(ids_questoes):
+        alternativas_por_questao.setdefault(alternativa.questao_id, []).append(alternativa)
+
+    alunos = []
+    for membro in await repo.listar_membros(grupo_id):
+        tentativa = escolher_tentativa(tentativas_por_aluno.get(membro.id, []), conteudo.versao)
+        if tentativa is None:
+            continue
+
+        aluno = AlunoQuizRead(
+            id=membro.id,
+            username=membro.username,
+            avatar=membro.avatar,
+            cor_fundo=membro.cor_fundo,
+            concluido_em=tentativa.criado_em,
+            acertos=tentativa.acertos,
+            questoes=tentativa.total,
+        )
+        if tentativa.versao_conteudo != conteudo.versao:
+            aluno.versao_antiga = True
+        else:
+            aluno.respostas = montar_respostas(questoes, tentativa.respostas, alternativas_por_questao)
+        alunos.append(aluno)
+    return alunos
