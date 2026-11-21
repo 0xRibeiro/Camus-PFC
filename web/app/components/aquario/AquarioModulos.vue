@@ -6,25 +6,47 @@
           Sensores
         </h2>
 
-        <!-- so a ultima hora atualiza rapido -->
+        <!-- so a ultima hora atualiza rapido, e so e ao vivo se o iot ta mandando leitura -->
         <span
-          v-if="minutos === 60"
+          v-if="minutos === 60 && !carregando"
           class="flex items-center gap-1.5 text-xs text-muted"
         >
           <span class="relative flex size-2">
-            <span class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
-            <span class="relative inline-flex size-2 rounded-full bg-success" />
+            <span
+              v-if="aoVivo"
+              class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75"
+            />
+            <span
+              class="relative inline-flex size-2 rounded-full"
+              :class="aoVivo ? 'bg-success' : 'bg-neutral-500'"
+            />
           </span>
-          ao vivo
+          {{ aoVivo ? 'ao vivo' : 'sem leituras agora' }}
         </span>
       </div>
 
-      <USelect
-        v-model="minutos"
-        :items="periodos"
-        class="w-40"
-      />
+      <div class="flex flex-wrap items-center gap-2">
+        <UTabs
+          v-model="minutos"
+          :items="periodos"
+          :content="false"
+          size="sm"
+        />
+
+        <UButton
+          label="Histórico"
+          icon="i-lucide-history"
+          color="neutral"
+          variant="outline"
+          @click="historicoAberto = true"
+        />
+      </div>
     </div>
+
+    <AquarioHistorico
+      v-model:open="historicoAberto"
+      :aquario-id="aquarioId"
+    />
 
     <div
       v-if="carregando"
@@ -46,21 +68,29 @@
     >
       <template
         v-for="modulo in modulos"
-        :key="modulo.serial"
+        :key="modulo.serial ?? modulo.tipo"
       >
         <AquarioTemperatura
           v-if="modulo.tipo === TIPO_TEMPERATURA"
           :modulo="modulo"
           :minutos="minutosCarregados"
           :pode-editar="podeEditar"
-          :pendente="pendentes[modulo.serial]"
-          @comandar="comandar(modulo.serial, $event)"
+          :pendente="pendentes[modulo.serial ?? '']"
+          @comandar="comandar(modulo.serial ?? '', $event)"
         />
 
         <AquarioNivel
           v-else-if="modulo.tipo === TIPO_DISTANCIA"
           :modulo="modulo"
           :minutos="minutosCarregados"
+        />
+
+        <!-- 2 sensores, ocupa a linha toda -->
+        <AquarioQualidade
+          v-else-if="modulo.tipo === TIPO_QUALIDADE_AGUA"
+          :modulo="modulo"
+          :minutos="minutosCarregados"
+          class="lg:col-span-2"
         />
       </template>
     </div>
@@ -76,15 +106,29 @@ const props = defineProps<{ aquarioId: number, podeEditar: boolean }>()
 // igual ao TipoModulo do back
 const TIPO_DISTANCIA = 1
 const TIPO_TEMPERATURA = 2
+const TIPO_QUALIDADE_AGUA = 3
 
 // esp confirma em ~1s, o polling de 5s traz o estado novo
 const ESPERA_CONFIRMACAO_MS = 15000
 
 const periodos = [
-  { label: 'Última hora', value: 60 },
-  { label: 'Últimas 6 horas', value: 360 },
-  { label: 'Últimas 24 horas', value: 1440 },
+  { label: '1 h', value: 60 },
+  { label: '6 h', value: 360 },
+  { label: '24 h', value: 1440 },
 ]
+
+// 7 e 30 dias ficam no modal, buscam so qnd abre
+const historicoAberto = ref(false)
+
+// algum sensor mandou leitura agora pouco
+const aoVivo = computed(() => {
+  for (const modulo of modulos.value) {
+    for (const serie of modulo.series) {
+      if (leituraRecente(serie)) return true
+    }
+  }
+  return false
+})
 
 const api = useApi()
 const toast = useToast()
@@ -108,7 +152,8 @@ function mensagemErro(error: unknown, padrao: string): string {
 // tira do pendente quem ja ta no estado pedido
 function limparConfirmados() {
   for (const modulo of modulos.value) {
-    if (pendentes.value[modulo.serial] === modulo.ligado) {
+    // ao vivo todo modulo tem serial, so o removido do historico vem sem
+    if (modulo.serial && pendentes.value[modulo.serial] === modulo.ligado) {
       delete pendentes.value[modulo.serial]
     }
   }

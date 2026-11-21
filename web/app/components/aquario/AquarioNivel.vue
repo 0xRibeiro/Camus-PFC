@@ -10,12 +10,16 @@
         </div>
 
         <div>
-          <h3 class="font-medium">
+          <h3 class="flex items-center gap-2 font-medium">
             Nível da água
+            <UBadge
+              v-if="modulo.removido"
+              label="Removido"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+            />
           </h3>
-          <p class="text-xs text-muted">
-            Módulo {{ modulo.serial }}
-          </p>
         </div>
       </div>
 
@@ -27,33 +31,22 @@
       </span>
     </div>
 
-    <div class="flex flex-wrap items-end justify-between gap-2">
-      <div>
-        <p class="text-4xl font-semibold text-highlighted tabular-nums">
-          {{ serie?.atual ? formatar(serie.atual.valor) : '—' }}
-        </p>
-        <p class="text-sm text-muted">
-          do sensor até a água
-        </p>
-      </div>
-
-      <!-- distancia menor e agua mais alta -->
-      <UBadge
-        v-if="variacao !== null"
-        :color="Math.abs(variacao) < 0.5 ? 'neutral' : variacao > 0 ? 'info' : 'warning'"
-        variant="subtle"
-        :icon="Math.abs(variacao) < 0.5 ? 'i-lucide-minus' : variacao > 0 ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
-      >
-        {{ textoVariacao }}
-      </UBadge>
+    <div>
+      <p class="text-4xl font-semibold text-highlighted tabular-nums">
+        {{ textoAtual(serie, formatar, fim === undefined) }}
+      </p>
+      <p class="text-sm text-muted">
+        do sensor até a água
+      </p>
     </div>
 
     <AquarioGrafico
       v-if="serie"
-      :pontos="serie.pontos"
+      :serie="serie"
       rotulo="Distância até a água"
       cor="var(--color-sky-500)"
       :minutos="minutos"
+      :fim="fim"
       :formatar="formatar"
       :titulos-estatisticas="['Mais cheio', 'Média', 'Mais vazio']"
       invertido
@@ -65,14 +58,6 @@
     >
       Sem leituras nesse período.
     </p>
-
-    <p class="flex items-start gap-2 text-xs text-muted">
-      <UIcon
-        name="i-lucide-info"
-        class="mt-0.5 size-3.5 shrink-0"
-      />
-      O sensor fica em cima do aquário e mede até a superfície. Quanto menor a distância, mais cheio. No gráfico, a linha sobe quando a água sobe.
-    </p>
   </UCard>
 </template>
 
@@ -82,6 +67,8 @@ import type { ModuloIotRead } from '~/types/generated'
 const props = defineProps<{
   modulo: ModuloIotRead
   minutos: number
+  // fim do periodo no historico, sem ele e agora
+  fim?: number
 }>()
 
 const haQuanto = useHaQuanto()
@@ -92,20 +79,4 @@ const serie = computed(() => props.modulo.series.find(item => item.nome === 'dis
 function formatar(valor: number) {
   return `${formatoDistancia.format(valor)} cm`
 }
-
-// positivo e agua subindo no periodo
-const variacao = computed(() => {
-  const pontos = serie.value?.pontos ?? []
-  const primeiro = pontos[0]
-  const ultimo = pontos.at(-1)
-  if (!primeiro || !ultimo || pontos.length < 2) return null
-  return primeiro.valor - ultimo.valor
-})
-
-const textoVariacao = computed(() => {
-  if (variacao.value === null) return ''
-  if (Math.abs(variacao.value) < 0.5) return 'Nível estável'
-  const quanto = formatar(Math.abs(variacao.value))
-  return variacao.value > 0 ? `Subiu ${quanto}` : `Baixou ${quanto}`
-})
 </script>

@@ -29,6 +29,11 @@ namespace sons {
     { NOTE_E6, 100 },
   };
 
+  const buzzer::Nota CONFIRMADO[] = {
+    { NOTE_G5, 80 },
+    { NOTE_C6, 160 },
+  };
+
   const buzzer::Nota ERRO[] = {
     { NOTE_C4, 200 },
     { PAUSA, 80 },

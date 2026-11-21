@@ -10,12 +10,16 @@
         </div>
 
         <div>
-          <h3 class="font-medium">
+          <h3 class="flex items-center gap-2 font-medium">
             Temperatura da água
+            <UBadge
+              v-if="modulo.removido"
+              label="Removido"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+            />
           </h3>
-          <p class="text-xs text-muted">
-            Módulo {{ modulo.serial }}
-          </p>
         </div>
       </div>
 
@@ -28,16 +32,19 @@
     </div>
 
     <p class="text-4xl font-semibold text-highlighted tabular-nums">
-      {{ serie?.atual ? formatar(serie.atual.valor) : '—' }}
+      {{ textoAtual(serie, formatar, fim === undefined) }}
     </p>
 
     <AquarioGrafico
       v-if="serie"
-      :pontos="serie.pontos"
+      :serie="serie"
       rotulo="Temperatura"
       cor="var(--color-orange-500)"
       :minutos="minutos"
+      :fim="fim"
       :formatar="formatar"
+      :ligado="modulo.periodos_ligado"
+      rotulo-ligado="Aquecedor ligado"
     />
 
     <p
@@ -47,9 +54,10 @@
       Sem leituras nesse período.
     </p>
 
-    <!-- rele do modulo de temperatura e o aquecedor -->
+    <!-- rele do modulo de temperatura e o aquecedor. no historico n tem, la e so pra ver -->
+
     <div
-      v-if="modulo.ligado !== null && modulo.ligado !== undefined"
+      v-if="modulo.ligado !== null && modulo.ligado !== undefined && fim === undefined"
       class="flex flex-wrap items-center justify-between gap-3 rounded-xl p-4 ring ring-inset transition-colors"
       :class="ligadoNaTela ? 'bg-orange-500/10 ring-orange-500/40' : 'bg-elevated/50 ring-default'"
     >
@@ -92,13 +100,16 @@
 <script setup lang="ts">
 import type { ModuloIotRead } from '~/types/generated'
 
-const props = defineProps<{
+// sem o default o vue transforma o pendente q n foi passado em false, e o card ficava "desligando"
+const props = withDefaults(defineProps<{
   modulo: ModuloIotRead
   minutos: number
   podeEditar: boolean
   // estado pedido enquanto o esp n confirma
   pendente?: boolean
-}>()
+  // fim do periodo no historico, sem ele e agora
+  fim?: number
+}>(), { pendente: undefined, fim: undefined })
 
 const emit = defineEmits<{ comandar: [ligar: boolean] }>()
 

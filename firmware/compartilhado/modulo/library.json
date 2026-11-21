@@ -1,0 +1,6 @@
+{
+  "name": "modulo",
+  "version": "0.1.0",
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}

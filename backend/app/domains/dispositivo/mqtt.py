@@ -7,6 +7,7 @@ from app.domains.dispositivo.schema import (
     StatusDispositivo,
 )
 from app.domains.dispositivo.service import (
+    contar_vinculados,
     desvincular_todos,
     gerar_codigo,
     gravar_leitura,
@@ -35,6 +36,10 @@ async def ao_pedido_vinculo(pedido: PedidoVinculo, topic: str):
     elif pedido.acao == "desvincular_todos":
         async with async_session_maker() as db:
             resposta = await desvincular_todos(db, mac)
+        mqtt.publish(f"camus/dispositivos/{mac}/vinculo/resposta", resposta)
+    elif pedido.acao == "contar_vinculados":
+        async with async_session_maker() as db:
+            resposta = await contar_vinculados(db, mac)
         mqtt.publish(f"camus/dispositivos/{mac}/vinculo/resposta", resposta)
 
 

@@ -22,6 +22,6 @@ namespace display {
     tft.writeColor(ST77XX_BLACK, 132 * 162);
     tft.endWrite();
 
-    tft.setRotation(1);
+    tft.setRotation(3);
   }
 }

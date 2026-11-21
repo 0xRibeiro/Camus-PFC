@@ -1,12 +1,19 @@
+from datetime import UTC, datetime, timedelta
+
 from influxdb_client import Point
 from influxdb_client.client.flux_table import FluxRecord
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.influx import cliente_influx
 from app.domains.aquario.model import AquarioMembro, PapelAquario
 from app.domains.dispositivo.model import Dispositivo, ModuloIot
+
+
+# flux aceita o horario direto, desde q seja utc com Z no final
+def tempo_flux(tempo: datetime) -> str:
+    return tempo.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class DispositivoRepository:
@@ -36,6 +43,11 @@ class DispositivoRepository:
         resultado = await self.db.execute(delete(AquarioMembro).where(AquarioMembro.id_aquario == id_aquario)
         .where(AquarioMembro.papel == PapelAquario.operador).returning(AquarioMembro.id_usuario))
         return len(resultado.all())
+
+    async def contar_operadores(self, id_aquario: int) -> int:
+        resultado = await self.db.execute(select(func.count()).select_from(AquarioMembro)
+        .where(AquarioMembro.id_aquario == id_aquario).where(AquarioMembro.papel == PapelAquario.operador))
+        return resultado.scalar_one()
 
     async def buscar_modulo(self, serial: str) -> ModuloIot | None:
         resultado = await self.db.execute(select(ModuloIot).where(ModuloIot.serial == serial))
@@ -67,21 +79,57 @@ class LeituraRepository:
                 registros.append(registro)
         return registros
 
-    # params so existe no influx cloud, mac vem do banco (hex)
-    # media por janela pro grafico n receber milhares de pontos
-    async def listar_do_dispositivo(self, mac: str, minutos: int, janela_segundos: int) -> list[FluxRecord]:
+    # params so existe no influx cloud, mac vem do banco (hex) e a condicao das constantes do service.
+    # junta por tipo e n por modulo, trocou o sensor de temperatura e continua sendo a temperatura do aquario.
+    # 2 modulos do msm tipo ao msm tempo viram a media dos dois.
+    # cada resultado vem com o nome no yield:
+    # pontos = media das validas por janela, vazia vira null. horario e o comeco da janela, o dia 14 fica no dia 14
+    # erros = janelas q tiveram leitura fora da faixa
+    # minimo, media e maximo = das validas no periodo todo
+    # deslocamento empurra as janelas pra de 1 dia comecar na meia-noite daqui e n na de utc
+    async def listar_do_dispositivo(self, mac: str, inicio: datetime, fim: datetime, janela_segundos: int,
+        condicao_valida: str, deslocamento_segundos: int) -> list[FluxRecord]:
         return await self.consultar(f"""
-            from(bucket: "{settings.influx_bucket}")
-              |> range(start: -{minutos}m)
-              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
-              |> aggregateWindow(every: {janela_segundos}s, fn: mean, createEmpty: false)
+            dados = from(bucket: "{settings.influx_bucket}")
+              |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
+              |> group(columns: ["tipo", "nome", "unidade"])
+              |> map(fn: (r) => ({{r with valido: {condicao_valida}}}))
+
+            validos = dados |> filter(fn: (r) => r.valido, onEmpty: "keep")
+
+            validos
+              |> aggregateWindow(every: {janela_segundos}s, offset: {deslocamento_segundos}s, fn: mean, createEmpty: true, timeSrc: "_start")
+              |> yield(name: "pontos")
+
+            dados
+              |> filter(fn: (r) => not r.valido)
+              |> aggregateWindow(every: {janela_segundos}s, offset: {deslocamento_segundos}s, fn: count, createEmpty: false, timeSrc: "_start")
+              |> yield(name: "erros")
+
+            validos |> min() |> yield(name: "minimo")
+            validos |> mean() |> yield(name: "media")
+            validos |> max() |> yield(name: "maximo")
         """)
 
-    # leitura mais recente sem media, pro valor de agora
-    async def ultimas_do_dispositivo(self, mac: str, minutos: int) -> list[FluxRecord]:
+    # mudancas do rele em ordem, comecando 30 dias antes pra saber se ja tava ligado no comeco do periodo
+    async def listar_rele(self, mac: str, inicio: datetime, fim: datetime) -> list[FluxRecord]:
         return await self.consultar(f"""
             from(bucket: "{settings.influx_bucket}")
-              |> range(start: -{minutos}m)
-              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}")
+              |> range(start: {tempo_flux(inicio - timedelta(days=30))}, stop: {tempo_flux(fim)})
+              |> filter(fn: (r) => r._measurement == "rele" and r.dispositivo == "{mac}" and r._field == "ligado")
+              |> group(columns: ["tipo"])
+              |> sort(columns: ["_time"])
+        """)
+
+    # leitura mais recente do periodo sem media, pro valor grande do card.
+    # ultima de cada modulo, dps fica so a mais nova de cada tipo
+    async def ultimas_do_dispositivo(self, mac: str, inicio: datetime, fim: datetime) -> list[FluxRecord]:
+        return await self.consultar(f"""
+            from(bucket: "{settings.influx_bucket}")
+              |> range(start: {tempo_flux(inicio)}, stop: {tempo_flux(fim)})
+              |> filter(fn: (r) => r._measurement == "leitura" and r.dispositivo == "{mac}" and r._field == "valor")
               |> last()
+              |> group(columns: ["tipo", "nome", "unidade"])
+              |> max(column: "_time")
         """)

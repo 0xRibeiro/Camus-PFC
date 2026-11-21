@@ -19,11 +19,20 @@ class AquarioRepository:
         consulta = select(Peixe).where(Peixe.aquario_id == aquario_id).order_by(Peixe.id)
         return list((await self.db.scalars(consulta)).all())
 
-    async def criar_peixe(self, peixe: Peixe) -> Peixe:
+    async def buscar_peixe(self, aquario_id: int, peixe_id: int) -> Peixe | None:
+        consulta = select(Peixe).where(Peixe.id == peixe_id, Peixe.aquario_id == aquario_id)
+        return await self.db.scalar(consulta)
+
+    # serve pra criar e pra editar
+    async def salvar_peixe(self, peixe: Peixe) -> Peixe:
         self.db.add(peixe)
         await self.db.commit()
         await self.db.refresh(peixe)
         return peixe
+
+    async def remover_peixe(self, peixe: Peixe) -> None:
+        await self.db.delete(peixe)
+        await self.db.commit()
 
     async def buscar(self, aquario_id: int) -> Aquario | None:
         return await self.db.get(Aquario, aquario_id)

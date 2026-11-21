@@ -875,6 +875,10 @@ export type DispositivoRead = {
      */
     firmware: string | null;
     /**
+     * Rede
+     */
+    rede?: string | null;
+    /**
      * Ultimo Contato
      */
     ultimo_contato: string;
@@ -1017,11 +1021,6 @@ export type EngajamentoTrilhaRead = {
 };
 
 /**
- * Especie
- */
-export type Especie = 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon' | 'Donzela chromis verde' | 'Cardinal banggai' | 'Anthias cauda de lira' | 'Bodião limpador';
-
-/**
  * EspecieComparadaRead
  */
 export type EspecieComparadaRead = {
@@ -1130,6 +1129,20 @@ export type ImagemRead = {
      * Url
      */
     url: string;
+};
+
+/**
+ * IntervaloLigado
+ */
+export type IntervaloLigado = {
+    /**
+     * Inicio
+     */
+    inicio: string;
+    /**
+     * Fim
+     */
+    fim: string;
 };
 
 /**
@@ -1292,7 +1305,7 @@ export type ModuloIotRead = {
     /**
      * Serial
      */
-    serial: string;
+    serial: string | null;
     tipo: TipoModulo;
     /**
      * Series
@@ -1302,6 +1315,14 @@ export type ModuloIotRead = {
      * Ligado
      */
     ligado?: boolean | null;
+    /**
+     * Periodos Ligado
+     */
+    periodos_ligado?: Array<IntervaloLigado>;
+    /**
+     * Removido
+     */
+    removido?: boolean;
 };
 
 /**
@@ -1403,13 +1424,17 @@ export type PapelAquario = 'dono' | 'operador' | 'leitor';
  */
 export type PeixeCreate = {
     /**
-     * Nome
+     * Taxon Id
      */
-    nome: string;
+    taxon_id: number;
     /**
-     * Especie
+     * Quantidade
      */
-    especie: 'Peixe Dourado' | 'Peixe Betta' | 'Peixe Palhaço' | 'Peixe Anjo' | 'Peixe Neon';
+    quantidade?: number;
+    /**
+     * Apelido
+     */
+    apelido?: string | null;
 };
 
 /**
@@ -1421,10 +1446,47 @@ export type PeixeRead = {
      */
     id: number;
     /**
-     * Nome
+     * Taxon Id
      */
-    nome: string;
-    especie: Especie;
+    taxon_id: number;
+    /**
+     * Nome Popular
+     */
+    nome_popular: string;
+    /**
+     * Nome Cientifico
+     */
+    nome_cientifico: string;
+    /**
+     * Foto Url
+     */
+    foto_url: string | null;
+    /**
+     * Foto Credito
+     */
+    foto_credito: string | null;
+    /**
+     * Quantidade
+     */
+    quantidade: number;
+    /**
+     * Apelido
+     */
+    apelido: string | null;
+};
+
+/**
+ * PeixeUpdate
+ */
+export type PeixeUpdate = {
+    /**
+     * Quantidade
+     */
+    quantidade?: number | null;
+    /**
+     * Apelido
+     */
+    apelido?: string | null;
 };
 
 /**
@@ -1899,7 +1961,27 @@ export type SerieLeitura = {
      * Pontos
      */
     pontos: Array<PontoLeitura>;
+    /**
+     * Trechos
+     */
+    trechos?: Array<TrechoLeitura>;
+    /**
+     * Minimo
+     */
+    minimo?: number | null;
+    /**
+     * Media
+     */
+    media?: number | null;
+    /**
+     * Maximo
+     */
+    maximo?: number | null;
     atual?: PontoLeitura | null;
+    /**
+     * Atual Erro
+     */
+    atual_erro?: boolean;
 };
 
 /**
@@ -1924,7 +2006,7 @@ export type TipoDocumentoLegal = 'termos_de_uso' | 'politica_de_privacidade';
 /**
  * TipoModulo
  */
-export type TipoModulo = 1 | 2;
+export type TipoModulo = 1 | 2 | 3;
 
 /**
  * TokenPair
@@ -2008,6 +2090,24 @@ export type TotaisTrilhaRead = {
      * Terminaram
      */
     terminaram: number;
+};
+
+/**
+ * TrechoLeitura
+ */
+export type TrechoLeitura = {
+    /**
+     * Inicio
+     */
+    inicio: string;
+    /**
+     * Fim
+     */
+    fim: string;
+    /**
+     * Tipo
+     */
+    tipo: 'sem_leitura' | 'erro';
 };
 
 /**
@@ -3602,6 +3702,18 @@ export type ListarModulosAquariosAquarioIdModulosGetData = {
          * Minutos
          */
         minutos?: number;
+        /**
+         * Inicio
+         */
+        inicio?: string | null;
+        /**
+         * Fim
+         */
+        fim?: string | null;
+        /**
+         * Agrupamento
+         */
+        agrupamento?: 'auto' | 'hora' | 'dia';
     };
     url: '/aquarios/{aquario_id}/modulos';
 };
@@ -3811,6 +3923,74 @@ export type CadastrarPeixeAquariosAquarioIdPeixesPostResponses = {
 };
 
 export type CadastrarPeixeAquariosAquarioIdPeixesPostResponse = CadastrarPeixeAquariosAquarioIdPeixesPostResponses[keyof CadastrarPeixeAquariosAquarioIdPeixesPostResponses];
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+        /**
+         * Peixe Id
+         */
+        peixe_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes/{peixe_id}';
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteError = RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors[keyof RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteErrors];
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponse = RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses[keyof RemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponses];
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchData = {
+    body: PeixeUpdate;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+        /**
+         * Peixe Id
+         */
+        peixe_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}/peixes/{peixe_id}';
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchError = EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors[keyof EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchErrors];
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: PeixeRead;
+};
+
+export type EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponse = EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses[keyof EditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponses];
 
 export type BuscarAquarioAquariosAquarioIdGetData = {
     body?: never;

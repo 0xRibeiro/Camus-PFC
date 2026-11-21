@@ -1,6 +1,10 @@
 import secrets
+from datetime import datetime
 
+import httpx
+from fastapi import HTTPException, status
 from fastcrud.exceptions.http_exceptions import (
+    BadRequestException,
     DuplicateValueException,
     ForbiddenException,
     NotFoundException,
@@ -20,8 +24,9 @@ from app.domains.dispositivo import service as dispositivo_service
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.dispositivo.repository import DispositivoRepository
 from app.domains.dispositivo.schema import CodigoDispositivo, ComandoModulo, DispositivoRead, ModuloIotRead
+from app.domains.minigame import inat
 from app.domains.peixe.model import Peixe
-from app.domains.peixe.schema import PeixeCreate
+from app.domains.peixe.schema import PeixeCreate, PeixeUpdate
 
 CONVITE_VALIDADE_SEGUNDOS = 900
 
@@ -71,6 +76,10 @@ async def montar_read(db: AsyncSession, aquario: Aquario, papel: PapelAquario) -
     if dispositivo is not None:
         dispositivo_read = DispositivoRead.model_validate(dispositivo)
 
+        # nome do wifi da casa e coisa do dono
+        if papel != PapelAquario.dono:
+            dispositivo_read.rede = None
+
     return AquarioRead(id=aquario.id, nome=aquario.nome, litros=aquario.litros, papel=papel, dispositivo=dispositivo_read)
 
 
@@ -101,8 +110,68 @@ async def cadastrar_peixe(db: AsyncSession, aquario_id: int, data: PeixeCreate, 
     aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
     exigir_edicao(papel)
 
-    peixe = Peixe(aquario_id=aquario.id, nome=data.nome, especie=data.especie)
-    return await repo.criar_peixe(peixe)
+    try:
+        taxon = await inat.buscar_taxon(data.taxon_id)
+    except httpx.HTTPError:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Não foi possível falar com o iNaturalist")
+
+    if taxon is None:
+        raise NotFoundException("Espécie não encontrada no iNaturalist")
+
+    # msm grupos da colecao, n deixa cadastrar passarinho no aquario
+    if taxon["grupo"] is None:
+        raise BadRequestException("Essa espécie não é de aquário")
+
+    peixe = Peixe(
+        aquario_id=aquario.id,
+        taxon_id=taxon["taxon_id"],
+        nome_popular=taxon["nome_popular"],
+        nome_cientifico=taxon["nome_cientifico"],
+        foto_url=taxon["foto_url"],
+        foto_credito=taxon["foto_credito"],
+        quantidade=data.quantidade,
+        apelido=data.apelido,
+    )
+    return await repo.salvar_peixe(peixe)
+
+
+async def buscar_peixe_editavel(repo: AquarioRepository, aquario_id: int, peixe_id: int, usuario_id: int) -> Peixe:
+    aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
+    exigir_edicao(papel)
+
+    peixe = await repo.buscar_peixe(aquario.id, peixe_id)
+    if peixe is None:
+        raise NotFoundException("Peixe não encontrado")
+
+    return peixe
+
+
+# quantidade sempre muda, nome so qnd fica 1. se passar de 1 perde o nome
+async def editar_peixe(db: AsyncSession, aquario_id: int, peixe_id: int, data: PeixeUpdate, usuario_id: int) -> Peixe:
+    repo = AquarioRepository(db)
+    peixe = await buscar_peixe_editavel(repo, aquario_id, peixe_id, usuario_id)
+    enviados = data.model_fields_set
+
+    if "quantidade" in enviados:
+        if data.quantidade is None:
+            raise BadRequestException("Informe a quantidade")
+        peixe.quantidade = data.quantidade
+
+    if peixe.quantidade > 1:
+        if data.apelido is not None:
+            raise BadRequestException("Só dá pra dar nome quando é 1 peixe")
+        peixe.apelido = None
+    elif "apelido" in enviados:
+        # mandar apelido null apaga o nome
+        peixe.apelido = data.apelido
+
+    return await repo.salvar_peixe(peixe)
+
+
+async def remover_peixe(db: AsyncSession, aquario_id: int, peixe_id: int, usuario_id: int) -> None:
+    repo = AquarioRepository(db)
+    peixe = await buscar_peixe_editavel(repo, aquario_id, peixe_id, usuario_id)
+    await repo.remover_peixe(peixe)
 
 
 # so o dono conecta, e so iot livre
@@ -164,14 +233,18 @@ async def desconectar_dispositivo(db: AsyncSession, aquario_id: int, usuario_id:
     await dispositivo_service.tirar_do_aquario(db, dispositivo)
 
 
-async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, minutos: int) -> list[ModuloIotRead]:
+async def listar_modulos(db: AsyncSession, aquario_id: int, usuario_id: int, minutos: int, inicio: datetime | None,
+    fim: datetime | None, agrupamento: str) -> list[ModuloIotRead]:
     aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    de, ate = dispositivo_service.resolver_periodo(minutos, inicio, fim)
     dispositivo = await DispositivoRepository(db).buscar_do_aquario(aquario.id)
 
     if dispositivo is None:
         return []
 
-    return await dispositivo_service.listar_modulos(db, dispositivo, minutos)
+    # historico e qnd vem o periodo do calendario
+    historico = inicio is not None and fim is not None
+    return await dispositivo_service.listar_modulos(db, dispositivo, de, ate, agrupamento, historico)
 
 
 # leitor so ve, dono e operador ligam/desligam

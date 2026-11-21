@@ -12,6 +12,7 @@ namespace credencial {
   char linha[80];
   int tamanhoLinha = 0;
 
+  // Preferences guarda na memoria da esp q n apaga qnd desliga
   void iniciar() {
     preferencias.begin("camus", false);
     preferencias.getString("senha", senhaSalva, sizeof(senhaSalva));

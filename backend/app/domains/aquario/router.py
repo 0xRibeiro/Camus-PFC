@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +17,7 @@ from app.domains.aquario.schema import (
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.dispositivo.schema import CodigoDispositivo, ComandoModulo, DispositivoRead, ModuloIotRead
 from app.domains.peixe.model import Peixe
-from app.domains.peixe.schema import PeixeCreate, PeixeRead
+from app.domains.peixe.schema import PeixeCreate, PeixeRead, PeixeUpdate
 from app.domains.usuario.model import Usuario
 from app.domains.usuario.service import get_current_user
 
@@ -58,11 +61,12 @@ async def desconectar_dispositivo(aquario_id: int, db: AsyncSession = Depends(ge
     await service.desconectar_dispositivo(db, aquario_id, usuario.id)
 
 
-# modulos do iot com as leituras dos ultimos minutos
+# modulos do iot com as leituras dos ultimos minutos, ou de inicio ate fim qnd vem os dois (historico)
 @router.get("/{aquario_id}/modulos", response_model=list[ModuloIotRead])
-async def listar_modulos(aquario_id: int, minutos: int = Query(60, ge=1, le=1440), db: AsyncSession = Depends(get_async_session),
-    usuario: Usuario = Depends(get_current_user)) -> list[ModuloIotRead]:
-    return await service.listar_modulos(db, aquario_id, usuario.id, minutos)
+async def listar_modulos(aquario_id: int, minutos: int = Query(60, ge=1, le=43200), inicio: datetime | None = None,
+    fim: datetime | None = None, agrupamento: Literal["auto", "hora", "dia"] = "auto",
+    db: AsyncSession = Depends(get_async_session), usuario: Usuario = Depends(get_current_user)) -> list[ModuloIotRead]:
+    return await service.listar_modulos(db, aquario_id, usuario.id, minutos, inicio, fim, agrupamento)
 
 
 # 202: o esp confirma depois, o estado novo aparece no listar_modulos
@@ -99,6 +103,16 @@ async def listar_peixes(aquario_id: int, db: AsyncSession = Depends(get_async_se
 async def cadastrar_peixe(aquario_id: int, data: PeixeCreate, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> Peixe:
     return await service.cadastrar_peixe(db, aquario_id, data, usuario.id)
+
+@router.patch("/{aquario_id}/peixes/{peixe_id}", response_model=PeixeRead)
+async def editar_peixe(aquario_id: int, peixe_id: int, data: PeixeUpdate, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> Peixe:
+    return await service.editar_peixe(db, aquario_id, peixe_id, data, usuario.id)
+
+@router.delete("/{aquario_id}/peixes/{peixe_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remover_peixe(aquario_id: int, peixe_id: int, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> None:
+    await service.remover_peixe(db, aquario_id, peixe_id, usuario.id)
 
 # rota para buscar um aquario do usuario, caso ele nao seja dono de nenhum retorna 404
 @router.get("/{aquario_id}", response_model=AquarioRead)

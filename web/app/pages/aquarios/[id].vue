@@ -52,6 +52,14 @@
           </div>
         </div>
 
+        <!-- central em cima dos sensores, offline nela explica os sensores sem leitura -->
+        <AquarioIot
+          :aquario-id="aquario.id"
+          :papel="aquario.papel ?? 'dono'"
+          :dispositivo="aquario.dispositivo ?? null"
+          @atualizado="atualizarDispositivo"
+        />
+
         <AquarioModulos
           v-if="aquario.dispositivo"
           :aquario-id="aquario.id"
@@ -63,19 +71,10 @@
           :pode-editar="aquario.papel !== 'leitor'"
         />
 
-        <div class="grid gap-4 md:grid-cols-2">
-          <AquarioIot
-            :aquario-id="aquario.id"
-            :papel="aquario.papel ?? 'dono'"
-            :dispositivo="aquario.dispositivo ?? null"
-            @atualizado="atualizarDispositivo"
-          />
-
-          <AquarioMembros
-            :aquario-id="aquario.id"
-            :papel="aquario.papel ?? 'dono'"
-          />
-        </div>
+        <AquarioMembros
+          :aquario-id="aquario.id"
+          :papel="aquario.papel ?? 'dono'"
+        />
       </template>
     </div>
   </div>
@@ -123,4 +122,16 @@ onMounted(async () => {
     carregando.value = false
   }
 })
+
+// online/offline da central muda sozinho, msm 5s dos sensores. erro aqui so espera a proxima
+useIntervalFn(async () => {
+  if (!aquario.value) return
+  try {
+    const atualizado: AquarioRead = await api(`/aquarios/${route.params.id}`)
+    atualizarDispositivo(atualizado.dispositivo ?? null)
+  }
+  catch {
+    // fica com o ultimo estado
+  }
+}, 5000)
 </script>

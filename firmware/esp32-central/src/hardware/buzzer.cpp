@@ -5,7 +5,7 @@
 #include "../config.h"
 
 namespace buzzer {
-  // som q tá tocando agora
+  // aponta pro som q tá tocando, nullptr = silêncio
   const Nota* somAtual = nullptr;
   int quantidadeNotas = 0;
   int notaAtual = 0;

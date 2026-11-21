@@ -44,7 +44,10 @@
       v-if="dispositivo"
       class="space-y-4"
     >
-      <dl class="grid grid-cols-2 gap-3 text-sm">
+      <dl
+        class="grid grid-cols-2 gap-3 text-sm"
+        :class="{ 'sm:grid-cols-3': papel === 'dono' }"
+      >
         <div class="rounded-lg bg-elevated/50 p-3">
           <dt class="text-xs text-muted">
             Último contato
@@ -63,12 +66,16 @@
           </dd>
         </div>
 
-        <div class="col-span-2 rounded-lg bg-elevated/50 p-3">
+        <!-- nome do wifi so o dono ve, o back nem manda pros outros -->
+        <div
+          v-if="papel === 'dono'"
+          class="col-span-2 rounded-lg bg-elevated/50 p-3 sm:col-span-1"
+        >
           <dt class="text-xs text-muted">
-            Endereço (MAC)
+            Rede Wi-Fi
           </dt>
-          <dd class="font-mono font-medium">
-            {{ macFormatado }}
+          <dd class="font-medium wrap-anywhere">
+            {{ dispositivo.rede ?? '—' }}
           </dd>
         </div>
       </dl>
@@ -168,7 +175,6 @@ const haQuanto = useHaQuanto()
 const online = computed(() => props.dispositivo?.estado === 'online')
 
 // vem sem os dois pontos do topico
-const macFormatado = computed(() => props.dispositivo?.mac.match(/.{1,2}/g)?.join(':').toUpperCase() ?? '')
 
 const formulario = reactive({ codigo: '' })
 const enviando = ref(false)

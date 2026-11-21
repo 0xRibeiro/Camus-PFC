@@ -75,10 +75,16 @@
             </template>
 
             <template v-if="peixeSelecionado">
+              <USkeleton
+                v-if="carregandoFoto(peixeSelecionado.id)"
+                class="aspect-square w-full rounded-lg"
+              />
+
               <img
-                v-if="peixeSelecionado.default_photo?.square_url"
-                :src="peixeSelecionado.default_photo.square_url"
+                v-else-if="fotos[peixeSelecionado.id]"
+                :src="fotos[peixeSelecionado.id]?.medium_url"
                 :alt="`Imagem de ${peixeSelecionado.preferred_common_name || peixeSelecionado.name}`"
+                :title="fotos[peixeSelecionado.id]?.attribution"
                 class="aspect-square w-full rounded-lg object-cover"
               >
 
@@ -147,10 +153,16 @@
               :aria-label="`Selecionar ${peixe.preferred_common_name || peixe.name}`"
               @click="selecionarPeixe(peixe)"
             >
+              <USkeleton
+                v-if="carregandoFoto(peixe.id)"
+                class="aspect-video w-full rounded-lg"
+              />
+
               <img
-                v-if="peixe.default_photo?.medium_url"
-                :src="peixe.default_photo.medium_url"
+                v-else-if="fotos[peixe.id]"
+                :src="fotos[peixe.id]?.medium_url"
                 :alt="`Imagem de ${peixe.preferred_common_name || peixe.name}`"
+                :title="fotos[peixe.id]?.attribution"
                 class="aspect-video w-full rounded-lg object-cover"
               >
 
@@ -193,23 +205,15 @@
 
 <script setup lang="ts">
 import { useConquistasStore } from '~/stores/conquistas'
+import type { TaxonInat } from '~/utils/inaturalista'
 import { TAXONS_COLECAO } from '~/utils/inaturalista'
 
 definePageMeta({ middleware: 'role' })
 
-interface FotosPeixe {
-  medium_url?: string
-  square_url?: string
-}
-
-interface Peixe {
-  id: number
-  name: string
-  preferred_common_name?: string
+interface Peixe extends TaxonInat {
   rank?: string
   observations_count?: number
   wikipedia_url?: string
-  default_photo?: FotosPeixe
 }
 
 interface RespostaTaxa {
@@ -219,6 +223,7 @@ interface RespostaTaxa {
 }
 
 const inat = useInat()
+const { fotos, carregar: carregarFotos, carregando: carregandoFoto } = useFotosLivres()
 const conquistas = useConquistasStore()
 const detalhesPeixe = useTemplateRef('detalhesPeixe')
 const telaLarga = useMediaQuery('(min-width: 64rem)')
@@ -277,6 +282,7 @@ async function carregarPagina(paginaSolicitada: number) {
     })
 
     peixes.value = resposta.results ?? []
+    carregarFotos(peixes.value)
     totalResultados.value = resposta.total_results ?? peixes.value.length
     pagina.value = resposta.page ?? paginaSolicitada
   }

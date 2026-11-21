@@ -368,21 +368,6 @@ export const zEngajamentoTrilhaRead = z.object({
 });
 
 /**
- * Especie
- */
-export const zEspecie = z.enum([
-    'Peixe Dourado',
-    'Peixe Betta',
-    'Peixe Palhaço',
-    'Peixe Anjo',
-    'Peixe Neon',
-    'Donzela chromis verde',
-    'Cardinal banggai',
-    'Anthias cauda de lira',
-    'Bodião limpador'
-]);
-
-/**
  * EspecieComparadaRead
  */
 export const zEspecieComparadaRead = z.object({
@@ -406,6 +391,7 @@ export const zDispositivoRead = z.object({
     mac: z.string(),
     estado: zEstadoDispositivo,
     firmware: z.string().nullable(),
+    rede: z.string().nullish(),
     ultimo_contato: z.iso.datetime()
 });
 
@@ -447,6 +433,14 @@ export const zGrupoRead = z.object({
  */
 export const zImagemRead = z.object({
     url: z.string()
+});
+
+/**
+ * IntervaloLigado
+ */
+export const zIntervaloLigado = z.object({
+    inicio: z.iso.datetime(),
+    fim: z.iso.datetime()
 });
 
 /**
@@ -593,14 +587,9 @@ export const zMembroAquarioRead = z.object({
  * PeixeCreate
  */
 export const zPeixeCreate = z.object({
-    nome: z.string().min(1).max(50),
-    especie: z.enum([
-        'Peixe Dourado',
-        'Peixe Betta',
-        'Peixe Palhaço',
-        'Peixe Anjo',
-        'Peixe Neon'
-    ])
+    taxon_id: z.int().gt(0),
+    quantidade: z.int().gte(1).lte(999).optional().default(1),
+    apelido: z.string().min(1).max(50).nullish()
 });
 
 /**
@@ -608,8 +597,21 @@ export const zPeixeCreate = z.object({
  */
 export const zPeixeRead = z.object({
     id: z.int(),
-    nome: z.string(),
-    especie: zEspecie
+    taxon_id: z.int(),
+    nome_popular: z.string(),
+    nome_cientifico: z.string(),
+    foto_url: z.string().nullable(),
+    foto_credito: z.string().nullable(),
+    quantidade: z.int(),
+    apelido: z.string().nullable()
+});
+
+/**
+ * PeixeUpdate
+ */
+export const zPeixeUpdate = z.object({
+    quantidade: z.int().gte(1).lte(999).nullish(),
+    apelido: z.string().min(1).max(50).nullish()
 });
 
 /**
@@ -840,16 +842,6 @@ export const zRoleUsuario = z.enum([
 ]);
 
 /**
- * SerieLeitura
- */
-export const zSerieLeitura = z.object({
-    nome: z.string(),
-    unidade: z.string(),
-    pontos: z.array(zPontoLeitura),
-    atual: zPontoLeitura.nullish()
-});
-
-/**
  * SuspensaoCreate
  */
 export const zSuspensaoCreate = z.object({
@@ -927,17 +919,11 @@ export const zRascunhoCreate = z.object({
 /**
  * TipoModulo
  */
-export const zTipoModulo = z.union([z.literal(1), z.literal(2)]);
-
-/**
- * ModuloIotRead
- */
-export const zModuloIotRead = z.object({
-    serial: z.string(),
-    tipo: zTipoModulo,
-    series: z.array(zSerieLeitura),
-    ligado: z.boolean().nullish()
-});
+export const zTipoModulo = z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal(3)
+]);
 
 /**
  * TokenPair
@@ -1016,6 +1002,42 @@ export const zDashboardTrilhaRead = z.object({
     totais_anteriores: zTotaisTrilhaRead,
     engajamento: zEngajamentoTrilhaRead,
     funil: z.array(zConteudoFunilRead)
+});
+
+/**
+ * TrechoLeitura
+ */
+export const zTrechoLeitura = z.object({
+    inicio: z.iso.datetime(),
+    fim: z.iso.datetime(),
+    tipo: z.enum(['sem_leitura', 'erro'])
+});
+
+/**
+ * SerieLeitura
+ */
+export const zSerieLeitura = z.object({
+    nome: z.string(),
+    unidade: z.string(),
+    pontos: z.array(zPontoLeitura),
+    trechos: z.array(zTrechoLeitura).optional().default([]),
+    minimo: z.number().nullish(),
+    media: z.number().nullish(),
+    maximo: z.number().nullish(),
+    atual: zPontoLeitura.nullish(),
+    atual_erro: z.boolean().optional().default(false)
+});
+
+/**
+ * ModuloIotRead
+ */
+export const zModuloIotRead = z.object({
+    serial: z.string().nullable(),
+    tipo: zTipoModulo,
+    series: z.array(zSerieLeitura),
+    ligado: z.boolean().nullish(),
+    periodos_ligado: z.array(zIntervaloLigado).optional().default([]),
+    removido: z.boolean().optional().default(false)
 });
 
 /**
@@ -1590,7 +1612,14 @@ export const zListarModulosAquariosAquarioIdModulosGetPath = z.object({
 });
 
 export const zListarModulosAquariosAquarioIdModulosGetQuery = z.object({
-    minutos: z.int().gte(1).lte(1440).optional().default(60)
+    minutos: z.int().gte(1).lte(43200).optional().default(60),
+    inicio: z.iso.datetime().nullish(),
+    fim: z.iso.datetime().nullish(),
+    agrupamento: z.enum([
+        'auto',
+        'hora',
+        'dia'
+    ]).optional().default('auto')
 });
 
 /**
@@ -1657,6 +1686,28 @@ export const zCadastrarPeixeAquariosAquarioIdPeixesPostPath = z.object({
  * Successful Response
  */
 export const zCadastrarPeixeAquariosAquarioIdPeixesPostResponse = zPeixeRead;
+
+export const zRemoverPeixeAquariosAquarioIdPeixesPeixeIdDeletePath = z.object({
+    aquario_id: z.int(),
+    peixe_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoverPeixeAquariosAquarioIdPeixesPeixeIdDeleteResponse = z.void();
+
+export const zEditarPeixeAquariosAquarioIdPeixesPeixeIdPatchBody = zPeixeUpdate;
+
+export const zEditarPeixeAquariosAquarioIdPeixesPeixeIdPatchPath = z.object({
+    aquario_id: z.int(),
+    peixe_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zEditarPeixeAquariosAquarioIdPeixesPeixeIdPatchResponse = zPeixeRead;
 
 export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
     aquario_id: z.int()

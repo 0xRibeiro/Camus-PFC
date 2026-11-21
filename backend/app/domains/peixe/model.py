@@ -1,33 +1,24 @@
-from enum import StrEnum
-
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
 
-class Especie(StrEnum):
-    DOURADO = "Peixe Dourado"
-    BETTA = "Peixe Betta"
-    PALHACO = "Peixe Palhaço"
-    ANJO = "Peixe Anjo"
-    NEON = "Peixe Neon"
-
-    # cadastros antigos, depois insiro eles dnv
-    CHROMIS = "Donzela chromis verde"
-    BANGGAI = "Cardinal banggai"
-    ANTHIAS = "Anthias cauda de lira"
-    BODIAO = "Bodião limpador"
-
-
+# dados da especie sao copia do iNat no cadastro, assim n depende dele pra mostrar
 class Peixe(Base):
     __tablename__ = "peixes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    nome: Mapped[str] = mapped_column(String(50))
-
     aquario_id: Mapped[int] = mapped_column(ForeignKey("aquarios.id", ondelete="CASCADE"), index=True)
-    
-    especie: Mapped[Especie] = mapped_column(SQLEnum(Especie, native_enum=False, create_constraint=True, name="especie_peixe"))
+
+    taxon_id: Mapped[int]
+    nome_popular: Mapped[str] = mapped_column(String(150))
+    nome_cientifico: Mapped[str] = mapped_column(String(150))
+    foto_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    foto_credito: Mapped[str | None] = mapped_column(String(300), nullable=True)
+
+    quantidade: Mapped[int] = mapped_column(default=1)
+
+    # nome do pet, so qnd tem 1
+    apelido: Mapped[str | None] = mapped_column(String(50), nullable=True)

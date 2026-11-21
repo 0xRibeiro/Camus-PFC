@@ -10,13 +10,14 @@ from app.domains.dispositivo.model import EstadoDispositivo, TipoModulo
 class StatusDispositivo(BaseModel):
     estado: EstadoDispositivo
 
-    # o offline do testamento n manda versao
+    # o offline do testamento n manda versao nem rede
     firmware: str | None = None
+    rede: str | None = None
 
 
 # camus/dispositivos/<mac>/vinculo/pedido
 class PedidoVinculo(BaseModel):
-    acao: Literal["gerar_codigo", "desvincular_todos"]
+    acao: Literal["gerar_codigo", "desvincular_todos", "contar_vinculados"]
 
 
 # camus/dispositivos/<mac>/vinculo/resposta
@@ -29,6 +30,12 @@ class RespostaVinculo(BaseModel):
 class RespostaDesvinculo(BaseModel):
     acao: Literal["desvincular_todos"] = "desvincular_todos"
     removidos: int
+
+
+# dono + operadores, quem perde acesso se desvincular
+class RespostaContagem(BaseModel):
+    acao: Literal["contar_vinculados"] = "contar_vinculados"
+    vinculados: int
 
 
 class CadastroDispositivo(BaseModel):
@@ -82,22 +89,49 @@ class PontoLeitura(BaseModel):
     valor: float
 
 
+# sem_leitura = iot desligado, erro = sensor mandou valor fora da faixa
+class TrechoLeitura(BaseModel):
+    inicio: datetime
+    fim: datetime
+    tipo: Literal["sem_leitura", "erro"]
+
+
 class SerieLeitura(BaseModel):
     nome: str
     unidade: str
-    # media por janela
+    # media das leituras validas por janela
     pontos: list[PontoLeitura]
+    trechos: list[TrechoLeitura] = []
+
+    # das leituras validas de vdd, n das medias
+    minimo: float | None = None
+    media: float | None = None
+    maximo: float | None = None
+
     # ultima leitura de vdd
     atual: PontoLeitura | None = None
+    atual_erro: bool = False
+
+
+# tempo q o rele ficou ligado dentro do periodo pedido
+class IntervaloLigado(BaseModel):
+    inicio: datetime
+    fim: datetime
 
 
 class ModuloIotRead(BaseModel):
-    serial: str
+    # None qnd e um tipo q so tem leitura antiga, nenhum modulo dele ta conectado agora
+    serial: str | None
     tipo: TipoModulo
     series: list[SerieLeitura]
 
     # None = n tem rele
     ligado: bool | None = None
+    # so os do msm tipo, vira a faixa do aquecedor no grafico
+    periodos_ligado: list[IntervaloLigado] = []
+
+    # so aparece no historico, leituras de um modulo q ja tiraram da central
+    removido: bool = False
 
 
 # body da rota de comando
@@ -118,4 +152,6 @@ class DispositivoRead(BaseModel):
     mac: str
     estado: EstadoDispositivo
     firmware: str | None
+    # so o dono recebe, pros outros vai None
+    rede: str | None = None
     ultimo_contato: datetime

@@ -2,7 +2,8 @@
 
 #include "../hardware/joystick.h"
 
-namespace navegacao {
+// as 3 telas da esp e a troca entre elas pelo joystick
+namespace telas {
   void iniciar();
   void atualizar(joystick::Evento evento);
 }

@@ -16,14 +16,18 @@ namespace mqtt {
   void publicar(const char* sufixo, const char* mensagem, bool retido);
 
   void pedirCodigo();
+  void pedirContagem();
   void pedirDesvincularTodos();
 
   bool chegouCodigo();
   const char* codigo();
   int validade();
 
+  // dono + operadores do aquario da esp
+  bool chegouContagem();
+  int vinculados();
+
   bool chegouDesvinculo();
-  int removidos();
 
   // comando pra um modulo, true so uma vez por mensagem
   bool chegouComando();
