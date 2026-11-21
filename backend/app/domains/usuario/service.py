@@ -29,6 +29,8 @@ from app.core.security import (
     validar_refresh_token,
     verificar_password,
 )
+from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
+from app.domains.auditoria.repository import AuditoriaRepository
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
 from app.domains.conquistas.repository import ConquistaRepository
@@ -45,7 +47,9 @@ from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
     AvatarRead,
+    EmailReveladoRead,
     TokenPair,
+    UsuarioAdminRead,
     UsuarioAdminUpdate,
     UsuarioCreate,
     UsuarioStaffCreate,
@@ -108,7 +112,15 @@ async def autenticar(db: AsyncSession, email: str, password: str) -> Usuario:
     user = await UsuarioRepository(db).buscar_por_email(email)
     if user is None or not verificar_password(password, user.hashed_password):
         raise UnauthorizedException("credenciais inválidas")
+    await registrar_acesso(db, user)
     return user
+
+
+# login e renovacao do token contam como acesso. conta desativada n conta
+async def registrar_acesso(db: AsyncSession, user: Usuario) -> None:
+    if not user.is_active:
+        return
+    await UsuarioRepository(db).registrar_acesso(user.id, datetime.now(timezone.utc))
 
 
 # o "subject" do token é sempre o id do usuario
@@ -131,6 +143,7 @@ async def renovar_tokens(db: AsyncSession, refresh_token: str) -> TokenPair:
         raise UnauthorizedException("refresh token inválido")
 
     await revogar_refresh_token(refresh_token)
+    await registrar_acesso(db, user)
     return await emitir_tokens(user)
 
 
@@ -211,8 +224,39 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
     return user
 
 
-async def listar_usuarios(db: AsyncSession) -> list[Usuario]:
-    return await UsuarioRepository(db).listar()
+async def listar_usuarios(db: AsyncSession, busca: str | None = None) -> list[UsuarioAdminRead]:
+    if busca is not None:
+        busca = busca.strip()
+    repo = UsuarioRepository(db)
+    usuarios = await repo.listar(busca)
+
+    ids = []
+    for usuario in usuarios:
+        ids.append(usuario.id)
+    acessos = await repo.listar_acessos(ids)
+
+    # o ultimo acesso fica em outra tabela, junta aqui
+    lista = []
+    for usuario in usuarios:
+        item = UsuarioAdminRead.model_validate(usuario)
+        item.ultimo_acesso_em = acessos.get(usuario.id)
+        lista.append(item)
+    return lista
+
+
+# cada clique no olhinho vira uma linha na auditoria: quem viu, de quem e quando
+async def revelar_email(db: AsyncSession, admin: Usuario, user_id: int) -> EmailReveladoRead:
+    user = await buscar_usuario(db, user_id)
+    email = user.email
+
+    await AuditoriaRepository(db).registrar(LogAuditoria(
+        usuario_id=admin.id,
+        acao=AcaoAuditoria.view,
+        entidade="usuarios",
+        entidade_id=user.id,
+        alteracoes={"campo": "email"},
+    ))
+    return EmailReveladoRead(email=email)
 
 
 # varre as chaves online:<id> no redis sem travar ele (scan_iter em vez de keys)

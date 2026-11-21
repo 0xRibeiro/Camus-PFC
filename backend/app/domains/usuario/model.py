@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -60,3 +60,15 @@ class Usuario(Base):
         "AceiteDocumentoLegal",
         cascade="all, delete-orphan",
     )
+
+
+# fora da tabela usuarios de proposito: la tem trigger de auditoria e cada login
+# viraria um log com o usuario inteiro. aqui atualiza a vontade
+class AcessoUsuario(Base):
+    __tablename__ = "acessos_usuarios"
+
+    usuario_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    ultimo_acesso_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))

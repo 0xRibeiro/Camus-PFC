@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
-from app.domains.usuario.model import Usuario
+from app.domains.usuario.model import AcessoUsuario, Usuario
 
 
 # so as queries do usuario. a lib fastcrud n serve aqui pq o create precisa
@@ -26,13 +26,38 @@ class UsuarioRepository:
         resultado = await self.db.execute(select(Usuario).where(Usuario.email == email))
         return resultado.scalar_one_or_none()
 
-    async def listar(self) -> list[Usuario]:
-        resultado = await self.db.execute(select(Usuario).order_by(Usuario.id))
+    # a busca olha o email de verdade, mas quem chama so recebe ele mascarado
+    async def listar(self, busca: str | None = None) -> list[Usuario]:
+        consulta = select(Usuario).order_by(Usuario.id)
+        if busca:
+            termo = f"%{busca}%"
+            consulta = consulta.where(Usuario.username.ilike(termo) | Usuario.email.ilike(termo))
+        resultado = await self.db.execute(consulta)
         return list(resultado.scalars().all())
 
     async def buscar_varios(self, ids: list[int]) -> list[Usuario]:
         resultado = await self.db.execute(select(Usuario).where(Usuario.id.in_(ids)))
         return list(resultado.scalars().all())
+
+    ###### ultimo acesso
+    # cria a linha no primeiro acesso, nos proximos so troca a data
+    async def registrar_acesso(self, usuario_id: int, quando: datetime) -> None:
+        acesso = await self.db.get(AcessoUsuario, usuario_id)
+        if acesso is None:
+            acesso = AcessoUsuario(usuario_id=usuario_id, ultimo_acesso_em=quando)
+            self.db.add(acesso)
+        else:
+            acesso.ultimo_acesso_em = quando
+        await self.db.commit()
+
+    async def listar_acessos(self, ids: list[int]) -> dict[int, datetime]:
+        resultado = await self.db.execute(
+            select(AcessoUsuario.usuario_id, AcessoUsuario.ultimo_acesso_em).where(AcessoUsuario.usuario_id.in_(ids))
+        )
+        acessos = {}
+        for usuario_id, quando in resultado.all():
+            acessos[usuario_id] = quando
+        return acessos
 
     # serve pra criar e editar: add num objeto novo insere, num existente
     # so marca e o commit salva as mudancas

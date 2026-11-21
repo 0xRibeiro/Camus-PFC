@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
@@ -8,10 +8,12 @@ from app.domains.usuario.avatares import AVATARES
 from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.schema import (
     AvatarRead,
+    EmailReveladoRead,
     ForgotPasswordInput,
     RefreshInput,
     ResetPasswordInput,
     TokenPair,
+    UsuarioAdminRead,
     UsuarioAdminUpdate,
     UsuarioCreate,
     UsuarioLogin,
@@ -165,21 +167,23 @@ admin_router = APIRouter(
 )
 
 
-@admin_router.get("", response_model=list[UsuarioRead])
+# nas rotas do admin o email vem mascarado, o de verdade so pelo /email (q gera log)
+@admin_router.get("", response_model=list[UsuarioAdminRead])
 async def listar_usuarios(
+    busca: str | None = Query(default=None, max_length=100),
     db: AsyncSession = Depends(get_async_session),
-) -> list[Usuario]:
-    return await service.listar_usuarios(db)
+) -> list[UsuarioAdminRead]:
+    return await service.listar_usuarios(db, busca)
 
 
-@admin_router.get("/online", response_model=list[UsuarioRead])
+@admin_router.get("/online", response_model=list[UsuarioAdminRead])
 async def listar_usuarios_online(
     db: AsyncSession = Depends(get_async_session),
 ) -> list[Usuario]:
     return await service.listar_usuarios_online(db)
 
 
-@admin_router.get("/{user_id}", response_model=UsuarioRead)
+@admin_router.get("/{user_id}", response_model=UsuarioAdminRead)
 async def obter_usuario(
     user_id: int,
     db: AsyncSession = Depends(get_async_session),
@@ -187,9 +191,19 @@ async def obter_usuario(
     return await service.buscar_usuario(db, user_id)
 
 
+# o olhinho da lista: devolve o email inteiro e registra quem viu na auditoria
+@admin_router.get("/{user_id}/email", response_model=EmailReveladoRead)
+async def revelar_email(
+    user_id: int,
+    admin: Usuario = Depends(service.get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+) -> EmailReveladoRead:
+    return await service.revelar_email(db, admin, user_id)
+
+
 @admin_router.post(
     "",
-    response_model=UsuarioRead,
+    response_model=UsuarioAdminRead,
     status_code=status.HTTP_201_CREATED,
 )
 async def criar_staff(
@@ -199,7 +213,7 @@ async def criar_staff(
     return await service.criar_staff(db, data)
 
 
-@admin_router.patch("/{user_id}", response_model=UsuarioRead)
+@admin_router.patch("/{user_id}", response_model=UsuarioAdminRead)
 async def atualizar_staff(
     user_id: int,
     data: UsuarioAdminUpdate,

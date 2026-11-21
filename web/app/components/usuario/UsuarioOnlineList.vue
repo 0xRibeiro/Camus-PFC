@@ -29,10 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import type { UsuarioRead } from '~/types/generated'
+import type { UsuarioAdminRead } from '~/types/generated'
 
 defineProps<{
-  usuarios: UsuarioRead[]
+  usuarios: UsuarioAdminRead[]
   loading: boolean
 }>()
 </script>

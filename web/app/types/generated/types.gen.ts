@@ -7,7 +7,7 @@ export type ClientOptions = {
 /**
  * AcaoAuditoria
  */
-export type AcaoAuditoria = 'create' | 'update' | 'delete';
+export type AcaoAuditoria = 'create' | 'update' | 'delete' | 'view';
 
 /**
  * AceiteCreate
@@ -1216,6 +1216,16 @@ export type DocumentoPendente = {
      * Publicado Em
      */
     publicado_em: string;
+};
+
+/**
+ * EmailReveladoRead
+ */
+export type EmailReveladoRead = {
+    /**
+     * Email
+     */
+    email: string;
 };
 
 /**
@@ -2591,6 +2601,45 @@ export type TrilhaUpdate = {
 };
 
 /**
+ * UsuarioAdminRead
+ */
+export type UsuarioAdminRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    role: RoleUsuario;
+    /**
+     * Deletado Em
+     */
+    deletado_em: string | null;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Ultimo Acesso Em
+     */
+    ultimo_acesso_em?: string | null;
+};
+
+/**
  * UsuarioAdminUpdate
  */
 export type UsuarioAdminUpdate = {
@@ -3327,9 +3376,23 @@ export type DesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = De
 export type ListarUsuariosAdminUsuariosGetData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Busca
+         */
+        busca?: string | null;
+    };
     url: '/admin/usuarios';
 };
+
+export type ListarUsuariosAdminUsuariosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarUsuariosAdminUsuariosGetError = ListarUsuariosAdminUsuariosGetErrors[keyof ListarUsuariosAdminUsuariosGetErrors];
 
 export type ListarUsuariosAdminUsuariosGetResponses = {
     /**
@@ -3337,7 +3400,7 @@ export type ListarUsuariosAdminUsuariosGetResponses = {
      *
      * Successful Response
      */
-    200: Array<UsuarioRead>;
+    200: Array<UsuarioAdminRead>;
 };
 
 export type ListarUsuariosAdminUsuariosGetResponse = ListarUsuariosAdminUsuariosGetResponses[keyof ListarUsuariosAdminUsuariosGetResponses];
@@ -3362,7 +3425,7 @@ export type CriarStaffAdminUsuariosPostResponses = {
     /**
      * Successful Response
      */
-    201: UsuarioRead;
+    201: UsuarioAdminRead;
 };
 
 export type CriarStaffAdminUsuariosPostResponse = CriarStaffAdminUsuariosPostResponses[keyof CriarStaffAdminUsuariosPostResponses];
@@ -3380,7 +3443,7 @@ export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponses = {
      *
      * Successful Response
      */
-    200: Array<UsuarioRead>;
+    200: Array<UsuarioAdminRead>;
 };
 
 export type ListarUsuariosOnlineAdminUsuariosOnlineGetResponse = ListarUsuariosOnlineAdminUsuariosOnlineGetResponses[keyof ListarUsuariosOnlineAdminUsuariosOnlineGetResponses];
@@ -3440,7 +3503,7 @@ export type ObterUsuarioAdminUsuariosUserIdGetResponses = {
     /**
      * Successful Response
      */
-    200: UsuarioRead;
+    200: UsuarioAdminRead;
 };
 
 export type ObterUsuarioAdminUsuariosUserIdGetResponse = ObterUsuarioAdminUsuariosUserIdGetResponses[keyof ObterUsuarioAdminUsuariosUserIdGetResponses];
@@ -3470,10 +3533,40 @@ export type AtualizarStaffAdminUsuariosUserIdPatchResponses = {
     /**
      * Successful Response
      */
-    200: UsuarioRead;
+    200: UsuarioAdminRead;
 };
 
 export type AtualizarStaffAdminUsuariosUserIdPatchResponse = AtualizarStaffAdminUsuariosUserIdPatchResponses[keyof AtualizarStaffAdminUsuariosUserIdPatchResponses];
+
+export type RevelarEmailAdminUsuariosUserIdEmailGetData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: number;
+    };
+    query?: never;
+    url: '/admin/usuarios/{user_id}/email';
+};
+
+export type RevelarEmailAdminUsuariosUserIdEmailGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevelarEmailAdminUsuariosUserIdEmailGetError = RevelarEmailAdminUsuariosUserIdEmailGetErrors[keyof RevelarEmailAdminUsuariosUserIdEmailGetErrors];
+
+export type RevelarEmailAdminUsuariosUserIdEmailGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EmailReveladoRead;
+};
+
+export type RevelarEmailAdminUsuariosUserIdEmailGetResponse = RevelarEmailAdminUsuariosUserIdEmailGetResponses[keyof RevelarEmailAdminUsuariosUserIdEmailGetResponses];
 
 export type TrilhaReadMultiTrilhasGetData = {
     body?: never;

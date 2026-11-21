@@ -8,7 +8,8 @@ import * as z from 'zod';
 export const zAcaoAuditoria = z.enum([
     'create',
     'update',
-    'delete'
+    'delete',
+    'view'
 ]);
 
 /**
@@ -391,6 +392,13 @@ export const zDenunciaUpdate = z.object({
 export const zDocumentoLegalHistorico = z.object({
     versao: z.int(),
     publicado_em: z.iso.datetime()
+});
+
+/**
+ * EmailReveladoRead
+ */
+export const zEmailReveladoRead = z.object({
+    email: z.string()
 });
 
 /**
@@ -1224,6 +1232,21 @@ export const zTrilhaUpdate = z.object({
 });
 
 /**
+ * UsuarioAdminRead
+ */
+export const zUsuarioAdminRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    email: z.string(),
+    is_active: z.boolean(),
+    role: zRoleUsuario,
+    deletado_em: z.iso.datetime().nullable(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    ultimo_acesso_em: z.iso.datetime().nullish()
+});
+
+/**
  * UsuarioAdminUpdate
  */
 export const zUsuarioAdminUpdate = z.object({
@@ -1530,26 +1553,30 @@ export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.ob
  */
 export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = zConquistaRead.nullable();
 
+export const zListarUsuariosAdminUsuariosGetQuery = z.object({
+    busca: z.string().max(100).nullish()
+});
+
 /**
  * Response Listar Usuarios Admin Usuarios Get
  *
  * Successful Response
  */
-export const zListarUsuariosAdminUsuariosGetResponse = z.array(zUsuarioRead);
+export const zListarUsuariosAdminUsuariosGetResponse = z.array(zUsuarioAdminRead);
 
 export const zCriarStaffAdminUsuariosPostBody = zUsuarioStaffCreate;
 
 /**
  * Successful Response
  */
-export const zCriarStaffAdminUsuariosPostResponse = zUsuarioRead;
+export const zCriarStaffAdminUsuariosPostResponse = zUsuarioAdminRead;
 
 /**
  * Response Listar Usuarios Online Admin Usuarios Online Get
  *
  * Successful Response
  */
-export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioRead);
+export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioAdminRead);
 
 export const zDeletarUsuarioAdminUsuariosUserIdDeletePath = z.object({
     user_id: z.int()
@@ -1567,7 +1594,7 @@ export const zObterUsuarioAdminUsuariosUserIdGetPath = z.object({
 /**
  * Successful Response
  */
-export const zObterUsuarioAdminUsuariosUserIdGetResponse = zUsuarioRead;
+export const zObterUsuarioAdminUsuariosUserIdGetResponse = zUsuarioAdminRead;
 
 export const zAtualizarStaffAdminUsuariosUserIdPatchBody = zUsuarioAdminUpdate;
 
@@ -1578,7 +1605,16 @@ export const zAtualizarStaffAdminUsuariosUserIdPatchPath = z.object({
 /**
  * Successful Response
  */
-export const zAtualizarStaffAdminUsuariosUserIdPatchResponse = zUsuarioRead;
+export const zAtualizarStaffAdminUsuariosUserIdPatchResponse = zUsuarioAdminRead;
+
+export const zRevelarEmailAdminUsuariosUserIdEmailGetPath = z.object({
+    user_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevelarEmailAdminUsuariosUserIdEmailGetResponse = zEmailReveladoRead;
 
 export const zTrilhaReadMultiTrilhasGetQuery = z.object({
     offset: z.int().nullish(),

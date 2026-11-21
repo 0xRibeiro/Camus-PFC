@@ -47,6 +47,43 @@ class UsuarioRead(BaseModel):
     cor_fundo: str
 
 
+# lu***@g***.com. rodar de novo da o msm resultado
+def mascarar_email(email: str) -> str:
+    local, _, dominio = email.partition("@")
+    nome, ponto, final = dominio.rpartition(".")
+    if not ponto:
+        nome, final = dominio, ""
+
+    mascara = f"{local[:2]}***@{nome[:1]}***"
+    if final:
+        mascara += f".{final}"
+    return mascara
+
+
+# lista do admin: o email so aparece de verdade pelo olhinho, q gera log
+class UsuarioAdminRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    role: RoleUsuario
+    deletado_em: datetime | None
+    avatar: str
+    cor_fundo: str
+    # vem de outra tabela, so a lista preenche
+    ultimo_acesso_em: datetime | None = None
+
+    @field_validator("email")
+    @classmethod
+    def esconde_email(cls, v: str) -> str:
+        return mascarar_email(v)
+
+
+class EmailReveladoRead(BaseModel):
+    email: str
+
 
 # um avatar do seletor. os bloqueados vem com a conquista que libera cada um
 class AvatarRead(BaseModel):

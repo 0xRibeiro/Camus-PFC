@@ -65,6 +65,7 @@ function corDaAcao(acao: string) {
   if (acao === 'create') return 'success'
   if (acao === 'update') return 'warning'
   if (acao === 'delete') return 'error'
+  if (acao === 'view') return 'info'
   return 'neutral'
 }
 

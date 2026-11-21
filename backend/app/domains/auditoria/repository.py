@@ -31,3 +31,8 @@ class AuditoriaRepository:
 
         resultado = await self.db.execute(query)
         return list(resultado.scalars().all())
+
+    # log escrito na mao, pra acao q n passa pelo trigger (tipo ver um email)
+    async def registrar(self, log: LogAuditoria) -> None:
+        self.db.add(log)
+        await self.db.commit()
