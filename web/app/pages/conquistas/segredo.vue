@@ -9,7 +9,7 @@
         class="size-48 shrink-0 object-contain sm:size-64 lg:size-80"
       > -->
       <h1 class="min-w-0 text-5xl font-black tracking-tight text-highlighted sm:text-7xl lg:text-9xl">
-        transparente não é cor
+        transparente é cor
       </h1>
     </div>
 
