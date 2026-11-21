@@ -1437,6 +1437,10 @@ export type LogAuditoriaRead = {
      * Criado Em
      */
     criado_em: string;
+    /**
+     * Usuario Nome
+     */
+    usuario_nome?: string | null;
 };
 
 /**
@@ -3381,6 +3385,10 @@ export type ListarUsuariosAdminUsuariosGetData = {
          * Busca
          */
         busca?: string | null;
+        /**
+         * Limite
+         */
+        limite?: number | null;
     };
     url: '/admin/usuarios';
 };

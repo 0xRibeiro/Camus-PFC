@@ -27,11 +27,13 @@ class UsuarioRepository:
         return resultado.scalar_one_or_none()
 
     # a busca olha o email de verdade, mas quem chama so recebe ele mascarado
-    async def listar(self, busca: str | None = None) -> list[Usuario]:
+    async def listar(self, busca: str | None = None, limite: int | None = None) -> list[Usuario]:
         consulta = select(Usuario).order_by(Usuario.id)
         if busca:
             termo = f"%{busca}%"
             consulta = consulta.where(Usuario.username.ilike(termo) | Usuario.email.ilike(termo))
+        if limite is not None:
+            consulta = consulta.limit(limite)
         resultado = await self.db.execute(consulta)
         return list(resultado.scalars().all())
 

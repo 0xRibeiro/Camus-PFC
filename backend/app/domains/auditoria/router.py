@@ -24,4 +24,11 @@ async def listar_logs(
     db: AsyncSession = Depends(get_async_session),
 ):
     repo = AuditoriaRepository(db)
-    return await repo.listar(limite, offset, entidade, entidade_id, usuario_id)
+    resultado = await repo.listar(limite, offset, entidade, entidade_id, usuario_id)
+
+    logs = []
+    for log, username in resultado:
+        item = LogAuditoriaRead.model_validate(log)
+        item.usuario_nome = username
+        logs.append(item)
+    return logs

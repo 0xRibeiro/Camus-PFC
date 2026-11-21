@@ -224,11 +224,13 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
     return user
 
 
-async def listar_usuarios(db: AsyncSession, busca: str | None = None) -> list[UsuarioAdminRead]:
+async def listar_usuarios(
+    db: AsyncSession, busca: str | None = None, limite: int | None = None
+) -> list[UsuarioAdminRead]:
     if busca is not None:
         busca = busca.strip()
     repo = UsuarioRepository(db)
-    usuarios = await repo.listar(busca)
+    usuarios = await repo.listar(busca, limite)
 
     ids = []
     for usuario in usuarios:

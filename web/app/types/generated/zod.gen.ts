@@ -496,7 +496,8 @@ export const zLogAuditoriaRead = z.object({
     entidade: z.string(),
     entidade_id: z.int(),
     alteracoes: z.record(z.string(), z.unknown()),
-    criado_em: z.iso.datetime()
+    criado_em: z.iso.datetime(),
+    usuario_nome: z.string().nullish()
 });
 
 /**
@@ -1554,7 +1555,8 @@ export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.ob
 export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = zConquistaRead.nullable();
 
 export const zListarUsuariosAdminUsuariosGetQuery = z.object({
-    busca: z.string().max(100).nullish()
+    busca: z.string().max(100).nullish(),
+    limite: z.int().gte(1).lte(100).nullish()
 });
 
 /**

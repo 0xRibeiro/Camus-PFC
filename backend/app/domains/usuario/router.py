@@ -171,9 +171,11 @@ admin_router = APIRouter(
 @admin_router.get("", response_model=list[UsuarioAdminRead])
 async def listar_usuarios(
     busca: str | None = Query(default=None, max_length=100),
+    # sem limite = todos (tela de usuarios). o select da auditoria pede poucos
+    limite: int | None = Query(default=None, ge=1, le=100),
     db: AsyncSession = Depends(get_async_session),
 ) -> list[UsuarioAdminRead]:
-    return await service.listar_usuarios(db, busca)
+    return await service.listar_usuarios(db, busca, limite)
 
 
 @admin_router.get("/online", response_model=list[UsuarioAdminRead])

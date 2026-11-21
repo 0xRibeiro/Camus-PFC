@@ -15,3 +15,5 @@ class LogAuditoriaRead(BaseModel):
     entidade_id: int
     alteracoes: dict
     criado_em: datetime
+    # vem do join com usuarios, pro front n precisar carregar a lista toda
+    usuario_nome: str | None = None

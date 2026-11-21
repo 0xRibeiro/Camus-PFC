@@ -3,11 +3,21 @@
     :data="logs"
     :columns="columns"
     :loading="loading"
+    :ui="{ base: 'table-fixed' }"
     class="cursor-pointer"
     @select="abrirDetalhe"
   >
+    <template #entidade-cell="{ row }">
+      <span
+        class="inline-flex max-w-full truncate rounded-md px-2 py-0.5 text-xs font-medium"
+        :class="entidadeAuditoria(row.original.entidade).classe"
+      >
+        {{ entidadeAuditoria(row.original.entidade).label }}
+      </span>
+    </template>
+
     <template #usuario_id-cell="{ row }">
-      {{ nomeDoUsuario(row.original.usuario_id) }}
+      {{ row.original.usuario_id === null ? '-' : `${row.original.usuario_id} - ${row.original.usuario_nome ?? '?'}` }}
     </template>
 
     <template #acao-cell="{ row }">
@@ -31,34 +41,21 @@
 
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { LogAuditoriaRead, UsuarioRead } from '~/types/generated'
+import type { LogAuditoriaRead } from '~/types/generated'
 
-const props = defineProps<{
+// o nome de quem fez ja vem no log (usuario_nome), n precisa da lista de usuarios
+defineProps<{
   logs: LogAuditoriaRead[]
   loading: boolean
-  usuarios: UsuarioRead[]
 }>()
 
-function nomeDoUsuario(usuarioId: number | null) {
-  if (usuarioId === null) return '-'
-
-  let username: string | undefined
-  for (const usuario of props.usuarios) {
-    if (usuario.id === usuarioId) {
-      username = usuario.username
-      break
-    }
-  }
-
-  return `${usuarioId} - ${username ?? '?'}`
-}
-
+// largura fixa pra tabela n mudar de tamanho de uma pagina pra outra
 const columns: TableColumn<LogAuditoriaRead>[] = [
-  { accessorKey: 'criado_em', header: 'Quando' },
-  { accessorKey: 'usuario_id', header: 'Usuário' },
-  { accessorKey: 'acao', header: 'Ação' },
-  { accessorKey: 'entidade', header: 'Entidade' },
-  { accessorKey: 'entidade_id', header: 'Id' },
+  { accessorKey: 'criado_em', header: 'Quando', meta: { class: { th: 'w-[20%]' } } },
+  { accessorKey: 'usuario_id', header: 'Usuário', meta: { class: { th: 'w-[30%]', td: 'truncate' } } },
+  { accessorKey: 'acao', header: 'Ação', meta: { class: { th: 'w-[13%]' } } },
+  { accessorKey: 'entidade', header: 'Entidade', meta: { class: { th: 'w-[25%]' } } },
+  { accessorKey: 'entidade_id', header: 'Id', meta: { class: { th: 'w-[12%]' } } },
 ]
 
 function corDaAcao(acao: string) {
