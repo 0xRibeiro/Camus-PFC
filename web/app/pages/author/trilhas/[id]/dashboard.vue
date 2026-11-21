@@ -19,10 +19,12 @@
       </h1>
     </div>
 
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <!-- filtro acompanha a rolagem -->
+    <div class="sticky top-0 z-10 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-default bg-default/90 py-3 backdrop-blur">
       <DashboardFiltro
         v-model:periodo="periodo"
         v-model:agrupamento="agrupamento"
+        :inicio-total="inicioTotal"
       />
 
       <UButton
@@ -32,6 +34,14 @@
         :loading="loading"
         @click="fetchDashboard"
       />
+
+      <!-- so avisa, da pra escolher antes disso msm assim -->
+      <p
+        v-if="dados"
+        class="w-full text-xs text-muted"
+      >
+        Trilha criada em {{ formatarData(dados.inicio_total) }}
+      </p>
     </div>
 
     <div
@@ -72,7 +82,10 @@
         class="min-w-0"
       />
 
-      <DashboardNumeros :indicadores="indicadores" />
+      <DashboardNumeros
+        :indicadores="indicadores"
+        :periodo-anterior="periodoAnterior"
+      />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <DashboardEngajamento
@@ -95,6 +108,7 @@
 <script setup lang="ts">
 import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
 import type { DashboardTrilhaRead, TrilhaRead } from '~/types/generated'
+import { formatarData } from '~/utils/datas'
 
 definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
@@ -105,7 +119,7 @@ const trilhaId = Number(route.params.id)
 const caminhoTrilha = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}/editar` : `/author/trilhas/${trilhaId}`
 
 const trilha = ref<TrilhaRead | null>(null)
-const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, fetchDashboard } = useDashboard<DashboardTrilhaRead>(`/trilhas/${trilhaId}/dashboard`)
+const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, periodoAnterior, inicioTotal, fetchDashboard } = useDashboard<DashboardTrilhaRead>(`/trilhas/${trilhaId}/dashboard`)
 
 // so pro titulo, o erro de acesso aparece pela dash
 onMounted(async () => {

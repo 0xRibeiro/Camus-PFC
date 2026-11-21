@@ -1,0 +1,179 @@
+<template>
+  <div>
+    <!-- no modal o titulo ja ta no cabecalho dele, entao da pra esconder -->
+    <div
+      v-if="comTitulo"
+      class="mb-6 flex flex-wrap items-start justify-between gap-3"
+    >
+      <div class="min-w-0 wrap-anywhere">
+        <p class="text-xs font-medium tracking-wide text-muted uppercase">
+          Dashboard do quiz
+        </p>
+
+        <h1 class="flex flex-wrap items-center gap-2 text-xl font-semibold">
+          {{ dados?.titulo }}
+        </h1>
+      </div>
+
+      <slot name="acoes" />
+    </div>
+
+    <!-- filtro acompanha a rolagem, no modal gruda no topo dele -->
+    <div class="sticky top-0 z-10 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-default bg-default/90 py-3 backdrop-blur">
+      <DashboardFiltro
+        v-model:periodo="periodo"
+        v-model:agrupamento="agrupamento"
+        :inicio-total="inicioTotal"
+        :versao-desde="versaoDesde"
+      />
+
+      <UButton
+        label="Atualizar"
+        icon="i-lucide-refresh-cw"
+        variant="outline"
+        :loading="loading"
+        @click="fetchDashboard"
+      />
+
+      <!-- so avisa, da pra escolher antes disso msm assim -->
+      <p
+        v-if="dados"
+        class="w-full text-xs text-muted"
+      >
+        Quiz criado em {{ formatarData(dados.inicio_total) }}
+        <template v-if="dados.versao > 1">
+          · versão atual ({{ dados.versao }}) desde {{ formatarData(dados.versao_desde) }}
+        </template>
+      </p>
+    </div>
+
+    <div
+      v-if="loading && !dados"
+      class="flex justify-center py-12"
+    >
+      <UIcon
+        name="i-lucide-loader-circle"
+        class="size-6 animate-spin"
+      />
+    </div>
+
+    <UCard v-else-if="erro">
+      <div class="space-y-3">
+        <p class="text-muted">
+          {{ erro }}
+        </p>
+
+        <UButton
+          label="Tentar novamente"
+          color="neutral"
+          variant="outline"
+          :loading="loading"
+          @click="fetchDashboard"
+        />
+      </div>
+    </UCard>
+
+    <div
+      v-else-if="dados"
+      class="space-y-6"
+    >
+      <DashboardEvolucao
+        :evolucao="dados.evolucao"
+        :linhas="linhas"
+        descricao="Quantos alunos fizeram o quiz, separados pela nota que tiraram."
+        :agrupamento="agrupamentoCarregado"
+        barras
+        :eixo-x="tituloEixoX"
+        eixo-y="Alunos"
+        class="min-w-0"
+      />
+
+      <DashboardNumeros
+        :indicadores="indicadores"
+        :periodo-anterior="periodoAnterior"
+      />
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <DashboardNotas
+          :notas="dados.notas"
+          class="min-w-0"
+        />
+
+        <DashboardQuestoes
+          :questoes="dados.questoes"
+          class="min-w-0 lg:col-span-2"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
+import type { DashboardConteudoRead } from '~/types/generated'
+import { parseDate } from '@internationalized/date'
+import { formatarData } from '~/utils/datas'
+
+// a pagina do dashboard e o modal da tela da trilha usam esse msm
+const props = withDefaults(defineProps<{
+  conteudoId: number
+  comTitulo?: boolean
+}>(), {
+  comTitulo: true,
+})
+
+const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, periodoAnterior, inicioTotal, fetchDashboard } = useDashboard<DashboardConteudoRead>(`/conteudos/${props.conteudoId}/dashboard`)
+
+const versaoDesde = computed(() => {
+  if (!dados.value) return null
+  return parseDate(dados.value.versao_desde)
+})
+
+const tituloEixoX = computed(() => {
+  if (agrupamentoCarregado.value === 'semana') return 'Semana'
+  if (agrupamentoCarregado.value === 'mes') return 'Mês'
+  return 'Dia'
+})
+
+// msm corte e cor do selo de acerto de cada questao
+const linhas = [
+  { key: 'mal', label: 'Abaixo de 50%', color: 'error' },
+  { key: 'medio', label: 'De 50% a 74%', color: 'warning' },
+  { key: 'bem', label: '75% ou mais', color: 'success' },
+]
+
+const formatarPorcentagem = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 }).format
+const formatarNota = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format
+
+// divisao por zero vira null
+function dividir(valor: number, por: number) {
+  if (!por) return null
+  return valor / por
+}
+
+const indicadores = computed<Indicador[]>(() => {
+  if (!dados.value) return []
+  const { totais, totais_anteriores: anteriores } = dados.value
+
+  // a nota é sempre de 0 a 10, independente de quantas questoes o quiz tem
+  return [
+    { titulo: 'Alunos que fizeram', icone: 'i-lucide-users', cor: 'quaternary', valor: totais.alunos, anterior: anteriores.alunos },
+    {
+      titulo: 'Nota média',
+      icone: 'i-lucide-target',
+      cor: 'primary',
+      valor: (dividir(totais.acertos, totais.questoes) ?? 0) * 10,
+      anterior: anteriores.questoes ? (anteriores.acertos / anteriores.questoes) * 10 : null,
+      formatar: valor => totais.questoes ? `${formatarNota(valor)}/10` : '—',
+    },
+    {
+      titulo: 'Gabaritaram',
+      icone: 'i-lucide-trophy',
+      cor: 'tertiary',
+      valor: dividir(totais.gabaritaram, totais.alunos) ?? 0,
+      anterior: dividir(anteriores.gabaritaram, anteriores.alunos),
+      formatar: valor => totais.alunos ? formatarPorcentagem(valor) : '—',
+    },
+  ]
+})
+</script>

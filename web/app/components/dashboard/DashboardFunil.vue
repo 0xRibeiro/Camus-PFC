@@ -6,7 +6,7 @@
       </h2>
 
       <p class="text-sm text-muted">
-        Quantos dos alunos que começaram a trilha concluíram cada conteúdo. Clique pra ver o conteúdo em detalhe.
+        Quantos dos alunos que começaram a trilha concluíram cada conteúdo. Clique num quiz pra ver o desempenho em detalhe.
       </p>
     </template>
 
@@ -20,9 +20,12 @@
         v-for="(conteudo, posicao) in lista"
         :key="conteudo.id"
       >
-        <NuxtLink
-          :to="`${linkBase}/${conteudo.id}`"
-          class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-elevated/50 focus-visible:bg-elevated/50 focus-visible:outline-none sm:px-6"
+        <!-- so o quiz tem dashboard, o resto fica sem link -->
+        <component
+          :is="conteudo.tipo === 'quiz' ? NuxtLink : 'div'"
+          :to="conteudo.tipo === 'quiz' ? `${linkBase}/${conteudo.id}` : undefined"
+          class="flex items-center gap-3 px-4 py-3 sm:px-6"
+          :class="conteudo.tipo === 'quiz' && 'transition-colors hover:bg-elevated/50 focus-visible:bg-elevated/50 focus-visible:outline-none'"
         >
           <span class="w-5 shrink-0 text-right text-sm font-medium text-dimmed">
             {{ posicao + 1 }}
@@ -77,7 +80,7 @@
             name="i-lucide-chevron-right"
             class="size-4 shrink-0 text-dimmed"
           />
-        </NuxtLink>
+        </component>
       </li>
     </ol>
 
@@ -91,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+const NuxtLink = resolveComponent('NuxtLink')
 import type { ConteudoFunilRead } from '~/types/generated'
 
 const props = defineProps<{
