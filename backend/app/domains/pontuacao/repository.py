@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.grupo.model import Grupo, Participacao
 from app.domains.minigame.model import TITULOS_JOGOS, RodadaMinigame
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.trilha.model import Conteudo
@@ -67,6 +68,34 @@ class PontuacaoRepository:
         )
         ranking = []
         for usuario, xp in resultado.all():
+            ranking.append((usuario, xp))
+        return ranking
+
+    # todos os alunos do grupo, ate quem n ganhou xp ainda. o dono fica de fora
+    async def listar_ranking_grupo(self, grupo_id: int) -> list[tuple[Usuario, int]]:
+        total = func.sum(LancamentoPontos.pontos).label("total")
+        resultado = await self.db.execute(
+            select(Usuario, total)
+            .join(Participacao, Participacao.id_usuario == Usuario.id)
+            .join(Grupo, Grupo.id == Participacao.id_grupo)
+            .outerjoin(
+                LancamentoPontos,
+                (LancamentoPontos.usuario_id == Usuario.id) & (LancamentoPontos.grupo_id == grupo_id),
+            )
+            .where(
+                Participacao.id_grupo == grupo_id,
+                Usuario.id != Grupo.id_dono,
+                Usuario.deletado_em.is_(None),
+                Usuario.is_active.is_(True),
+            )
+            .group_by(Usuario.id)
+            .order_by(total.desc().nulls_last(), Usuario.username)
+        )
+        ranking = []
+        for usuario, xp in resultado.all():
+            # sem nenhum lancamento o sum volta None
+            if xp is None:
+                xp = 0
             ranking.append((usuario, xp))
         return ranking
 

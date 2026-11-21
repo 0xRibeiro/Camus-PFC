@@ -1461,6 +1461,14 @@ export type MembroGrupoRead = {
      */
     username: string;
     /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
      * Papel
      */
     papel: 'dono' | 'membro';

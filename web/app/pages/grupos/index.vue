@@ -127,7 +127,7 @@ import { useConquistasStore } from '~/stores/conquistas'
 import type { AvisoRead, GrupoRead } from '~/types/generated/types.gen'
 import { zGrupoCreate, zGrupoEntrar } from '~/types/generated/zod.gen'
 
-definePageMeta({ middleware: 'role' })
+definePageMeta({ middleware: 'role', roles: ['aluno'] })
 
 const api = useApi()
 const auth = useAuthStore()

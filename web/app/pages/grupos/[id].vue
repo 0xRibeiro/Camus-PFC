@@ -1,9 +1,9 @@
 <template>
   <div class="flex-1 p-4">
     <UButton
-      label="Voltar aos grupos"
+      :label="ehAdmin ? 'Voltar às denúncias' : 'Voltar aos grupos'"
       icon="i-lucide-arrow-left"
-      to="/grupos"
+      :to="ehAdmin ? '/admin/denuncias' : '/grupos'"
       color="neutral"
       variant="ghost"
       class="mb-4"
@@ -39,39 +39,85 @@
       v-else-if="grupo"
       class="space-y-6"
     >
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <h1 class="text-xl font-semibold break-words">
-            {{ grupo.nome }}
-          </h1>
+      <!-- card do dono com as infos do grupo -->
+      <UCard>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div
+            v-if="dono"
+            class="self-start rounded-full bg-linear-to-b from-primary to-primary/30 p-1 sm:self-center"
+          >
+            <UsuarioAvatar
+              :avatar="dono.avatar"
+              :cor-fundo="dono.cor_fundo"
+              :tamanho="96"
+            />
+          </div>
 
-          <p class="text-sm text-muted">
-            Consulte os participantes e os conteúdos do grupo.
-          </p>
+          <div class="min-w-0 flex-1 space-y-2">
+            <h1 class="text-2xl font-bold break-words text-highlighted">
+              {{ grupo.nome }}
+            </h1>
+
+            <p
+              v-if="dono"
+              class="flex items-center gap-1.5 text-sm text-muted"
+            >
+              <UIcon
+                name="i-lucide-crown"
+                class="size-4 text-amber-400"
+              />
+              Dono:
+              <span class="truncate font-medium text-highlighted">{{ dono.username }}</span>
+              <UBadge
+                v-if="usuarioCriador"
+                label="você"
+                size="sm"
+                variant="subtle"
+              />
+            </p>
+
+            <div class="flex flex-wrap gap-2">
+              <UBadge
+                icon="i-lucide-users"
+                color="neutral"
+                variant="soft"
+              >
+                {{ totalAlunos }} aluno{{ totalAlunos === 1 ? '' : 's' }}
+              </UBadge>
+              <UBadge
+                v-if="podeVerConteudo"
+                icon="i-lucide-book-open"
+                color="neutral"
+                variant="soft"
+              >
+                {{ trilhas.length }} trilha{{ trilhas.length === 1 ? '' : 's' }}
+              </UBadge>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 sm:self-start">
+            <!-- denunciar só aparece pra membro, dono e admin não veem -->
+            <UButton
+              v-if="!usuarioCriador && !ehAdmin"
+              label="Denunciar grupo"
+              icon="i-lucide-flag"
+              color="error"
+              variant="outline"
+              @click="denunciando = true"
+            />
+
+            <!-- admin só visualiza o grupo, então nem sair nem excluir -->
+            <UButton
+              v-if="!ehAdmin"
+              :label="acaoGrupo"
+              :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
+              color="error"
+              variant="outline"
+              @click="confirmando = true"
+            />
+          </div>
         </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- denunciar só aparece pra membro, dono e admin não veem -->
-          <UButton
-            v-if="!usuarioCriador && !ehAdmin"
-            label="Denunciar grupo"
-            icon="i-lucide-flag"
-            color="error"
-            variant="outline"
-            @click="denunciando = true"
-          />
-
-          <!-- admin só visualiza o grupo, então nem sair nem excluir -->
-          <UButton
-            v-if="!ehAdmin"
-            :label="acaoGrupo"
-            :icon="usuarioCriador ? 'i-lucide-trash-2' : 'i-lucide-log-out'"
-            color="error"
-            variant="outline"
-            @click="confirmando = true"
-          />
-        </div>
-      </div>
+      </UCard>
 
       <UAlert
         v-if="grupo.suspenso"
@@ -84,55 +130,39 @@
           : 'O acesso aos conteúdos do grupo fica bloqueado até o fim da suspensão.'"
       />
 
-      <UCard>
+      <!-- trilhas do grupo -->
+      <UCard v-if="podeVerConteudo">
         <template #header>
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="font-medium">
-              Membros
+              Trilhas
             </h2>
 
-            <UBadge
-              color="neutral"
-              variant="soft"
-            >
-              {{ membros.length }}
-            </UBadge>
+            <UButton
+              v-if="gerenciaTrilhas"
+              label="Gerenciar trilhas"
+              icon="i-lucide-settings-2"
+              size="sm"
+              :to="`/grupos/${grupoId}/trilhas/gerenciar`"
+            />
           </div>
         </template>
 
-        <UTable
-          :data="membros"
-          :columns="columns"
-        >
-          <template #papel-cell="{ row }">
-            <UBadge
-              :color="row.original.papel === 'dono' ? 'primary' : 'neutral'"
-              variant="soft"
-            >
-              {{ row.original.papel === 'dono' ? 'Dono' : 'Membro' }}
-            </UBadge>
-          </template>
-          <template #acoes-cell="{ row }">
-            <UButton
-              v-if="usuarioCriador && !grupo.suspenso && row.original.papel !== 'dono'"
-              label="Remover"
-              :aria-label="`Remover ${row.original.username}`"
-              color="error"
-              variant="ghost"
-              size="sm"
-              :loading="removendoMembro === row.original.id"
-              :disabled="removendoMembro !== null"
-              @click="removerMembro(row.original)"
-            />
-          </template>
-        </UTable>
         <p
-          v-if="erroRemocao"
-          role="alert"
-          class="mt-2 text-sm text-error"
+          v-if="!trilhas.length"
+          class="py-6 text-center text-sm text-muted"
         >
-          {{ erroRemocao }}
+          Nenhuma trilha no grupo ainda.
         </p>
+
+        <UPageGrid v-else>
+          <TrilhaProgressoCard
+            v-for="trilha in trilhas"
+            :key="trilha.id"
+            :trilha="trilha"
+            :to="`/grupos/${grupoId}/trilhas/${trilha.id}`"
+          />
+        </UPageGrid>
       </UCard>
 
       <UCard v-if="usuarioCriador && !grupo.suspenso">
@@ -193,23 +223,58 @@
         </div>
       </UCard>
 
-      <!-- seção nova dos grupos para ver ou editar as trilhas dependendo da role -->
-      <section
-        v-if="!grupo.suspenso || usuarioCriador || ehAdmin"
-        class="flex flex-wrap items-center gap-3"
-      >
-        <UButton
-          :label="gerenciaTrilhas ? 'Gerenciar trilhas' : 'Ver trilhas'"
-          icon="i-lucide-book-open"
-          :to="gerenciaTrilhas ? `/grupos/${grupoId}/trilhas/gerenciar` : `/grupos/${grupoId}/trilhas`"
-        />
-        <UBadge
-          v-if="xpGrupo !== null"
-          variant="soft"
+      <!-- ranking dos alunos, o dono fica de fora -->
+      <UCard v-if="podeVerConteudo">
+        <template #header>
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-medium">
+              Alunos
+            </h2>
+
+            <UBadge
+              color="neutral"
+              variant="soft"
+            >
+              {{ ranking.length }}
+            </UBadge>
+          </div>
+        </template>
+
+        <p
+          v-if="!ranking.length"
+          class="py-6 text-center text-sm text-muted"
         >
-          {{ xpGrupo }} XP no grupo
-        </UBadge>
-      </section>
+          Nenhum aluno no grupo ainda.
+        </p>
+
+        <RankingLista
+          v-else
+          :ranking="ranking"
+        >
+          <template #acoes="{ item }">
+            <UButton
+              v-if="gerenciaTrilhas"
+              label="Remover"
+              :aria-label="`Remover ${item.username}`"
+              color="error"
+              variant="ghost"
+              size="xs"
+              :loading="removendoMembro === item.usuario_id"
+              :disabled="removendoMembro !== null"
+              @click="removerMembro(item)"
+            />
+          </template>
+        </RankingLista>
+
+        <p
+          v-if="erroRemocao"
+          role="alert"
+          class="mt-2 text-sm text-error"
+        >
+          {{ erroRemocao }}
+        </p>
+      </UCard>
+
       <UModal
         v-model:open="confirmando"
         :title="acaoGrupo"
@@ -245,12 +310,12 @@
 </template>
 
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
-import type { ConviteRead, GrupoRead, MembroGrupoRead, XpRead } from '~/types/generated/types.gen'
+import type { ConviteRead, GrupoRead, MembroGrupoRead, RankingItemRead, TrilhaResumoRead } from '~/types/generated/types.gen'
 
-definePageMeta({ middleware: 'role', key: route => route.path })
+// admin entra so pra moderar, vindo das denuncias
+definePageMeta({ middleware: 'role', roles: ['aluno', 'admin'], key: route => route.path })
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -259,9 +324,10 @@ const conquistas = useConquistasStore()
 
 const grupoId = Number(route.params.id)
 const api = useApi(grupoId)
-const xpGrupo = ref<number | null>(null)
 const grupo = ref<GrupoRead | null>(null)
 const membros = ref<MembroGrupoRead[]>([])
+const trilhas = ref<TrilhaResumoRead[]>([])
+const ranking = ref<RankingItemRead[]>([])
 const loading = ref(true)
 const erroCarregamento = ref('')
 
@@ -302,11 +368,17 @@ const tituloSuspensao = computed(() => {
   return `Este grupo está suspenso até ${new Date(grupo.value.suspenso_ate).toLocaleDateString('pt-BR')}`
 })
 
-const columns = computed<TableColumn<MembroGrupoRead>[]>(() => [
-  { accessorKey: 'username', header: 'Usuário' },
-  { accessorKey: 'papel', header: 'Papel' },
-  ...(gerenciaTrilhas.value ? [{ id: 'acoes', header: 'Ações' }] : []),
-])
+// membro com o grupo suspenso n ve trilhas nem ranking (o back barra)
+const podeVerConteudo = computed(() => !!grupo.value && (!grupo.value.suspenso || usuarioCriador.value || ehAdmin.value))
+
+const dono = computed(() => {
+  for (const membro of membros.value) {
+    if (membro.papel === 'dono') return membro
+  }
+  return null
+})
+
+const totalAlunos = computed(() => Math.max(0, membros.value.length - 1))
 
 function mensagemErro(error: unknown, padrao: string): string {
   if (error instanceof FetchError && typeof error.data?.detail === 'string') {
@@ -320,19 +392,29 @@ async function fetchGrupo() {
   erroCarregamento.value = ''
 
   try {
-    const [dadosGrupo, dadosMembros, pontos] = await Promise.all([
+    const [dadosGrupo, dadosMembros] = await Promise.all([
       api(`/grupos/${grupoId}`),
       api(`/grupos/${grupoId}/membros`),
-      (api('/pontuacao/xp') as Promise<XpRead>).catch(() => null),
     ])
 
     grupo.value = dadosGrupo
     membros.value = dadosMembros
-    xpGrupo.value = pontos?.xp_total ?? null
+
+    // as duas rotas passam pelo prefixo do grupo no useApi
+    if (podeVerConteudo.value) {
+      const [dadosTrilhas, dadosRanking] = await Promise.all([
+        api('/progresso/trilhas'),
+        api('/pontuacao/ranking'),
+      ])
+      trilhas.value = dadosTrilhas
+      ranking.value = dadosRanking
+    }
   }
   catch (error) {
     grupo.value = null
     membros.value = []
+    trilhas.value = []
+    ranking.value = []
     erroCarregamento.value = mensagemErro(error, 'Não foi possível carregar o grupo')
   }
   finally {
@@ -396,16 +478,18 @@ async function confirmarSaida() {
   }
 }
 
-async function removerMembro(membro: MembroGrupoRead) {
+async function removerMembro(aluno: RankingItemRead) {
   if (removendoMembro.value !== null) return
-  if (!window.confirm(`Remover ${membro.username} do grupo?`)) return
+  if (!window.confirm(`Remover ${aluno.username} do grupo?`)) return
 
-  removendoMembro.value = membro.id
+  removendoMembro.value = aluno.usuario_id
   erroRemocao.value = ''
 
   try {
-    await api(`/grupos/${grupoId}/membros/${membro.id}`, { method: 'DELETE' })
-    membros.value = membros.value.filter(item => item.id !== membro.id)
+    await api(`/grupos/${grupoId}/membros/${aluno.usuario_id}`, { method: 'DELETE' })
+    membros.value = membros.value.filter(item => item.id !== aluno.usuario_id)
+    // recarrega pra recalcular as posicoes
+    ranking.value = await api('/pontuacao/ranking')
   }
   catch (error) {
     erroRemocao.value = mensagemErro(error, 'Não foi possível remover o membro')

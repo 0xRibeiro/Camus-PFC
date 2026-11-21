@@ -29,6 +29,15 @@ def montar_contagem(linhas) -> dict:
 class DashboardRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
+        # na trilha de grupo o dono pode fazer os conteudos, mas n entra nos graficos
+        self.dono = db.info.get("grupo_dono")
+
+    # no grupo tira o dono, na global so conta aluno (author e admin ficam de fora)
+    def so_alunos(self, consulta, coluna):
+        if self.dono is not None:
+            return consulta.where(coluna != self.dono)
+        alunos = select(Usuario.id).where(Usuario.role == RoleUsuario.aluno)
+        return consulta.where(coluna.in_(alunos))
 
     # atualiza o metodo de contar trilhas pra fornecer dados pra dash
     async def contar_trilhas_por_escopo(self) -> tuple[int, int]:
@@ -111,6 +120,7 @@ class DashboardRepository:
             .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
             .group_by(ConclusaoConteudo.conteudo_id)
         )
+        consulta = self.so_alunos(consulta, ConclusaoConteudo.usuario_id)
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
 
@@ -126,12 +136,14 @@ class DashboardRepository:
             .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
             .group_by(ConclusaoConteudo.usuario_id)
         )
+        consulta = self.so_alunos(consulta, ConclusaoConteudo.usuario_id)
         resultado = await self.db.execute(consulta)
         return list(resultado.tuples().all())
 
     # 1 por aluno e versao, o service separa a versao atual
     async def listar_tentativas_dos_quizzes(self, quizzes: list[int]) -> list[TentativaQuiz]:
         consulta = select(TentativaQuiz).where(TentativaQuiz.conteudo_id.in_(quizzes))
+        consulta = self.so_alunos(consulta, TentativaQuiz.usuario_id)
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
 
@@ -151,6 +163,7 @@ class DashboardRepository:
             TentativaQuiz.conteudo_id == conteudo_id,
             TentativaQuiz.versao_conteudo == versao,
         )
+        consulta = self.so_alunos(consulta, TentativaQuiz.usuario_id)
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
 
@@ -217,39 +230,43 @@ class DashboardRepository:
 
     # quem concluiu ou tentou algo no periodo
     async def listar_alunos_ativos(self, conteudos: list[int], inicio: date, fim: date) -> set[int]:
-        concluiram = await self.db.scalars(
+        concluiram = await self.db.scalars(self.so_alunos(
             select(ConclusaoConteudo.usuario_id).distinct().where(
                 ConclusaoConteudo.conteudo_id.in_(conteudos),
                 DIA_DA_CONCLUSAO >= inicio,
                 DIA_DA_CONCLUSAO <= fim,
-            )
-        )
-        tentaram = await self.db.scalars(
+            ),
+            ConclusaoConteudo.usuario_id,
+        ))
+        tentaram = await self.db.scalars(self.so_alunos(
             select(TentativaQuiz.usuario_id).distinct().where(
                 TentativaQuiz.conteudo_id.in_(conteudos),
                 DIA_DA_TENTATIVA >= inicio,
                 DIA_DA_TENTATIVA <= fim,
-            )
-        )
+            ),
+            TentativaQuiz.usuario_id,
+        ))
         return set(concluiram.all()) | set(tentaram.all())
 
     # cada dia q o aluno concluiu ou tentou algo, sem repetir
     async def listar_dias_de_atividade(self, conteudos: list[int], inicio: date,
         fim: date) -> set[tuple[int, date]]:
-        concluiram = await self.db.execute(
+        concluiram = await self.db.execute(self.so_alunos(
             select(ConclusaoConteudo.usuario_id, DIA_DA_CONCLUSAO).distinct().where(
                 ConclusaoConteudo.conteudo_id.in_(conteudos),
                 DIA_DA_CONCLUSAO >= inicio,
                 DIA_DA_CONCLUSAO <= fim,
-            )
-        )
-        tentaram = await self.db.execute(
+            ),
+            ConclusaoConteudo.usuario_id,
+        ))
+        tentaram = await self.db.execute(self.so_alunos(
             select(TentativaQuiz.usuario_id, DIA_DA_TENTATIVA).distinct().where(
                 TentativaQuiz.conteudo_id.in_(conteudos),
                 DIA_DA_TENTATIVA >= inicio,
                 DIA_DA_TENTATIVA <= fim,
-            )
-        )
+            ),
+            TentativaQuiz.usuario_id,
+        ))
         return set(concluiram.tuples().all()) | set(tentaram.tuples().all())
 
     # dia em q a entidade foi criada, pela auditoria. None se n tiver log

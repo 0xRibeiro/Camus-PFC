@@ -10,10 +10,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/login')
   }
 
+  // rotas dentro de grupo: author n participa de grupo, so aluno e o admin moderando
+  const grupoId = to.params.grupoId
+  if (grupoId && auth.role !== 'aluno' && auth.role !== 'admin') {
+    return navigateTo('/')
+  }
+
   if (!roles) return
 
   // se a rota tem roles, verifica se o usuario logado tem uma delas, senao redireciona para a home
-  const grupoId = to.params.grupoId
   if (grupoId) {
     try {
       const api = useApi()

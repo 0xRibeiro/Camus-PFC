@@ -309,7 +309,10 @@ async def atualizar_usuario_admin(
         user.email = data.email
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
-    if data.role is not None:
+    # papel so troca entre author e admin. aluno continua aluno e ninguem vira aluno
+    if data.role is not None and data.role != user.role:
+        if user.role == RoleUsuario.aluno or data.role == RoleUsuario.aluno:
+            raise ForbiddenException("Só é possível trocar o papel entre author e admin")
         user.role = data.role
     if data.is_active is not None:
         user.is_active = data.is_active

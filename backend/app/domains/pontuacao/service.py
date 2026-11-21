@@ -12,9 +12,13 @@ FUSO = ZoneInfo("America/Sao_Paulo")
 
 
 def registrar_lancamento(db: AsyncSession, usuario: Usuario, origem_tipo: OrigemLancamento, origem_id: int, pontos: int,  versao: int = 1, grupo_id: int | None = None) -> LancamentoPontos | None:
-    # XP global é só para alunos. No grupo, qualquer membro pode ganhar XP.
+    # XP global é só para alunos. No grupo, qualquer membro menos o dono pode ganhar XP.
     # se tiver com zero pontos é ignorado.
     if pontos <= 0 or (grupo_id is None and usuario.role != RoleUsuario.aluno):
+        return None
+
+    # dono fazendo a trilha do proprio grupo n ganha xp
+    if grupo_id is not None and db.info.get("grupo_dono") == usuario.id:
         return None
 
     lancamento = LancamentoPontos(usuario_id=usuario.id, origem_tipo=origem_tipo, origem_id=origem_id, versao=versao, pontos=pontos, grupo_id=grupo_id)
@@ -63,7 +67,14 @@ LIMITE_RANKING = 50
 
 
 async def ranking(db: AsyncSession) -> list[RankingItemRead]:
-    linhas = await PontuacaoRepository(db).listar_ranking(LIMITE_RANKING)
+    repo = PontuacaoRepository(db)
+    grupo_id = db.info.get("grupo_id")
+
+    # no grupo vai todo mundo, sem o limite do global
+    if grupo_id is None:
+        linhas = await repo.listar_ranking(LIMITE_RANKING)
+    else:
+        linhas = await repo.listar_ranking_grupo(grupo_id)
 
     itens = []
     posicao = 1

@@ -53,6 +53,8 @@ class ConviteRead(BaseModel):
 class MembroGrupoRead(BaseModel):
     id: int
     username: str
+    avatar: str
+    cor_fundo: str
     # esses papeis por enquanto só servem para distinguir quem é o dono do grupo, mas com a adição de
     # novos como moderadores, daria para ampliar o uso desses papeis.
     papel: Literal["dono", "membro"]

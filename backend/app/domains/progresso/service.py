@@ -318,6 +318,13 @@ CONQUISTA_XP = 15
 XP_DA_CONQUISTA = 500
 
 
+# quem cria n ganha conquista pelo proprio conteudo: no grupo o dono, na global author e admin
+def faz_como_aluno(repo: ProgressoRepository, usuario: Usuario) -> bool:
+    if repo.grupo_id is None:
+        return usuario.role == RoleUsuario.aluno
+    return repo.db.info.get("grupo_dono") != usuario.id
+
+
 # roda depois de salvar o progresso e concede as conquistas que destravam avatar.
 # a sequencia é a da trilha do conteudo, a mesma que o buscar_conteudo_liberado devolve
 async def conferir_conquistas_avatar(
@@ -330,16 +337,17 @@ async def conferir_conquistas_avatar(
     # só entra aqui o que foi concedido agora, pra não repetir o toast
     novas: list[ConquistaRead] = []
 
-    conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
-    if len(sequencia) > 0 and len(conclusoes) == len(sequencia):
-        nova = await conquistas.conceder(usuario.id, CONQUISTA_TRILHA_COMPLETA)
-        if nova:
-            novas.append(ConquistaRead.model_validate(nova))
+    if faz_como_aluno(repo, usuario):
+        conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
+        if len(sequencia) > 0 and len(conclusoes) == len(sequencia):
+            nova = await conquistas.conceder(usuario.id, CONQUISTA_TRILHA_COMPLETA)
+            if nova:
+                novas.append(ConquistaRead.model_validate(nova))
 
-    if quiz_perfeito:
-        nova = await conquistas.conceder(usuario.id, CONQUISTA_QUIZ_PERFEITO)
-        if nova:
-            novas.append(ConquistaRead.model_validate(nova))
+        if quiz_perfeito:
+            nova = await conquistas.conceder(usuario.id, CONQUISTA_QUIZ_PERFEITO)
+            if nova:
+                novas.append(ConquistaRead.model_validate(nova))
 
     # só o xp global conta (grupo_id nulo)
     xp = await PontuacaoRepository(repo.db).somar_xp(usuario.id, None)

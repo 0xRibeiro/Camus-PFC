@@ -497,6 +497,8 @@ export const zLogAuditoriaRead = z.object({
 export const zMembroGrupoRead = z.object({
     id: z.int(),
     username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
     papel: z.enum(['dono', 'membro'])
 });
 

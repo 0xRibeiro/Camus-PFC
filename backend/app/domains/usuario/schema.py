@@ -104,6 +104,14 @@ class UsuarioStaffCreate(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
     role: RoleUsuario = Field(..., description="author ou admin")
 
+    # aluno so nasce pelo cadastro normal
+    @field_validator("role")
+    @classmethod
+    def so_staff(cls, v: RoleUsuario) -> RoleUsuario:
+        if v == RoleUsuario.aluno:
+            raise ValueError("O admin só cria contas de author ou admin")
+        return v
+
 
 class UsuarioAdminUpdate(BaseModel):
     username: str | None = Field(default=None, min_length=3, max_length=50)
