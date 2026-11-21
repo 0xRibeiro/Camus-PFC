@@ -66,6 +66,28 @@ export type AlternativaCreate = {
 };
 
 /**
+ * AlternativaDoAlunoRead
+ */
+export type AlternativaDoAlunoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Texto
+     */
+    texto: string;
+    /**
+     * Correta
+     */
+    correta: boolean;
+    /**
+     * Escolhida
+     */
+    escolhida: boolean;
+};
+
+/**
  * AlternativaEscolhaRead
  */
 export type AlternativaEscolhaRead = {
@@ -121,6 +143,78 @@ export type AlternativaUpdate = {
      * Correta
      */
     correta?: boolean | null;
+};
+
+/**
+ * AlunoDetalheRead
+ */
+export type AlunoDetalheRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Concluidos
+     */
+    concluidos: number;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Ultima Atividade
+     */
+    ultima_atividade?: string | null;
+    /**
+     * Conteudos
+     */
+    conteudos: Array<ConteudoDoAlunoRead>;
+};
+
+/**
+ * AlunoTrilhaRead
+ */
+export type AlunoTrilhaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     */
+    username: string;
+    /**
+     * Avatar
+     */
+    avatar: string;
+    /**
+     * Cor Fundo
+     */
+    cor_fundo: string;
+    /**
+     * Concluidos
+     */
+    concluidos: number;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Ultima Atividade
+     */
+    ultima_atividade?: string | null;
 };
 
 /**
@@ -465,6 +559,48 @@ export type ConteudoCreate = {
     artigo_conteudo?: {
         [key: string]: unknown;
     } | null;
+};
+
+/**
+ * ConteudoDoAlunoRead
+ */
+export type ConteudoDoAlunoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Titulo
+     */
+    titulo: string;
+    /**
+     * Tipo
+     */
+    tipo: string;
+    /**
+     * Modulo
+     */
+    modulo: string;
+    /**
+     * Concluido Em
+     */
+    concluido_em?: string | null;
+    /**
+     * Acertos
+     */
+    acertos?: number | null;
+    /**
+     * Questoes
+     */
+    questoes?: number | null;
+    /**
+     * Versao Antiga
+     */
+    versao_antiga?: boolean;
+    /**
+     * Respostas
+     */
+    respostas?: Array<RespostaDoAlunoRead>;
 };
 
 /**
@@ -1584,13 +1720,13 @@ export type PontoEvolucaoTrilhaRead = {
      */
     data: string;
     /**
-     * Conclusoes
+     * Comecaram
      */
-    conclusoes: number;
+    comecaram: number;
     /**
-     * Novos
+     * Andamento
      */
-    novos: number;
+    andamento: number;
     /**
      * Terminaram
      */
@@ -1812,6 +1948,28 @@ export type ResetPasswordInput = {
      * Password
      */
     password: string;
+};
+
+/**
+ * RespostaDoAlunoRead
+ */
+export type RespostaDoAlunoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Enunciado
+     */
+    enunciado: string;
+    /**
+     * Acertou
+     */
+    acertou: boolean;
+    /**
+     * Alternativas
+     */
+    alternativas: Array<AlternativaDoAlunoRead>;
 };
 
 /**
@@ -2149,13 +2307,9 @@ export type TotaisPeriodoRead = {
  */
 export type TotaisTrilhaRead = {
     /**
-     * Alunos Ativos
+     * Em Andamento
      */
-    alunos_ativos: number;
-    /**
-     * Conclusoes
-     */
-    conclusoes: number;
+    em_andamento: number;
     /**
      * Novos
      */
@@ -2164,6 +2318,10 @@ export type TotaisTrilhaRead = {
      * Terminaram
      */
     terminaram: number;
+    /**
+     * Tempo Mediano
+     */
+    tempo_mediano?: number | null;
 };
 
 /**
@@ -6709,6 +6867,72 @@ export type ResumirConteudosTrilhasIdResumoConteudosGetResponses = {
 
 export type ResumirConteudosTrilhasIdResumoConteudosGetResponse = ResumirConteudosTrilhasIdResumoConteudosGetResponses[keyof ResumirConteudosTrilhasIdResumoConteudosGetResponses];
 
+export type ListarAlunosDaTrilhaTrilhasIdAlunosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/trilhas/{id}/alunos';
+};
+
+export type ListarAlunosDaTrilhaTrilhasIdAlunosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarAlunosDaTrilhaTrilhasIdAlunosGetError = ListarAlunosDaTrilhaTrilhasIdAlunosGetErrors[keyof ListarAlunosDaTrilhaTrilhasIdAlunosGetErrors];
+
+export type ListarAlunosDaTrilhaTrilhasIdAlunosGetResponses = {
+    /**
+     * Response Listar Alunos Da Trilha Trilhas  Id  Alunos Get
+     *
+     * Successful Response
+     */
+    200: Array<AlunoTrilhaRead>;
+};
+
+export type ListarAlunosDaTrilhaTrilhasIdAlunosGetResponse = ListarAlunosDaTrilhaTrilhasIdAlunosGetResponses[keyof ListarAlunosDaTrilhaTrilhasIdAlunosGetResponses];
+
+export type ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Usuario Id
+         */
+        usuario_id: number;
+    };
+    query?: never;
+    url: '/trilhas/{id}/alunos/{usuario_id}';
+};
+
+export type ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetError = ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetErrors[keyof ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetErrors];
+
+export type ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AlunoDetalheRead;
+};
+
+export type ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponse = ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponses[keyof ObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponses];
+
 export type ObterDashboardConteudoConteudosIdDashboardGetData = {
     body?: never;
     path: {
@@ -6834,6 +7058,80 @@ export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses = 
 };
 
 export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponse = ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses[keyof ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses];
+
+export type ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}/alunos';
+};
+
+export type ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetError = ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetErrors[keyof ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetErrors];
+
+export type ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponses = {
+    /**
+     * Response Listar Alunos Da Trilha Grupos  Grupo Id  Trilhas  Id  Alunos Get
+     *
+     * Successful Response
+     */
+    200: Array<AlunoTrilhaRead>;
+};
+
+export type ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponse = ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponses[keyof ListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponses];
+
+export type ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Usuario Id
+         */
+        usuario_id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}/alunos/{usuario_id}';
+};
+
+export type ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetError = ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetErrors[keyof ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetErrors];
+
+export type ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AlunoDetalheRead;
+};
+
+export type ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponse = ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponses[keyof ObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponses];
 
 export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetData = {
     body?: never;

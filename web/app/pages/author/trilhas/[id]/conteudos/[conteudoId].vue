@@ -98,14 +98,6 @@ async function onQuizAlterou(obrigatoria: boolean) {
         v-if="conteudo"
         class="flex flex-wrap items-center gap-x-4 gap-y-2"
       >
-        <UButton
-          v-if="conteudo.tipo === 'quiz'"
-          label="Dashboard"
-          icon="i-lucide-chart-spline"
-          color="neutral"
-          variant="outline"
-          :to="`${trilhaPath}/dashboard-conteudo/${conteudoId}`"
-        />
         <!-- no quiz vale pro proximo salvar ou excluir de pergunta -->
         <UCheckbox
           v-model="alteracaoSignificativa"

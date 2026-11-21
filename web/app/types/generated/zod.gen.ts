@@ -36,6 +36,16 @@ export const zAlternativaCreate = z.object({
 });
 
 /**
+ * AlternativaDoAlunoRead
+ */
+export const zAlternativaDoAlunoRead = z.object({
+    id: z.int(),
+    texto: z.string(),
+    correta: z.boolean(),
+    escolhida: z.boolean()
+});
+
+/**
  * AlternativaEscolhaRead
  */
 export const zAlternativaEscolhaRead = z.object({
@@ -61,6 +71,19 @@ export const zAlternativaRead = z.object({
 export const zAlternativaUpdate = z.object({
     texto: z.string().min(1).max(200).nullish(),
     correta: z.boolean().nullish()
+});
+
+/**
+ * AlunoTrilhaRead
+ */
+export const zAlunoTrilhaRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluidos: z.int(),
+    total: z.int(),
+    ultima_atividade: z.iso.datetime().nullish()
 });
 
 /**
@@ -652,8 +675,8 @@ export const zPontoEvolucaoRead = z.object({
  */
 export const zPontoEvolucaoTrilhaRead = z.object({
     data: z.iso.date(),
-    conclusoes: z.int(),
-    novos: z.int(),
+    comecaram: z.int(),
+    andamento: z.int(),
     terminaram: z.int()
 });
 
@@ -773,6 +796,45 @@ export const zResetPasswordInput = z.object({
     email: z.email(),
     code: z.string(),
     password: z.string().min(8).max(128)
+});
+
+/**
+ * RespostaDoAlunoRead
+ */
+export const zRespostaDoAlunoRead = z.object({
+    id: z.int(),
+    enunciado: z.string(),
+    acertou: z.boolean(),
+    alternativas: z.array(zAlternativaDoAlunoRead)
+});
+
+/**
+ * ConteudoDoAlunoRead
+ */
+export const zConteudoDoAlunoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    tipo: z.string(),
+    modulo: z.string(),
+    concluido_em: z.iso.datetime().nullish(),
+    acertos: z.int().nullish(),
+    questoes: z.int().nullish(),
+    versao_antiga: z.boolean().optional().default(false),
+    respostas: z.array(zRespostaDoAlunoRead).optional().default([])
+});
+
+/**
+ * AlunoDetalheRead
+ */
+export const zAlunoDetalheRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluidos: z.int(),
+    total: z.int(),
+    ultima_atividade: z.iso.datetime().nullish(),
+    conteudos: z.array(zConteudoDoAlunoRead)
 });
 
 /**
@@ -1018,10 +1080,10 @@ export const zDashboardRead = z.object({
  * TotaisTrilhaRead
  */
 export const zTotaisTrilhaRead = z.object({
-    alunos_ativos: z.int(),
-    conclusoes: z.int(),
+    em_andamento: z.int(),
     novos: z.int(),
-    terminaram: z.int()
+    terminaram: z.int(),
+    tempo_mediano: z.number().nullish()
 });
 
 /**
@@ -2513,6 +2575,27 @@ export const zResumirConteudosTrilhasIdResumoConteudosGetPath = z.object({
  */
 export const zResumirConteudosTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
 
+export const zListarAlunosDaTrilhaTrilhasIdAlunosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Listar Alunos Da Trilha Trilhas  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDaTrilhaTrilhasIdAlunosGetResponse = z.array(zAlunoTrilhaRead);
+
+export const zObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetPath = z.object({
+    id: z.int(),
+    usuario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponse = zAlunoDetalheRead;
+
 export const zObterDashboardConteudoConteudosIdDashboardGetPath = z.object({
     id: z.int()
 });
@@ -2563,6 +2646,29 @@ export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetPath = z.o
  * Successful Response
  */
 export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
+
+export const zListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Alunos Da Trilha Grupos  Grupo Id  Trilhas  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponse = z.array(zAlunoTrilhaRead);
+
+export const zObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetPath = z.object({
+    id: z.int(),
+    usuario_id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponse = zAlunoDetalheRead;
 
 export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetPath = z.object({
     id: z.int(),

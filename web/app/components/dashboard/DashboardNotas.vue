@@ -4,10 +4,6 @@
       <h2 class="font-medium">
         Distribuição das notas
       </h2>
-
-      <p class="text-sm text-muted">
-        Quantos alunos tiraram cada nota no período, na versão atual.
-      </p>
     </template>
 
     <div

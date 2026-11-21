@@ -484,11 +484,24 @@
       :title="conteudoDesempenho ? `Desempenho: ${conteudoDesempenho.titulo}` : 'Desempenho'"
       :ui="{ content: 'sm:max-w-5xl' }"
     >
+      <!-- data de criacao do lado do nome, igual na pagina -->
+      <template #title>
+        <span class="flex flex-wrap items-baseline gap-x-3">
+          {{ conteudoDesempenho ? `Desempenho: ${conteudoDesempenho.titulo}` : 'Desempenho' }}
+          <span
+            v-if="desempenhoCriadoEm"
+            class="text-sm font-normal text-muted"
+          >
+            {{ formatarData(desempenhoCriadoEm) }}
+          </span>
+        </span>
+      </template>
+
       <template #body>
         <DashboardConteudo
           v-if="conteudoDesempenho"
           :conteudo-id="conteudoDesempenho.id"
-          :com-titulo="false"
+          @criado-em="desempenhoCriadoEm = $event"
         />
       </template>
     </UModal>
@@ -521,6 +534,9 @@
 import { VueDraggable } from 'vue-draggable-plus'
 import type { Ref } from 'vue'
 import type { ConteudoRead, ModuloRead, ResumoConteudoRead, TrilhaRead } from '~/types/generated'
+import { formatarData } from '~/utils/datas'
+import { tiposInfo } from '~/utils/tiposConteudo'
+import type { TipoConteudo } from '~/utils/tiposConteudo'
 
 definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
@@ -555,34 +571,6 @@ async function salvando(saving: Ref<boolean>, mensagemErro: string, acao: () => 
   await comErro(mensagemErro, acao)
   saving.value = false
 }
-
-// centraliza label + icone de cada tipo de conteudo num lugar so
-// classes inteiras pq o tailwind n acha classe montada com variavel
-// linha: faixa na esquerda + fundo leve, icone: bolinha do icone, selo: o tipo escrito
-const tiposInfo = {
-  video: {
-    label: 'Vídeo',
-    icon: 'i-lucide-play-circle',
-    linha: 'border-l-sky-500 bg-sky-500/5',
-    icone: 'bg-sky-500/15 text-sky-500',
-    selo: 'bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300',
-  },
-  artigo: {
-    label: 'Artigo',
-    icon: 'i-lucide-book-open',
-    linha: 'border-l-emerald-500 bg-emerald-500/5',
-    icone: 'bg-emerald-500/15 text-emerald-500',
-    selo: 'bg-emerald-500/15 text-emerald-600 ring-emerald-500/30 dark:text-emerald-300',
-  },
-  quiz: {
-    label: 'Quiz',
-    icon: 'i-lucide-list-checks',
-    linha: 'border-l-violet-500 bg-violet-500/5',
-    icone: 'bg-violet-500/15 text-violet-500',
-    selo: 'bg-violet-500/15 text-violet-600 ring-violet-500/30 dark:text-violet-300',
-  },
-} as const
-type TipoConteudo = keyof typeof tiposInfo
 
 const trilha = ref<TrilhaRead | null>(null)
 const modulos = ref<ModuloRead[]>([])
@@ -848,9 +836,12 @@ function formatarAcerto(acerto: number | null | undefined) {
 
 const showDesempenhoModal = ref(false)
 const conteudoDesempenho = ref<ConteudoRead | null>(null)
+// vem da dashboard qnd carrega
+const desempenhoCriadoEm = ref('')
 
 function abrirDesempenho(conteudo: ConteudoRead) {
   conteudoDesempenho.value = conteudo
+  desempenhoCriadoEm.value = ''
   showDesempenhoModal.value = true
 }
 

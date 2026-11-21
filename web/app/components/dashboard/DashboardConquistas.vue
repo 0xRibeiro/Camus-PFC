@@ -2,15 +2,9 @@
   <UCard :ui="{ body: 'p-0 sm:p-0' }">
     <template #header>
       <div class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 class="font-medium">
-            {{ mostrarMais ? 'Conquistas mais obtidas' : 'Conquistas menos obtidas' }}
-          </h2>
-
-          <p class="text-sm text-muted">
-            Porcentagem dos alunos que já desbloquearam.
-          </p>
-        </div>
+        <h2 class="font-medium">
+          {{ mostrarMais ? 'Conquistas mais obtidas' : 'Conquistas menos obtidas' }}
+        </h2>
 
         <UFieldGroup size="sm">
           <UButton

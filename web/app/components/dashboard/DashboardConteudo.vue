@@ -1,24 +1,7 @@
 <template>
   <div>
-    <!-- no modal o titulo ja ta no cabecalho dele, entao da pra esconder -->
-    <div
-      v-if="comTitulo"
-      class="mb-6 flex flex-wrap items-start justify-between gap-3"
-    >
-      <div class="min-w-0 wrap-anywhere">
-        <p class="text-xs font-medium tracking-wide text-muted uppercase">
-          Dashboard do quiz
-        </p>
-
-        <h1 class="flex flex-wrap items-center gap-2 text-xl font-semibold">
-          {{ dados?.titulo }}
-        </h1>
-      </div>
-
-      <slot name="acoes" />
-    </div>
-
-    <!-- filtro acompanha a rolagem, no modal gruda no topo dele -->
+    <!-- so abre em modal, o titulo e a data ficam no cabecalho dele -->
+    <!-- filtro gruda no topo do modal -->
     <div class="sticky top-0 z-10 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-default bg-default/90 py-3 backdrop-blur">
       <DashboardFiltro
         v-model:periodo="periodo"
@@ -34,17 +17,6 @@
         :loading="loading"
         @click="fetchDashboard"
       />
-
-      <!-- so avisa, da pra escolher antes disso msm assim -->
-      <p
-        v-if="dados"
-        class="w-full text-xs text-muted"
-      >
-        Quiz criado em {{ formatarData(dados.inicio_total) }}
-        <template v-if="dados.versao > 1">
-          · versão atual ({{ dados.versao }}) desde {{ formatarData(dados.versao_desde) }}
-        </template>
-      </p>
     </div>
 
     <div
@@ -112,17 +84,22 @@
 import type { Indicador } from '~/components/dashboard/DashboardNumeros.vue'
 import type { DashboardConteudoRead } from '~/types/generated'
 import { parseDate } from '@internationalized/date'
-import { formatarData } from '~/utils/datas'
 
-// a pagina do dashboard e o modal da tela da trilha usam esse msm
-const props = withDefaults(defineProps<{
+// modal da tela da trilha e da dashboard da trilha usam esse msm
+const props = defineProps<{
   conteudoId: number
-  comTitulo?: boolean
-}>(), {
-  comTitulo: true,
-})
+}>()
 
 const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, periodoAnterior, inicioTotal, fetchDashboard } = useDashboard<DashboardConteudoRead>(`/conteudos/${props.conteudoId}/dashboard`)
+
+// o titulo é do cabecalho do modal, entao manda a data pra ele mostrar
+const emit = defineEmits<{
+  criadoEm: [data: string]
+}>()
+
+watch(dados, (novos) => {
+  if (novos) emit('criadoEm', novos.inicio_total)
+})
 
 const versaoDesde = computed(() => {
   if (!dados.value) return null
@@ -162,17 +139,17 @@ const indicadores = computed<Indicador[]>(() => {
       titulo: 'Nota média',
       icone: 'i-lucide-target',
       cor: 'primary',
-      valor: (dividir(totais.acertos, totais.questoes) ?? 0) * 10,
+      valor: totais.questoes ? (totais.acertos / totais.questoes) * 10 : null,
       anterior: anteriores.questoes ? (anteriores.acertos / anteriores.questoes) * 10 : null,
-      formatar: valor => totais.questoes ? `${formatarNota(valor)}/10` : '—',
+      formatar: valor => `${formatarNota(valor)}/10`,
     },
     {
       titulo: 'Gabaritaram',
       icone: 'i-lucide-trophy',
       cor: 'tertiary',
-      valor: dividir(totais.gabaritaram, totais.alunos) ?? 0,
+      valor: dividir(totais.gabaritaram, totais.alunos),
       anterior: dividir(anteriores.gabaritaram, anteriores.alunos),
-      formatar: valor => totais.alunos ? formatarPorcentagem(valor) : '—',
+      formatar: formatarPorcentagem,
     },
   ]
 })

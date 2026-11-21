@@ -9,7 +9,7 @@
       :key="indicador.titulo"
       :icon="indicador.icone"
       :title="indicador.titulo"
-      variant="subtle"
+      variant="outline"
       :ui="{
         container: 'gap-y-1.5',
         wrapper: 'items-start',
@@ -19,24 +19,32 @@
       }"
     >
       <div class="space-y-1">
-        <span class="text-3xl font-semibold text-highlighted">
-          {{ indicador.texto }}
-        </span>
+        <!-- a seta fica no numero de agora, a cor diz se foi bom ou ruim -->
+        <div class="flex items-center gap-2">
+          <span class="text-3xl font-semibold text-highlighted">
+            {{ indicador.texto }}
+          </span>
 
-        <!-- valor de antes numa linha so, a cor diz se subiu ou desceu -->
-        <p
-          v-if="indicador.antes !== null && periodoAnterior"
-          class="flex flex-wrap items-center gap-x-1 text-xs"
-          :class="indicador.comparacao.texto"
-        >
-          <span>Período anterior ({{ periodoAnterior }}):</span>
-          <span class="flex items-center gap-0.5 font-semibold tabular-nums">
+          <span
+            v-if="indicador.antes !== null && periodoAnterior && indicador.comparacao.icone"
+            class="flex size-6 items-center justify-center rounded-full"
+            :class="indicador.comparacao.selo"
+            :aria-label="indicador.comparacao.descricao"
+          >
             <UIcon
               :name="indicador.comparacao.icone"
-              class="size-3.5"
+              class="size-4"
             />
-            {{ indicador.antes }}
           </span>
+        </div>
+
+        <!-- so informa o valor de antes -->
+        <p
+          v-if="indicador.antes !== null && periodoAnterior"
+          class="text-xs text-muted"
+        >
+          Período anterior ({{ periodoAnterior }}):
+          <span class="font-semibold tabular-nums">{{ indicador.antes }}</span>
         </p>
       </div>
     </UPageCard>
@@ -50,10 +58,13 @@ export interface Indicador {
   titulo: string
   icone: string
   cor: Cor
-  valor: number
+  // null vira — (tempo sem ngm terminar, nota sem ngm fazer)
+  valor: number | null
   // valor do periodo anterior, null ou 0 n mostra a comparacao
   anterior: number | null
   formatar?: (valor: number) => string
+  // tempo por ex, cair é bom
+  menorMelhor?: boolean
 }
 
 const props = defineProps<{
@@ -70,16 +81,23 @@ const cores: Record<Cor, { fundo: string, icone: string }> = {
   quaternary: { fundo: 'bg-quaternary/10 ring-quaternary/25', icone: 'text-quaternary' },
 }
 
-function formatarValor(indicador: Indicador, valor: number) {
+function formatarValor(indicador: Indicador, valor: number | null) {
+  if (valor === null) return '—'
   if (indicador.formatar) return indicador.formatar(valor)
   return valor.toLocaleString('pt-BR')
 }
 
-// em todos os cards subir e bom
-function comparar(atual: number, anterior: number) {
-  if (atual > anterior) return { texto: 'text-success', icone: 'i-lucide-arrow-up' }
-  if (atual < anterior) return { texto: 'text-error', icone: 'i-lucide-arrow-down' }
-  return { texto: 'text-muted', icone: 'i-lucide-equal' }
+// a seta segue o numero, a cor segue se foi bom ou ruim. sem valor agora n tem o q comparar
+function comparar(atual: number | null, anterior: number, menorMelhor = false) {
+  if (atual === null) return { selo: '', icone: '', descricao: '' }
+  if (atual === anterior) return { selo: 'bg-elevated text-muted', icone: 'i-lucide-equal', descricao: 'Igual ao período anterior' }
+  const subiu = atual > anterior
+  const melhorou = subiu !== menorMelhor
+  return {
+    selo: melhorou ? 'bg-success/15 text-success' : 'bg-error/15 text-error',
+    icone: subiu ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down',
+    descricao: subiu ? 'Subiu em relação ao período anterior' : 'Caiu em relação ao período anterior',
+  }
 }
 
 const lista = computed(() => {
@@ -90,7 +108,7 @@ const lista = computed(() => {
       texto: formatarValor(indicador, indicador.valor),
       // antes zerado n compara nada
       antes: indicador.anterior ? formatarValor(indicador, indicador.anterior) : null,
-      comparacao: comparar(indicador.valor, indicador.anterior ?? indicador.valor),
+      comparacao: comparar(indicador.valor, indicador.anterior ?? 0, indicador.menorMelhor),
     })
   }
   return resultado

@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from statistics import median
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
@@ -8,24 +9,29 @@ from app.domains.dashboard.repository import DashboardRepository
 from app.domains.dashboard.schema import (
     Agrupamento,
     AlternativaEscolhaRead,
+    AlunoDetalheRead,
+    AlunoTrilhaRead,
     ConquistaResumoRead,
+    ConteudoDoAlunoRead,
     ConteudoFunilRead,
     DashboardConteudoRead,
     DashboardRead,
     DashboardTrilhaRead,
     EngajamentoTrilhaRead,
+    AlternativaDoAlunoRead,
     NotaQuizRead,
     PontoEvolucaoConteudoRead,
     PontoEvolucaoRead,
     PontoEvolucaoTrilhaRead,
     QuestaoAcertoRead,
+    RespostaDoAlunoRead,
     ResumoConteudoRead,
     TotaisConteudoRead,
     TotaisPeriodoRead,
     TotaisTrilhaRead,
 )
 from app.domains.progresso.model import TentativaQuiz
-from app.domains.trilha.model import Conteudo, ConteudoTipo
+from app.domains.trilha.model import Alternativa, Conteudo, ConteudoTipo, Questao
 
 # msm fuso dos dias da dashboard no repository
 FUSO = ZoneInfo("America/Sao_Paulo")
@@ -135,24 +141,70 @@ async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | Non
     )
 
 
+# tempo de quem terminou no periodo, mediana pra um aluno q sumiu por meses n puxar tudo
+def calcular_tempo_mediano(duracoes: list[tuple[date, float]], inicio: date, fim: date) -> float | None:
+    no_periodo = []
+    for dia, horas in duracoes:
+        if inicio <= dia <= fim:
+            no_periodo.append(horas)
+    if not no_periodo:
+        return None
+    return median(no_periodo)
+
+
+# dia q cada aluno comecou e terminou (None se n terminou)
+def montar_marcos(progresso: list[tuple[int, int, datetime, datetime]],
+    total_conteudos: int) -> dict[int, tuple[date, date | None]]:
+    marcos = {}
+    for usuario_id, quantidade, primeira, ultima in progresso:
+        termino = None
+        if quantidade == total_conteudos:
+            termino = dia_no_fuso(ultima)
+        marcos[usuario_id] = (dia_no_fuso(primeira), termino)
+    return marcos
+
+
+# fez algo no periodo e ainda n tinha terminado a trilha no fim dele, quem comecou agr tbm conta
+async def contar_em_andamento(repo: DashboardRepository, conteudos: list[int], inicio: date,
+    fim: date, marcos: dict[int, tuple[date, date | None]]) -> int:
+    quantidade = 0
+    for usuario_id in await repo.listar_alunos_ativos(conteudos, inicio, fim):
+        _, termino = marcos.get(usuario_id, (None, None))
+        if termino is not None and termino <= fim:
+            continue
+        quantidade += 1
+    return quantidade
+
+
 async def contar_totais_trilha(repo: DashboardRepository, conteudos: list[int], inicio: date,
-    fim: date, contagens: dict[str, dict[date, int]]) -> TotaisTrilhaRead:
+    fim: date, contagens: dict[str, dict[date, int]], duracoes: list[tuple[date, float]],
+    marcos: dict[int, tuple[date, date | None]]) -> TotaisTrilhaRead:
     return TotaisTrilhaRead(
-        alunos_ativos=len(await repo.listar_alunos_ativos(conteudos, inicio, fim)),
+        em_andamento=await contar_em_andamento(repo, conteudos, inicio, fim, marcos),
+        tempo_mediano=calcular_tempo_mediano(duracoes, inicio, fim),
         **somar_totais(contagens),
     )
 
 
-# novo conta no 1o dia, terminou conta no dia da ultima conclusao
-def contar_novos_e_terminaram(progresso: list[tuple[int, int, date, date]],
-    total_conteudos: int) -> tuple[dict[date, int], dict[date, int]]:
+def dia_no_fuso(momento: datetime) -> date:
+    return momento.astimezone(FUSO).date()
+
+
+# novo conta no dia da 1a conclusao, terminou no dia da ultima.
+# o tempo vai da 1a ate a ultima, n tem registro de quando abriu o 1o conteudo
+def contar_novos_e_terminaram(progresso: list[tuple[int, int, datetime, datetime]],
+    total_conteudos: int) -> tuple[dict[date, int], dict[date, int], list[tuple[date, float]]]:
     novos: dict[date, int] = {}
     terminaram: dict[date, int] = {}
-    for _, quantidade, primeiro_dia, ultimo_dia in progresso:
+    duracoes = []
+    for _, quantidade, primeira, ultima in progresso:
+        primeiro_dia = dia_no_fuso(primeira)
         novos[primeiro_dia] = novos.get(primeiro_dia, 0) + 1
         if quantidade == total_conteudos:
+            ultimo_dia = dia_no_fuso(ultima)
             terminaram[ultimo_dia] = terminaram.get(ultimo_dia, 0) + 1
-    return novos, terminaram
+            duracoes.append((ultimo_dia, (ultima - primeira).total_seconds() / 3600))
+    return novos, terminaram, duracoes
 
 
 def filtrar_periodo(por_dia: dict[date, int], inicio: date, fim: date) -> dict[date, int]:
@@ -163,13 +215,45 @@ def filtrar_periodo(por_dia: dict[date, int], inicio: date, fim: date) -> dict[d
     return filtrado
 
 
-async def contar_linhas_trilha(repo: DashboardRepository, conteudos: list[int], novos: dict[date, int],
-    terminaram: dict[date, int], inicio: date, fim: date) -> dict[str, dict[date, int]]:
+def contar_linhas_trilha(novos: dict[date, int], terminaram: dict[date, int], inicio: date,
+    fim: date) -> dict[str, dict[date, int]]:
     return {
-        "conclusoes": await repo.contar_conclusoes_por_dia(conteudos, inicio, fim),
         "novos": filtrar_periodo(novos, inicio, fim),
         "terminaram": filtrar_periodo(terminaram, inicio, fim),
     }
+
+
+# cada aluno ativo no ponto entra numa coluna so: terminou ganha de comecou, q ganha de em andamento
+def montar_evolucao_trilha(atividade: set[tuple[int, date]], marcos: dict[int, tuple[date, date | None]],
+    inicio: date, fim: date, agrupamento: Agrupamento) -> list[PontoEvolucaoTrilhaRead]:
+    comeco = {}
+    termino = {}
+    # o 1o ponto pode comecar antes do periodo (semana/mes), oq aconteceu antes do inicio n conta
+    for usuario_id, (dia_comeco, dia_termino) in marcos.items():
+        if dia_comeco >= inicio:
+            comeco[usuario_id] = inicio_do_grupo(dia_comeco, agrupamento)
+        if dia_termino is not None and dia_termino >= inicio:
+            termino[usuario_id] = inicio_do_grupo(dia_termino, agrupamento)
+
+    # o msm aluno em varios dias da semana conta uma vez so
+    ativos_por_ponto: dict[date, set[int]] = {}
+    for usuario_id, dia in atividade:
+        ativos_por_ponto.setdefault(inicio_do_grupo(dia, agrupamento), set()).add(usuario_id)
+
+    evolucao = []
+    # sem linhas ele so devolve as datas de cada ponto
+    for ponto in montar_evolucao({}, inicio, fim, agrupamento):
+        chave = ponto["data"]
+        contagem = {"comecaram": 0, "andamento": 0, "terminaram": 0}
+        for usuario_id in ativos_por_ponto.get(chave, set()):
+            if termino.get(usuario_id) == chave:
+                contagem["terminaram"] += 1
+            elif comeco.get(usuario_id) == chave:
+                contagem["comecaram"] += 1
+            else:
+                contagem["andamento"] += 1
+        evolucao.append(PontoEvolucaoTrilhaRead(data=chave, **contagem))
+    return evolucao
 
 
 # a rota ja garantiu q a trilha ta no escopo
@@ -185,19 +269,19 @@ async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date 
 
     # progresso de sempre, o periodo filtra dps
     progresso = await repo.listar_progresso_por_aluno(conteudos)
-    novos, terminaram = contar_novos_e_terminaram(progresso, len(conteudos))
+    novos, terminaram, duracoes = contar_novos_e_terminaram(progresso, len(conteudos))
 
-    contagens = await contar_linhas_trilha(repo, conteudos, novos, terminaram, inicio, fim)
-    contagens_anteriores = await contar_linhas_trilha(repo, conteudos, novos, terminaram, inicio_anterior, fim_anterior)
+    contagens = contar_linhas_trilha(novos, terminaram, inicio, fim)
+    contagens_anteriores = contar_linhas_trilha(novos, terminaram, inicio_anterior, fim_anterior)
 
-    evolucao = []
-    for ponto in montar_evolucao(contagens, inicio, fim, agrupamento):
-        evolucao.append(PontoEvolucaoTrilhaRead(**ponto))
+    marcos = montar_marcos(progresso, len(conteudos))
+    atividade = await repo.listar_dias_de_atividade(conteudos, inicio, fim)
 
     return DashboardTrilhaRead(
-        evolucao=evolucao,
-        totais=await contar_totais_trilha(repo, conteudos, inicio, fim, contagens),
-        totais_anteriores=await contar_totais_trilha(repo, conteudos, inicio_anterior, fim_anterior, contagens_anteriores),
+        evolucao=montar_evolucao_trilha(atividade, marcos, inicio, fim, agrupamento),
+        totais=await contar_totais_trilha(repo, conteudos, inicio, fim, contagens, duracoes, marcos),
+        totais_anteriores=await contar_totais_trilha(repo, conteudos, inicio_anterior, fim_anterior,
+            contagens_anteriores, duracoes, marcos),
         engajamento=await montar_engajamento(repo, trilha_id, progresso, sum(terminaram.values())),
         funil=await montar_funil(repo, lista_conteudos),
         inicio_total=await buscar_dia_de_criacao(repo, "trilhas", trilha_id),
@@ -240,7 +324,7 @@ async def resumir_conteudos(db: AsyncSession, trilha_id: int) -> list[ResumoCont
 
 # terminou e quem concluiu todos os conteudos atuais
 async def montar_engajamento(repo: DashboardRepository, trilha_id: int,
-    progresso: list[tuple[int, int, date, date]], concluiram: int) -> EngajamentoTrilhaRead:
+    progresso: list[tuple[int, int, datetime, datetime]], concluiram: int) -> EngajamentoTrilhaRead:
     trilha = await repo.buscar_trilha(trilha_id)
     if trilha is not None and trilha.grupo_id is not None:
         base = await repo.contar_membros(trilha.grupo_id)
@@ -411,4 +495,148 @@ async def obter_dashboard_conteudo(db: AsyncSession, conteudo_id: int, inicio: d
         totais_anteriores=contar_totais_conteudo(tentativas, inicio_anterior, fim_anterior),
         notas=montar_notas(no_periodo, len(questoes)),
         questoes=questoes,
+    )
+
+
+########## alunos da trilha de grupo
+
+# so trilha de grupo mostra o aluno, na global o autor n tem relacao com quem faz
+async def buscar_grupo_da_trilha(repo: DashboardRepository, trilha_id: int) -> int:
+    trilha = await repo.buscar_trilha(trilha_id)
+    if trilha is None or trilha.grupo_id is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Só trilha de grupo mostra os alunos")
+    return trilha.grupo_id
+
+
+async def listar_alunos_da_trilha(db: AsyncSession, trilha_id: int) -> list[AlunoTrilhaRead]:
+    repo = DashboardRepository(db)
+    grupo_id = await buscar_grupo_da_trilha(repo, trilha_id)
+
+    conteudos = []
+    for conteudo, _ in await repo.listar_conteudos_da_trilha(trilha_id):
+        conteudos.append(conteudo.id)
+
+    # {aluno: (quantos concluiu, ultima conclusao)}
+    progresso = {}
+    for usuario_id, quantidade, _, ultima in await repo.listar_progresso_por_aluno(conteudos):
+        progresso[usuario_id] = (quantidade, ultima)
+
+    alunos = []
+    for membro in await repo.listar_membros(grupo_id):
+        quantidade, ultima = progresso.get(membro.id, (0, None))
+        alunos.append(AlunoTrilhaRead(
+            id=membro.id,
+            username=membro.username,
+            avatar=membro.avatar,
+            cor_fundo=membro.cor_fundo,
+            concluidos=quantidade,
+            total=len(conteudos),
+            ultima_atividade=ultima,
+        ))
+    return alunos
+
+
+# o q o aluno marcou em cada questao, so da pra montar na versao atual (as antigas foram editadas)
+def montar_respostas(questoes: list[Questao], respostas: dict,
+    alternativas_por_questao: dict[int, list[Alternativa]]) -> list[RespostaDoAlunoRead]:
+    lista = []
+    for questao in questoes:
+        # chave do json vem como texto, sem resposta fica None
+        escolhida_id = respostas.get(str(questao.id))
+        acertou = False
+        alternativas = []
+        for alternativa in alternativas_por_questao.get(questao.id, []):
+            escolhida = alternativa.id == escolhida_id
+            if escolhida and alternativa.correta:
+                acertou = True
+            alternativas.append(AlternativaDoAlunoRead(
+                id=alternativa.id,
+                texto=alternativa.texto,
+                correta=alternativa.correta,
+                escolhida=escolhida,
+            ))
+
+        lista.append(RespostaDoAlunoRead(
+            id=questao.id,
+            enunciado=questao.enunciado,
+            acertou=acertou,
+            alternativas=alternativas,
+        ))
+    return lista
+
+
+# tentativa da versao atual, se ele so fez uma antiga pega a mais nova q tiver
+def escolher_tentativa(tentativas: list[TentativaQuiz], versao_atual: int) -> TentativaQuiz | None:
+    escolhida = None
+    for tentativa in tentativas:
+        if tentativa.versao_conteudo == versao_atual:
+            return tentativa
+        if escolhida is None or tentativa.versao_conteudo > escolhida.versao_conteudo:
+            escolhida = tentativa
+    return escolhida
+
+
+async def obter_aluno_da_trilha(db: AsyncSession, trilha_id: int, usuario_id: int) -> AlunoDetalheRead:
+    repo = DashboardRepository(db)
+    grupo_id = await buscar_grupo_da_trilha(repo, trilha_id)
+    membro = await repo.buscar_membro(grupo_id, usuario_id)
+    if membro is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aluno não encontrado nesse grupo")
+
+    lista_conteudos = await repo.listar_conteudos_da_trilha(trilha_id)
+    conteudos = []
+    quizzes = []
+    for conteudo, _ in lista_conteudos:
+        conteudos.append(conteudo.id)
+        if conteudo.tipo == ConteudoTipo.quiz:
+            quizzes.append(conteudo.id)
+
+    conclusoes = {}
+    for conclusao in await repo.listar_conclusoes_do_aluno(usuario_id, conteudos):
+        conclusoes[conclusao.conteudo_id] = conclusao
+
+    tentativas_por_quiz: dict[int, list[TentativaQuiz]] = {}
+    for tentativa in await repo.listar_tentativas_do_aluno(usuario_id, quizzes):
+        tentativas_por_quiz.setdefault(tentativa.conteudo_id, []).append(tentativa)
+
+    questoes_por_quiz: dict[int, list[Questao]] = {}
+    ids_questoes = []
+    for questao in await repo.listar_questoes(quizzes):
+        questoes_por_quiz.setdefault(questao.conteudo_id, []).append(questao)
+        ids_questoes.append(questao.id)
+
+    alternativas_por_questao: dict[int, list[Alternativa]] = {}
+    for alternativa in await repo.listar_alternativas(ids_questoes):
+        alternativas_por_questao.setdefault(alternativa.questao_id, []).append(alternativa)
+
+    itens = []
+    ultima = None
+    for conteudo, modulo in lista_conteudos:
+        conclusao = conclusoes.get(conteudo.id)
+        item = ConteudoDoAlunoRead(id=conteudo.id, titulo=conteudo.titulo, tipo=conteudo.tipo.value, modulo=modulo)
+        if conclusao is not None:
+            item.concluido_em = conclusao.concluido_em
+            if ultima is None or conclusao.concluido_em > ultima:
+                ultima = conclusao.concluido_em
+
+        tentativa = escolher_tentativa(tentativas_por_quiz.get(conteudo.id, []), conteudo.versao)
+        if tentativa is not None:
+            item.acertos = tentativa.acertos
+            item.questoes = tentativa.total
+            if tentativa.versao_conteudo != conteudo.versao:
+                item.versao_antiga = True
+            else:
+                item.respostas = montar_respostas(questoes_por_quiz.get(conteudo.id, []), tentativa.respostas,
+                    alternativas_por_questao)
+        itens.append(item)
+
+    return AlunoDetalheRead(
+        id=membro.id,
+        username=membro.username,
+        avatar=membro.avatar,
+        cor_fundo=membro.cor_fundo,
+        concluidos=len(conclusoes),
+        total=len(conteudos),
+        ultima_atividade=ultima,
+        conteudos=itens,
     )

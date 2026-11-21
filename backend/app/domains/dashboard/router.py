@@ -7,6 +7,8 @@ from app.core.database import get_async_session
 from app.domains.dashboard import service
 from app.domains.dashboard.schema import (
     Agrupamento,
+    AlunoDetalheRead,
+    AlunoTrilhaRead,
     DashboardConteudoRead,
     DashboardRead,
     DashboardTrilhaRead,
@@ -50,6 +52,20 @@ async def obter_dashboard_trilha(id: int, inicio: date | None = None, fim: date 
     dependencies=[Depends(gerenciar_trilhas), Depends(validar_item(Trilha))])
 async def resumir_conteudos(id: int, db: AsyncSession = Depends(get_async_session)) -> list[ResumoConteudoRead]:
     return await service.resumir_conteudos(db, id)
+
+
+# so trilha de grupo, o dono ve cada membro
+@trilha_router.get("/trilhas/{id}/alunos", response_model=list[AlunoTrilhaRead],
+    dependencies=[Depends(gerenciar_trilhas), Depends(validar_item(Trilha))])
+async def listar_alunos_da_trilha(id: int, db: AsyncSession = Depends(get_async_session)) -> list[AlunoTrilhaRead]:
+    return await service.listar_alunos_da_trilha(db, id)
+
+
+@trilha_router.get("/trilhas/{id}/alunos/{usuario_id}", response_model=AlunoDetalheRead,
+    dependencies=[Depends(gerenciar_trilhas), Depends(validar_item(Trilha))])
+async def obter_aluno_da_trilha(id: int, usuario_id: int,
+    db: AsyncSession = Depends(get_async_session)) -> AlunoDetalheRead:
+    return await service.obter_aluno_da_trilha(db, id, usuario_id)
 
 
 @trilha_router.get("/conteudos/{id}/dashboard", response_model=DashboardConteudoRead,

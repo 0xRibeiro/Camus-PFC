@@ -2,15 +2,9 @@
   <UCard :ui="{ body: 'p-0 sm:p-0' }">
     <template #header>
       <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <h2 class="font-medium">
-            Acerto por questão
-          </h2>
-
-          <p class="text-sm text-muted">
-            Quanto cada alternativa foi marcada no período, na versão atual.
-          </p>
-        </div>
+        <h2 class="font-medium">
+          Acerto por questão
+        </h2>
 
         <div class="flex flex-wrap items-center gap-1">
           <UButton

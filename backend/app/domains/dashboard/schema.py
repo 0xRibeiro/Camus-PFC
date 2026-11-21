@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -22,18 +22,22 @@ class TotaisPeriodoRead(BaseModel):
     grupos: int
 
 
+# cada aluno ativo no ponto entra numa coluna so, a altura é o total de ativos
 class PontoEvolucaoTrilhaRead(BaseModel):
     data: date
-    conclusoes: int
-    novos: int
+    comecaram: int
+    andamento: int
     terminaram: int
 
 
+# novo = concluiu o 1o conteudo, terminou = concluiu todos
 class TotaisTrilhaRead(BaseModel):
-    alunos_ativos: int
-    conclusoes: int
+    # ativo no periodo q ainda n tinha terminado a trilha no fim dele
+    em_andamento: int
     novos: int
     terminaram: int
+    # mediana em horas de quem terminou no periodo, None se ngm terminou
+    tempo_mediano: float | None = None
 
 
 # base e membros no grupo ou alunos na global
@@ -41,6 +45,52 @@ class EngajamentoTrilhaRead(BaseModel):
     base: int
     iniciaram: int
     concluiram: int
+
+
+# so trilha de grupo, cada membro com quanto ja fez
+class AlunoTrilhaRead(BaseModel):
+    id: int
+    username: str
+    avatar: str
+    cor_fundo: str
+    concluidos: int
+    total: int
+    # None se n comecou
+    ultima_atividade: datetime | None = None
+
+
+class AlternativaDoAlunoRead(BaseModel):
+    id: int
+    texto: str
+    correta: bool
+    escolhida: bool
+
+
+# cada questao do quiz com o q o aluno marcou
+class RespostaDoAlunoRead(BaseModel):
+    id: int
+    enunciado: str
+    acertou: bool
+    alternativas: list[AlternativaDoAlunoRead]
+
+
+class ConteudoDoAlunoRead(BaseModel):
+    id: int
+    titulo: str
+    tipo: str
+    modulo: str
+    concluido_em: datetime | None = None
+    # so no quiz q ele fez
+    acertos: int | None = None
+    questoes: int | None = None
+    # fez uma versao antiga, a nota vale mas as questoes mudaram
+    versao_antiga: bool = False
+    # vazio na versao antiga
+    respostas: list[RespostaDoAlunoRead] = []
+
+
+class AlunoDetalheRead(AlunoTrilhaRead):
+    conteudos: list[ConteudoDoAlunoRead]
 
 
 # numeros q aparecem do lado de cada quiz na tela da trilha, de sempre e n do periodo

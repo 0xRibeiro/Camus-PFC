@@ -1,15 +1,9 @@
 <template>
   <UCard>
     <template #header>
-      <div>
-        <h2 class="font-medium">
-          Evolução no período
-        </h2>
-
-        <p class="text-sm text-muted">
-          {{ descricao }}
-        </p>
-      </div>
+      <h2 class="font-medium">
+        Evolução no período
+      </h2>
     </template>
 
     <div
