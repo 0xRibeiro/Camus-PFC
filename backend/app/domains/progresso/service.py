@@ -473,21 +473,20 @@ async def responder_quiz(
             acertos += 1
     total = len(correcao)
 
-    # toda tentativa fica salva msm sem ganhar xp
-    repo.salvar_tentativa(
-        TentativaQuiz(
-            usuario_id=usuario.id,
-            conteudo_id=conteudo.id,
-            versao_conteudo=conteudo.versao,
-            respostas=data.respostas,
-            acertos=acertos,
-            total=total,
-        )
-    )
-
-    # refazer na msm versao so pra estudar n paga
+    # so a 1a tentativa de cada versao vale: salva, conclui e paga.
+    # refazer na msm versao é so pra estudar, corrige e devolve sem gravar nada
     xp_ganho = 0
     if conclusao is None or conclusao.versao_conteudo != conteudo.versao:
+        repo.salvar_tentativa(
+            TentativaQuiz(
+                usuario_id=usuario.id,
+                conteudo_id=conteudo.id,
+                versao_conteudo=conteudo.versao,
+                respostas=data.respostas,
+                acertos=acertos,
+                total=total,
+            )
+        )
         valor_novo = conteudo.pontos * acertos // total
         xp_ganho = await pagar_diferenca(repo, usuario, conteudo, valor_novo)
         salvar_conclusao(repo, usuario, conteudo, conclusao)

@@ -29,9 +29,11 @@ class ConclusaoConteudo(Base):
     )
 
 
-# toda tentativa fica guardada, a nota e salva na hora pra n mudar se editarem o quiz
+# so a 1a tentativa de cada versao fica guardada, é ela q conclui e paga.
+# a nota e salva na hora pra n mudar se editarem o quiz
 class TentativaQuiz(Base):
     __tablename__ = "tentativas_quiz"
+    __table_args__ = (UniqueConstraint("usuario_id", "conteudo_id", "versao_conteudo"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
