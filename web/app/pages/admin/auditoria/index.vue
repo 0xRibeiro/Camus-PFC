@@ -6,21 +6,22 @@
     />
 
     <div class="flex flex-wrap items-end gap-3 mb-4">
-      <UFormField label="Entidade">
+      <UFormField label="Período">
+        <AuditoriaFiltroPeriodo
+          v-model:periodo="periodo"
+          class="w-64"
+        />
+      </UFormField>
+
+      <UFormField label="Entidades">
         <!-- bolinha com a cor da entidade, a mesma da tabela -->
         <USelect
-          v-model="entidade"
+          v-model="entidades"
           :items="opcoesEntidade"
+          multiple
           placeholder="Todas"
-          class="w-56"
+          class="w-64"
         >
-          <template #leading>
-            <span
-              v-if="entidade"
-              class="size-2.5 rounded-full"
-              :class="entidadeAuditoria(entidade).ponto"
-            />
-          </template>
           <template #item-leading="{ item }">
             <span
               class="size-2.5 rounded-full"
@@ -30,23 +31,22 @@
         </USelect>
       </UFormField>
 
-      <!-- busca pelo nome ou pelo id, o label tem os dois -->
-      <UFormField label="Usuário">
+      <UFormField label="Usuários">
         <!-- ignore-filter: quem filtra e o back, o select so mostra o q voltou -->
         <USelectMenu
-          v-model="usuarioId"
+          v-model="usuarioIds"
           v-model:search-term="termoUsuario"
           :items="opcoesUsuario"
           value-key="value"
+          multiple
           placeholder="Todos"
-          :search-input="{ placeholder: 'Digite o nome ou e-mail...' }"
+          :search-input="{ placeholder: 'Digite o nome, e-mail ou id...' }"
           :loading="buscandoUsuarios"
           ignore-filter
-          class="w-64"
+          class="w-72"
         >
           <template #item-leading="{ item }">
             <UsuarioAvatar
-              v-if="item.usuario"
               :avatar="item.usuario.avatar"
               :cor-fundo="item.usuario.cor_fundo"
               :tamanho="20"
@@ -54,6 +54,34 @@
           </template>
         </USelectMenu>
       </UFormField>
+
+      <!-- busca de novo com os msm filtros e na msm pagina, pra ver o q entrou depois -->
+      <UTooltip text="Atualizar">
+        <UButton
+          icon="i-lucide-refresh-cw"
+          aria-label="Atualizar"
+          color="neutral"
+          variant="outline"
+          :loading="loading"
+          @click="fetchLogs"
+        />
+      </UTooltip>
+
+    </div>
+
+    <!-- embaixo dos filtros, so aparece qnd algum saiu do padrao -->
+    <div
+      v-if="filtrosAlterados"
+      class="-mt-2 mb-4"
+    >
+      <UButton
+        label="Limpar"
+        icon="i-lucide-filter-x"
+        color="error"
+        variant="soft"
+        size="sm"
+        @click="limparFiltros"
+      />
     </div>
 
     <div class="rounded-xl bg-default ring ring-default">
@@ -81,6 +109,9 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalTimeZone, today } from '@internationalized/date'
+import type { CalendarDate } from '@internationalized/date'
+import type { Periodo } from '~/composables/useDashboard'
 import type { LogAuditoriaRead, UsuarioAdminRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
@@ -88,17 +119,39 @@ definePageMeta({ middleware: 'role', roles: ['admin'] })
 const logs = ref<LogAuditoriaRead[]>([])
 const loading = ref(true)
 
-// ------- select de usuario: so busca no back quando digita, no maximo 20
-const usuarioId = ref<number | undefined>(undefined)
+// ------- periodo: por padrao so hoje
+const hoje = today(getLocalTimeZone())
+const periodo = ref<Periodo>({ start: hoje, end: hoje })
+
+// comeco do dia no fuso de quem ta vendo, em ISO pro back
+function inicioDoDia(dia: CalendarDate) {
+  return dia.toDate(getLocalTimeZone()).toISOString()
+}
+
+// ------- entidades: vazio = todas
+const entidades = ref<string[]>([])
+
+const opcoesEntidade = computed(() => {
+  const opcoes: { label: string, value: string, ponto: string }[] = []
+  for (const item of ENTIDADES_AUDITORIA) {
+    opcoes.push({ label: item.label, value: item.value, ponto: item.ponto })
+  }
+  return opcoes
+})
+
+// ------- usuarios: so busca no back quando digita, no maximo 20. vazio = todos
+const usuarioIds = ref<number[]>([])
 const termoUsuario = ref('')
 const usuariosEncontrados = ref<UsuarioAdminRead[]>([])
 const buscandoUsuarios = ref(false)
-// guarda o escolhido pra ele continuar aparecendo no select qnd a busca muda
-const usuarioEscolhido = ref<UsuarioAdminRead | null>(null)
+// guarda os escolhidos pra eles continuarem aparecendo no select qnd a busca muda
+const usuariosEscolhidos = ref<UsuarioAdminRead[]>([])
 
 async function buscarUsuarios() {
   const termo = termoUsuario.value.trim()
-  if (termo.length < 2) {
+  // id pode ter 1 digito so, nome precisa de 2 letras
+  const ehId = /^\d+$/.test(termo)
+  if (!termo || (!ehId && termo.length < 2)) {
     usuariosEncontrados.value = []
     return
   }
@@ -115,37 +168,54 @@ async function buscarUsuarios() {
 
 watchDebounced(termoUsuario, buscarUsuarios, { debounce: 350 })
 
-type OpcaoUsuario = { label: string, value: number | undefined, usuario?: UsuarioAdminRead }
-
-function opcaoDe(usuario: UsuarioAdminRead): OpcaoUsuario {
-  return { label: `${usuario.id} - ${usuario.username}`, value: usuario.id, usuario }
-}
-
-// "Todos" primeiro pra dar pra tirar o filtro, depois o escolhido e o resultado da busca
+// escolhidos primeiro, depois o resto do q a busca achou
 const opcoesUsuario = computed(() => {
-  const opcoes: OpcaoUsuario[] = [{ label: 'Todos', value: undefined }]
-  if (usuarioEscolhido.value) opcoes.push(opcaoDe(usuarioEscolhido.value))
-  for (const usuario of usuariosEncontrados.value) {
-    if (usuario.id !== usuarioEscolhido.value?.id) opcoes.push(opcaoDe(usuario))
+  const opcoes: { label: string, value: number, usuario: UsuarioAdminRead }[] = []
+  const jaTem = new Set<number>()
+  for (const usuario of [...usuariosEscolhidos.value, ...usuariosEncontrados.value]) {
+    if (jaTem.has(usuario.id)) continue
+    jaTem.add(usuario.id)
+    opcoes.push({ label: `${usuario.id} - ${usuario.username}`, value: usuario.id, usuario })
   }
   return opcoes
 })
 
-watch(usuarioId, (id) => {
-  if (id === undefined) {
-    usuarioEscolhido.value = null
-    return
+// monta a lista dos escolhidos a partir dos ids, olhando no q ja tinha e na busca
+watch(usuarioIds, (ids) => {
+  const escolhidos: UsuarioAdminRead[] = []
+  for (const id of ids) {
+    for (const usuario of [...usuariosEscolhidos.value, ...usuariosEncontrados.value]) {
+      if (usuario.id === id) {
+        escolhidos.push(usuario)
+        break
+      }
+    }
   }
-  for (const usuario of usuariosEncontrados.value) {
-    if (usuario.id === id) usuarioEscolhido.value = usuario
-  }
+  usuariosEscolhidos.value = escolhidos
 })
 
+// ------- limpar: volta pro padrao (hoje, todas as entidades, todos os usuarios)
+const filtrosAlterados = computed(() => {
+  const { start, end } = periodo.value
+  const soHoje = !!start && !!end && start.compare(hoje) === 0 && end.compare(hoje) === 0
+  return !soHoje || !!entidades.value.length || !!usuarioIds.value.length
+})
+
+function limparFiltros() {
+  periodo.value = { start: hoje, end: hoje }
+  entidades.value = []
+  usuarioIds.value = []
+}
+
+// ------- busca dos logs
 const itensPorPagina = 10
 const pagina = ref(1)
-const entidade = ref<string | undefined>(undefined)
 
 async function fetchLogs() {
+  const { start, end } = periodo.value
+  // no meio da escolha do intervalo o calendario fica sem fim, espera fechar
+  if (!start || !end) return
+
   loading.value = true
   const api = useApi()
   const offset = (pagina.value - 1) * itensPorPagina
@@ -154,8 +224,11 @@ async function fetchLogs() {
     query: {
       limite: itensPorPagina,
       offset,
-      entidade: entidade.value,
-      usuario_id: usuarioId.value,
+      entidades: entidades.value.length ? entidades.value : undefined,
+      usuario_ids: usuarioIds.value.length ? usuarioIds.value : undefined,
+      desde: inicioDoDia(start),
+      // ate o comeco do dia seguinte, assim o ultimo dia entra inteiro
+      ate: inicioDoDia(end.add({ days: 1 })),
     },
   })
 
@@ -164,22 +237,11 @@ async function fetchLogs() {
 
 onMounted(fetchLogs)
 
-// "Todas" sem cor, o resto vem da lista compartilhada com a tabela
-const opcoesEntidade = computed(() => {
-  const opcoes: { label: string, value: string | undefined, ponto: string }[] = [
-    { label: 'Todas', value: undefined, ponto: '' },
-  ]
-  for (const item of ENTIDADES_AUDITORIA) {
-    opcoes.push({ label: item.label, value: item.value, ponto: item.ponto })
-  }
-  return opcoes
-})
-
 // muda filtro -> volta pra pagina 1 e busca de novo
-watch([entidade, usuarioId], () => {
+watch([periodo, entidades, usuarioIds], () => {
   pagina.value = 1
   fetchLogs()
-})
+}, { deep: true })
 
 function paginaAnterior() {
   pagina.value -= 1

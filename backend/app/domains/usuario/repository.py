@@ -31,7 +31,11 @@ class UsuarioRepository:
         consulta = select(Usuario).order_by(Usuario.id)
         if busca:
             termo = f"%{busca}%"
-            consulta = consulta.where(Usuario.username.ilike(termo) | Usuario.email.ilike(termo))
+            condicao = Usuario.username.ilike(termo) | Usuario.email.ilike(termo)
+            # so numero tb procura pelo id exato
+            if busca.isdigit():
+                condicao = condicao | (Usuario.id == int(busca))
+            consulta = consulta.where(condicao)
         if limite is not None:
             consulta = consulta.limit(limite)
         resultado = await self.db.execute(consulta)

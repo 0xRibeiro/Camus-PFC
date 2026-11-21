@@ -3941,17 +3941,25 @@ export type ListarLogsAdminAuditoriaGetData = {
          */
         offset?: number;
         /**
-         * Entidade
+         * Entidades
          */
-        entidade?: string | null;
+        entidades?: Array<string> | null;
         /**
          * Entidade Id
          */
         entidade_id?: number | null;
         /**
-         * Usuario Id
+         * Usuario Ids
          */
-        usuario_id?: number | null;
+        usuario_ids?: Array<number> | null;
+        /**
+         * Desde
+         */
+        desde?: string | null;
+        /**
+         * Ate
+         */
+        ate?: string | null;
     };
     url: '/admin/auditoria';
 };

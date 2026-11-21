@@ -1714,9 +1714,11 @@ export const zObterDashboardAdminDashboardGetResponse = zDashboardRead;
 export const zListarLogsAdminAuditoriaGetQuery = z.object({
     limite: z.int().optional().default(50),
     offset: z.int().optional().default(0),
-    entidade: z.string().nullish(),
+    entidades: z.array(z.string()).nullish(),
     entidade_id: z.int().nullish(),
-    usuario_id: z.int().nullish()
+    usuario_ids: z.array(z.int()).nullish(),
+    desde: z.iso.datetime().nullish(),
+    ate: z.iso.datetime().nullish()
 });
 
 /**
