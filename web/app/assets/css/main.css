@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* fonte do nome "Camus" na sidebar (classe font-logo). qualquer nome do google fonts
+   funciona, o @nuxt/fonts (vem junto do nuxt ui) baixa sozinho */
+@theme {
+  --font-logo: "Henny Penny", serif;
+}
+
 .camus-pagina {
   background-image: linear-gradient(
     to bottom,

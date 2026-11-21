@@ -334,13 +334,19 @@ async function alternarEmail(id: number) {
 const usuariosOnline = ref<UsuarioAdminRead[]>([])
 const loadingOnline = ref(true)
 
+// o loading so vale na primeira vez, nas atualizacoes os peixes continuam nadando
 async function fetchUsuariosOnline() {
-  loadingOnline.value = true
-  usuariosOnline.value = await api('/admin/usuarios/online')
-  loadingOnline.value = false
+  try {
+    usuariosOnline.value = await api('/admin/usuarios/online')
+  }
+  finally {
+    loadingOnline.value = false
+  }
 }
 
 onMounted(fetchUsuariosOnline)
+// quem entrou ou saiu aparece sozinho, a cada 1 minuto
+useIntervalFn(fetchUsuariosOnline, 60_000)
 
 // define quais colunas a UTable desenha e o nome de cada uma. accessorKey tem
 // que bater com o nome do campo la no UsuarioAdminRead (username, email, is_active).

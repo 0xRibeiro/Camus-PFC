@@ -121,7 +121,8 @@ const loading = ref(true)
 
 // ------- periodo: por padrao so hoje
 const hoje = today(getLocalTimeZone())
-const periodo = ref<Periodo>({ start: hoje, end: hoje })
+// shallowRef pq o ref desmonta o tipo da CalendarDate. o calendario sempre troca o objeto todo
+const periodo = shallowRef<Periodo>({ start: hoje, end: hoje })
 
 // comeco do dia no fuso de quem ta vendo, em ISO pro back
 function inicioDoDia(dia: CalendarDate) {
