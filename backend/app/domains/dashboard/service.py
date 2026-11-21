@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +19,7 @@ from app.domains.dashboard.schema import (
     PontoEvolucaoRead,
     PontoEvolucaoTrilhaRead,
     QuestaoAcertoRead,
+    ResumoConteudoRead,
     TotaisConteudoRead,
     TotaisPeriodoRead,
     TotaisTrilhaRead,
@@ -25,6 +27,8 @@ from app.domains.dashboard.schema import (
 from app.domains.progresso.model import TentativaQuiz
 from app.domains.trilha.model import Conteudo, ConteudoTipo
 
+# msm fuso dos dias da dashboard no repository
+FUSO = ZoneInfo("America/Sao_Paulo")
 
 # comeco da semana (segunda) ou do mes
 def inicio_do_grupo(dia: date, agrupamento: Agrupamento) -> date:
@@ -86,6 +90,22 @@ async def resolver_periodo(repo: DashboardRepository, inicio: date | None,
     return inicio, fim, inicio - tamanho, inicio - timedelta(days=1)
 
 
+# comeco do todo o periodo no admin, banco vazio comeca hj
+async def buscar_inicio_do_sistema(repo: DashboardRepository) -> date:
+    primeiro = await repo.buscar_primeiro_dia()
+    if primeiro is None:
+        return await repo.buscar_data_atual()
+    return primeiro
+
+
+# sem log de criacao (coisa de antes da auditoria) vale o comeco do sistema
+async def buscar_dia_de_criacao(repo: DashboardRepository, entidade: str, entidade_id: int) -> date:
+    dia = await repo.buscar_dia_de_criacao(entidade, entidade_id)
+    if dia is None:
+        return await buscar_inicio_do_sistema(repo)
+    return dia
+
+
 async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | None,
     agrupamento: Agrupamento) -> DashboardRead:
     repo = DashboardRepository(db)
@@ -111,6 +131,7 @@ async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | Non
         total_alunos=await repo.contar_alunos(),
         total_trilhas_globais=trilhas_globais,
         total_trilhas_de_grupo=trilhas_de_grupo,
+        inicio_total=await buscar_inicio_do_sistema(repo),
     )
 
 
@@ -179,7 +200,42 @@ async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date 
         totais_anteriores=await contar_totais_trilha(repo, conteudos, inicio_anterior, fim_anterior, contagens_anteriores),
         engajamento=await montar_engajamento(repo, trilha_id, progresso, sum(terminaram.values())),
         funil=await montar_funil(repo, lista_conteudos),
+        inicio_total=await buscar_dia_de_criacao(repo, "trilhas", trilha_id),
     )
+
+
+# numeros de cada quiz pra tela de gerenciar a trilha, tudo de sempre
+async def resumir_conteudos(db: AsyncSession, trilha_id: int) -> list[ResumoConteudoRead]:
+    repo = DashboardRepository(db)
+
+    versoes = {}
+    for conteudo, _ in await repo.listar_conteudos_da_trilha(trilha_id):
+        if conteudo.tipo == ConteudoTipo.quiz:
+            versoes[conteudo.id] = conteudo.versao
+
+    # so a versao atual, subiu a versao zera ate alguem refazer
+    da_versao = {}
+    for quiz_id in versoes:
+        da_versao[quiz_id] = []
+    for tentativa in await repo.listar_tentativas_dos_quizzes(list(versoes)):
+        if tentativa.versao_conteudo == versoes[tentativa.conteudo_id]:
+            da_versao[tentativa.conteudo_id].append(tentativa)
+
+    resumo = []
+    for quiz_id, tentativas in da_versao.items():
+        acertos = 0
+        total = 0
+        for tentativa in tentativas:
+            acertos += tentativa.acertos
+            total += tentativa.total
+
+        acerto = None
+        if total > 0:
+            acerto = acertos / total
+
+        # cada aluno tem 1 tentativa por versao, quem fez a atual é quem concluiu ela
+        resumo.append(ResumoConteudoRead(id=quiz_id, concluiram=len(tentativas), acerto=acerto))
+    return resumo
 
 
 # terminou e quem concluiu todos os conteudos atuais
@@ -212,23 +268,46 @@ async def montar_funil(repo: DashboardRepository, lista_conteudos: list[tuple[Co
     return funil
 
 
-async def contar_totais_conteudo(repo: DashboardRepository, conteudo: Conteudo, inicio: date,
-    fim: date, contagens: dict[str, dict[date, int]]) -> TotaisConteudoRead:
-    acertos, questoes = await repo.somar_acertos(conteudo.id, conteudo.versao, inicio, fim)
-    return TotaisConteudoRead(
-        alunos_quiz=await repo.contar_alunos_que_tentaram(conteudo.id, inicio, fim),
-        acertos=acertos,
-        questoes=questoes,
-        **somar_totais(contagens),
-    )
+def dia_da_tentativa(tentativa: TentativaQuiz) -> date:
+    return tentativa.criado_em.astimezone(FUSO).date()
 
 
-async def contar_linhas_conteudo(repo: DashboardRepository, conteudo_id: int, inicio: date,
+# msm corte do selo de cada questao no front: abaixo de 50% mal, abaixo de 75% medio
+def faixa_da_nota(tentativa: TentativaQuiz) -> str:
+    acerto = tentativa.acertos / tentativa.total
+    if acerto < 0.5:
+        return "mal"
+    if acerto < 0.75:
+        return "medio"
+    return "bem"
+
+
+# quantos alunos de cada faixa por dia, a tentativa ja é 1 por aluno
+def contar_faixas_por_dia(tentativas: list[TentativaQuiz], inicio: date,
     fim: date) -> dict[str, dict[date, int]]:
-    return {
-        "conclusoes": await repo.contar_conclusoes_por_dia([conteudo_id], inicio, fim),
-        "tentativas": await repo.contar_tentativas_por_dia([conteudo_id], inicio, fim),
-    }
+    contagens = {"mal": {}, "medio": {}, "bem": {}}
+    for tentativa in tentativas:
+        dia = dia_da_tentativa(tentativa)
+        if inicio <= dia <= fim:
+            por_dia = contagens[faixa_da_nota(tentativa)]
+            por_dia[dia] = por_dia.get(dia, 0) + 1
+    return contagens
+
+
+def contar_totais_conteudo(tentativas: list[TentativaQuiz], inicio: date, fim: date) -> TotaisConteudoRead:
+    alunos = 0
+    acertos = 0
+    questoes = 0
+    gabaritaram = 0
+    for tentativa in tentativas:
+        if inicio <= dia_da_tentativa(tentativa) <= fim:
+            alunos += 1
+            acertos += tentativa.acertos
+            questoes += tentativa.total
+            if tentativa.acertos == tentativa.total:
+                gabaritaram += 1
+
+    return TotaisConteudoRead(alunos=alunos, acertos=acertos, questoes=questoes, gabaritaram=gabaritaram)
 
 
 # nota de 0 ate o total, nota sem ninguem entra com 0
@@ -294,37 +373,42 @@ async def obter_dashboard_conteudo(db: AsyncSession, conteudo_id: int, inicio: d
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conteúdo não encontrado")
     conteudo, trilha_id = encontrado
 
+    # artigo e video so tem concluiu ou n, isso fica pra dashboard da trilha
+    if conteudo.tipo != ConteudoTipo.quiz:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Só quiz tem dashboard")
+
     inicio, fim, inicio_anterior, fim_anterior = await resolver_periodo(repo, inicio, fim)
-    contagens = await contar_linhas_conteudo(repo, conteudo_id, inicio, fim)
-    contagens_anteriores = await contar_linhas_conteudo(repo, conteudo_id, inicio_anterior, fim_anterior)
+    tentativas = await repo.listar_tentativas_da_versao(conteudo_id, conteudo.versao)
 
     evolucao = []
-    for ponto in montar_evolucao(contagens, inicio, fim, agrupamento):
+    for ponto in montar_evolucao(contar_faixas_por_dia(tentativas, inicio, fim), inicio, fim, agrupamento):
         evolucao.append(PontoEvolucaoConteudoRead(**ponto))
 
-    # base e quem comecou a trilha
-    ids_da_trilha = []
-    for item, _ in await repo.listar_conteudos_da_trilha(trilha_id):
-        ids_da_trilha.append(item.id)
-    progresso = await repo.listar_progresso_por_aluno(ids_da_trilha)
-    concluiram = await repo.contar_conclusoes_por_conteudo([conteudo_id])
+    # notas e questoes tbm so do periodo, igual o resto da tela
+    no_periodo = []
+    for tentativa in tentativas:
+        if inicio <= dia_da_tentativa(tentativa) <= fim:
+            no_periodo.append(tentativa)
 
-    notas = []
-    questoes = []
-    if conteudo.tipo == ConteudoTipo.quiz:
-        tentativas = await repo.listar_tentativas_da_versao(conteudo_id, conteudo.versao)
-        questoes = await montar_questoes(repo, conteudo_id, tentativas)
-        notas = montar_notas(tentativas, len(questoes))
+    questoes = await montar_questoes(repo, conteudo_id, no_periodo)
+
+    # a versao 1 nasce junto com o conteudo
+    criado_em = await buscar_dia_de_criacao(repo, "conteudos", conteudo_id)
+    versao_desde = None
+    if conteudo.versao > 1:
+        versao_desde = await repo.buscar_dia_da_versao(conteudo_id, conteudo.versao)
+    if versao_desde is None:
+        versao_desde = criado_em
 
     return DashboardConteudoRead(
+        inicio_total=criado_em,
+        versao=conteudo.versao,
+        versao_desde=versao_desde,
         titulo=conteudo.titulo,
-        tipo=conteudo.tipo.value,
         trilha_id=trilha_id,
         evolucao=evolucao,
-        totais=await contar_totais_conteudo(repo, conteudo, inicio, fim, contagens),
-        totais_anteriores=await contar_totais_conteudo(repo, conteudo, inicio_anterior, fim_anterior, contagens_anteriores),
-        iniciaram_trilha=len(progresso),
-        concluiram=concluiram.get(conteudo_id, 0),
-        notas=notas,
+        totais=contar_totais_conteudo(tentativas, inicio, fim),
+        totais_anteriores=contar_totais_conteudo(tentativas, inicio_anterior, fim_anterior),
+        notas=montar_notas(no_periodo, len(questoes)),
         questoes=questoes,
     )

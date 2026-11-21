@@ -43,6 +43,14 @@ class EngajamentoTrilhaRead(BaseModel):
     concluiram: int
 
 
+# numeros q aparecem do lado de cada quiz na tela da trilha, de sempre e n do periodo
+class ResumoConteudoRead(BaseModel):
+    id: int
+    concluiram: int
+    # de 0 a 1 na versao atual. None se ngm fez ainda
+    acerto: float | None = None
+
+
 class ConteudoFunilRead(BaseModel):
     id: int
     titulo: str
@@ -60,23 +68,27 @@ class DashboardTrilhaRead(BaseModel):
     engajamento: EngajamentoTrilhaRead
     funil: list[ConteudoFunilRead]
 
+    # dia q a trilha foi criada, comeco do todo o periodo
+    inicio_total: date
 
+
+# quantos alunos fizeram o quiz no dia, separados pela faixa da nota
 class PontoEvolucaoConteudoRead(BaseModel):
     data: date
-    conclusoes: int
-    tentativas: int
+    mal: int
+    medio: int
+    bem: int
 
 
-# tentativas e acertos so tem no quiz
+# 1 tentativa por aluno na versao atual
 class TotaisConteudoRead(BaseModel):
-    conclusoes: int
-    tentativas: int
-    alunos_quiz: int
+    alunos: int
     acertos: int
     questoes: int
+    gabaritaram: int
 
 
-# quantas tentativas tiraram essa nota
+# quantos alunos tiraram essa nota
 class NotaQuizRead(BaseModel):
     acertos: int
     quantidade: int
@@ -97,20 +109,20 @@ class QuestaoAcertoRead(BaseModel):
     alternativas: list[AlternativaEscolhaRead]
 
 
+# so quiz tem, tudo da versao atual e do periodo
 class DashboardConteudoRead(BaseModel):
     titulo: str
-    tipo: str
     trilha_id: int
+
+    # dia q o quiz foi criado, comeco do todo o periodo
+    inicio_total: date
+    versao: int
+    versao_desde: date
 
     evolucao: list[PontoEvolucaoConteudoRead]
     totais: TotaisConteudoRead
     totais_anteriores: TotaisConteudoRead
 
-    # de sempre, base do % de quem concluiu
-    iniciaram_trilha: int
-    concluiram: int
-
-    # so versao atual do quiz
     notas: list[NotaQuizRead]
     questoes: list[QuestaoAcertoRead]
 
@@ -136,3 +148,6 @@ class DashboardRead(BaseModel):
     # mais dados pra dash, diferenciando entre os tipos de trilhas
     total_trilhas_globais: int
     total_trilhas_de_grupo: int
+
+    # 1o registro do sistema, comeco do todo o periodo
+    inicio_total: date

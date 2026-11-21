@@ -583,6 +583,10 @@ export type ConteudoTipo = 'video' | 'artigo' | 'quiz';
  */
 export type ConteudoUpdate = {
     /**
+     * Modulo Id
+     */
+    modulo_id?: number | null;
+    /**
      * Titulo
      */
     titulo?: string | null;
@@ -683,27 +687,27 @@ export type DashboardConteudoRead = {
      */
     titulo: string;
     /**
-     * Tipo
-     */
-    tipo: string;
-    /**
      * Trilha Id
      */
     trilha_id: number;
+    /**
+     * Inicio Total
+     */
+    inicio_total: string;
+    /**
+     * Versao
+     */
+    versao: number;
+    /**
+     * Versao Desde
+     */
+    versao_desde: string;
     /**
      * Evolucao
      */
     evolucao: Array<PontoEvolucaoConteudoRead>;
     totais: TotaisConteudoRead;
     totais_anteriores: TotaisConteudoRead;
-    /**
-     * Iniciaram Trilha
-     */
-    iniciaram_trilha: number;
-    /**
-     * Concluiram
-     */
-    concluiram: number;
     /**
      * Notas
      */
@@ -740,6 +744,10 @@ export type DashboardRead = {
      * Total Trilhas De Grupo
      */
     total_trilhas_de_grupo: number;
+    /**
+     * Inicio Total
+     */
+    inicio_total: string;
 };
 
 /**
@@ -757,6 +765,10 @@ export type DashboardTrilhaRead = {
      * Funil
      */
     funil: Array<ConteudoFunilRead>;
+    /**
+     * Inicio Total
+     */
+    inicio_total: string;
 };
 
 /**
@@ -1524,13 +1536,17 @@ export type PontoEvolucaoConteudoRead = {
      */
     data: string;
     /**
-     * Conclusoes
+     * Mal
      */
-    conclusoes: number;
+    mal: number;
     /**
-     * Tentativas
+     * Medio
      */
-    tentativas: number;
+    medio: number;
+    /**
+     * Bem
+     */
+    bem: number;
 };
 
 /**
@@ -1923,6 +1939,24 @@ export type ResultadoRead = {
 };
 
 /**
+ * ResumoConteudoRead
+ */
+export type ResumoConteudoRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Concluiram
+     */
+    concluiram: number;
+    /**
+     * Acerto
+     */
+    acerto?: number | null;
+};
+
+/**
  * RodadaMaisOuMenosRead
  */
 export type RodadaMaisOuMenosRead = {
@@ -2071,17 +2105,9 @@ export type TokenPair = {
  */
 export type TotaisConteudoRead = {
     /**
-     * Conclusoes
+     * Alunos
      */
-    conclusoes: number;
-    /**
-     * Tentativas
-     */
-    tentativas: number;
-    /**
-     * Alunos Quiz
-     */
-    alunos_quiz: number;
+    alunos: number;
     /**
      * Acertos
      */
@@ -2090,6 +2116,10 @@ export type TotaisConteudoRead = {
      * Questoes
      */
     questoes: number;
+    /**
+     * Gabaritaram
+     */
+    gabaritaram: number;
 };
 
 /**
@@ -6647,6 +6677,38 @@ export type ObterDashboardTrilhaTrilhasIdDashboardGetResponses = {
 
 export type ObterDashboardTrilhaTrilhasIdDashboardGetResponse = ObterDashboardTrilhaTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaTrilhasIdDashboardGetResponses];
 
+export type ResumirConteudosTrilhasIdResumoConteudosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/trilhas/{id}/resumo-conteudos';
+};
+
+export type ResumirConteudosTrilhasIdResumoConteudosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResumirConteudosTrilhasIdResumoConteudosGetError = ResumirConteudosTrilhasIdResumoConteudosGetErrors[keyof ResumirConteudosTrilhasIdResumoConteudosGetErrors];
+
+export type ResumirConteudosTrilhasIdResumoConteudosGetResponses = {
+    /**
+     * Response Resumir Conteudos Trilhas  Id  Resumo Conteudos Get
+     *
+     * Successful Response
+     */
+    200: Array<ResumoConteudoRead>;
+};
+
+export type ResumirConteudosTrilhasIdResumoConteudosGetResponse = ResumirConteudosTrilhasIdResumoConteudosGetResponses[keyof ResumirConteudosTrilhasIdResumoConteudosGetResponses];
+
 export type ObterDashboardConteudoConteudosIdDashboardGetData = {
     body?: never;
     path: {
@@ -6736,6 +6798,42 @@ export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses = {
 };
 
 export type ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses[keyof ObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponses];
+
+export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: number;
+        /**
+         * Grupo Id
+         */
+        grupo_id: number;
+    };
+    query?: never;
+    url: '/grupos/{grupo_id}/trilhas/{id}/resumo-conteudos';
+};
+
+export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetError = ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetErrors[keyof ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetErrors];
+
+export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses = {
+    /**
+     * Response Resumir Conteudos Grupos  Grupo Id  Trilhas  Id  Resumo Conteudos Get
+     *
+     * Successful Response
+     */
+    200: Array<ResumoConteudoRead>;
+};
+
+export type ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponse = ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses[keyof ResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponses];
 
 export type ObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetData = {
     body?: never;

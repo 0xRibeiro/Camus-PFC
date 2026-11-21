@@ -10,6 +10,7 @@ from app.domains.dashboard.schema import (
     DashboardConteudoRead,
     DashboardRead,
     DashboardTrilhaRead,
+    ResumoConteudoRead,
 )
 from app.domains.trilha.model import Conteudo, Trilha
 from app.domains.trilha.router import gerenciar_trilhas, validar_item
@@ -42,6 +43,13 @@ async def obter_dashboard_trilha(id: int, inicio: date | None = None, fim: date 
     agrupamento: Agrupamento = Query(default="dia"),
     db: AsyncSession = Depends(get_async_session)) -> DashboardTrilhaRead:
     return await service.obter_dashboard_trilha(db, id, inicio, fim, agrupamento)
+
+
+# numeros q aparecem do lado de cada quiz na tela de gerenciar a trilha
+@trilha_router.get("/trilhas/{id}/resumo-conteudos", response_model=list[ResumoConteudoRead],
+    dependencies=[Depends(gerenciar_trilhas), Depends(validar_item(Trilha))])
+async def resumir_conteudos(id: int, db: AsyncSession = Depends(get_async_session)) -> list[ResumoConteudoRead]:
+    return await service.resumir_conteudos(db, id)
 
 
 @trilha_router.get("/conteudos/{id}/dashboard", response_model=DashboardConteudoRead,

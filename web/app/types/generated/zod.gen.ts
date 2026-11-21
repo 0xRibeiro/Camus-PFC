@@ -257,6 +257,7 @@ export const zConteudoStatusRead = z.object({
  * ConteudoUpdate
  */
 export const zConteudoUpdate = z.object({
+    modulo_id: z.int().nullish(),
     titulo: z.string().min(1).max(100).nullish(),
     ordem: z.int().gte(0).nullish(),
     pontos: z.int().gte(0).nullish(),
@@ -630,8 +631,9 @@ export const zPeixeUpdate = z.object({
  */
 export const zPontoEvolucaoConteudoRead = z.object({
     data: z.iso.date(),
-    conclusoes: z.int(),
-    tentativas: z.int()
+    mal: z.int(),
+    medio: z.int(),
+    bem: z.int()
 });
 
 /**
@@ -827,6 +829,15 @@ export const zResultadoRead = z.object({
 });
 
 /**
+ * ResumoConteudoRead
+ */
+export const zResumoConteudoRead = z.object({
+    id: z.int(),
+    concluiram: z.int(),
+    acerto: z.number().nullish()
+});
+
+/**
  * RodadaMaisOuMenosRead
  */
 export const zRodadaMaisOuMenosRead = z.object({
@@ -957,11 +968,10 @@ export const zTokenPair = z.object({
  * TotaisConteudoRead
  */
 export const zTotaisConteudoRead = z.object({
-    conclusoes: z.int(),
-    tentativas: z.int(),
-    alunos_quiz: z.int(),
+    alunos: z.int(),
     acertos: z.int(),
-    questoes: z.int()
+    questoes: z.int(),
+    gabaritaram: z.int()
 });
 
 /**
@@ -969,13 +979,13 @@ export const zTotaisConteudoRead = z.object({
  */
 export const zDashboardConteudoRead = z.object({
     titulo: z.string(),
-    tipo: z.string(),
     trilha_id: z.int(),
+    inicio_total: z.iso.date(),
+    versao: z.int(),
+    versao_desde: z.iso.date(),
     evolucao: z.array(zPontoEvolucaoConteudoRead),
     totais: zTotaisConteudoRead,
     totais_anteriores: zTotaisConteudoRead,
-    iniciaram_trilha: z.int(),
-    concluiram: z.int(),
     notas: z.array(zNotaQuizRead),
     questoes: z.array(zQuestaoAcertoRead)
 });
@@ -1000,7 +1010,8 @@ export const zDashboardRead = z.object({
     conquistas_por_quantidade: z.array(zConquistaResumoRead),
     total_alunos: z.int(),
     total_trilhas_globais: z.int(),
-    total_trilhas_de_grupo: z.int()
+    total_trilhas_de_grupo: z.int(),
+    inicio_total: z.iso.date()
 });
 
 /**
@@ -1021,7 +1032,8 @@ export const zDashboardTrilhaRead = z.object({
     totais: zTotaisTrilhaRead,
     totais_anteriores: zTotaisTrilhaRead,
     engajamento: zEngajamentoTrilhaRead,
-    funil: z.array(zConteudoFunilRead)
+    funil: z.array(zConteudoFunilRead),
+    inicio_total: z.iso.date()
 });
 
 /**
@@ -2490,6 +2502,17 @@ export const zObterDashboardTrilhaTrilhasIdDashboardGetQuery = z.object({
  */
 export const zObterDashboardTrilhaTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
 
+export const zResumirConteudosTrilhasIdResumoConteudosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Resumir Conteudos Trilhas  Id  Resumo Conteudos Get
+ *
+ * Successful Response
+ */
+export const zResumirConteudosTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
+
 export const zObterDashboardConteudoConteudosIdDashboardGetPath = z.object({
     id: z.int()
 });
@@ -2528,6 +2551,18 @@ export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetQuery = z.ob
  * Successful Response
  */
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
+
+export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Resumir Conteudos Grupos  Grupo Id  Trilhas  Id  Resumo Conteudos Get
+ *
+ * Successful Response
+ */
+export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
 
 export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetPath = z.object({
     id: z.int(),
