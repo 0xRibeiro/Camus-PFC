@@ -150,6 +150,11 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
             if ultima_atividade is None or conclusao.concluido_em > ultima_atividade:
                 ultima_atividade = conclusao.concluido_em
 
+        ultimo_conteudo = None
+        for conteudo in sequencia:
+            if ultimo_conteudo is None or conteudo.criado_em > ultimo_conteudo:
+                ultimo_conteudo = conteudo.criado_em
+
         resumos.append(
             TrilhaResumoRead(
                 id=trilha.id,
@@ -160,9 +165,11 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
                 concluidos=concluidos,
                 total=total,
                 progresso=calcular_porcentagem(concluidos, total),
+                total_modulos=len(modulos),
                 proximo_conteudo_id=proximo.id if proximo else None,
                 proximo_conteudo_titulo=proximo.titulo if proximo else None,
                 ultima_atividade_em=ultima_atividade,
+                ultimo_conteudo_em=ultimo_conteudo,
             )
         )
 
@@ -209,6 +216,7 @@ async def buscar_trilha(
         concluidos=concluidos,
         total=total,
         progresso=calcular_porcentagem(concluidos, total),
+        total_modulos=len(modulos),
         modulos=modulos_aluno,
     )
 

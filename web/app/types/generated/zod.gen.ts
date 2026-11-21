@@ -1163,9 +1163,11 @@ export const zTrilhaAlunoRead = z.object({
     concluidos: z.int(),
     total: z.int(),
     progresso: z.int(),
+    total_modulos: z.int().optional().default(0),
     proximo_conteudo_id: z.int().nullish(),
     proximo_conteudo_titulo: z.string().nullish(),
     ultima_atividade_em: z.iso.datetime().nullish(),
+    ultimo_conteudo_em: z.iso.datetime().nullish(),
     modulos: z.array(zModuloAlunoRead)
 });
 
@@ -1203,9 +1205,11 @@ export const zTrilhaResumoRead = z.object({
     concluidos: z.int(),
     total: z.int(),
     progresso: z.int(),
+    total_modulos: z.int().optional().default(0),
     proximo_conteudo_id: z.int().nullish(),
     proximo_conteudo_titulo: z.string().nullish(),
-    ultima_atividade_em: z.iso.datetime().nullish()
+    ultima_atividade_em: z.iso.datetime().nullish(),
+    ultimo_conteudo_em: z.iso.datetime().nullish()
 });
 
 /**

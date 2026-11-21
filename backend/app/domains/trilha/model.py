@@ -1,8 +1,10 @@
 import enum
+from datetime import datetime
 
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 
@@ -63,6 +65,11 @@ class Conteudo(Base):
     video_url: Mapped[str | None] = mapped_column(String(500))
 
     artigo_conteudo: Mapped[dict | None] = mapped_column(JSONB)
+
+    # pra tela de trilhas mostrar as q receberam conteudo novo
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 
 class Questao(Base):

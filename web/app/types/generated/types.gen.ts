@@ -2429,6 +2429,10 @@ export type TrilhaAlunoRead = {
      */
     progresso: number;
     /**
+     * Total Modulos
+     */
+    total_modulos?: number;
+    /**
      * Proximo Conteudo Id
      */
     proximo_conteudo_id?: number | null;
@@ -2440,6 +2444,10 @@ export type TrilhaAlunoRead = {
      * Ultima Atividade Em
      */
     ultima_atividade_em?: string | null;
+    /**
+     * Ultimo Conteudo Em
+     */
+    ultimo_conteudo_em?: string | null;
     /**
      * Modulos
      */
@@ -2535,6 +2543,10 @@ export type TrilhaResumoRead = {
      */
     progresso: number;
     /**
+     * Total Modulos
+     */
+    total_modulos?: number;
+    /**
      * Proximo Conteudo Id
      */
     proximo_conteudo_id?: number | null;
@@ -2546,6 +2558,10 @@ export type TrilhaResumoRead = {
      * Ultima Atividade Em
      */
     ultima_atividade_em?: string | null;
+    /**
+     * Ultimo Conteudo Em
+     */
+    ultimo_conteudo_em?: string | null;
 };
 
 /**
