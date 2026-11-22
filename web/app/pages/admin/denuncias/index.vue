@@ -53,23 +53,17 @@
 
       <template #acoes-cell="{ row }">
         <div class="flex items-center gap-2">
-          <!-- resolver e rejeitar só aparecem enquanto a denúncia tá pendente -->
-          <template v-if="row.original.status === 'pendente'">
-            <UButton
-              label="Resolver"
-              size="sm"
-              :loading="atualizando === row.original.id"
-              @click="analisar(row.original, 'resolvida')"
-            />
-            <UButton
-              label="Rejeitar"
-              size="sm"
-              color="neutral"
-              variant="outline"
-              :disabled="atualizando === row.original.id"
-              @click="analisar(row.original, 'rejeitada')"
-            />
-          </template>
+          <!-- rejeitar só aparece enquanto a denúncia tá pendente. quando ela procede,
+               o admin age pelo menu de moderação e a denúncia já fecha como resolvida -->
+          <UButton
+            v-if="row.original.status === 'pendente'"
+            label="Rejeitar"
+            size="sm"
+            color="neutral"
+            variant="outline"
+            :loading="atualizando === row.original.id"
+            @click="analisar(row.original, 'rejeitada')"
+          />
 
           <!-- o menu de moderar sempre aparece, só o ícone pra caber na tela -->
           <UDropdownMenu :items="itensModeracao(row.original)">
