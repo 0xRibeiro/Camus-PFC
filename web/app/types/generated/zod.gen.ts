@@ -8,7 +8,8 @@ import * as z from 'zod';
 export const zAcaoAuditoria = z.enum([
     'create',
     'update',
-    'delete'
+    'delete',
+    'view'
 ]);
 
 /**
@@ -33,6 +34,16 @@ export const zAlternativaCreate = z.object({
     questao_id: z.int(),
     texto: z.string().min(1).max(200),
     correta: z.boolean().optional().default(false)
+});
+
+/**
+ * AlternativaDoAlunoRead
+ */
+export const zAlternativaDoAlunoRead = z.object({
+    id: z.int(),
+    texto: z.string(),
+    correta: z.boolean(),
+    escolhida: z.boolean()
 });
 
 /**
@@ -61,6 +72,19 @@ export const zAlternativaRead = z.object({
 export const zAlternativaUpdate = z.object({
     texto: z.string().min(1).max(200).nullish(),
     correta: z.boolean().nullish()
+});
+
+/**
+ * AlunoTrilhaRead
+ */
+export const zAlunoTrilhaRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluidos: z.int(),
+    total: z.int(),
+    ultima_atividade: z.iso.datetime().nullish()
 });
 
 /**
@@ -180,6 +204,17 @@ export const zConquistaUpdate = z.object({
 });
 
 /**
+ * ConquistaUsuarioRead
+ */
+export const zConquistaUsuarioRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    descricao: z.string().nullish(),
+    imagem_dir: z.string().nullish(),
+    desbloqueada_em: z.iso.datetime().nullish()
+});
+
+/**
  * ConteudoFunilRead
  */
 export const zConteudoFunilRead = z.object({
@@ -246,6 +281,7 @@ export const zConteudoStatusRead = z.object({
  * ConteudoUpdate
  */
 export const zConteudoUpdate = z.object({
+    modulo_id: z.int().nullish(),
     titulo: z.string().min(1).max(100).nullish(),
     ordem: z.int().gte(0).nullish(),
     pontos: z.int().gte(0).nullish(),
@@ -359,6 +395,13 @@ export const zDocumentoLegalHistorico = z.object({
 });
 
 /**
+ * EmailReveladoRead
+ */
+export const zEmailReveladoRead = z.object({
+    email: z.string()
+});
+
+/**
  * EngajamentoTrilhaRead
  */
 export const zEngajamentoTrilhaRead = z.object({
@@ -453,7 +496,8 @@ export const zLogAuditoriaRead = z.object({
     entidade: z.string(),
     entidade_id: z.int(),
     alteracoes: z.record(z.string(), z.unknown()),
-    criado_em: z.iso.datetime()
+    criado_em: z.iso.datetime(),
+    usuario_nome: z.string().nullish()
 });
 
 /**
@@ -462,6 +506,8 @@ export const zLogAuditoriaRead = z.object({
 export const zMembroGrupoRead = z.object({
     id: z.int(),
     username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
     papel: z.enum(['dono', 'membro'])
 });
 
@@ -619,8 +665,9 @@ export const zPeixeUpdate = z.object({
  */
 export const zPontoEvolucaoConteudoRead = z.object({
     data: z.iso.date(),
-    conclusoes: z.int(),
-    tentativas: z.int()
+    mal: z.int(),
+    medio: z.int(),
+    bem: z.int()
 });
 
 /**
@@ -639,8 +686,8 @@ export const zPontoEvolucaoRead = z.object({
  */
 export const zPontoEvolucaoTrilhaRead = z.object({
     data: z.iso.date(),
-    conclusoes: z.int(),
-    novos: z.int(),
+    comecaram: z.int(),
+    andamento: z.int(),
     terminaram: z.int()
 });
 
@@ -738,6 +785,15 @@ export const zRascunhoUpdate = z.object({
 });
 
 /**
+ * RecordeRead
+ */
+export const zRecordeRead = z.object({
+    jogo: z.string(),
+    titulo: z.string(),
+    recorde: z.int()
+});
+
+/**
  * RefreshInput
  */
 export const zRefreshInput = z.object({
@@ -751,6 +807,60 @@ export const zResetPasswordInput = z.object({
     email: z.email(),
     code: z.string(),
     password: z.string().min(8).max(128)
+});
+
+/**
+ * RespostaDoAlunoRead
+ */
+export const zRespostaDoAlunoRead = z.object({
+    id: z.int(),
+    enunciado: z.string(),
+    acertou: z.boolean(),
+    alternativas: z.array(zAlternativaDoAlunoRead)
+});
+
+/**
+ * AlunoQuizRead
+ */
+export const zAlunoQuizRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluido_em: z.iso.datetime(),
+    acertos: z.int(),
+    questoes: z.int(),
+    versao_antiga: z.boolean().optional().default(false),
+    respostas: z.array(zRespostaDoAlunoRead).optional().default([])
+});
+
+/**
+ * ConteudoDoAlunoRead
+ */
+export const zConteudoDoAlunoRead = z.object({
+    id: z.int(),
+    titulo: z.string(),
+    tipo: z.string(),
+    modulo: z.string(),
+    concluido_em: z.iso.datetime().nullish(),
+    acertos: z.int().nullish(),
+    questoes: z.int().nullish(),
+    versao_antiga: z.boolean().optional().default(false),
+    respostas: z.array(zRespostaDoAlunoRead).optional().default([])
+});
+
+/**
+ * AlunoDetalheRead
+ */
+export const zAlunoDetalheRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    concluidos: z.int(),
+    total: z.int(),
+    ultima_atividade: z.iso.datetime().nullish(),
+    conteudos: z.array(zConteudoDoAlunoRead)
 });
 
 /**
@@ -804,6 +914,15 @@ export const zResultadoRead = z.object({
     pontos: z.int(),
     acertos_com_xp_hoje: z.int(),
     limite_acertos_com_xp: z.int()
+});
+
+/**
+ * ResumoConteudoRead
+ */
+export const zResumoConteudoRead = z.object({
+    id: z.int(),
+    concluiram: z.int(),
+    acerto: z.number().nullish()
 });
 
 /**
@@ -937,11 +1056,10 @@ export const zTokenPair = z.object({
  * TotaisConteudoRead
  */
 export const zTotaisConteudoRead = z.object({
-    conclusoes: z.int(),
-    tentativas: z.int(),
-    alunos_quiz: z.int(),
+    alunos: z.int(),
     acertos: z.int(),
-    questoes: z.int()
+    questoes: z.int(),
+    gabaritaram: z.int()
 });
 
 /**
@@ -949,13 +1067,13 @@ export const zTotaisConteudoRead = z.object({
  */
 export const zDashboardConteudoRead = z.object({
     titulo: z.string(),
-    tipo: z.string(),
     trilha_id: z.int(),
+    inicio_total: z.iso.date(),
+    versao: z.int(),
+    versao_desde: z.iso.date(),
     evolucao: z.array(zPontoEvolucaoConteudoRead),
     totais: zTotaisConteudoRead,
     totais_anteriores: zTotaisConteudoRead,
-    iniciaram_trilha: z.int(),
-    concluiram: z.int(),
     notas: z.array(zNotaQuizRead),
     questoes: z.array(zQuestaoAcertoRead)
 });
@@ -980,17 +1098,18 @@ export const zDashboardRead = z.object({
     conquistas_por_quantidade: z.array(zConquistaResumoRead),
     total_alunos: z.int(),
     total_trilhas_globais: z.int(),
-    total_trilhas_de_grupo: z.int()
+    total_trilhas_de_grupo: z.int(),
+    inicio_total: z.iso.date()
 });
 
 /**
  * TotaisTrilhaRead
  */
 export const zTotaisTrilhaRead = z.object({
-    alunos_ativos: z.int(),
-    conclusoes: z.int(),
+    em_andamento: z.int(),
     novos: z.int(),
-    terminaram: z.int()
+    terminaram: z.int(),
+    tempo_mediano: z.number().nullish()
 });
 
 /**
@@ -1001,7 +1120,8 @@ export const zDashboardTrilhaRead = z.object({
     totais: zTotaisTrilhaRead,
     totais_anteriores: zTotaisTrilhaRead,
     engajamento: zEngajamentoTrilhaRead,
-    funil: z.array(zConteudoFunilRead)
+    funil: z.array(zConteudoFunilRead),
+    inicio_total: z.iso.date()
 });
 
 /**
@@ -1052,6 +1172,11 @@ export const zTrilhaAlunoRead = z.object({
     concluidos: z.int(),
     total: z.int(),
     progresso: z.int(),
+    total_modulos: z.int().optional().default(0),
+    proximo_conteudo_id: z.int().nullish(),
+    proximo_conteudo_titulo: z.string().nullish(),
+    ultima_atividade_em: z.iso.datetime().nullish(),
+    ultimo_conteudo_em: z.iso.datetime().nullish(),
     modulos: z.array(zModuloAlunoRead)
 });
 
@@ -1088,7 +1213,12 @@ export const zTrilhaResumoRead = z.object({
     tag: z.string().nullish(),
     concluidos: z.int(),
     total: z.int(),
-    progresso: z.int()
+    progresso: z.int(),
+    total_modulos: z.int().optional().default(0),
+    proximo_conteudo_id: z.int().nullish(),
+    proximo_conteudo_titulo: z.string().nullish(),
+    ultima_atividade_em: z.iso.datetime().nullish(),
+    ultimo_conteudo_em: z.iso.datetime().nullish()
 });
 
 /**
@@ -1103,13 +1233,27 @@ export const zTrilhaUpdate = z.object({
 });
 
 /**
+ * UsuarioAdminRead
+ */
+export const zUsuarioAdminRead = z.object({
+    id: z.int(),
+    username: z.string(),
+    email: z.string(),
+    is_active: z.boolean(),
+    role: zRoleUsuario,
+    deletado_em: z.iso.datetime().nullable(),
+    avatar: z.string(),
+    cor_fundo: z.string(),
+    ultimo_acesso_em: z.iso.datetime().nullish()
+});
+
+/**
  * UsuarioAdminUpdate
  */
 export const zUsuarioAdminUpdate = z.object({
     username: z.string().min(3).max(50).nullish(),
     email: z.email().max(100).nullish(),
     password: z.string().min(8).max(128).nullish(),
-    role: zRoleUsuario.nullish(),
     is_active: z.boolean().nullish()
 });
 
@@ -1185,10 +1329,19 @@ export const zHttpValidationError = z.object({
 });
 
 /**
+ * XpDiaRead
+ */
+export const zXpDiaRead = z.object({
+    data: z.iso.date(),
+    pontos: z.int()
+});
+
+/**
  * XpRead
  */
 export const zXpRead = z.object({
-    xp_total: z.int()
+    xp_total: z.int(),
+    posicao: z.int().nullish()
 });
 
 /**
@@ -1388,7 +1541,7 @@ export const zUpdateMeUsuariosMePatchResponse = zUsuarioRead;
  *
  * Successful Response
  */
-export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaRead);
+export const zListarMinhasConquistasUsuariosMeConquistasGetResponse = z.array(zConquistaUsuarioRead);
 
 export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.object({
     conquista_id: z.int()
@@ -1401,26 +1554,31 @@ export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostPath = z.ob
  */
 export const zDesbloquearConquistaUsuariosMeConquistasConquistaIdPostResponse = zConquistaRead.nullable();
 
+export const zListarUsuariosAdminUsuariosGetQuery = z.object({
+    busca: z.string().max(100).nullish(),
+    limite: z.int().gte(1).lte(100).nullish()
+});
+
 /**
  * Response Listar Usuarios Admin Usuarios Get
  *
  * Successful Response
  */
-export const zListarUsuariosAdminUsuariosGetResponse = z.array(zUsuarioRead);
+export const zListarUsuariosAdminUsuariosGetResponse = z.array(zUsuarioAdminRead);
 
 export const zCriarStaffAdminUsuariosPostBody = zUsuarioStaffCreate;
 
 /**
  * Successful Response
  */
-export const zCriarStaffAdminUsuariosPostResponse = zUsuarioRead;
+export const zCriarStaffAdminUsuariosPostResponse = zUsuarioAdminRead;
 
 /**
  * Response Listar Usuarios Online Admin Usuarios Online Get
  *
  * Successful Response
  */
-export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioRead);
+export const zListarUsuariosOnlineAdminUsuariosOnlineGetResponse = z.array(zUsuarioAdminRead);
 
 export const zDeletarUsuarioAdminUsuariosUserIdDeletePath = z.object({
     user_id: z.int()
@@ -1438,7 +1596,7 @@ export const zObterUsuarioAdminUsuariosUserIdGetPath = z.object({
 /**
  * Successful Response
  */
-export const zObterUsuarioAdminUsuariosUserIdGetResponse = zUsuarioRead;
+export const zObterUsuarioAdminUsuariosUserIdGetResponse = zUsuarioAdminRead;
 
 export const zAtualizarStaffAdminUsuariosUserIdPatchBody = zUsuarioAdminUpdate;
 
@@ -1449,7 +1607,16 @@ export const zAtualizarStaffAdminUsuariosUserIdPatchPath = z.object({
 /**
  * Successful Response
  */
-export const zAtualizarStaffAdminUsuariosUserIdPatchResponse = zUsuarioRead;
+export const zAtualizarStaffAdminUsuariosUserIdPatchResponse = zUsuarioAdminRead;
+
+export const zRevelarEmailAdminUsuariosUserIdEmailGetPath = z.object({
+    user_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevelarEmailAdminUsuariosUserIdEmailGetResponse = zEmailReveladoRead;
 
 export const zTrilhaReadMultiTrilhasGetQuery = z.object({
     offset: z.int().nullish(),
@@ -1547,9 +1714,11 @@ export const zObterDashboardAdminDashboardGetResponse = zDashboardRead;
 export const zListarLogsAdminAuditoriaGetQuery = z.object({
     limite: z.int().optional().default(50),
     offset: z.int().optional().default(0),
-    entidade: z.string().nullish(),
+    entidades: z.array(z.string()).nullish(),
     entidade_id: z.int().nullish(),
-    usuario_id: z.int().nullish()
+    usuario_ids: z.array(z.int()).nullish(),
+    desde: z.iso.datetime().nullish(),
+    ate: z.iso.datetime().nullish()
 });
 
 /**
@@ -1906,6 +2075,17 @@ export const zRemoverMembroGruposGrupoIdMembrosMembroIdDeleteResponse = z.void()
  */
 export const zMeuXpPontuacaoXpGetResponse = zXpRead;
 
+export const zMeuXpPorDiaPontuacaoXpDiasGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(7)
+});
+
+/**
+ * Response Meu Xp Por Dia Pontuacao Xp Dias Get
+ *
+ * Successful Response
+ */
+export const zMeuXpPorDiaPontuacaoXpDiasGetResponse = z.array(zXpDiaRead);
+
 /**
  * Response Ranking Pontuacao Ranking Get
  *
@@ -1919,6 +2099,13 @@ export const zRankingPontuacaoRankingGetResponse = z.array(zRankingItemRead);
  * Successful Response
  */
 export const zMeuExtratoPontuacaoExtratoGetResponse = z.array(zLancamentoRead);
+
+/**
+ * Response Meus Recordes Minigames Recordes Get
+ *
+ * Successful Response
+ */
+export const zMeusRecordesMinigamesRecordesGetResponse = z.array(zRecordeRead);
 
 /**
  * Successful Response
@@ -2437,6 +2624,38 @@ export const zObterDashboardTrilhaTrilhasIdDashboardGetQuery = z.object({
  */
 export const zObterDashboardTrilhaTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
 
+export const zResumirConteudosTrilhasIdResumoConteudosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Resumir Conteudos Trilhas  Id  Resumo Conteudos Get
+ *
+ * Successful Response
+ */
+export const zResumirConteudosTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
+
+export const zListarAlunosDaTrilhaTrilhasIdAlunosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Listar Alunos Da Trilha Trilhas  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDaTrilhaTrilhasIdAlunosGetResponse = z.array(zAlunoTrilhaRead);
+
+export const zObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetPath = z.object({
+    id: z.int(),
+    usuario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zObterAlunoDaTrilhaTrilhasIdAlunosUsuarioIdGetResponse = zAlunoDetalheRead;
+
 export const zObterDashboardConteudoConteudosIdDashboardGetPath = z.object({
     id: z.int()
 });
@@ -2455,6 +2674,17 @@ export const zObterDashboardConteudoConteudosIdDashboardGetQuery = z.object({
  * Successful Response
  */
 export const zObterDashboardConteudoConteudosIdDashboardGetResponse = zDashboardConteudoRead;
+
+export const zListarAlunosDoQuizConteudosIdAlunosGetPath = z.object({
+    id: z.int()
+});
+
+/**
+ * Response Listar Alunos Do Quiz Conteudos  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDoQuizConteudosIdAlunosGetResponse = z.array(zAlunoQuizRead);
 
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetPath = z.object({
     id: z.int(),
@@ -2476,6 +2706,41 @@ export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetQuery = z.ob
  */
 export const zObterDashboardTrilhaGruposGrupoIdTrilhasIdDashboardGetResponse = zDashboardTrilhaRead;
 
+export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Resumir Conteudos Grupos  Grupo Id  Trilhas  Id  Resumo Conteudos Get
+ *
+ * Successful Response
+ */
+export const zResumirConteudosGruposGrupoIdTrilhasIdResumoConteudosGetResponse = z.array(zResumoConteudoRead);
+
+export const zListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Alunos Da Trilha Grupos  Grupo Id  Trilhas  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDaTrilhaGruposGrupoIdTrilhasIdAlunosGetResponse = z.array(zAlunoTrilhaRead);
+
+export const zObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetPath = z.object({
+    id: z.int(),
+    usuario_id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zObterAlunoDaTrilhaGruposGrupoIdTrilhasIdAlunosUsuarioIdGetResponse = zAlunoDetalheRead;
+
 export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetPath = z.object({
     id: z.int(),
     grupo_id: z.int()
@@ -2495,6 +2760,18 @@ export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetQuery = 
  * Successful Response
  */
 export const zObterDashboardConteudoGruposGrupoIdConteudosIdDashboardGetResponse = zDashboardConteudoRead;
+
+export const zListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetPath = z.object({
+    id: z.int(),
+    grupo_id: z.int()
+});
+
+/**
+ * Response Listar Alunos Do Quiz Grupos  Grupo Id  Conteudos  Id  Alunos Get
+ *
+ * Successful Response
+ */
+export const zListarAlunosDoQuizGruposGrupoIdConteudosIdAlunosGetResponse = z.array(zAlunoQuizRead);
 
 export const zEnviarImagemGruposGrupoIdImagensPostBody = zBodyEnviarImagemGruposGrupoIdImagensPost;
 
@@ -2602,6 +2879,21 @@ export const zMeuXpGruposGrupoIdPontuacaoXpGetPath = z.object({
  * Successful Response
  */
 export const zMeuXpGruposGrupoIdPontuacaoXpGetResponse = zXpRead;
+
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetPath = z.object({
+    grupo_id: z.int()
+});
+
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetQuery = z.object({
+    dias: z.int().gte(1).lte(90).optional().default(7)
+});
+
+/**
+ * Response Meu Xp Por Dia Grupos  Grupo Id  Pontuacao Xp Dias Get
+ *
+ * Successful Response
+ */
+export const zMeuXpPorDiaGruposGrupoIdPontuacaoXpDiasGetResponse = z.array(zXpDiaRead);
 
 export const zRankingGruposGrupoIdPontuacaoRankingGetPath = z.object({
     grupo_id: z.int()

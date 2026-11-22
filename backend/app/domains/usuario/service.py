@@ -29,9 +29,12 @@ from app.core.security import (
     validar_refresh_token,
     verificar_password,
 )
+from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
+from app.domains.auditoria.repository import AuditoriaRepository
 from app.domains.conquistas import service as conquistas_service
 from app.domains.conquistas.model import Conquista
 from app.domains.conquistas.repository import ConquistaRepository
+from app.domains.conquistas.schema import ConquistaUsuarioRead
 from app.domains.documento_legal import service as documento_legal_service
 from app.domains.documento_legal.model import AceiteDocumentoLegal
 from app.domains.usuario.avatares import (
@@ -44,7 +47,9 @@ from app.domains.usuario.model import RoleUsuario, Usuario
 from app.domains.usuario.repository import UsuarioRepository
 from app.domains.usuario.schema import (
     AvatarRead,
+    EmailReveladoRead,
     TokenPair,
+    UsuarioAdminRead,
     UsuarioAdminUpdate,
     UsuarioCreate,
     UsuarioStaffCreate,
@@ -107,7 +112,15 @@ async def autenticar(db: AsyncSession, email: str, password: str) -> Usuario:
     user = await UsuarioRepository(db).buscar_por_email(email)
     if user is None or not verificar_password(password, user.hashed_password):
         raise UnauthorizedException("credenciais inválidas")
+    await registrar_acesso(db, user)
     return user
+
+
+# login e renovacao do token contam como acesso. conta desativada n conta
+async def registrar_acesso(db: AsyncSession, user: Usuario) -> None:
+    if not user.is_active:
+        return
+    await UsuarioRepository(db).registrar_acesso(user.id, datetime.now(timezone.utc))
 
 
 # o "subject" do token é sempre o id do usuario
@@ -130,6 +143,7 @@ async def renovar_tokens(db: AsyncSession, refresh_token: str) -> TokenPair:
         raise UnauthorizedException("refresh token inválido")
 
     await revogar_refresh_token(refresh_token)
+    await registrar_acesso(db, user)
     return await emitir_tokens(user)
 
 
@@ -210,8 +224,41 @@ async def buscar_usuario(db: AsyncSession, user_id: int) -> Usuario:
     return user
 
 
-async def listar_usuarios(db: AsyncSession) -> list[Usuario]:
-    return await UsuarioRepository(db).listar()
+async def listar_usuarios(
+    db: AsyncSession, busca: str | None = None, limite: int | None = None
+) -> list[UsuarioAdminRead]:
+    if busca is not None:
+        busca = busca.strip()
+    repo = UsuarioRepository(db)
+    usuarios = await repo.listar(busca, limite)
+
+    ids = []
+    for usuario in usuarios:
+        ids.append(usuario.id)
+    acessos = await repo.listar_acessos(ids)
+
+    # o ultimo acesso fica em outra tabela, junta aqui
+    lista = []
+    for usuario in usuarios:
+        item = UsuarioAdminRead.model_validate(usuario)
+        item.ultimo_acesso_em = acessos.get(usuario.id)
+        lista.append(item)
+    return lista
+
+
+# cada clique no olhinho vira uma linha na auditoria: quem viu, de quem e quando
+async def revelar_email(db: AsyncSession, admin: Usuario, user_id: int) -> EmailReveladoRead:
+    user = await buscar_usuario(db, user_id)
+    email = user.email
+
+    await AuditoriaRepository(db).registrar(LogAuditoria(
+        usuario_id=admin.id,
+        acao=AcaoAuditoria.view,
+        entidade="usuarios",
+        entidade_id=user.id,
+        alteracoes={"campo": "email"},
+    ))
+    return EmailReveladoRead(email=email)
 
 
 # varre as chaves online:<id> no redis sem travar ele (scan_iter em vez de keys)
@@ -229,8 +276,14 @@ async def listar_usuarios_online(db: AsyncSession) -> list[Usuario]:
     return await UsuarioRepository(db).buscar_varios(ids)
 
 
-async def listar_conquistas_usuario(db: AsyncSession, user_id: int):
-    return await UsuarioRepository(db).listar_conquistas(user_id)
+async def listar_conquistas_usuario(db: AsyncSession, user_id: int) -> list[ConquistaUsuarioRead]:
+    linhas = await UsuarioRepository(db).listar_conquistas(user_id)
+    conquistas = []
+    for conquista, desbloqueada_em in linhas:
+        item = ConquistaUsuarioRead.model_validate(conquista)
+        item.desbloqueada_em = desbloqueada_em
+        conquistas.append(item)
+    return conquistas
 
 # metodo faz algumas checagens para não dar conquistas não existentes
 # ou duplicadas
@@ -291,7 +344,7 @@ async def atualizar_usuario(
     return await UsuarioRepository(db).salvar(user)
 
 
-# edicao feita pelo admin: pode mudar role e is_active tbm
+# edicao feita pelo admin: pode mudar is_active tbm, o papel nunca muda
 async def atualizar_usuario_admin(
     db: AsyncSession, user_id: int, data: UsuarioAdminUpdate
 ) -> Usuario:
@@ -302,11 +355,24 @@ async def atualizar_usuario_admin(
         user.email = data.email
     if data.password is not None:
         user.hashed_password = criar_hash(data.password)
-    if data.role is not None:
-        user.role = data.role
     if data.is_active is not None:
         user.is_active = data.is_active
     return await UsuarioRepository(db).salvar(user)
+
+
+# pelo perfil so o aluno exclui a propria conta. author e admin passam pelo admin
+async def deletar_propria_conta(db: AsyncSession, user: Usuario) -> None:
+    if user.role != RoleUsuario.aluno:
+        raise ForbiddenException("Só alunos podem excluir a própria conta")
+    await deletar_usuario(db, user)
+
+
+# admin exclui qualquer papel, so n a propria conta (senao podia sumir o ultimo admin)
+async def deletar_pelo_admin(db: AsyncSession, admin: Usuario, user_id: int) -> None:
+    if admin.id == user_id:
+        raise ForbiddenException("Você não pode excluir a própria conta")
+    user = await buscar_usuario(db, user_id)
+    await deletar_usuario(db, user)
 
 
 # soft delete: em vez de apagar a linha, sobrescreve os dados pessoais e marca
@@ -315,8 +381,6 @@ async def atualizar_usuario_admin(
 # de auditoria pega isso como UPDATE e guarda o antes/depois no logs_auditoria,
 # entao fica provado que a conta existiu e quando foi encerrada
 async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
-    if user.role == RoleUsuario.admin:
-        raise ForbiddenException("contas de administrador não podem ser excluídas")
     if user.deletado_em is not None:
         return  # ja tava deletado, n faz nada
 

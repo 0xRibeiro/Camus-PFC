@@ -6,9 +6,10 @@ const props = defineProps<{
   conteudoId: number
 }>()
 
-// avisa a pagina q o quiz mudou no banco, ela decide se sobe a versao
+// avisa a pagina q o quiz mudou no banco, ela decide se sobe a versao.
+// obrigatoria = mudou o resultado (pergunta, alternativa ou correta), ai sobe sempre
 const emit = defineEmits<{
-  alterou: []
+  alterou: [obrigatoria: boolean]
 }>()
 
 const toast = useToast()
@@ -27,6 +28,8 @@ interface QuestaoLocal {
   alternativas: AlternativaLocal[]
   removidas: number[]
   alterada: boolean
+  // mexeu em algo q muda a correcao, so texto n conta
+  mudouResultado: boolean
   salvando: boolean
 }
 
@@ -64,6 +67,7 @@ async function fetchQuiz() {
         alternativas,
         removidas: [],
         alterada: false,
+        mudouResultado: false,
         salvando: false,
       })
     }
@@ -90,6 +94,7 @@ function adicionarPergunta() {
     ],
     removidas: [],
     alterada: true,
+    mudouResultado: true,
     salvando: false,
   })
 }
@@ -97,6 +102,7 @@ function adicionarPergunta() {
 function adicionarAlternativa(questao: QuestaoLocal) {
   questao.alternativas.push({ id: null, texto: '', correta: false })
   questao.alterada = true
+  questao.mudouResultado = true
 }
 
 function removerAlternativa(questao: QuestaoLocal, indice: number) {
@@ -105,10 +111,13 @@ function removerAlternativa(questao: QuestaoLocal, indice: number) {
   if (alternativa.id !== null) questao.removidas.push(alternativa.id)
   questao.alternativas.splice(indice, 1)
   questao.alterada = true
+  questao.mudouResultado = true
 }
 
 // so uma correta por pergunta, marcar uma desmarca as outras
 function marcarCorreta(questao: QuestaoLocal, indice: number) {
+  if (questao.alternativas[indice]?.correta) return
+  questao.mudouResultado = true
   for (let i = 0; i < questao.alternativas.length; i++) {
     const alternativa = questao.alternativas[i]
     if (alternativa) alternativa.correta = i === indice
@@ -150,6 +159,9 @@ async function salvarPergunta(questao: QuestaoLocal, indice: number) {
     return
   }
 
+  // quiz q ainda n tinha nada salvo ta sendo montado, n tem versao pra proteger
+  const quizJaExistia = questao.id !== null || totalSalvas.value > 0
+
   questao.salvando = true
   try {
     const api = useApi()
@@ -186,9 +198,11 @@ async function salvarPergunta(questao: QuestaoLocal, indice: number) {
       }
     }
 
+    const obrigatoria = questao.mudouResultado && quizJaExistia
     questao.alterada = false
+    questao.mudouResultado = false
     toast.add({ title: 'Pergunta salva', color: 'success' })
-    emit('alterou')
+    emit('alterou', obrigatoria)
   }
   catch {
     toast.add({ title: 'Não foi possível salvar a pergunta', color: 'error' })
@@ -219,7 +233,7 @@ async function excluirPergunta() {
     }
     questoes.value = questoes.value.filter(q => q.chave !== questao.chave)
     await salvarOrdem()
-    if (questao.id !== null) emit('alterou')
+    if (questao.id !== null) emit('alterou', true)
     showDeleteModal.value = false
   }
   catch {
@@ -305,6 +319,14 @@ async function salvarOrdem() {
                 size="sm"
               >
                 não salva
+              </UBadge>
+              <UBadge
+                v-if="questao.mudouResultado && totalSalvas > 0"
+                color="info"
+                variant="soft"
+                size="sm"
+              >
+                salvar gera nova versão
               </UBadge>
             </div>
             <UButton

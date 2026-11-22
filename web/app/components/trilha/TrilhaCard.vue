@@ -1,5 +1,5 @@
 <template>
-  <UCard>
+  <UCard :class="{ 'opacity-70 transition-opacity hover:opacity-100': !trilha.is_active }">
     <!-- imagem + status + titulo + descricao, tudo dentro do link pra edicao -->
     <!-- agora o :to não leva mais para o link fixo global -->
     <NuxtLink
@@ -57,7 +57,19 @@
           · {{ conteudosCount }} conteúdo{{ conteudosCount === 1 ? '' : 's' }}
         </span>
 
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
+          <!-- atalho pra dashboard sem precisar abrir a trilha antes -->
+          <UTooltip text="Dashboard">
+            <UButton
+              icon="i-lucide-chart-column"
+              :aria-label="`Dashboard de ${trilha.titulo}`"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              square
+              :to="dashboard"
+            />
+          </UTooltip>
           <!--
             botao editar so avisa o pai que o botao foi clicado (emit('edit')).
             esse componente n sabe abrir modal, n sabe chamar api, n sabe nada disso -
@@ -66,20 +78,28 @@
             realmente controla o modal e fala com o back. isso e o que chamamos de
             "componente burro": ele tem 0 logica de negocio dentro dele.
           -->
-          <UButton
-            icon="i-lucide-pencil"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            @click="emit('edit')"
-          />
-          <UButton
-            icon="i-lucide-trash"
-            color="error"
-            variant="ghost"
-            size="xs"
-            @click="emit('delete')"
-          />
+          <UTooltip text="Editar">
+            <UButton
+              icon="i-lucide-pencil"
+              :aria-label="`Editar ${trilha.titulo}`"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              square
+              @click="emit('edit')"
+            />
+          </UTooltip>
+          <UTooltip text="Excluir">
+            <UButton
+              icon="i-lucide-trash-2"
+              :aria-label="`Excluir ${trilha.titulo}`"
+              color="error"
+              variant="soft"
+              size="sm"
+              square
+              @click="emit('delete')"
+            />
+          </UTooltip>
         </div>
       </div>
     </template>
@@ -100,6 +120,7 @@ import type { TrilhaRead } from '~/types/generated'
 // <TrilhaCard :trilha="..." /> - nesse caso, vai ser a pagina index.vue
 defineProps<{
   to: string
+  dashboard: string
   trilha: TrilhaRead
   modulosCount: number
   conteudosCount: number

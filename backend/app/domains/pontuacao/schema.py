@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -7,6 +7,13 @@ from app.domains.pontuacao.model import OrigemLancamento
 
 class XpRead(BaseModel):
     xp_total: int
+    # so no xp global de aluno com algum ponto
+    posicao: int | None = None
+
+
+class XpDiaRead(BaseModel):
+    data: date
+    pontos: int
 
 
 class RankingItemRead(BaseModel):

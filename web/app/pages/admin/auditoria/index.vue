@@ -6,28 +6,88 @@
     />
 
     <div class="flex flex-wrap items-end gap-3 mb-4">
-      <UFormField label="Entidade">
-        <USelect
-          v-model="entidade"
-          :items="opcoesEntidade"
-          class="w-40"
+      <UFormField label="Período">
+        <AuditoriaFiltroPeriodo
+          v-model:periodo="periodo"
+          class="w-64"
         />
       </UFormField>
 
-      <UFormField label="Id do usuário">
-        <UInput
-          v-model.number="usuarioId"
-          type="number"
-          class="w-32"
-        />
+      <UFormField label="Entidades">
+        <!-- bolinha com a cor da entidade, a mesma da tabela -->
+        <USelect
+          v-model="entidades"
+          :items="opcoesEntidade"
+          multiple
+          placeholder="Todas"
+          class="w-64"
+        >
+          <template #item-leading="{ item }">
+            <span
+              class="size-2.5 rounded-full"
+              :class="item.ponto"
+            />
+          </template>
+        </USelect>
       </UFormField>
+
+      <UFormField label="Usuários">
+        <!-- ignore-filter: quem filtra e o back, o select so mostra o q voltou -->
+        <USelectMenu
+          v-model="usuarioIds"
+          v-model:search-term="termoUsuario"
+          :items="opcoesUsuario"
+          value-key="value"
+          multiple
+          placeholder="Todos"
+          :search-input="{ placeholder: 'Digite o nome, e-mail ou id...' }"
+          :loading="buscandoUsuarios"
+          ignore-filter
+          class="w-72"
+        >
+          <template #item-leading="{ item }">
+            <UsuarioAvatar
+              :avatar="item.usuario.avatar"
+              :cor-fundo="item.usuario.cor_fundo"
+              :tamanho="20"
+            />
+          </template>
+        </USelectMenu>
+      </UFormField>
+
+      <!-- busca de novo com os msm filtros e na msm pagina, pra ver o q entrou depois -->
+      <UTooltip text="Atualizar">
+        <UButton
+          icon="i-lucide-refresh-cw"
+          aria-label="Atualizar"
+          color="neutral"
+          variant="outline"
+          :loading="loading"
+          @click="fetchLogs"
+        />
+      </UTooltip>
+
+    </div>
+
+    <!-- embaixo dos filtros, so aparece qnd algum saiu do padrao -->
+    <div
+      v-if="filtrosAlterados"
+      class="-mt-2 mb-4"
+    >
+      <UButton
+        label="Limpar"
+        icon="i-lucide-filter-x"
+        color="error"
+        variant="soft"
+        size="sm"
+        @click="limparFiltros"
+      />
     </div>
 
     <div class="rounded-xl bg-default ring ring-default">
       <AuditoriaTable
         :logs="logs"
         :loading="loading"
-        :usuarios="usuarios"
       />
     </div>
 
@@ -49,28 +109,114 @@
 </template>
 
 <script setup lang="ts">
-import type { LogAuditoriaRead, UsuarioRead } from '~/types/generated'
+import { getLocalTimeZone, today } from '@internationalized/date'
+import type { CalendarDate } from '@internationalized/date'
+import type { Periodo } from '~/composables/useDashboard'
+import type { LogAuditoriaRead, UsuarioAdminRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
 const logs = ref<LogAuditoriaRead[]>([])
 const loading = ref(true)
 
-const usuarios = ref<UsuarioRead[]>([])
+// ------- periodo: por padrao so hoje
+const hoje = today(getLocalTimeZone())
+// shallowRef pq o ref desmonta o tipo da CalendarDate. o calendario sempre troca o objeto todo
+const periodo = shallowRef<Periodo>({ start: hoje, end: hoje })
 
-async function fetchUsuarios() {
-  const api = useApi()
-  usuarios.value = await api('/admin/usuarios')
+// comeco do dia no fuso de quem ta vendo, em ISO pro back
+function inicioDoDia(dia: CalendarDate) {
+  return dia.toDate(getLocalTimeZone()).toISOString()
 }
 
-onMounted(fetchUsuarios)
+// ------- entidades: vazio = todas
+const entidades = ref<string[]>([])
 
+const opcoesEntidade = computed(() => {
+  const opcoes: { label: string, value: string, ponto: string }[] = []
+  for (const item of ENTIDADES_AUDITORIA) {
+    opcoes.push({ label: item.label, value: item.value, ponto: item.ponto })
+  }
+  return opcoes
+})
+
+// ------- usuarios: so busca no back quando digita, no maximo 20. vazio = todos
+const usuarioIds = ref<number[]>([])
+const termoUsuario = ref('')
+const usuariosEncontrados = ref<UsuarioAdminRead[]>([])
+const buscandoUsuarios = ref(false)
+// guarda os escolhidos pra eles continuarem aparecendo no select qnd a busca muda
+const usuariosEscolhidos = ref<UsuarioAdminRead[]>([])
+
+async function buscarUsuarios() {
+  const termo = termoUsuario.value.trim()
+  // id pode ter 1 digito so, nome precisa de 2 letras
+  const ehId = /^\d+$/.test(termo)
+  if (!termo || (!ehId && termo.length < 2)) {
+    usuariosEncontrados.value = []
+    return
+  }
+
+  buscandoUsuarios.value = true
+  try {
+    const api = useApi()
+    usuariosEncontrados.value = await api('/admin/usuarios', { query: { busca: termo, limite: 20 } })
+  }
+  finally {
+    buscandoUsuarios.value = false
+  }
+}
+
+watchDebounced(termoUsuario, buscarUsuarios, { debounce: 350 })
+
+// escolhidos primeiro, depois o resto do q a busca achou
+const opcoesUsuario = computed(() => {
+  const opcoes: { label: string, value: number, usuario: UsuarioAdminRead }[] = []
+  const jaTem = new Set<number>()
+  for (const usuario of [...usuariosEscolhidos.value, ...usuariosEncontrados.value]) {
+    if (jaTem.has(usuario.id)) continue
+    jaTem.add(usuario.id)
+    opcoes.push({ label: `${usuario.id} - ${usuario.username}`, value: usuario.id, usuario })
+  }
+  return opcoes
+})
+
+// monta a lista dos escolhidos a partir dos ids, olhando no q ja tinha e na busca
+watch(usuarioIds, (ids) => {
+  const escolhidos: UsuarioAdminRead[] = []
+  for (const id of ids) {
+    for (const usuario of [...usuariosEscolhidos.value, ...usuariosEncontrados.value]) {
+      if (usuario.id === id) {
+        escolhidos.push(usuario)
+        break
+      }
+    }
+  }
+  usuariosEscolhidos.value = escolhidos
+})
+
+// ------- limpar: volta pro padrao (hoje, todas as entidades, todos os usuarios)
+const filtrosAlterados = computed(() => {
+  const { start, end } = periodo.value
+  const soHoje = !!start && !!end && start.compare(hoje) === 0 && end.compare(hoje) === 0
+  return !soHoje || !!entidades.value.length || !!usuarioIds.value.length
+})
+
+function limparFiltros() {
+  periodo.value = { start: hoje, end: hoje }
+  entidades.value = []
+  usuarioIds.value = []
+}
+
+// ------- busca dos logs
 const itensPorPagina = 10
 const pagina = ref(1)
-const entidade = ref<string | undefined>(undefined)
-const usuarioId = ref<number | undefined>(undefined)
 
 async function fetchLogs() {
+  const { start, end } = periodo.value
+  // no meio da escolha do intervalo o calendario fica sem fim, espera fechar
+  if (!start || !end) return
+
   loading.value = true
   const api = useApi()
   const offset = (pagina.value - 1) * itensPorPagina
@@ -79,8 +225,11 @@ async function fetchLogs() {
     query: {
       limite: itensPorPagina,
       offset,
-      entidade: entidade.value,
-      usuario_id: usuarioId.value,
+      entidades: entidades.value.length ? entidades.value : undefined,
+      usuario_ids: usuarioIds.value.length ? usuarioIds.value : undefined,
+      desde: inicioDoDia(start),
+      // ate o comeco do dia seguinte, assim o ultimo dia entra inteiro
+      ate: inicioDoDia(end.add({ days: 1 })),
     },
   })
 
@@ -89,22 +238,11 @@ async function fetchLogs() {
 
 onMounted(fetchLogs)
 
-const opcoesEntidade = [
-  { label: 'Todas', value: undefined },
-  { label: 'usuarios', value: 'usuarios' },
-  { label: 'trilhas', value: 'trilhas' },
-  { label: 'modulos', value: 'modulos' },
-  { label: 'conteudos', value: 'conteudos' },
-  { label: 'questoes', value: 'questoes' },
-  { label: 'alternativas', value: 'alternativas' },
-  { label: 'conquistas', value: 'conquistas' },
-]
-
 // muda filtro -> volta pra pagina 1 e busca de novo
-watch([entidade, usuarioId], () => {
+watch([periodo, entidades, usuarioIds], () => {
   pagina.value = 1
   fetchLogs()
-})
+}, { deep: true })
 
 function paginaAnterior() {
   pagina.value -= 1

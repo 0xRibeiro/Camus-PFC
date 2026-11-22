@@ -47,12 +47,20 @@ def mensagem_suspensao(grupo: Grupo) -> str:
     return f"Este grupo está suspenso até {fim:%d/%m/%Y %H:%M}."
 
 
+# grupo é coisa de aluno. o admin só entra pra moderar (pelo buscar_grupo)
+def exigir_aluno(usuario: Usuario) -> None:
+    if usuario.role != RoleUsuario.aluno:
+        raise ForbiddenException("Grupos são exclusivos para alunos.")
+
+
 async def criar_grupo(db: AsyncSession, data: GrupoCreate, usuario: Usuario) -> Grupo:
+    exigir_aluno(usuario)
     grupo = Grupo(nome=data.nome, id_dono=usuario.id)
     return await GrupoRepository(db).criar(grupo)
 
 
 async def listar_grupos(db: AsyncSession, usuario: Usuario) -> list[Grupo]:
+    exigir_aluno(usuario)
     return await GrupoRepository(db).listar_do_usuario(usuario.id)
 
 
@@ -67,6 +75,9 @@ async def buscar_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Gru
     # é checado lá no grupo_membro.
     if usuario.role == RoleUsuario.admin:
         return grupo
+
+    # author n participa, mesmo se tiver alguma participacao antiga no banco
+    exigir_aluno(usuario)
 
     participacao = await repo.buscar_participacao(grupo.id, usuario.id)
 
@@ -99,6 +110,8 @@ async def grupo_membro(
 
     # esse escopo vale só durante a sessão da requisição.
     db.info["grupo_id"] = grupo.id
+    # o dono pode fazer as trilhas, mas sem xp e fora da dashboard
+    db.info["grupo_dono"] = grupo.id_dono
     return grupo
 
 # confere se o usuário é o dono do grupo e levanta erro se não for. devolve o id do grupo.
@@ -135,6 +148,7 @@ async def gerar_convite(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Co
 # as checagens desse metodo garantem a validade do convite e a não participação do usuário
 # tentando entrar. com sorte esses bloqueios evitam os principais erros
 async def entrar_grupo(db: AsyncSession, data: GrupoEntrar, usuario: Usuario) -> Grupo:
+    exigir_aluno(usuario)
     grupo_id = await redis_client.get(f"grupo:convite:{data.convite}")
 
     if grupo_id is None:
@@ -163,10 +177,17 @@ async def listar_membros(db: AsyncSession, grupo_id: int, usuario: Usuario) -> l
     grupo = await buscar_grupo(db, grupo_id, usuario)
     membros = await GrupoRepository(db).listar_membros(grupo.id)
 
-    return [
-        MembroGrupoRead(id=membro.id, username=membro.username, papel="dono" if membro.id == grupo.id_dono else "membro")
-        for membro in membros
-    ]
+    lista = []
+    for membro in membros:
+        papel = "dono" if membro.id == grupo.id_dono else "membro"
+        lista.append(MembroGrupoRead(
+            id=membro.id,
+            username=membro.username,
+            avatar=membro.avatar,
+            cor_fundo=membro.cor_fundo,
+            papel=papel,
+        ))
+    return lista
 
 # metodo da service pra sair do grupo. tem exceção até caso o dono chegue nesse metodo! mas o ideal é que não
 async def sair_grupo(db: AsyncSession, grupo_id: int, usuario: Usuario) -> None:

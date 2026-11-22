@@ -60,8 +60,14 @@ async function onSalvarArtigo() {
 /* quiz salva pergunta por pergunta */
 
 // o montador avisa qnd salvou ou excluiu algo, se ta marcado sobe a versao 1 vez
-async function onQuizAlterou() {
-  if (!conteudo.value || !alteracaoSignificativa.value) return
+// mudou o resultado sobe sozinho, mas so uma vez por edicao pra n pular varias versoes
+let subiuNestaEdicao = false
+
+async function onQuizAlterou(obrigatoria: boolean) {
+  if (!conteudo.value) return
+  const forcada = obrigatoria && !subiuNestaEdicao
+  if (!forcada && !alteracaoSignificativa.value) return
+  subiuNestaEdicao = true
 
   try {
     const versao = conteudo.value.versao + 1
@@ -92,13 +98,6 @@ async function onQuizAlterou() {
         v-if="conteudo"
         class="flex flex-wrap items-center gap-x-4 gap-y-2"
       >
-        <UButton
-          label="Dashboard"
-          icon="i-lucide-chart-spline"
-          color="neutral"
-          variant="outline"
-          :to="`${trilhaPath}/dashboard-conteudo/${conteudoId}`"
-        />
         <!-- no quiz vale pro proximo salvar ou excluir de pergunta -->
         <UCheckbox
           v-model="alteracaoSignificativa"

@@ -36,6 +36,16 @@ def filtro_escopo(coluna):
     return aplicar
 
 
+# conteudo so pode trocar pra outro modulo da msm trilha
+async def exigir_modulo_da_mesma_trilha(db: AsyncSession, conteudo_id: int, modulo_id: int) -> None:
+    trilha_atual = await db.scalar(
+        select(Modulo.trilha_id).join(Conteudo, Conteudo.modulo_id == Modulo.id).where(Conteudo.id == conteudo_id)
+    )
+    trilha_nova = await db.scalar(select(Modulo.trilha_id).where(Modulo.id == modulo_id))
+    if trilha_nova is None or trilha_nova != trilha_atual:
+        raise NotFoundException("Módulo não encontrado nessa trilha")
+
+
 # verifica se o item da trilha existe e pertence ao grupo.
 async def exigir_item_no_escopo(db: AsyncSession, modelo, item_id: int, grupo_id: int | None, apenas_quiz: bool = False) -> None:
     consulta = select(modelo.id).where(modelo.id == item_id, no_escopo(modelo, grupo_id))

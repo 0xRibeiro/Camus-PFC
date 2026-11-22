@@ -1,10 +1,23 @@
 <template>
   <UModal
     v-model:open="open"
-    title="Detalhes da alteração"
+    :title="ehVisualizacao ? 'Detalhes da visualização' : 'Detalhes da alteração'"
   >
     <template #body>
-      <div class="grid grid-cols-2 gap-4">
+      <!-- view n muda nada, so registra q alguem olhou um dado -->
+      <p
+        v-if="ehVisualizacao"
+        class="text-sm"
+      >
+        Visualizou o campo
+        <span class="font-semibold">{{ props.log?.alteracoes.campo }}</span>
+        de {{ props.log?.entidade }} #{{ props.log?.entidade_id }}.
+      </p>
+
+      <div
+        v-else
+        class="grid grid-cols-2 gap-4"
+      >
         <div>
           <p class="font-medium mb-2">
             Antes
@@ -31,6 +44,8 @@ const props = defineProps<{
 }>()
 
 const open = defineModel<boolean>('open', { required: true })
+
+const ehVisualizacao = computed(() => props.log?.acao === 'view')
 
 const antigoFormatado = computed(() => JSON.stringify(props.log?.alteracoes.antigo, null, 2))
 const novoFormatado = computed(() => JSON.stringify(props.log?.alteracoes.novo, null, 2))

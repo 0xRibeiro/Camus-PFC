@@ -12,6 +12,8 @@ class AcaoAuditoria(enum.Enum):
     create = "create"
     update = "update"
     delete = "delete"
+    # admin viu um dado sensivel (ex: email no olhinho)
+    view = "view"
 
 
 class LogAuditoria(Base):

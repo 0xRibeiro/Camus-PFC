@@ -21,31 +21,55 @@
         <UBadge size="xl">
           {{ trilhas.length }} trilha{{ trilhas.length === 1 ? '' : 's' }}
         </UBadge>
+        <UButton
+          label="Nova trilha"
+          icon="i-lucide-plus"
+          size="lg"
+          @click="abrirCriar()"
+        />
       </template>
     </CamusBanner>
 
-    <div class="mb-4 flex flex-wrap items-center gap-3 sm:flex-nowrap">
-      <UInput
-        v-model="busca"
-        icon="i-lucide-search"
-        placeholder="Buscar trilha..."
-        class="w-full min-w-0 sm:flex-1"
-      />
+    <!-- filtros: busca, tag, status e agrupamento -->
+    <div class="mb-6 space-y-3">
+      <div class="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+        <UInput
+          v-model="busca"
+          icon="i-lucide-search"
+          placeholder="Buscar trilha..."
+          class="w-full min-w-0 sm:flex-1"
+        />
 
-      <USelect
-        v-model="tagFiltro"
-        :items="tagFiltroOptions"
-        placeholder="Filtrar por tag"
-        class="min-w-0 flex-1 sm:w-48 sm:flex-none"
-      />
+        <USelect
+          v-model="tagFiltro"
+          :items="tagFiltroOptions"
+          placeholder="Filtrar por tag"
+          class="min-w-0 flex-1 sm:w-48 sm:flex-none"
+        />
 
-      <UButton
-        v-if="tagFiltro"
-        icon="i-lucide-x"
-        color="neutral"
-        variant="ghost"
-        @click="tagFiltro = ''"
-      />
+        <UButton
+          v-if="filtrosAtivos"
+          label="Limpar"
+          icon="i-lucide-x"
+          color="neutral"
+          variant="ghost"
+          @click="limparFiltros"
+        />
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <UTabs
+          v-model="statusFiltro"
+          :items="statusOptions"
+          :content="false"
+          size="sm"
+        />
+
+        <USwitch
+          v-model="agruparPorTag"
+          label="Agrupar por tag"
+        />
+      </div>
     </div>
 
     <!-- spinner enquanto busca as trilhas -->
@@ -59,8 +83,49 @@
       />
     </div>
 
+    <!-- nenhuma trilha cadastrada ainda -->
+    <UCard
+      v-else-if="!trilhas.length"
+      class="text-center"
+    >
+      <UIcon
+        name="i-lucide-route"
+        class="size-10 text-primary"
+      />
+      <p class="mt-2 text-muted">
+        Nenhuma trilha cadastrada ainda.
+      </p>
+      <UButton
+        label="Cadastrar trilha"
+        icon="i-lucide-plus"
+        class="mt-4"
+        @click="abrirCriar()"
+      />
+    </UCard>
+
+    <!-- tem trilha mas o filtro n achou nada -->
+    <UCard
+      v-else-if="!trilhasFiltradas.length"
+      class="text-center"
+    >
+      <UIcon
+        name="i-lucide-search-x"
+        class="size-10 text-muted"
+      />
+      <p class="mt-2 text-muted">
+        Nenhuma trilha encontrada com esses filtros.
+      </p>
+      <UButton
+        label="Limpar filtros"
+        color="neutral"
+        variant="outline"
+        class="mt-4"
+        @click="limparFiltros"
+      />
+    </UCard>
+
     <!--
-      grid com 1 TrilhaCard por trilha, mais o botao de "cadastrar" no final.
+      grid com 1 TrilhaCard por trilha, separado por tag ou tudo junto.
 
       :modulos-count e :conteudos-count sao props indo PRA DENTRO do componente
       (a pagina calculou essas contagens, o card so mostra).
@@ -70,28 +135,36 @@
       "cliquei em editar" ou "cliquei em excluir", e aqui na pagina a gente decide
       o que fazer com esse aviso (abrirEditar / abrirExcluir)
     -->
-    <UPageGrid v-else>
-      <TrilhaCard
-        v-for="trilha in trilhasFiltradas"
-        :key="trilha.id"
-        :trilha="trilha"
-        :to="grupoId ? `/grupos/${grupoId}/trilhas/${trilha.id}/editar` : `/author/trilhas/${trilha.id}`"
-        :modulos-count="contarModulos(trilha.id)"
-        :conteudos-count="contarConteudos(trilha.id)"
-        @edit="abrirEditar(trilha)"
-        @delete="abrirExcluir(trilha)"
-      />
+    <div
+      v-else
+      class="space-y-8"
+    >
+      <section
+        v-for="secao in secoes"
+        :key="secao.chave"
+        class="space-y-3"
+      >
+        <TrilhaSecaoTag
+          v-if="agruparPorTag"
+          :chave="secao.chave"
+          :quantidade="secao.trilhas.length"
+        />
 
-      <UButton
-        icon="i-lucide-plus"
-        label="Cadastrar trilha"
-        color="neutral"
-        variant="outline"
-        block
-        class="h-full min-h-40"
-        @click="abrirCriar()"
-      />
-    </UPageGrid>
+        <UPageGrid>
+          <TrilhaCard
+            v-for="trilha in secao.trilhas"
+            :key="trilha.id"
+            :trilha="trilha"
+            :to="caminhoTrilha(trilha.id)"
+            :dashboard="`${caminhoTrilha(trilha.id)}/dashboard`"
+            :modulos-count="contarModulos(trilha.id)"
+            :conteudos-count="contarConteudos(trilha.id)"
+            @edit="abrirEditar(trilha)"
+            @delete="abrirExcluir(trilha)"
+          />
+        </UPageGrid>
+      </section>
+    </div>
 
     <!--
       v-model:open="showModal" liga o estado "showModal" daqui com o defineModel('open')
@@ -154,31 +227,97 @@ const loading = ref(true)
 const busca = ref('')
 
 const tagFiltro = ref('')
+const statusFiltro = ref<'todas' | 'ativas' | 'desativadas'>('todas')
+const agruparPorTag = ref(true)
 
-const tagFiltroOptions: { label: string, value: string, chip: { color: CorTagTrilha } }[] = []
-for (const item of TRILHA_TAGS) {
-  tagFiltroOptions.push({ label: item.label, value: item.value, chip: { color: item.color } })
+const tagFiltroOptions = opcoesFiltroTagTrilha()
+
+const totalAtivas = computed(() => {
+  let total = 0
+  for (const trilha of trilhas.value) {
+    if (trilha.is_active) total++
+  }
+  return total
+})
+
+const statusOptions = computed(() => [
+  { label: 'Todas', value: 'todas', badge: trilhas.value.length },
+  { label: 'Ativas', value: 'ativas', badge: totalAtivas.value },
+  { label: 'Desativadas', value: 'desativadas', badge: trilhas.value.length - totalAtivas.value },
+])
+
+const filtrosAtivos = computed(() => !!busca.value || !!tagFiltro.value || statusFiltro.value !== 'todas')
+
+function limparFiltros() {
+  busca.value = ''
+  tagFiltro.value = ''
+  statusFiltro.value = 'todas'
 }
 
-// computed recalcula sozinho toda vez que "trilhas" ou "busca" mudam
+// ativa primeiro, depois pelo titulo
+function compararTrilhas(a: TrilhaRead, b: TrilhaRead) {
+  if (a.is_active !== b.is_active) return a.is_active ? -1 : 1
+  return a.titulo.localeCompare(b.titulo, 'pt-BR')
+}
+
+// computed recalcula sozinho toda vez que "trilhas" ou algum filtro mudam
 const trilhasFiltradas = computed(() => {
   const resultado: TrilhaRead[] = []
-  for (const trilha of trilhas.value) {
-    const buscaLower = busca.value.toLowerCase()
+  const buscaLower = busca.value.toLowerCase()
 
+  for (const trilha of trilhas.value) {
     let descricao = ''
     if (trilha.descricao) descricao = trilha.descricao
 
+    const tag = chaveDaTagTrilha(trilha.tag)
+
     const bateBusca = trilha.titulo.toLowerCase().includes(buscaLower)
       || descricao.toLowerCase().includes(buscaLower)
-    const bateTag = !tagFiltro.value || trilha.tag === tagFiltro.value
+    const bateTag = !tagFiltro.value || tag === tagFiltro.value
 
-    if (bateBusca && bateTag) {
+    let bateStatus = true
+    if (statusFiltro.value === 'ativas') bateStatus = trilha.is_active
+    if (statusFiltro.value === 'desativadas') bateStatus = !trilha.is_active
+
+    if (bateBusca && bateTag && bateStatus) {
       resultado.push(trilha)
     }
   }
+  resultado.sort(compararTrilhas)
   return resultado
 })
+
+// sem agrupar vira uma secao so
+const secoes = computed(() => {
+  if (!agruparPorTag.value) return [{ chave: 'todas', trilhas: trilhasFiltradas.value }]
+
+  const porTag = new Map<string, TrilhaRead[]>()
+  for (const trilha of trilhasFiltradas.value) {
+    const chave = chaveDaTagTrilha(trilha.tag)
+
+    let lista = porTag.get(chave)
+    if (!lista) {
+      lista = []
+      porTag.set(chave, lista)
+    }
+    lista.push(trilha)
+  }
+
+  const chaves = Array.from(porTag.keys())
+  chaves.sort(compararSecoesTrilha)
+
+  const resultado: { chave: string, trilhas: TrilhaRead[] }[] = []
+  for (const chave of chaves) {
+    const lista = porTag.get(chave)
+    if (lista) resultado.push({ chave, trilhas: lista })
+  }
+  return resultado
+})
+
+function caminhoTrilha(trilhaId: number) {
+  if (grupoId) return `/grupos/${grupoId}/trilhas/${trilhaId}/editar`
+  return `/author/trilhas/${trilhaId}`
+}
 
 // contagem de modulos/conteudos por trilha, pro rodape do card
 const contagem = ref({

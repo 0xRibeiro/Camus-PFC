@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -14,6 +16,11 @@ class ConquistaRead(BaseModel):
 	titulo: str
 	descricao: str | None = None
 	imagem_dir: str | None = None
+
+
+# conquista do usuario, com quando ele ganhou
+class ConquistaUsuarioRead(ConquistaRead):
+	desbloqueada_em: datetime | None = None
 
 
 class ConquistaUpdate(BaseModel):

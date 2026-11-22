@@ -137,6 +137,24 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
         concluidos = contar_concluidos(list(status.values()))
         total = len(sequencia)
 
+        # primeiro q falta, pro botao de continuar
+        proximo = None
+        for conteudo in sequencia:
+            if not status[conteudo.id].concluido:
+                proximo = conteudo
+                break
+
+        # conclusao mais recente, ordena o perfil e vira a data de qnd terminou a trilha
+        ultima_atividade = None
+        for conclusao in conclusoes.values():
+            if ultima_atividade is None or conclusao.concluido_em > ultima_atividade:
+                ultima_atividade = conclusao.concluido_em
+
+        ultimo_conteudo = None
+        for conteudo in sequencia:
+            if ultimo_conteudo is None or conteudo.criado_em > ultimo_conteudo:
+                ultimo_conteudo = conteudo.criado_em
+
         resumos.append(
             TrilhaResumoRead(
                 id=trilha.id,
@@ -147,6 +165,11 @@ async def listar_trilhas(db: AsyncSession, usuario: Usuario) -> list[TrilhaResum
                 concluidos=concluidos,
                 total=total,
                 progresso=calcular_porcentagem(concluidos, total),
+                total_modulos=len(modulos),
+                proximo_conteudo_id=proximo.id if proximo else None,
+                proximo_conteudo_titulo=proximo.titulo if proximo else None,
+                ultima_atividade_em=ultima_atividade,
+                ultimo_conteudo_em=ultimo_conteudo,
             )
         )
 
@@ -193,6 +216,7 @@ async def buscar_trilha(
         concluidos=concluidos,
         total=total,
         progresso=calcular_porcentagem(concluidos, total),
+        total_modulos=len(modulos),
         modulos=modulos_aluno,
     )
 
@@ -302,6 +326,13 @@ CONQUISTA_XP = 15
 XP_DA_CONQUISTA = 500
 
 
+# quem cria n ganha conquista pelo proprio conteudo: no grupo o dono, na global author e admin
+def faz_como_aluno(repo: ProgressoRepository, usuario: Usuario) -> bool:
+    if repo.grupo_id is None:
+        return usuario.role == RoleUsuario.aluno
+    return repo.db.info.get("grupo_dono") != usuario.id
+
+
 # roda depois de salvar o progresso e concede as conquistas que destravam avatar.
 # a sequencia é a da trilha do conteudo, a mesma que o buscar_conteudo_liberado devolve
 async def conferir_conquistas_avatar(
@@ -314,16 +345,17 @@ async def conferir_conquistas_avatar(
     # só entra aqui o que foi concedido agora, pra não repetir o toast
     novas: list[ConquistaRead] = []
 
-    conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
-    if len(sequencia) > 0 and len(conclusoes) == len(sequencia):
-        nova = await conquistas.conceder(usuario.id, CONQUISTA_TRILHA_COMPLETA)
-        if nova:
-            novas.append(ConquistaRead.model_validate(nova))
+    if faz_como_aluno(repo, usuario):
+        conclusoes = await carregar_conclusoes(repo, usuario, sequencia)
+        if len(sequencia) > 0 and len(conclusoes) == len(sequencia):
+            nova = await conquistas.conceder(usuario.id, CONQUISTA_TRILHA_COMPLETA)
+            if nova:
+                novas.append(ConquistaRead.model_validate(nova))
 
-    if quiz_perfeito:
-        nova = await conquistas.conceder(usuario.id, CONQUISTA_QUIZ_PERFEITO)
-        if nova:
-            novas.append(ConquistaRead.model_validate(nova))
+        if quiz_perfeito:
+            nova = await conquistas.conceder(usuario.id, CONQUISTA_QUIZ_PERFEITO)
+            if nova:
+                novas.append(ConquistaRead.model_validate(nova))
 
     # só o xp global conta (grupo_id nulo)
     xp = await PontuacaoRepository(repo.db).somar_xp(usuario.id, None)
@@ -457,21 +489,20 @@ async def responder_quiz(
             acertos += 1
     total = len(correcao)
 
-    # toda tentativa fica salva msm sem ganhar xp
-    repo.salvar_tentativa(
-        TentativaQuiz(
-            usuario_id=usuario.id,
-            conteudo_id=conteudo.id,
-            versao_conteudo=conteudo.versao,
-            respostas=data.respostas,
-            acertos=acertos,
-            total=total,
-        )
-    )
-
-    # refazer na msm versao so pra estudar n paga
+    # so a 1a tentativa de cada versao vale: salva, conclui e paga.
+    # refazer na msm versao é so pra estudar, corrige e devolve sem gravar nada
     xp_ganho = 0
     if conclusao is None or conclusao.versao_conteudo != conteudo.versao:
+        repo.salvar_tentativa(
+            TentativaQuiz(
+                usuario_id=usuario.id,
+                conteudo_id=conteudo.id,
+                versao_conteudo=conteudo.versao,
+                respostas=data.respostas,
+                acertos=acertos,
+                total=total,
+            )
+        )
         valor_novo = conteudo.pontos * acertos // total
         xp_ganho = await pagar_diferenca(repo, usuario, conteudo, valor_novo)
         salvar_conclusao(repo, usuario, conteudo, conclusao)

@@ -1,10 +1,16 @@
-from sqlalchemy import func, select
+from datetime import date
+
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.grupo.model import Grupo, Participacao
 from app.domains.minigame.model import TITULOS_JOGOS, RodadaMinigame
 from app.domains.pontuacao.model import LancamentoPontos, OrigemLancamento
 from app.domains.trilha.model import Conteudo
 from app.domains.usuario.model import Usuario
+
+# dia do lancamento no fuso de sp
+DIA_DO_LANCAMENTO = cast(func.timezone("America/Sao_Paulo", LancamentoPontos.criado_em), Date)
 
 
 class PontuacaoRepository:
@@ -64,6 +70,73 @@ class PontuacaoRepository:
         for usuario, xp in resultado.all():
             ranking.append((usuario, xp))
         return ranking
+
+    # todos os alunos do grupo, ate quem n ganhou xp ainda. o dono fica de fora
+    async def listar_ranking_grupo(self, grupo_id: int) -> list[tuple[Usuario, int]]:
+        total = func.sum(LancamentoPontos.pontos).label("total")
+        resultado = await self.db.execute(
+            select(Usuario, total)
+            .join(Participacao, Participacao.id_usuario == Usuario.id)
+            .join(Grupo, Grupo.id == Participacao.id_grupo)
+            .outerjoin(
+                LancamentoPontos,
+                (LancamentoPontos.usuario_id == Usuario.id) & (LancamentoPontos.grupo_id == grupo_id),
+            )
+            .where(
+                Participacao.id_grupo == grupo_id,
+                Usuario.id != Grupo.id_dono,
+                Usuario.deletado_em.is_(None),
+                Usuario.is_active.is_(True),
+            )
+            .group_by(Usuario.id)
+            .order_by(total.desc().nulls_last(), Usuario.username)
+        )
+        ranking = []
+        for usuario, xp in resultado.all():
+            # sem nenhum lancamento o sum volta None
+            if xp is None:
+                xp = 0
+            ranking.append((usuario, xp))
+        return ranking
+
+    # quem ta na frente no ranking global, msm desempate do listar_ranking
+    async def contar_na_frente(self, usuario: Usuario, xp: int) -> int:
+        total = func.sum(LancamentoPontos.pontos).label("total")
+        totais = (
+            select(Usuario.username, total)
+            .join(LancamentoPontos, LancamentoPontos.usuario_id == Usuario.id)
+            .where(
+                LancamentoPontos.grupo_id.is_(None),
+                Usuario.deletado_em.is_(None),
+                Usuario.is_active.is_(True),
+            )
+            .group_by(Usuario.id)
+            .subquery()
+        )
+        quantidade = await self.db.scalar(
+            select(func.count()).select_from(totais).where(
+                (totais.c.total > xp) | ((totais.c.total == xp) & (totais.c.username < usuario.username))
+            )
+        )
+        if quantidade is None:
+            return 0
+        return quantidade
+
+    # so os dias q teve xp, os vazios o service completa
+    async def somar_por_dia(self, usuario_id: int, grupo_id: int | None, inicio: date) -> dict[date, int]:
+        resultado = await self.db.execute(
+            select(DIA_DO_LANCAMENTO, func.sum(LancamentoPontos.pontos))
+            .where(
+                LancamentoPontos.usuario_id == usuario_id,
+                LancamentoPontos.grupo_id == grupo_id,
+                DIA_DO_LANCAMENTO >= inicio,
+            )
+            .group_by(DIA_DO_LANCAMENTO)
+        )
+        pontos = {}
+        for dia, soma in resultado.all():
+            pontos[dia] = soma
+        return pontos
 
     async def listar_do_usuario(
         self, usuario_id: int, grupo_id: int | None

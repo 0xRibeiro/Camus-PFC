@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,6 +29,15 @@ def montar_contagem(linhas) -> dict:
 class DashboardRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
+        # na trilha de grupo o dono pode fazer os conteudos, mas n entra nos graficos
+        self.dono = db.info.get("grupo_dono")
+
+    # no grupo tira o dono, na global so conta aluno (author e admin ficam de fora)
+    def so_alunos(self, consulta, coluna):
+        if self.dono is not None:
+            return consulta.where(coluna != self.dono)
+        alunos = select(Usuario.id).where(Usuario.role == RoleUsuario.aluno)
+        return consulta.where(coluna.in_(alunos))
 
     # atualiza o metodo de contar trilhas pra fornecer dados pra dash
     async def contar_trilhas_por_escopo(self) -> tuple[int, int]:
@@ -111,23 +120,32 @@ class DashboardRepository:
             .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
             .group_by(ConclusaoConteudo.conteudo_id)
         )
+        consulta = self.so_alunos(consulta, ConclusaoConteudo.usuario_id)
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
 
-    # por aluno quantos concluiu, o 1o dia e o ultimo
-    async def listar_progresso_por_aluno(self, conteudos: list[int]) -> list[tuple[int, int, date, date]]:
+    # por aluno quantos concluiu, a 1a e a ultima conclusao com hora (pro tempo ate terminar)
+    async def listar_progresso_por_aluno(self, conteudos: list[int]) -> list[tuple[int, int, datetime, datetime]]:
         consulta = (
             select(
                 ConclusaoConteudo.usuario_id,
                 func.count(),
-                func.min(DIA_DA_CONCLUSAO),
-                func.max(DIA_DA_CONCLUSAO),
+                func.min(ConclusaoConteudo.concluido_em),
+                func.max(ConclusaoConteudo.concluido_em),
             )
             .where(ConclusaoConteudo.conteudo_id.in_(conteudos))
             .group_by(ConclusaoConteudo.usuario_id)
         )
+        consulta = self.so_alunos(consulta, ConclusaoConteudo.usuario_id)
         resultado = await self.db.execute(consulta)
         return list(resultado.tuples().all())
+
+    # 1 por aluno e versao, o service separa a versao atual
+    async def listar_tentativas_dos_quizzes(self, quizzes: list[int]) -> list[TentativaQuiz]:
+        consulta = select(TentativaQuiz).where(TentativaQuiz.conteudo_id.in_(quizzes))
+        consulta = self.so_alunos(consulta, TentativaQuiz.usuario_id)
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
 
     async def listar_questoes(self, quizzes: list[int]) -> list[Questao]:
         consulta = select(Questao).where(Questao.conteudo_id.in_(quizzes)).order_by(Questao.conteudo_id, Questao.ordem)
@@ -145,6 +163,7 @@ class DashboardRepository:
             TentativaQuiz.conteudo_id == conteudo_id,
             TentativaQuiz.versao_conteudo == versao,
         )
+        consulta = self.so_alunos(consulta, TentativaQuiz.usuario_id)
         resultado = await self.db.scalars(consulta)
         return list(resultado.all())
 
@@ -153,14 +172,6 @@ class DashboardRepository:
         consulta = select(Conteudo, Modulo.trilha_id).join(Modulo, Modulo.id == Conteudo.modulo_id).where(Conteudo.id == conteudo_id)
         resultado = await self.db.execute(consulta)
         return resultado.tuples().one_or_none()
-
-    async def contar_alunos_que_tentaram(self, conteudo_id: int, inicio: date, fim: date) -> int:
-        consulta = select(func.count(TentativaQuiz.usuario_id.distinct())).where(
-            TentativaQuiz.conteudo_id == conteudo_id,
-            DIA_DA_TENTATIVA >= inicio,
-            DIA_DA_TENTATIVA <= fim,
-        )
-        return await self.db.scalar(consulta) or 0
 
     async def buscar_trilha(self, trilha_id: int) -> Trilha | None:
         return await self.db.get(Trilha, trilha_id)
@@ -175,63 +186,112 @@ class DashboardRepository:
         )
         return await self.db.scalar(consulta) or 0
 
-    async def contar_conclusoes_por_dia(self, conteudos: list[int], inicio: date, fim: date) -> dict[date, int]:
+    # membros sem o dono, ele so cria
+    async def listar_membros(self, grupo_id: int) -> list[Usuario]:
         consulta = (
-            select(DIA_DA_CONCLUSAO, func.count())
-            .where(
-                ConclusaoConteudo.conteudo_id.in_(conteudos),
-                DIA_DA_CONCLUSAO >= inicio,
-                DIA_DA_CONCLUSAO <= fim,
-            )
-            .group_by(DIA_DA_CONCLUSAO)
+            select(Usuario)
+            .join(Participacao, Participacao.id_usuario == Usuario.id)
+            .join(Grupo, Grupo.id == Participacao.id_grupo)
+            .where(Participacao.id_grupo == grupo_id, Participacao.id_usuario != Grupo.id_dono)
+            .order_by(Usuario.username)
         )
-        resultado = await self.db.execute(consulta)
-        return montar_contagem(resultado.all())
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
 
-    async def contar_tentativas_por_dia(self, conteudos: list[int], inicio: date, fim: date) -> dict[date, int]:
+    async def buscar_membro(self, grupo_id: int, usuario_id: int) -> Usuario | None:
         consulta = (
-            select(DIA_DA_TENTATIVA, func.count())
+            select(Usuario)
+            .join(Participacao, Participacao.id_usuario == Usuario.id)
+            .join(Grupo, Grupo.id == Participacao.id_grupo)
             .where(
-                TentativaQuiz.conteudo_id.in_(conteudos),
-                DIA_DA_TENTATIVA >= inicio,
-                DIA_DA_TENTATIVA <= fim,
+                Participacao.id_grupo == grupo_id,
+                Participacao.id_usuario == usuario_id,
+                Participacao.id_usuario != Grupo.id_dono,
             )
-            .group_by(DIA_DA_TENTATIVA)
         )
-        resultado = await self.db.execute(consulta)
-        return montar_contagem(resultado.all())
+        return await self.db.scalar(consulta)
+
+    async def listar_conclusoes_do_aluno(self, usuario_id: int, conteudos: list[int]) -> list[ConclusaoConteudo]:
+        consulta = select(ConclusaoConteudo).where(
+            ConclusaoConteudo.usuario_id == usuario_id,
+            ConclusaoConteudo.conteudo_id.in_(conteudos),
+        )
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
+
+    # 1 por versao, o service escolhe qual mostrar
+    async def listar_tentativas_do_aluno(self, usuario_id: int, quizzes: list[int]) -> list[TentativaQuiz]:
+        consulta = select(TentativaQuiz).where(
+            TentativaQuiz.usuario_id == usuario_id,
+            TentativaQuiz.conteudo_id.in_(quizzes),
+        )
+        resultado = await self.db.scalars(consulta)
+        return list(resultado.all())
 
     # quem concluiu ou tentou algo no periodo
     async def listar_alunos_ativos(self, conteudos: list[int], inicio: date, fim: date) -> set[int]:
-        concluiram = await self.db.scalars(
+        concluiram = await self.db.scalars(self.so_alunos(
             select(ConclusaoConteudo.usuario_id).distinct().where(
                 ConclusaoConteudo.conteudo_id.in_(conteudos),
                 DIA_DA_CONCLUSAO >= inicio,
                 DIA_DA_CONCLUSAO <= fim,
-            )
-        )
-        tentaram = await self.db.scalars(
+            ),
+            ConclusaoConteudo.usuario_id,
+        ))
+        tentaram = await self.db.scalars(self.so_alunos(
             select(TentativaQuiz.usuario_id).distinct().where(
                 TentativaQuiz.conteudo_id.in_(conteudos),
                 DIA_DA_TENTATIVA >= inicio,
                 DIA_DA_TENTATIVA <= fim,
-            )
-        )
+            ),
+            TentativaQuiz.usuario_id,
+        ))
         return set(concluiram.all()) | set(tentaram.all())
 
-    # soma de acertos e questoes das tentativas
-    # so a versao atual pra bater com as questoes
-    async def somar_acertos(self, conteudo_id: int, versao: int, inicio: date, fim: date) -> tuple[int, int]:
-        consulta = select(func.sum(TentativaQuiz.acertos), func.sum(TentativaQuiz.total)).where(
-            TentativaQuiz.conteudo_id == conteudo_id,
-            TentativaQuiz.versao_conteudo == versao,
-            DIA_DA_TENTATIVA >= inicio,
-            DIA_DA_TENTATIVA <= fim,
+    # cada dia q o aluno concluiu ou tentou algo, sem repetir
+    async def listar_dias_de_atividade(self, conteudos: list[int], inicio: date,
+        fim: date) -> set[tuple[int, date]]:
+        concluiram = await self.db.execute(self.so_alunos(
+            select(ConclusaoConteudo.usuario_id, DIA_DA_CONCLUSAO).distinct().where(
+                ConclusaoConteudo.conteudo_id.in_(conteudos),
+                DIA_DA_CONCLUSAO >= inicio,
+                DIA_DA_CONCLUSAO <= fim,
+            ),
+            ConclusaoConteudo.usuario_id,
+        ))
+        tentaram = await self.db.execute(self.so_alunos(
+            select(TentativaQuiz.usuario_id, DIA_DA_TENTATIVA).distinct().where(
+                TentativaQuiz.conteudo_id.in_(conteudos),
+                DIA_DA_TENTATIVA >= inicio,
+                DIA_DA_TENTATIVA <= fim,
+            ),
+            TentativaQuiz.usuario_id,
+        ))
+        return set(concluiram.tuples().all()) | set(tentaram.tuples().all())
+
+    # dia em q a entidade foi criada, pela auditoria. None se n tiver log
+    async def buscar_dia_de_criacao(self, entidade: str, entidade_id: int) -> date | None:
+        consulta = select(func.min(DIA_DO_LOG)).where(
+            LogAuditoria.entidade == entidade,
+            LogAuditoria.entidade_id == entidade_id,
+            LogAuditoria.acao == AcaoAuditoria.create,
         )
-        acertos, total = (await self.db.execute(consulta)).one()
-        if acertos is None:
-            return 0, 0
-        return acertos, total
+        return await self.db.scalar(consulta)
+
+    # dia do update q mudou a versao do conteudo pra essa
+    async def buscar_dia_da_versao(self, conteudo_id: int, versao: int) -> date | None:
+        consulta = select(func.min(DIA_DO_LOG)).where(
+            LogAuditoria.entidade == "conteudos",
+            LogAuditoria.entidade_id == conteudo_id,
+            LogAuditoria.acao == AcaoAuditoria.update,
+            LogAuditoria.alteracoes["novo"]["versao"].astext == str(versao),
+            LogAuditoria.alteracoes["antigo"]["versao"].astext != str(versao),
+        )
+        return await self.db.scalar(consulta)
+
+    # 1o registro do sistema, é o comeco do todo o periodo no admin
+    async def buscar_primeiro_dia(self) -> date | None:
+        return await self.db.scalar(select(func.min(DIA_DO_LOG)))
 
     # pegando a data direto do postgres pra garantir que seja a mesma pra todos os cálculos.
     async def buscar_data_atual(self) -> date:

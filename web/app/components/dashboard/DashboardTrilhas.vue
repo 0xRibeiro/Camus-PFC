@@ -4,9 +4,6 @@
       <h2 class="font-medium">
         Trilhas por escopo
       </h2>
-      <p class="text-sm text-muted">
-        Todas as trilhas cadastradas, incluindo rascunhos.
-      </p>
     </template>
 
     <div

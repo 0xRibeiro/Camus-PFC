@@ -1,13 +1,33 @@
 <template>
   <UCard :ui="{ body: 'p-0 sm:p-0' }">
     <template #header>
-      <h2 class="font-medium">
-        Acerto por questão
-      </h2>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <h2 class="font-medium">
+          Acerto por questão
+        </h2>
 
-      <p class="text-sm text-muted">
-        Das mais erradas pras mais acertadas, com quanto cada alternativa foi marcada na versão atual.
-      </p>
+        <div class="flex flex-wrap items-center gap-1">
+          <UButton
+            :icon="emPorcentagem ? 'i-lucide-percent' : 'i-lucide-hash'"
+            :label="emPorcentagem ? 'Porcentagem' : 'Quantidade'"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            aria-label="Alternar entre porcentagem e quantidade"
+            @click="emPorcentagem = !emPorcentagem"
+          />
+
+          <UButton
+          :icon="dificeisPrimeiro ? 'i-lucide-arrow-down-wide-narrow' : 'i-lucide-arrow-up-narrow-wide'"
+          :label="dificeisPrimeiro ? 'Menos acertadas' : 'Mais acertadas'"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          aria-label="Inverter a ordem das questões"
+          @click="dificeisPrimeiro = !dificeisPrimeiro"
+          />
+        </div>
+      </div>
     </template>
 
     <ul
@@ -38,7 +58,12 @@
             variant="subtle"
             class="shrink-0 tabular-nums"
           >
-            {{ formatarPorcentagem(questao.taxa) }} de acerto
+            <template v-if="emPorcentagem">
+              {{ formatarPorcentagem(questao.taxa) }} de acerto
+            </template>
+            <template v-else>
+              {{ questao.acertos }} de {{ questao.respostas }} acertaram
+            </template>
           </UBadge>
         </div>
 
@@ -57,27 +82,18 @@
                   :aria-label="alternativa.correta ? 'Correta' : 'Errada'"
                 />
                 <span class="truncate">{{ alternativa.texto }}</span>
-
-                <UBadge
-                  v-if="alternativa.id === questao.pegadinha"
-                  color="error"
-                  variant="subtle"
-                  size="sm"
-                  class="shrink-0"
-                >
-                  errada mais marcada
-                </UBadge>
               </p>
 
               <span class="shrink-0 text-muted tabular-nums">
-                {{ alternativa.escolhas }}
+                {{ emPorcentagem ? formatarPorcentagem(questao.respostas ? alternativa.escolhas / questao.respostas : 0) : alternativa.escolhas }}
               </span>
             </div>
 
             <UProgress
               :model-value="questao.respostas ? alternativa.escolhas / questao.respostas : 0"
               :max="1"
-              :color="alternativa.correta ? 'success' : 'neutral'"
+              :color="alternativa.correta ? 'success' : 'error'"
+              :ui="{ indicator: !alternativa.correta && alternativa.id !== questao.pegadinha ? 'opacity-45' : '' }"
               size="xs"
             />
           </li>
@@ -120,7 +136,11 @@ function pegadinha(questao: QuestaoAcertoRead) {
   return maisMarcada?.id ?? null
 }
 
-// sem resposta vai pro fim
+const dificeisPrimeiro = ref(true)
+// muda o numero da questao e das alternativas juntos
+const emPorcentagem = ref(true)
+
+// sem resposta vai pro fim nas duas ordens
 const lista = computed(() => {
   const comTaxa = props.questoes.map(questao => ({
     ...questao,
@@ -131,6 +151,7 @@ const lista = computed(() => {
   return comTaxa.sort((a, b) => {
     if (a.taxa === null) return 1
     if (b.taxa === null) return -1
+    if (!dificeisPrimeiro.value) return b.taxa - a.taxa
     return a.taxa - b.taxa
   })
 })

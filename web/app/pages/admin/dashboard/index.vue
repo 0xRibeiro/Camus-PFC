@@ -6,10 +6,12 @@
       imagem="/papeis-de-parede/azul/admin.webp"
     />
 
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <!-- filtro acompanha a rolagem -->
+    <div class="sticky top-0 z-10 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-default bg-default/90 py-3 backdrop-blur">
       <DashboardFiltro
         v-model:periodo="periodo"
         v-model:agrupamento="agrupamento"
+        :inicio-total="inicioTotal"
       />
 
       <UButton
@@ -59,7 +61,10 @@
         class="min-w-0"
       />
 
-      <DashboardNumeros :indicadores="indicadores" />
+      <DashboardNumeros
+        :indicadores="indicadores"
+        :periodo-anterior="periodoAnterior"
+      />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DashboardTrilhas
@@ -84,7 +89,7 @@ import type { DashboardRead } from '~/types/generated'
 
 definePageMeta({ middleware: 'role', roles: ['admin'] })
 
-const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, fetchDashboard } = useDashboard<DashboardRead>('/admin/dashboard')
+const { dados, loading, erro, periodo, agrupamento, agrupamentoCarregado, periodoAnterior, inicioTotal, fetchDashboard } = useDashboard<DashboardRead>('/admin/dashboard')
 
 // msm cor nas linhas e nos cards
 const linhas = [

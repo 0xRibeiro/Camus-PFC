@@ -10,7 +10,7 @@ from app.domains.trilha.model import (
     Questao,
     Trilha,
 )
-from app.domains.trilha.repository import exigir_item_no_escopo, filtro_escopo
+from app.domains.trilha.repository import exigir_item_no_escopo, exigir_modulo_da_mesma_trilha, filtro_escopo
 from app.domains.trilha.schema import (
     AlternativaCreate,
     AlternativaRead,
@@ -69,6 +69,12 @@ def validar_pai(campo, pai, schema):
     return validar
 
 
+# arrastar o conteudo pra outro modulo manda o modulo_id junto, so deixa se for da msm trilha
+async def validar_troca_de_modulo(id: int, item: ConteudoUpdate = Body(...), db: AsyncSession = Depends(get_async_session)) -> None:
+    if item.modulo_id is not None:
+        await exigir_modulo_da_mesma_trilha(db, id, item.modulo_id)
+
+
 ######## o crud_router() gera 5 endpoints automaticamente de CRUD padrao ja com opcoes de paginacao e sort, alem de podermos adicionarmos filtros personalizados com filterconfig
 
 filtros_personalizados = {"escopo": filtro_escopo}
@@ -125,7 +131,7 @@ conteudo_router = crud_router(
     read_deps=[gerenciar_trilhas, validar_item(Conteudo)],
     read_multi_deps=[gerenciar_trilhas],
     create_deps=[gerenciar_trilhas, validar_pai("modulo_id", Modulo, ConteudoCreate)],
-    update_deps=[gerenciar_trilhas, validar_item(Conteudo)],
+    update_deps=[gerenciar_trilhas, validar_item(Conteudo), validar_troca_de_modulo],
     delete_deps=[gerenciar_trilhas, validar_item(Conteudo)],
 )
 

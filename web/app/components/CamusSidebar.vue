@@ -7,7 +7,7 @@
     :menu="{ ui: { overlay: 'z-40', content: 'z-50' } }"
     :ui="{
       header: 'group-data-[state=collapsed]/sidebar:px-3',
-      title: 'flex group-data-[state=collapsed]/sidebar:justify-center',
+      title: 'flex items-center group-data-[state=collapsed]/sidebar:justify-center',
       container: 'h-full',
       body: 'px-1.5',
       footer: 'p-3',
@@ -17,7 +17,7 @@
       <NuxtLink
         to="/"
         aria-label="Camus — página inicial"
-        class="inline-flex shrink-0 rounded-md bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex shrink-0 rounded-md focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
         @click="fecharMenuNoCelular"
       >
         <img
@@ -29,6 +29,14 @@
           :class="state === 'collapsed' ? 'size-8' : 'size-11'"
         >
       </NuxtLink>
+      <!-- fonte definida no --font-logo do main.css. some com a sidebar fechada.
+           text-box corta o espaco q a fonte reserva em cima e embaixo, ai centraliza pela letra -->
+      <span
+        v-if="state !== 'collapsed'"
+        class="ms-2 font-logo text-2xl leading-none font-bold tracking-wide text-highlighted [text-box:trim-both_cap_alphabetic]"
+      >
+        Camus
+      </span>
     </template>
     <template #default="{ state }">
       <UNavigationMenu

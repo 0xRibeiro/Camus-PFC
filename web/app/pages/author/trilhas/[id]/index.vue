@@ -76,8 +76,8 @@
       />
     </div>
 
-    <!-- arrasta os MODULOS (nao os conteudos, isso ficou so no nivel modulo
-    por enquanto). o handle=".modulo-drag-handle" trava o arrasto no icone de
+    <!-- arrasta os MODULOS, os conteudos tem o draggable deles mais embaixo.
+    o handle=".modulo-drag-handle" trava o arrasto no icone de
     pontinhos, senao qualquer clique no card ia comecar a arrastar -->
     <VueDraggable
       v-else-if="trilha"
@@ -135,22 +135,59 @@
           </div>
         </div>
 
-        <div class="bg-default divide-y divide-default">
+        <!-- todas as listas no msm group, da pra arrastar o conteudo pra outro modulo.
+        vazia ganha altura pra ter onde soltar, e o aviso fica por cima sem bloquear -->
+        <div class="relative">
+          <p
+            v-if="contarConteudos(modulo.id) === 0"
+            class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted"
+          >
+            Nenhum conteúdo neste módulo ainda.
+          </p>
+
+          <VueDraggable
+            :model-value="conteudosDoModulo(modulo.id)"
+            :animation="150"
+            group="conteudos"
+            handle=".conteudo-drag-handle"
+            class="bg-default divide-y divide-default"
+            :class="contarConteudos(modulo.id) === 0 ? 'min-h-17 bg-transparent' : ''"
+            @update:model-value="(lista: ConteudoRead[]) => conteudosPorModulo[modulo.id] = lista"
+            @end="onReordenarConteudos"
+          >
           <div
             v-for="conteudo in conteudosDoModulo(modulo.id)"
             :key="conteudo.id"
-            class="flex items-start justify-between gap-2 px-4 py-3 sm:items-center"
+            class="flex items-start justify-between gap-2 border-l-4 px-4 py-3 sm:items-center"
+            :class="tiposInfo[conteudo.tipo].linha"
           >
             <div class="flex min-w-0 flex-1 items-start gap-2 sm:items-center sm:gap-3">
-              <div class="flex items-center justify-center size-8 rounded-full bg-primary-10 shrink-0">
+              <UIcon
+                name="i-lucide-grip-vertical"
+                class="conteudo-drag-handle size-4 shrink-0 self-center text-muted cursor-grab active:cursor-grabbing"
+              />
+              <div
+                class="flex items-center justify-center size-8 rounded-full shrink-0"
+                :class="tiposInfo[conteudo.tipo].icone"
+              >
                 <UIcon
                   :name="tiposInfo[conteudo.tipo].icon"
-                  class="size-4 text-primary"
+                  class="size-4"
                 />
               </div>
               <div class="min-w-0 wrap-anywhere">
-                <p class="text-sm font-medium">
+                <!-- lapis do lado do nome, ele so edita nome e pontos -->
+                <p class="flex items-center gap-1 text-sm font-medium">
                   {{ conteudo.titulo }}
+                  <UButton
+                    icon="i-lucide-pencil"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    aria-label="Editar nome e pontos"
+                    class="shrink-0"
+                    @click="abrirEditarConteudo(conteudo)"
+                  />
                 </p>
                 <p class="text-xs text-muted">
                   {{ conteudo.pontos }} pts
@@ -166,50 +203,95 @@
                   >
                     · sem texto ainda
                   </span>
+                  <span
+                    v-if="conteudo.tipo === 'quiz'"
+                    class="text-warning"
+                  >
+                    · {{ textoPerguntas(conteudo.id) }}
+                  </span>
                 </p>
               </div>
             </div>
 
             <div class="flex shrink-0 items-center gap-1 sm:gap-2">
-              <!-- so mostra qual e o tipo, nao da pra trocar clicando -->
-              <div class="hidden items-center gap-1.5 lg:flex">
-                <span
-                  v-for="(info, tipo) in tiposInfo"
-                  :key="tipo"
-                  class="rounded-full text-xs px-2.5 py-1 font-medium"
-                  :class="conteudo.tipo === tipo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-400'"
-                >
-                  {{ info.label }}
+              <!-- so o quiz tem desempenho, de sempre. clicando abre o dashboard completo no modal -->
+              <button
+                v-if="conteudo.tipo === 'quiz'"
+                type="button"
+                class="flex items-center gap-3 rounded-lg px-2 py-1 text-sm text-muted ring ring-default transition hover:bg-elevated hover:text-highlighted"
+                aria-label="Ver desempenho do quiz"
+                @click="abrirDesempenho(conteudo)"
+              >
+                <span class="flex items-center gap-1.5 font-medium">
+                  <UIcon
+                    name="i-lucide-chart-no-axes-column"
+                    class="size-4 shrink-0"
+                  />
+                  <span class="hidden sm:inline">Desempenho</span>
                 </span>
-              </div>
+                <span
+                  v-if="resumoPorConteudo[conteudo.id]"
+                  class="hidden items-center gap-3 text-xs tabular-nums md:flex"
+                >
+                  <UTooltip text="Nota média (versão atual)">
+                    <span class="flex items-center gap-1">
+                      <UIcon
+                        name="i-lucide-target"
+                        class="size-3.5"
+                      />
+                      {{ formatarAcerto(resumoPorConteudo[conteudo.id]!.acerto) }}
+                    </span>
+                  </UTooltip>
+                  <UTooltip text="Concluíram">
+                    <span class="flex items-center gap-1">
+                      <UIcon
+                        name="i-lucide-users"
+                        class="size-3.5"
+                      />
+                      {{ resumoPorConteudo[conteudo.id]!.concluiram }}
+                    </span>
+                  </UTooltip>
+                </span>
+              </button>
 
-              <UButton
-                icon="i-lucide-pencil"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                aria-label="Editar conteúdo"
-                @click="abrirEditarConteudo(conteudo)"
-              />
-              <UButton
-                v-if="conteudo.tipo === 'video'"
-                :icon="conteudo.video_url ? 'i-lucide-play' : 'i-lucide-link'"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :aria-label="conteudo.video_url ? 'Abrir vídeo' : 'Adicionar link do vídeo'"
-                @click="abrirLinkVideo(conteudo)"
-              />
-              <!-- artigo e quiz abrem a tela de edicao propria -->
-              <UButton
+              <!-- o selo do tipo ja e o botao de editar: video abre o modal do link,
+              artigo e quiz vao pro editor deles. no celular fica so o icone -->
+              <NuxtLink
                 v-if="conteudo.tipo !== 'video'"
-                icon="i-lucide-file-pen-line"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :aria-label="conteudo.tipo === 'artigo' ? 'Editar artigo' : 'Editar quiz'"
                 :to="`${trilhaPath}/conteudos/${conteudo.id}`"
-              />
+                class="flex items-center justify-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-semibold ring transition hover:brightness-110 sm:w-30 sm:px-3"
+                :class="tiposInfo[conteudo.tipo].selo"
+                :aria-label="conteudo.tipo === 'artigo' ? 'Editar artigo' : 'Editar quiz'"
+              >
+                <UIcon
+                  :name="tiposInfo[conteudo.tipo].icon"
+                  class="size-4"
+                />
+                <span class="hidden sm:inline">{{ tiposInfo[conteudo.tipo].label }}</span>
+                <UIcon
+                  name="i-lucide-arrow-up-right"
+                  class="size-3.5 opacity-70"
+                />
+              </NuxtLink>
+              <button
+                v-else
+                type="button"
+                class="flex items-center justify-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-semibold ring transition hover:brightness-110 sm:w-30 sm:px-3"
+                :class="tiposInfo[conteudo.tipo].selo"
+                :aria-label="conteudo.video_url ? 'Editar link do vídeo' : 'Adicionar link do vídeo'"
+                @click="abrirLinkVideo(conteudo)"
+              >
+                <UIcon
+                  :name="tiposInfo[conteudo.tipo].icon"
+                  class="size-4"
+                />
+                <span class="hidden sm:inline">{{ tiposInfo[conteudo.tipo].label }}</span>
+                <UIcon
+                  name="i-lucide-link"
+                  class="size-3.5 opacity-70"
+                />
+              </button>
+
               <UButton
                 icon="i-lucide-trash-2"
                 size="xs"
@@ -220,14 +302,8 @@
               />
             </div>
           </div>
+          </VueDraggable>
         </div>
-
-        <p
-          v-if="contarConteudos(modulo.id) === 0"
-          class="px-4 py-6 text-sm text-muted text-center"
-        >
-          Nenhum conteúdo neste módulo ainda.
-        </p>
       </div>
     </VueDraggable>
 
@@ -313,14 +389,6 @@
             />
           </UFormField>
 
-          <UFormField label="Ordem">
-            <UInputNumber
-              v-model="formConteudo.ordem"
-              :min="0"
-              class="w-full"
-            />
-          </UFormField>
-
           <UFormField label="Pontos">
             <UInputNumber
               v-model="formConteudo.pontos"
@@ -328,14 +396,6 @@
               class="w-full"
             />
           </UFormField>
-
-          <!-- marcar ou mudar os pontos sobe a versao e quem ja concluiu pode refazer -->
-          <UCheckbox
-            v-if="modoConteudoModal === 'editar'"
-            v-model="formConteudo.alteracaoSignificativa"
-            label="Alteração significativa"
-            description="Avisa quem já concluiu que o conteúdo mudou. Mudar os pontos já conta como alteração."
-          />
 
           <div class="flex justify-end gap-2">
             <UButton
@@ -418,6 +478,35 @@
       </template>
     </UModal>
 
+    <!-- dashboard do conteudo sem sair da tela, busca os dados toda vez q abre -->
+    <UModal
+      v-model:open="showDesempenhoModal"
+      :title="conteudoDesempenho ? `Desempenho: ${conteudoDesempenho.titulo}` : 'Desempenho'"
+      :ui="{ content: 'sm:max-w-5xl' }"
+    >
+      <!-- data de criacao do lado do nome, igual na pagina -->
+      <template #title>
+        <span class="flex flex-wrap items-baseline gap-x-3">
+          {{ conteudoDesempenho ? `Desempenho: ${conteudoDesempenho.titulo}` : 'Desempenho' }}
+          <span
+            v-if="desempenhoCriadoEm"
+            class="text-sm font-normal text-muted"
+          >
+            {{ formatarData(desempenhoCriadoEm) }}
+          </span>
+        </span>
+      </template>
+
+      <template #body>
+        <DashboardConteudo
+          v-if="conteudoDesempenho"
+          :conteudo-id="conteudoDesempenho.id"
+          :com-alunos="trilhaDeGrupo"
+          @criado-em="desempenhoCriadoEm = $event"
+        />
+      </template>
+    </UModal>
+
     <UModal
       v-model:open="showDeleteModal"
       :title="exclusao?.titulo"
@@ -445,13 +534,18 @@
 <script setup lang="ts">
 import { VueDraggable } from 'vue-draggable-plus'
 import type { Ref } from 'vue'
-import type { ConteudoRead, ModuloRead, TrilhaRead } from '~/types/generated'
+import type { ConteudoRead, ModuloRead, ResumoConteudoRead, TrilhaRead } from '~/types/generated'
+import { formatarData } from '~/utils/datas'
+import { tiposInfo } from '~/utils/tiposConteudo'
+import type { TipoConteudo } from '~/utils/tiposConteudo'
 
 definePageMeta({ middleware: 'role', roles: ['author', 'admin'], key: route => route.path })
 
 const route = useRoute()
 const api = useApi()
 const grupoId = route.params.grupoId
+// a dashboard do quiz so mostra os alunos no grupo
+const trilhaDeGrupo = Boolean(grupoId)
 const router = useRouter()
 const trilhaId = Number(route.params.id)
 const trilhaGrupo = grupoId ? `/grupos/${grupoId}/trilhas/${trilhaId}` : null
@@ -480,14 +574,6 @@ async function salvando(saving: Ref<boolean>, mensagemErro: string, acao: () => 
   await comErro(mensagemErro, acao)
   saving.value = false
 }
-
-// centraliza label + icone de cada tipo de conteudo num lugar so
-const tiposInfo = {
-  video: { label: 'Vídeo', icon: 'i-lucide-play-circle' },
-  artigo: { label: 'Artigo', icon: 'i-lucide-book-open' },
-  quiz: { label: 'Quiz', icon: 'i-lucide-list-checks' },
-} as const
-type TipoConteudo = keyof typeof tiposInfo
 
 const trilha = ref<TrilhaRead | null>(null)
 const modulos = ref<ModuloRead[]>([])
@@ -519,6 +605,29 @@ function popularConteudosPorModulo() {
   }
 }
 
+// quantas perguntas cada quiz tem, o conteudo n traz isso entao busca as questoes de cada um
+const perguntasPorQuiz = reactive<Record<number, number>>({})
+
+async function contarPerguntas() {
+  const quizzes = []
+  for (const conteudo of conteudos.value) {
+    if (conteudo.tipo === 'quiz') quizzes.push(conteudo.id)
+  }
+  const respostas = await Promise.all(quizzes.map(id => api('/questoes', { query: { conteudo_id: id } })))
+  let indice = 0
+  for (const id of quizzes) {
+    perguntasPorQuiz[id] = respostas[indice]!.data.length
+    indice += 1
+  }
+}
+
+function textoPerguntas(conteudoId: number) {
+  const quantidade = perguntasPorQuiz[conteudoId]
+  if (quantidade === undefined) return '...'
+  if (quantidade === 0) return 'sem perguntas ainda'
+  return `${quantidade} pergunta${quantidade === 1 ? '' : 's'}`
+}
+
 async function fetchTudo() {
   loading.value = true
 
@@ -534,6 +643,7 @@ async function fetchTudo() {
     ))
     conteudos.value = listas.flatMap(lista => lista.data)
     popularConteudosPorModulo()
+    await Promise.all([contarPerguntas(), buscarResumo()])
     trilha.value = dadosTrilha
   })
 
@@ -550,6 +660,28 @@ async function onReordenarModulos() {
       modulo.ordem = indice
       return api(`/modulos/${modulo.id}`, { method: 'PATCH', body: { ordem: indice } })
     }))
+  })
+}
+
+/* conteudo */
+
+// as listas ja chegam na ordem nova. passa por todos os modulos pq o arrasto pode ter
+// mexido em dois (o de onde saiu e o q recebeu), e so manda pro back quem mudou
+async function onReordenarConteudos() {
+  await comErro('Não foi possível salvar a nova ordem dos conteúdos', async () => {
+    const pedidos = []
+    for (const modulo of modulos.value) {
+      let indice = 0
+      for (const conteudo of conteudosDoModulo(modulo.id)) {
+        if (conteudo.ordem !== indice || conteudo.modulo_id !== modulo.id) {
+          conteudo.ordem = indice
+          conteudo.modulo_id = modulo.id
+          pedidos.push(api(`/conteudos/${conteudo.id}`, { method: 'PATCH', body: { ordem: indice, modulo_id: modulo.id } }))
+        }
+        indice += 1
+      }
+    }
+    await Promise.all(pedidos)
   })
 }
 
@@ -611,33 +743,35 @@ const savingConteudo = ref(false)
 const modoConteudoModal = ref<'criar' | 'editar'>('criar')
 const moduloAlvo = ref<ModuloRead | null>(null) // usado so no modo criar
 const conteudoEditando = ref<ConteudoRead | null>(null) // usado so no modo editar
-const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10, ordem: 0, alteracaoSignificativa: false })
+// a ordem agora e pelo draggable, o modal so mexe no nome e nos pontos
+const formConteudo = reactive({ tipo: 'video' as TipoConteudo, titulo: '', pontos: 10 })
 
 function abrirCriarConteudo(modulo: ModuloRead) {
   modoConteudoModal.value = 'criar'
   moduloAlvo.value = modulo
-  const ordem = Math.max(-1, ...conteudosDoModulo(modulo.id).map(c => c.ordem)) + 1
-  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10, ordem, alteracaoSignificativa: false })
+  Object.assign(formConteudo, { tipo: 'video', titulo: '', pontos: 10 })
   showConteudoModal.value = true
 }
 
 function abrirEditarConteudo(conteudo: ConteudoRead) {
   modoConteudoModal.value = 'editar'
   conteudoEditando.value = conteudo
-  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos, ordem: conteudo.ordem, alteracaoSignificativa: false })
+  Object.assign(formConteudo, { tipo: conteudo.tipo, titulo: conteudo.titulo, pontos: conteudo.pontos })
   showConteudoModal.value = true
 }
 
 async function onSubmitConteudoModal() {
   await salvando(savingConteudo, 'Não foi possível salvar o conteúdo', async () => {
     if (modoConteudoModal.value === 'criar' && moduloAlvo.value) {
+      // conteudo novo vai pro fim do modulo
+      const ordem = Math.max(-1, ...conteudosDoModulo(moduloAlvo.value.id).map(c => c.ordem)) + 1
       const novo = await api('/conteudos', {
         method: 'POST',
         body: {
           modulo_id: moduloAlvo.value.id,
           titulo: formConteudo.titulo,
           tipo: formConteudo.tipo,
-          ordem: formConteudo.ordem,
+          ordem,
           pontos: formConteudo.pontos,
         },
       })
@@ -654,14 +788,14 @@ async function onSubmitConteudoModal() {
     else if (conteudoEditando.value) {
       const id = conteudoEditando.value.id
 
-      // versao sobe se marcou o checkbox ou se mudou os pontos
+      // so mudar os pontos sobe a versao, trocar o nome n precisa
       let versao = conteudoEditando.value.versao
-      if (formConteudo.alteracaoSignificativa || formConteudo.pontos !== conteudoEditando.value.pontos) {
+      if (formConteudo.pontos !== conteudoEditando.value.pontos) {
         versao += 1
       }
 
-      const { titulo, pontos, ordem } = formConteudo
-      const dados = { titulo, pontos, ordem, versao }
+      const { titulo, pontos } = formConteudo
+      const dados = { titulo, pontos, versao }
       await api(`/conteudos/${id}`, { method: 'PATCH', body: dados })
       // PATCH do fastcrud n devolve o item, entao atualiza local com o que ja temos
       Object.assign(conteudoEditando.value, dados)
@@ -683,6 +817,35 @@ function onDeleteConteudo(conteudo: ConteudoRead) {
       if (lista) conteudosPorModulo[conteudo.modulo_id] = lista.filter(c => c.id !== conteudo.id)
     },
   )
+}
+
+/* desempenho do conteudo no modal */
+
+// concluiram e acerto de cada quiz, vem tudo numa chamada so
+const resumoPorConteudo = reactive<Record<number, ResumoConteudoRead>>({})
+
+async function buscarResumo() {
+  const lista: ResumoConteudoRead[] = await api(`/trilhas/${trilhaId}/resumo-conteudos`)
+  for (const item of lista) resumoPorConteudo[item.id] = item
+}
+
+const formatarNota = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format
+
+// nota de 0 a 10 igual a dashboard do quiz
+function formatarAcerto(acerto: number | null | undefined) {
+  if (acerto === null || acerto === undefined) return '—'
+  return `${formatarNota(acerto * 10)}/10`
+}
+
+const showDesempenhoModal = ref(false)
+const conteudoDesempenho = ref<ConteudoRead | null>(null)
+// vem da dashboard qnd carrega
+const desempenhoCriadoEm = ref('')
+
+function abrirDesempenho(conteudo: ConteudoRead) {
+  conteudoDesempenho.value = conteudo
+  desempenhoCriadoEm.value = ''
+  showDesempenhoModal.value = true
 }
 
 /* modal de excluir, serve pra modulo e conteudo */

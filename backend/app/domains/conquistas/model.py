@@ -1,5 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql import func
 
 from app.core.database import Base
 
@@ -25,5 +26,7 @@ associacao_conquista_usuario = Table(
 	"associacao_conquista_usuario",
 	Base.metadata,
 	Column("conquista_id", Integer, ForeignKey("conquistas.id"), primary_key=True),
-	Column("usuario_id", Integer, ForeignKey("usuarios.id"), primary_key=True)
+	Column("usuario_id", Integer, ForeignKey("usuarios.id"), primary_key=True),
+	# as que ja existiam ficam com a data da migration
+	Column("desbloqueada_em", DateTime(timezone=True), server_default=func.now()),
 )

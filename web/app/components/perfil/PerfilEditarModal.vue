@@ -1,0 +1,332 @@
+<template>
+  <UModal
+    v-model:open="open"
+    title="Editar perfil"
+    description="Escolha seu avatar, a cor de fundo e seu nome."
+    :ui="{ content: 'sm:max-w-2xl' }"
+  >
+    <template #body>
+      <div class="space-y-6">
+        <div class="flex flex-col items-center gap-6 sm:flex-row">
+          <UsuarioAvatar
+            :avatar="avatarEscolhido"
+            :cor-fundo="cor"
+            :tamanho="96"
+          />
+
+          <div class="w-full min-w-0 flex-1 space-y-3">
+            <UFormField
+              label="Nome de usuário"
+              :error="erroUsername"
+            >
+              <UInput
+                v-model="username"
+                class="w-full"
+                maxlength="50"
+                @update:model-value="erroUsername = undefined"
+              />
+            </UFormField>
+
+            <!-- seletor de cor do nuxt ui, abre num popover -->
+            <UPopover>
+              <UButton
+                label="Cor de fundo"
+                color="neutral"
+                variant="outline"
+              >
+                <template #leading>
+                  <span
+                    class="size-3 rounded-full border border-default"
+                    :style="{ background: `linear-gradient(${cor}, ${cor}), ${xadrez}` }"
+                  />
+                </template>
+              </UButton>
+
+              <template #content>
+                <div class="flex gap-4 p-2">
+                  <UColorPicker v-model="corBase" />
+
+                  <!-- easter egg: so aparece depois do konami code -->
+                  <div
+                    v-if="transparenciaLiberada"
+                    class="relative h-42 w-2 rounded-md"
+                    :style="{ background: `linear-gradient(to top, transparent, ${corBase}), ${xadrez}` }"
+                  >
+                    <USlider
+                      v-model="opacidade"
+                      orientation="vertical"
+                      :min="0"
+                      :max="100"
+                      aria-label="Transparência"
+                      class="absolute inset-0"
+                      :ui="{ track: 'bg-transparent', range: 'bg-transparent', thumb: 'size-4 bg-transparent ring-white' }"
+                    />
+                  </div>
+                </div>
+              </template>
+            </UPopover>
+          </div>
+        </div>
+
+        <div>
+          <p class="mb-3 text-sm font-medium">
+            Avatar
+          </p>
+          <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <UTooltip
+              v-for="item in avatares"
+              :key="item.chave"
+              :text="`Conquista: ${item.conquista}`"
+              :disabled="item.liberado"
+            >
+              <button
+                type="button"
+                class="relative flex justify-center rounded-xl p-2 transition"
+                :class="[
+                  item.chave === avatarEscolhido ? 'ring-2 ring-primary' : '',
+                  item.liberado ? 'hover:bg-elevated' : 'cursor-not-allowed',
+                ]"
+                :aria-label="item.liberado ? item.chave : `${item.chave} (bloqueado)`"
+                :disabled="!item.liberado"
+                @click="avatarEscolhido = item.chave"
+              >
+                <UsuarioAvatar
+                  :avatar="item.chave"
+                  :cor-fundo="cor"
+                  :tamanho="56"
+                  :class="item.liberado ? '' : 'opacity-40 grayscale'"
+                />
+                <UIcon
+                  v-if="!item.liberado"
+                  name="i-lucide-lock"
+                  class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2"
+                />
+              </button>
+            </UTooltip>
+          </div>
+        </div>
+
+        <!-- excluir conta (soft delete: os dados pessoais sao anonimizados). so aluno -->
+        <div
+          v-if="auth.role === 'aluno'"
+          class="flex flex-col items-start justify-between gap-3 rounded-lg border border-error/30 p-3 sm:flex-row sm:items-center"
+        >
+          <div>
+            <p class="text-sm font-medium text-highlighted">
+              Excluir conta
+            </p>
+            <p class="text-xs text-muted">
+              Seus dados pessoais serão anonimizados e você não conseguirá mais entrar.
+            </p>
+          </div>
+          <UButton
+            label="Excluir conta"
+            icon="i-lucide-trash-2"
+            color="error"
+            variant="outline"
+            size="sm"
+            @click="confirmando = true"
+          />
+        </div>
+      </div>
+    </template>
+
+    <template #footer="{ close }">
+      <div class="flex w-full justify-end gap-2">
+        <UButton
+          label="Cancelar"
+          color="neutral"
+          variant="outline"
+          @click="close"
+        />
+        <UButton
+          label="Salvar"
+          icon="i-lucide-check"
+          :loading="salvando"
+          :disabled="!mudou || !usernameValido"
+          @click="salvar"
+        />
+      </div>
+    </template>
+  </UModal>
+
+  <UModal
+    v-model:open="confirmando"
+    title="Excluir conta"
+    description="Essa ação não pode ser desfeita. Seu nome de usuário e e-mail serão removidos e o acesso encerrado."
+  >
+    <template #footer="{ close }">
+      <UButton
+        label="Cancelar"
+        color="neutral"
+        variant="outline"
+        @click="close"
+      />
+      <UButton
+        label="Excluir minha conta"
+        color="error"
+        :loading="excluindo"
+        @click="excluirConta"
+      />
+    </template>
+  </UModal>
+</template>
+
+<script setup lang="ts">
+import type { AvatarRead, ConquistaRead } from '~/types/generated/types.gen'
+
+const open = defineModel<boolean>('open', { required: true })
+
+const auth = useAuthStore()
+const toast = useToast()
+const conquistas = useConquistasStore()
+
+const avatares = ref<AvatarRead[]>([])
+const avatarEscolhido = ref('peixe-palhaco')
+const username = ref('')
+const erroUsername = ref<string | undefined>()
+const salvando = ref(false)
+const confirmando = ref(false)
+const excluindo = ref(false)
+
+// a cor salva pode vir #RRGGBBAA, o picker so entende #RRGGBB entao separa o alfa
+const corBase = ref('#0EA5E9')
+const opacidade = ref(100)
+
+const cor = computed(() => {
+  if (opacidade.value >= 100) return corBase.value
+  const alfa = Math.round(opacidade.value * 2.55).toString(16).padStart(2, '0')
+  return `${corBase.value}${alfa}`.toUpperCase()
+})
+
+const xadrez = 'repeating-conic-gradient(#d4d4d4 0 25%, #fff 0 50%) 0 0 / 8px 8px'
+
+// toda vez q abre volta pro que ta salvo, cancelar n deixa nada pela metade
+function carregarDoUsuario() {
+  const corSalva = auth.user?.cor_fundo ?? '#0EA5E9'
+  corBase.value = corSalva.slice(0, 7)
+  opacidade.value = corSalva.length === 9 ? Math.round(parseInt(corSalva.slice(7), 16) / 2.55) : 100
+  avatarEscolhido.value = auth.user?.avatar ?? 'peixe-palhaco'
+  username.value = auth.user?.username ?? ''
+  erroUsername.value = undefined
+}
+
+watch(open, (aberto) => {
+  if (aberto) carregarDoUsuario()
+}, { immediate: true })
+
+// ↑ ↑ ↓ ↓ ← → ← → b a
+const CONQUISTA_TRANSPARENCIA = 11
+const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a']
+const NEGACIONISMO = ['n', 'e', 'g', 'a', 'c', 'i', 'o', 'n', 'i', 's', 'm', 'o']
+const transparenciaLiberada = ref(false)
+let teclas: string[] = []
+
+// fica escutando na pagina toda, n so com o modal aberto
+useEventListener(window, 'keydown', async (evento: KeyboardEvent) => {
+  teclas.push(evento.key.toLowerCase())
+  teclas = teclas.slice(-Math.max(KONAMI.length, NEGACIONISMO.length))
+
+  const digitouKonami = teclas.slice(-KONAMI.length).join() === KONAMI.join()
+  const digitouNegacionismo = teclas.slice(-NEGACIONISMO.length).join() === NEGACIONISMO.join()
+
+  if (!digitouNegacionismo && (!digitouKonami || transparenciaLiberada.value)) return
+
+  teclas = []
+
+  try {
+    if (digitouNegacionismo) {
+      opacidade.value = 100
+      transparenciaLiberada.value = false
+      await conquistas.desbloquearConquista(12)
+    }
+    else {
+      await conquistas.desbloquearConquista(CONQUISTA_TRANSPARENCIA)
+      transparenciaLiberada.value = true
+    }
+  }
+  catch {
+    toast.add({ title: 'Quase... tente de novo', color: 'error' })
+  }
+})
+
+// mesmo limite do back (3 a 50 caracteres)
+const usernameValido = computed(() => username.value.length >= 3 && username.value.length <= 50)
+
+// so habilita o botao se tiver algo diferente do que ta salvo
+const mudou = computed(() =>
+  avatarEscolhido.value !== auth.user?.avatar
+  || cor.value.toUpperCase() !== auth.user?.cor_fundo.toUpperCase()
+  || username.value !== auth.user?.username,
+)
+
+onMounted(async () => {
+  const api = useApi()
+  try {
+    avatares.value = await api('/usuarios/me/avatares')
+  }
+  catch {
+    toast.add({ title: 'Não foi possível carregar os avatares', color: 'error' })
+  }
+
+  // quem ja desbloqueou ve a barra direto
+  try {
+    const minhas: ConquistaRead[] = await api('/usuarios/me/conquistas')
+    for (const conquista of minhas) {
+      if (conquista.id === CONQUISTA_TRANSPARENCIA) transparenciaLiberada.value = true
+    }
+  }
+  catch {
+    // sem a lista so n mostra a barra, da pra liberar pelo codigo de novo
+  }
+})
+
+async function salvar() {
+  const api = useApi()
+  salvando.value = true
+  erroUsername.value = undefined
+  try {
+    // o back devolve o usuario ja atualizado, entao troca direto na store
+    auth.user = await api('/usuarios/me', {
+      method: 'PATCH',
+      body: {
+        avatar: avatarEscolhido.value,
+        cor_fundo: cor.value,
+        username: username.value,
+      },
+    })
+    toast.add({ title: 'Perfil atualizado', color: 'success' })
+    open.value = false
+  }
+  catch (erro) {
+    const e = erro as { status?: number, data?: { detail?: string } }
+    if (e.status === 422 && e.data?.detail === 'username já existe') {
+      erroUsername.value = 'Esse nome de usuário já está em uso'
+    }
+    else {
+      toast.add({ title: 'Não foi possível salvar', color: 'error' })
+    }
+  }
+  finally {
+    salvando.value = false
+  }
+}
+
+async function excluirConta() {
+  const api = useApi()
+  excluindo.value = true
+  try {
+    await api('/usuarios/me', { method: 'DELETE' })
+    confirmando.value = false
+    // limpa a sessao local e manda pro login
+    await auth.logout()
+    await navigateTo('/login')
+  }
+  catch {
+    toast.add({ title: 'Não foi possível excluir a conta', color: 'error' })
+  }
+  finally {
+    excluindo.value = false
+  }
+}
+</script>

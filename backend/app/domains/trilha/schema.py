@@ -77,6 +77,8 @@ class ConteudoRead(BaseModel):
 
 
 class ConteudoUpdate(BaseModel):
+    # arrastar pra outro modulo, o router so aceita modulo da msm trilha
+    modulo_id: int | None = None
     titulo: str | None = Field(default=None, min_length=1, max_length=100)
     ordem: int | None = Field(default=None, ge=0)
     pontos: int | None = Field(default=None, ge=0)
