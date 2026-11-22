@@ -1016,6 +1016,10 @@ export type DenunciaAdminRead = {
      */
     conteudo: string | null;
     /**
+     * Conteudo Removido
+     */
+    conteudo_removido?: boolean;
+    /**
      * Grupo Suspenso
      */
     grupo_suspenso?: boolean;
@@ -1028,7 +1032,7 @@ export type DenunciaCreate = {
     /**
      * Motivo
      */
-    motivo: 'conteudo_improprio' | 'assedio' | 'spam' | 'outro';
+    motivo: 'conteudo_improprio' | 'assedio' | 'spam' | 'informacao_incorreta' | 'conteudo_com_defeito' | 'outro';
     /**
      * Descricao
      */

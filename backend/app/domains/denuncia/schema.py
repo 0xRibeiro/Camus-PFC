@@ -4,7 +4,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 # motivos e status que a api aceita. pra ter um motivo novo, inclui aqui e no front tbm.
-Motivo = Literal["conteudo_improprio", "assedio", "spam", "outro"]
+Motivo = Literal[
+    "conteudo_improprio",
+    "assedio",
+    "spam",
+    "informacao_incorreta",
+    "conteudo_com_defeito",
+    "outro",
+]
 StatusDenuncia = Literal["pendente", "resolvida", "rejeitada"]
 
 
@@ -37,6 +44,8 @@ class DenunciaAdminRead(DenunciaRead):
     grupo: str
     dono: str
     conteudo: str | None
+    # true quando a denúncia era de um conteúdo que já foi apagado
+    conteudo_removido: bool = False
     # o front usa isso pra esconder o suspender quando o grupo já está suspenso
     grupo_suspenso: bool = False
 

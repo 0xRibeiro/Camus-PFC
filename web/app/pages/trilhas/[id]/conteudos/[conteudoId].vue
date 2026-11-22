@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { JSONContent } from '@tiptap/core'
 import { FetchError } from 'ofetch'
-import type { ConclusaoRead, ConteudoAlunoRead } from '~/types/generated'
+import type { ConclusaoRead, ConteudoAlunoRead, GrupoRead } from '~/types/generated'
 
 const conquistasStore = useConquistasStore()
 
@@ -9,6 +9,7 @@ definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
 const api = useApi()
+const auth = useAuthStore()
 const grupoId = route.params.grupoId
 const toast = useToast()
 const trilhaId = Number(route.params.id)
@@ -18,6 +19,9 @@ const conteudoId = Number(route.params.conteudoId)
 const conteudo = ref<ConteudoAlunoRead | null>(null)
 const loading = ref(true)
 const concluindo = ref(false)
+const denunciando = ref(false)
+// começa como true pro botão não piscar antes de saber se a pessoa é a dona
+const donoDoGrupo = ref(true)
 
 async function fetchConteudo() {
   loading.value = true
@@ -37,6 +41,22 @@ async function fetchConteudo() {
 }
 
 onMounted(fetchConteudo)
+
+// só dá pra denunciar conteúdo de grupo. o dono e o admin não veem o botão
+async function fetchDono() {
+  if (!grupoId) return
+  try {
+    const grupo: GrupoRead = await api(`/grupos/${grupoId}`)
+    donoDoGrupo.value = grupo.id_dono === auth.user?.id
+  }
+  catch {
+    // se falhar, o botão continua escondido
+  }
+}
+
+onMounted(fetchDono)
+
+const podeDenunciar = computed(() => !!grupoId && !donoDoGrupo.value && auth.role !== 'admin')
 
 const youtubeId = computed(() => {
   if (!conteudo.value?.video_url) return null
@@ -167,6 +187,16 @@ const precisaConcluir = computed(() => {
       />
 
       <div class="mt-6 flex justify-end gap-2">
+        <!-- só pra membro de grupo, o mr-auto joga o botão pro canto esquerdo -->
+        <UButton
+          v-if="podeDenunciar"
+          icon="i-lucide-flag"
+          label="Denunciar conteúdo"
+          color="error"
+          variant="ghost"
+          class="mr-auto"
+          @click="denunciando = true"
+        />
         <UButton
           v-if="conteudo.tipo !== 'quiz' && precisaConcluir"
           icon="i-lucide-check"
@@ -185,6 +215,13 @@ const precisaConcluir = computed(() => {
           :to="`${trilhaPath}/conteudos/${conteudo.proximo_conteudo_id}`"
         />
       </div>
+
+      <GrupoDenunciaModal
+        v-if="podeDenunciar"
+        v-model:open="denunciando"
+        :grupo-id="Number(grupoId)"
+        :id-conteudo="conteudo.id"
+      />
     </template>
   </div>
 </template>

@@ -34,10 +34,13 @@ async def criar_denuncia(db: AsyncSession, grupo: Grupo, data: DenunciaCreate, u
     if await repo.buscar_pendente(usuario.id, grupo.id, data.id_conteudo) is not None:
         raise DuplicateValueException("Você já enviou uma denúncia pendente sobre isso")
 
+    titulo_conteudo = await repo.titulo_do_conteudo(data.id_conteudo)
+
     denuncia = Denuncia(
         id_denunciante=usuario.id,
         id_grupo=grupo.id,
         id_conteudo=data.id_conteudo,
+        titulo_conteudo=titulo_conteudo,
         motivo=data.motivo,
         descricao=data.descricao or None,
     )
