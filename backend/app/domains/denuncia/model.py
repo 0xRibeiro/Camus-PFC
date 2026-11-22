@@ -24,6 +24,9 @@ class Denuncia(Base):
     # o dono pode apagar o conteúdo, mas a denúncia continua registrada (o campo vira null)
     id_conteudo: Mapped[int | None] = mapped_column(ForeignKey("conteudos.id", ondelete="SET NULL"))
 
+    # guarda o título na hora da denúncia: se o conteúdo for apagado, ainda dá pra saber qual era
+    titulo_conteudo: Mapped[str | None] = mapped_column(Text)
+
     motivo: Mapped[str] = mapped_column(String(30))
 
     descricao: Mapped[str | None] = mapped_column(Text)

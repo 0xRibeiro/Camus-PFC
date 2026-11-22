@@ -44,6 +44,8 @@ class DenunciaAdminRead(DenunciaRead):
     grupo: str
     dono: str
     conteudo: str | None
+    # true quando a denúncia era de um conteúdo que já foi apagado
+    conteudo_removido: bool = False
     # o front usa isso pra esconder o suspender quando o grupo já está suspenso
     grupo_suspenso: bool = False
 

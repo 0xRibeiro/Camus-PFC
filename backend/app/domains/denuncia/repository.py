@@ -51,6 +51,13 @@ class DenunciaRepository:
         resultado = await self.db.execute(consulta)
         return resultado.first() is not None
 
+    # título do conteúdo pra guardar junto da denúncia. sem id_conteudo não tem o que guardar
+    async def titulo_do_conteudo(self, id_conteudo: int | None) -> str | None:
+        if id_conteudo is None:
+            return None
+        conteudo = await self.db.get(Conteudo, id_conteudo)
+        return conteudo.titulo if conteudo else None
+
     # lista pro admin com as mais recentes primeiro. dá pra filtrar passando o status.
     async def listar(self, status: str | None = None) -> list[DenunciaAdminRead]:
         denunciante = aliased(Usuario)
@@ -81,7 +88,9 @@ class DenunciaRepository:
                 denunciante=nome_denunciante,
                 grupo=grupo.nome,
                 dono=nome_dono,
-                conteudo=titulo_conteudo,
+                # se o conteúdo foi apagado, usa o título que ficou guardado na denúncia
+                conteudo=titulo_conteudo or denuncia.titulo_conteudo,
+                conteudo_removido=denuncia.id_conteudo is None and denuncia.titulo_conteudo is not None,
                 grupo_suspenso=grupo.inabilitado
                 or (grupo.suspenso_ate is not None and grupo.suspenso_ate > datetime.now(UTC)),
             )

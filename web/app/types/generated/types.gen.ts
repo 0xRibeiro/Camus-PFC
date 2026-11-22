@@ -1016,6 +1016,10 @@ export type DenunciaAdminRead = {
      */
     conteudo: string | null;
     /**
+     * Conteudo Removido
+     */
+    conteudo_removido?: boolean;
+    /**
      * Grupo Suspenso
      */
     grupo_suspenso?: boolean;

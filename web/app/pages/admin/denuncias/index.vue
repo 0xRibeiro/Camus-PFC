@@ -29,6 +29,10 @@
       <template #alvo-cell="{ row }">
         <p class="font-medium">
           {{ row.original.conteudo ?? 'Grupo inteiro' }}
+          <span
+            v-if="row.original.conteudo_removido"
+            class="text-sm font-normal text-muted"
+          >(removido)</span>
         </p>
         <p
           v-if="row.original.descricao"
