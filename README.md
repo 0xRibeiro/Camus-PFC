@@ -18,7 +18,7 @@
 <!-- EXPLICA O MOTIVO DO PROJETO -->
 O Camus é uma plataforma de apoio ao ensino de oceanografia, limnologia e biologia marinha. Estudantes podem seguir trilhas com artigos, vídeos e quizzes, participar de grupos de estudo e acompanhar seu progresso. A plataforma também oferece uma coleção de espécies integrada ao iNaturalist e permite cadastrar aquários e peixes. Ao vincular um dispositivo IoT a um aquário, é possível acompanhar leituras recentes de temperatura e distância em gráficos.
 
-Link do deploy: camus.gardiencor.app.br
+Link do deploy: [CAMUS](https://camus.gardiencor.app.br)
 
 <!-- LINHA DE DIVISÃO: -->
 ---
