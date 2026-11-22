@@ -1,16 +1,18 @@
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
+from app.core.limite import LIMITE_TENTATIVAS, limiter
 from app.domains.aquario import service
 from app.domains.aquario.model import Aquario
 from app.domains.aquario.schema import (
     AquarioCreate,
     AquarioEntrar,
     AquarioRead,
+    AquarioUpdate,
     ConviteAquarioRead,
     MembroAquarioRead,
 )
@@ -37,20 +39,24 @@ async def criar_aquario(data: AquarioCreate, db: AsyncSession = Depends(get_asyn
     await db.refresh(aquario)
     return aquario
 
+# limite nas 3 rotas de codigo pra n ficar chutando
 @router.post("/entrar-com-codigo", response_model=AquarioRead, status_code=status.HTTP_201_CREATED)
-async def entrar_com_codigo(data: CodigoDispositivo, db: AsyncSession = Depends(get_async_session),
+@limiter.limit(LIMITE_TENTATIVAS)
+async def entrar_com_codigo(request: Request, data: CodigoDispositivo, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> AquarioRead:
     return await service.entrar_com_codigo(db, data, usuario.id)
 
 
 @router.post("/entrar", response_model=AquarioRead, status_code=status.HTTP_201_CREATED)
-async def entrar_com_convite(data: AquarioEntrar, db: AsyncSession = Depends(get_async_session),
+@limiter.limit(LIMITE_TENTATIVAS)
+async def entrar_com_convite(request: Request, data: AquarioEntrar, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> AquarioRead:
     return await service.entrar_com_convite(db, data, usuario.id)
 
 
 @router.post("/{aquario_id}/dispositivo", response_model=DispositivoRead, status_code=status.HTTP_201_CREATED)
-async def conectar_dispositivo(aquario_id: int, data: CodigoDispositivo, db: AsyncSession = Depends(get_async_session),
+@limiter.limit(LIMITE_TENTATIVAS)
+async def conectar_dispositivo(request: Request, aquario_id: int, data: CodigoDispositivo, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> Dispositivo:
     return await service.conectar_dispositivo(db, aquario_id, data, usuario.id)
 
@@ -113,6 +119,12 @@ async def editar_peixe(aquario_id: int, peixe_id: int, data: PeixeUpdate, db: As
 async def remover_peixe(aquario_id: int, peixe_id: int, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user)) -> None:
     await service.remover_peixe(db, aquario_id, peixe_id, usuario.id)
+
+# troca nome e/ou litros, so o dono
+@router.patch("/{aquario_id}", response_model=AquarioRead)
+async def editar_aquario(aquario_id: int, data: AquarioUpdate, db: AsyncSession = Depends(get_async_session),
+    usuario: Usuario = Depends(get_current_user)) -> AquarioRead:
+    return await service.editar_aquario(db, aquario_id, data, usuario.id)
 
 # rota para buscar um aquario do usuario, caso ele nao seja dono de nenhum retorna 404
 @router.get("/{aquario_id}", response_model=AquarioRead)

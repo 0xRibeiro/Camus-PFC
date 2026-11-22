@@ -130,10 +130,10 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
     await navigateTo('/')
   }
-  catch {
+  catch (error) {
     toast.add({
       title: 'Não foi possível criar a conta',
-      description: 'Verifique os dados e tente de novo.',
+      description: mensagemDeLimite(error) ?? 'Verifique os dados e tente de novo.',
       color: 'error',
     })
   }

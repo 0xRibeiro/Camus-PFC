@@ -4,9 +4,12 @@ from pathlib import Path
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIASGIMiddleware
 
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
+from app.core.limite import limite_estourado, limiter
 from app.core.mqtt import mqtt
 from app.domains.aquario.router import router as aquario_router
 from app.domains.auditoria.router import router as auditoria_router
@@ -58,6 +61,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Projeto Camus - API", lifespan=lifespan)
+
+# rate limit: o middleware aplica o limite geral em toda rota, as sensiveis tem o @limiter.limit delas
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, limite_estourado)
+app.add_middleware(SlowAPIASGIMiddleware)
 
 # libera o front pra chamar a api (CORS)
 app.add_middleware(

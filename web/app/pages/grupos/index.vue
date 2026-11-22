@@ -50,7 +50,7 @@
         </template>
 
         <UForm
-          :schema="zGrupoEntrar"
+          :schema="schemaEntrar"
           :state="formEntrar"
           class="space-y-4"
           @submit="entrarGrupo"
@@ -58,8 +58,10 @@
           <UFormField name="convite" label="Código de convite">
             <UInput
               v-model="formEntrar.convite"
-              placeholder="Cole o código recebido"
-              class="w-full"
+              placeholder="000000"
+              maxlength="6"
+              inputmode="numeric"
+              class="w-full sm:w-40"
             />
           </UFormField>
 
@@ -95,28 +97,60 @@
       Você ainda não participa de nenhum grupo. Crie um ou entre usando um convite.
     </p>
 
-    <UPageGrid v-else>
-      <UCard v-for="grupo in grupos" :key="grupo.id">
-        <div class="flex items-center justify-between gap-3">
-          <h2 class="font-medium break-words min-w-0">{{ grupo.nome }}</h2>
+    <div
+      v-else
+      class="space-y-8"
+    >
+      <!-- a lista e so dos grupos da pessoa, entao filtra aqui mesmo -->
+      <UInput
+        v-model="busca"
+        icon="i-lucide-search"
+        placeholder="Buscar grupo pelo nome..."
+        class="w-full sm:max-w-sm"
+      />
 
-          <UBadge
-            :color="grupo.id_dono === auth.user?.id ? 'primary' : 'neutral'"
-            variant="soft"
-          >
-            {{ grupo.id_dono === auth.user?.id ? 'Dono' : 'Participante' }}
-          </UBadge>
-        </div>
-        <template #footer>
-          <UButton
-            label="Abrir grupo"
-            :to="`/grupos/${grupo.id}`"
-            color="neutral"
-            variant="outline"
+      <p
+        v-if="!secoes.length"
+        class="text-muted"
+      >
+        Nenhum grupo encontrado com esse nome.
+      </p>
+
+      <!-- separado igual nos aquarios: os que eu criei e os que eu entrei. secao vazia n aparece -->
+      <section
+        v-for="secao in secoes"
+        :key="secao.titulo"
+        class="space-y-3"
+      >
+        <h2 class="flex items-center gap-2 text-lg font-semibold">
+          <UIcon
+            :name="secao.icone"
+            class="size-5 text-muted"
           />
-        </template>
-      </UCard>
-    </UPageGrid>
+          {{ secao.titulo }}
+          <span class="text-sm font-normal text-muted">({{ secao.grupos.length }})</span>
+        </h2>
+
+        <UPageGrid>
+          <UCard
+            v-for="grupo in secao.grupos"
+            :key="grupo.id"
+          >
+            <h3 class="font-medium break-words min-w-0">
+              {{ grupo.nome }}
+            </h3>
+            <template #footer>
+              <UButton
+                label="Abrir grupo"
+                :to="`/grupos/${grupo.id}`"
+                color="neutral"
+                variant="outline"
+              />
+            </template>
+          </UCard>
+        </UPageGrid>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -125,7 +159,8 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import { useConquistasStore } from '~/stores/conquistas'
 import type { AvisoRead, GrupoRead } from '~/types/generated/types.gen'
-import { zGrupoCreate, zGrupoEntrar } from '~/types/generated/zod.gen'
+import { z } from 'zod'
+import { zGrupoCreate } from '~/types/generated/zod.gen'
 
 definePageMeta({ middleware: 'role', roles: ['aluno'] })
 
@@ -138,8 +173,38 @@ const grupos = ref<GrupoRead[]>([])
 const loading = ref(true)
 const erroCarregamento = ref(false)
 
+// ------- busca e separacao: dono primeiro, depois os q participo, cada um em ordem alfabetica
+const busca = ref('')
+
+const secoes = computed(() => {
+  const termo = busca.value.trim().toLowerCase()
+  const meus: GrupoRead[] = []
+  const participo: GrupoRead[] = []
+
+  for (const grupo of grupos.value) {
+    if (termo && !grupo.nome.toLowerCase().includes(termo)) continue
+    if (grupo.id_dono === auth.user?.id) meus.push(grupo)
+    else participo.push(grupo)
+  }
+
+  meus.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  participo.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+
+  const todas = [
+    { titulo: 'Grupos que criei', icone: 'i-lucide-crown', grupos: meus },
+    { titulo: 'Grupos que participo', icone: 'i-lucide-users', grupos: participo },
+  ]
+
+  const visiveis = []
+  for (const secao of todas) {
+    if (secao.grupos.length) visiveis.push(secao)
+  }
+  return visiveis
+})
+
 const formCriar = reactive({ nome: '' })
 const formEntrar = reactive({ convite: '' })
+const schemaEntrar = z.object({ convite: zCodigoSeisDigitos })
 
 const criando = ref(false)
 const entrando = ref(false)

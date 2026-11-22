@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.security import CodigoSeisDigitos
 from app.domains.dispositivo.model import EstadoDispositivo, TipoModulo
 
 
@@ -54,7 +55,7 @@ class CredencialDispositivo(BaseModel):
 class CodigoDispositivo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    codigo: str = Field(..., min_length=6, max_length=6)
+    codigo: CodigoSeisDigitos
 
 
 # camus/dispositivos/<mac>/modulos

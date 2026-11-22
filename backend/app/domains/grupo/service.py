@@ -1,4 +1,3 @@
-import secrets
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
@@ -12,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
 from app.core.redis import redis_client
+from app.core.security import gerar_codigo_unico
 from app.domains.grupo.model import Grupo
 from app.domains.grupo.repository import GrupoRepository
 from app.domains.grupo.schema import (
@@ -135,14 +135,9 @@ async def gerar_convite(db: AsyncSession, grupo_id: int, usuario: Usuario) -> Co
     if grupo_suspenso(grupo):
         raise ForbiddenException(mensagem_suspensao(grupo))
 
-    while True:
-        convite = secrets.token_urlsafe(9)
-
-        # evita sobrescrever outro convite que ainda esteja válido
-        criado = await redis_client.set(f"grupo:convite:{convite}", str(grupo.id), ex=CONVITE_VALIDADE_SEGUNDOS, nx=True,)
-
-        if criado:
-            return ConviteRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
+    # 6 numeros igual o do iot. o gerador ja evita repetir um convite ainda valido
+    convite = await gerar_codigo_unico("grupo:convite", str(grupo.id), CONVITE_VALIDADE_SEGUNDOS)
+    return ConviteRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
 
 
 # as checagens desse metodo garantem a validade do convite e a não participação do usuário

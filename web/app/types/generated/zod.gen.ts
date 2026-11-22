@@ -99,7 +99,15 @@ export const zAquarioCreate = z.object({
  * AquarioEntrar
  */
 export const zAquarioEntrar = z.object({
-    convite: z.string().length(12)
+    convite: z.string().length(6).regex(/^\d{6}$/)
+});
+
+/**
+ * AquarioUpdate
+ */
+export const zAquarioUpdate = z.object({
+    nome: z.string().min(1).max(50).nullish(),
+    litros: z.int().gt(0).nullish()
 });
 
 /**
@@ -147,7 +155,7 @@ export const zCadastroDispositivo = z.object({
  * CodigoDispositivo
  */
 export const zCodigoDispositivo = z.object({
-    codigo: z.string().length(6)
+    codigo: z.string().length(6).regex(/^\d{6}$/)
 });
 
 /**
@@ -456,7 +464,7 @@ export const zGrupoCreate = z.object({
  * GrupoEntrar
  */
 export const zGrupoEntrar = z.object({
-    convite: z.string().length(12)
+    convite: z.string().length(6).regex(/^\d{6}$/)
 });
 
 /**
@@ -805,7 +813,7 @@ export const zRefreshInput = z.object({
  */
 export const zResetPasswordInput = z.object({
     email: z.email(),
-    code: z.string(),
+    code: z.string().length(6).regex(/^\d{6}$/),
     password: z.string().min(8).max(128)
 });
 
@@ -1886,6 +1894,17 @@ export const zBuscarAquarioAquariosAquarioIdGetPath = z.object({
  * Successful Response
  */
 export const zBuscarAquarioAquariosAquarioIdGetResponse = zAquarioRead;
+
+export const zEditarAquarioAquariosAquarioIdPatchBody = zAquarioUpdate;
+
+export const zEditarAquarioAquariosAquarioIdPatchPath = z.object({
+    aquario_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zEditarAquarioAquariosAquarioIdPatchResponse = zAquarioRead;
 
 export const zCadastrarDispositivoAdminDispositivosPostBody = zCadastroDispositivo;
 

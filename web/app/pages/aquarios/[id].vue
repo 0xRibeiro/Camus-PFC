@@ -21,9 +21,22 @@
 
       <template v-else>
         <div class="space-y-3 border-b border-default pb-6">
-          <h1 class="text-3xl font-bold text-highlighted wrap-anywhere">
-            {{ aquario.nome }}
-          </h1>
+          <div class="flex items-start justify-between gap-3">
+            <h1 class="text-3xl font-bold text-highlighted wrap-anywhere">
+              {{ aquario.nome }}
+            </h1>
+
+            <!-- nome e litros so o dono troca -->
+            <UButton
+              v-if="(aquario.papel ?? 'dono') === 'dono'"
+              label="Editar"
+              icon="i-lucide-pencil"
+              color="neutral"
+              variant="outline"
+              class="shrink-0"
+              @click="editando = true"
+            />
+          </div>
 
           <div class="flex flex-wrap gap-2">
             <UBadge
@@ -75,12 +88,19 @@
           :aquario-id="aquario.id"
           :papel="aquario.papel ?? 'dono'"
         />
+
+        <AquarioEditarModal
+          v-model:open="editando"
+          :aquario="aquario"
+          @salvo="aquario = $event"
+        />
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import AquarioEditarModal from '~/components/aquario/AquarioEditarModal.vue'
 import AquarioIot from '~/components/aquario/AquarioIot.vue'
 import AquarioMembros from '~/components/aquario/AquarioMembros.vue'
 import AquarioModulos from '~/components/aquario/AquarioModulos.vue'
@@ -91,6 +111,7 @@ definePageMeta({ middleware: 'role', key: route => route.path })
 
 const route = useRoute()
 const api = useApi()
+const editando = ref(false)
 const aquario = ref<AquarioRead | null>(null)
 const carregando = ref(true)
 

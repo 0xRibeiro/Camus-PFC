@@ -30,6 +30,12 @@ class AquarioRepository:
         await self.db.refresh(peixe)
         return peixe
 
+    async def salvar(self, aquario: Aquario) -> Aquario:
+        self.db.add(aquario)
+        await self.db.commit()
+        await self.db.refresh(aquario)
+        return aquario
+
     async def remover_peixe(self, peixe: Peixe) -> None:
         await self.db.delete(peixe)
         await self.db.commit()

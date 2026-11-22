@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
+from app.core.limite import LIMITE_CADASTRO, LIMITE_EMAIL_SENHA, LIMITE_TENTATIVAS, limiter
 from app.domains.conquistas.schema import ConquistaRead, ConquistaUsuarioRead
 from app.domains.usuario import service
 from app.domains.usuario.avatares import AVATARES
@@ -34,15 +35,20 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     tags=["auth"],
 )
+@limiter.limit(LIMITE_CADASTRO)
 async def register(
+    request: Request,
     data: UsuarioCreate,
     db: AsyncSession = Depends(get_async_session),
 ) -> Usuario:
     return await service.criar_aluno(db, data)
 
 
+# o request e pra slowapi pegar o ip
 @router.post("/auth/login", tags=["auth"])
+@limiter.limit(LIMITE_TENTATIVAS)
 async def login(
+    request: Request,
     credentials: UsuarioLogin,
     db: AsyncSession = Depends(get_async_session),
 ) -> TokenPair:
@@ -68,7 +74,9 @@ async def logout(data: RefreshInput) -> None:
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["auth"],
 )
+@limiter.limit(LIMITE_EMAIL_SENHA)
 async def forgot_password(
+    request: Request,
     data: ForgotPasswordInput,
     db: AsyncSession = Depends(get_async_session),
 ) -> None:
@@ -80,7 +88,9 @@ async def forgot_password(
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["auth"],
 )
+@limiter.limit(LIMITE_TENTATIVAS)
 async def reset_password(
+    request: Request,
     data: ResetPasswordInput,
     db: AsyncSession = Depends(get_async_session),
 ) -> None:

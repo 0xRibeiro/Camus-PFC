@@ -304,6 +304,20 @@ export type AquarioRead = {
 };
 
 /**
+ * AquarioUpdate
+ */
+export type AquarioUpdate = {
+    /**
+     * Nome
+     */
+    nome?: string | null;
+    /**
+     * Litros
+     */
+    litros?: number | null;
+};
+
+/**
  * AvatarRead
  */
 export type AvatarRead = {
@@ -4469,6 +4483,36 @@ export type BuscarAquarioAquariosAquarioIdGetResponses = {
 };
 
 export type BuscarAquarioAquariosAquarioIdGetResponse = BuscarAquarioAquariosAquarioIdGetResponses[keyof BuscarAquarioAquariosAquarioIdGetResponses];
+
+export type EditarAquarioAquariosAquarioIdPatchData = {
+    body: AquarioUpdate;
+    path: {
+        /**
+         * Aquario Id
+         */
+        aquario_id: number;
+    };
+    query?: never;
+    url: '/aquarios/{aquario_id}';
+};
+
+export type EditarAquarioAquariosAquarioIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EditarAquarioAquariosAquarioIdPatchError = EditarAquarioAquariosAquarioIdPatchErrors[keyof EditarAquarioAquariosAquarioIdPatchErrors];
+
+export type EditarAquarioAquariosAquarioIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: AquarioRead;
+};
+
+export type EditarAquarioAquariosAquarioIdPatchResponse = EditarAquarioAquariosAquarioIdPatchResponses[keyof EditarAquarioAquariosAquarioIdPatchResponses];
 
 export type CadastrarDispositivoAdminDispositivosPostData = {
     body: CadastroDispositivo;

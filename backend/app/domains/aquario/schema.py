@@ -2,6 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
+from app.core.security import CodigoSeisDigitos
 from app.domains.aquario.model import PapelAquario
 from app.domains.dispositivo.schema import DispositivoRead
 
@@ -9,6 +10,12 @@ from app.domains.dispositivo.schema import DispositivoRead
 class AquarioCreate(BaseModel):
     # usa annoted para ajudar a validar o campo, tirando espaços e limitando o tamanho
     nome: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+    litros: int | None = Field(default=None, gt=0)
+
+
+# so o que vier e alterado. litros null apaga os litros (eles sao opcionais na criacao tb)
+class AquarioUpdate(BaseModel):
+    nome: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)] | None = None
     litros: int | None = Field(default=None, gt=0)
 
 
@@ -40,4 +47,5 @@ class ConviteAquarioRead(BaseModel):
 class AquarioEntrar(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    convite: str = Field(..., min_length=12, max_length=12)
+    # 6 numeros, o msm formato de todo codigo do sistema
+    convite: CodigoSeisDigitos

@@ -1,4 +1,3 @@
-import secrets
 from datetime import datetime
 
 import httpx
@@ -12,11 +11,13 @@ from fastcrud.exceptions.http_exceptions import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.redis import redis_client
+from app.core.security import gerar_codigo_unico
 from app.domains.aquario.model import Aquario, PapelAquario
 from app.domains.aquario.repository import AquarioRepository
 from app.domains.aquario.schema import (
     AquarioEntrar,
     AquarioRead,
+    AquarioUpdate,
     ConviteAquarioRead,
     MembroAquarioRead,
 )
@@ -96,6 +97,27 @@ async def listar_aquarios(db: AsyncSession, usuario_id: int) -> list[AquarioRead
 
 async def buscar_aquario(db: AsyncSession, aquario_id: int, usuario_id: int) -> AquarioRead:
     aquario, papel = await buscar_com_papel(AquarioRepository(db), aquario_id, usuario_id)
+    return await montar_read(db, aquario, papel)
+
+
+# nome e litros sao configuracao do aquario, so o dono mexe. operador e leitor so veem
+async def editar_aquario(db: AsyncSession, aquario_id: int, data: AquarioUpdate, usuario_id: int) -> AquarioRead:
+    repo = AquarioRepository(db)
+    aquario, papel = await buscar_com_papel(repo, aquario_id, usuario_id)
+    if papel != PapelAquario.dono:
+        raise ForbiddenException("Só o dono pode editar o aquário")
+
+    enviados = data.model_fields_set
+
+    if "nome" in enviados:
+        if data.nome is None:
+            raise BadRequestException("Informe o nome")
+        aquario.nome = data.nome
+
+    if "litros" in enviados:
+        aquario.litros = data.litros
+
+    aquario = await repo.salvar(aquario)
     return await montar_read(db, aquario, papel)
 
 
@@ -262,12 +284,8 @@ async def comandar_modulo(db: AsyncSession, aquario_id: int, usuario_id: int, se
 async def gerar_convite(db: AsyncSession, aquario_id: int, usuario_id: int) -> ConviteAquarioRead:
     aquario = await buscar_aquario_do_usuario(AquarioRepository(db), aquario_id, usuario_id)
 
-    while True:
-        convite = secrets.token_urlsafe(9)
-        criado = await redis_client.set(f"aquario:convite:{convite}", str(aquario.id), ex=CONVITE_VALIDADE_SEGUNDOS, nx=True)
-
-        if criado:
-            return ConviteAquarioRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
+    convite = await gerar_codigo_unico("aquario:convite", str(aquario.id), CONVITE_VALIDADE_SEGUNDOS)
+    return ConviteAquarioRead(convite=convite, expira_em_segundos=CONVITE_VALIDADE_SEGUNDOS)
 
 
 # convite sempre entra como leitor

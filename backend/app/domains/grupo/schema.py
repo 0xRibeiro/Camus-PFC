@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
+from app.core.security import CodigoSeisDigitos
+
 
 class GrupoCreate(BaseModel):
     # remove espaços nas pontas antes de validar o nome
@@ -40,8 +42,8 @@ class GrupoRead(BaseModel):
 class GrupoEntrar(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    # limitei assim o min e max pra garantir sempre ser 12
-    convite: str = Field(..., min_length=12, max_length=12)
+    # 6 numeros, o msm formato de todo codigo do sistema
+    convite: CodigoSeisDigitos
 
 
 class ConviteRead(BaseModel):

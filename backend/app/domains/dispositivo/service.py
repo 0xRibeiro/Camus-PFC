@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import dynsec
 from app.core.mqtt import mqtt
 from app.core.redis import redis_client
+from app.core.security import gerar_codigo_unico
 from app.domains.dispositivo.model import Dispositivo, EstadoDispositivo, ModuloIot
 from app.domains.dispositivo.repository import DispositivoRepository, LeituraRepository
 from app.domains.dispositivo.schema import (
@@ -70,13 +71,8 @@ async def cadastrar(db: AsyncSession, data: CadastroDispositivo) -> CredencialDi
 
 
 async def gerar_codigo(mac: str) -> RespostaVinculo:
-    while True:
-        codigo = f"{secrets.randbelow(1_000_000):06d}"
-
-        # nx: so grava se o codigo n estiver em uso
-        gravou = await redis_client.set(f"dispositivo:codigo:{codigo}", mac, ex=CODIGO_VALIDADE_SEGUNDOS, nx=True)
-        if gravou:
-            return RespostaVinculo(codigo=codigo, expira_em=CODIGO_VALIDADE_SEGUNDOS)
+    codigo = await gerar_codigo_unico("dispositivo:codigo", mac, CODIGO_VALIDADE_SEGUNDOS)
+    return RespostaVinculo(codigo=codigo, expira_em=CODIGO_VALIDADE_SEGUNDOS)
 
 
 # usado pelo aquario pra conectar e pra entrar com codigo

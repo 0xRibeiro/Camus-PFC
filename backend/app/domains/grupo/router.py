@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
+from app.core.limite import LIMITE_TENTATIVAS, limiter
 from app.domains.grupo import service
 from app.domains.grupo.model import Grupo
 from app.domains.grupo.schema import (
@@ -32,8 +33,11 @@ async def listar_grupos(db: AsyncSession = Depends(get_async_session),
     return await service.listar_grupos(db, usuario)
 
 # rota 3 = entra no grupo utilizando um convite. retorna 200 também nos sucessos ou 400 quando é convite inválido.
+# limite pra n ficar chutando codigo
 @router.post("/entrar", response_model=GrupoRead)
+@limiter.limit(LIMITE_TENTATIVAS)
 async def entrar_grupo(
+    request: Request,
     data: GrupoEntrar, db: AsyncSession = Depends(get_async_session),
     usuario: Usuario = Depends(get_current_user),
 ) -> Grupo:
