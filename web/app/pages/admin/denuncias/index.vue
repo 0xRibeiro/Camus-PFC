@@ -132,6 +132,8 @@ const motivos: Record<string, string> = {
   conteudo_improprio: 'Conteúdo impróprio',
   assedio: 'Assédio',
   spam: 'Spam',
+  informacao_incorreta: 'Informação incorreta',
+  conteudo_com_defeito: 'Conteúdo não funciona',
   outro: 'Outro',
 }
 

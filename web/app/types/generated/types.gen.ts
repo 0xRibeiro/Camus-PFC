@@ -1028,7 +1028,7 @@ export type DenunciaCreate = {
     /**
      * Motivo
      */
-    motivo: 'conteudo_improprio' | 'assedio' | 'spam' | 'outro';
+    motivo: 'conteudo_improprio' | 'assedio' | 'spam' | 'informacao_incorreta' | 'conteudo_com_defeito' | 'outro';
     /**
      * Descricao
      */

@@ -4,7 +4,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 # motivos e status que a api aceita. pra ter um motivo novo, inclui aqui e no front tbm.
-Motivo = Literal["conteudo_improprio", "assedio", "spam", "outro"]
+Motivo = Literal[
+    "conteudo_improprio",
+    "assedio",
+    "spam",
+    "informacao_incorreta",
+    "conteudo_com_defeito",
+    "outro",
+]
 StatusDenuncia = Literal["pendente", "resolvida", "rejeitada"]
 
 

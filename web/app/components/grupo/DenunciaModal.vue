@@ -62,6 +62,7 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { FetchError } from 'ofetch'
 import type { DenunciaCreate } from '~/types/generated/types.gen'
+import { z } from 'zod'
 import { zDenunciaCreate } from '~/types/generated/zod.gen'
 
 // v-model:open igual ao do TrilhaFormModal: o pai controla se o modal está aberto
@@ -82,15 +83,31 @@ const toast = useToast()
 
 const titulo = computed(() => (props.idConteudo ? 'Denunciar conteúdo' : 'Denunciar grupo'))
 
-const motivos = [
-  { label: 'Conteúdo impróprio', value: 'conteudo_improprio' },
-  { label: 'Assédio', value: 'assedio' },
-  { label: 'Spam', value: 'spam' },
-  { label: 'Outro', value: 'outro' },
-]
+// assédio é sobre o comportamento do dono, então só aparece na denúncia do grupo.
+// pro conteúdo entram os motivos de erro de informação e de defeito
+const motivos = computed(() =>
+  props.idConteudo
+    ? [
+        { label: 'Conteúdo impróprio', value: 'conteudo_improprio' },
+        { label: 'Informação incorreta', value: 'informacao_incorreta' },
+        { label: 'Conteúdo não funciona', value: 'conteudo_com_defeito' },
+        { label: 'Spam', value: 'spam' },
+        { label: 'Outro', value: 'outro' },
+      ]
+    : [
+        { label: 'Conteúdo impróprio', value: 'conteudo_improprio' },
+        { label: 'Assédio', value: 'assedio' },
+        { label: 'Spam', value: 'spam' },
+        { label: 'Outro', value: 'outro' },
+      ],
+)
 
-// a regra de validação vem do schema gerado a partir do back (zDenunciaCreate)
-const formSchema = zDenunciaCreate.pick({ motivo: true, descricao: true })
+// a regra de validação vem do schema gerado a partir do back (zDenunciaCreate).
+// o motivo ganha mensagem própria, porque a padrão lista todas as opções do back,
+// até as que não aparecem nesse modal
+const formSchema = zDenunciaCreate
+  .pick({ descricao: true })
+  .extend({ motivo: z.enum(zDenunciaCreate.shape.motivo.options, { error: 'Selecione um motivo' }) })
 
 const formState = reactive({
   motivo: undefined as DenunciaCreate['motivo'] | undefined,

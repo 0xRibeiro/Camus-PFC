@@ -363,6 +363,8 @@ export const zDenunciaCreate = z.object({
         'conteudo_improprio',
         'assedio',
         'spam',
+        'informacao_incorreta',
+        'conteudo_com_defeito',
         'outro'
     ]),
     descricao: z.string().max(500).nullish(),
