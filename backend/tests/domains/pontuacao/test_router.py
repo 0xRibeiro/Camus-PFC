@@ -34,3 +34,8 @@ async def test_xp_por_dia_aceita_outro_periodo(client, db, usuario_logado, monke
     resposta = await client.get("/pontuacao/xp/dias?dias=30")
     assert resposta.status_code == 200
     assert mock.call_args.args[2] == 30
+
+
+async def test_xp_por_dia_zero_dias(client, db, usuario_logado):
+    resposta = await client.get("/pontuacao/xp/dias?dias=0")
+    assert resposta.status_code == 422
