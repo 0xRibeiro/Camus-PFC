@@ -96,3 +96,9 @@ async def test_listar_membros(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "listar_membros", [])
     resposta = await client.get("/grupos/1/membros")
     assert resposta.status_code == 200
+
+
+async def test_sair_do_grupo(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "sair_grupo")
+    resposta = await client.delete("/grupos/1/membros/me")
+    assert resposta.status_code == 204
