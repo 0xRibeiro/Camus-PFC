@@ -41,3 +41,8 @@ async def test_marcar_como_lido_inexistente(client, db, usuario_logado, monkeypa
     trocar(monkeypatch, "marcar_como_lido", erro=NotFoundException("sem aviso"))
     resposta = await client.patch("/avisos/99/lido")
     assert resposta.status_code == 404
+
+
+async def test_marcar_como_lido_id_invalido(client, db, usuario_logado):
+    resposta = await client.patch("/avisos/abc/lido")
+    assert resposta.status_code == 422
