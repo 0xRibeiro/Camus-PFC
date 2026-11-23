@@ -86,3 +86,10 @@ async def test_denunciar_grupo_inexistente(client, db, usuario_logado, monkeypat
     trocar(monkeypatch, grupo_service, "buscar_grupo", erro=NotFoundException("sem grupo"))
     resposta = await client.post("/grupos/99/denuncias", json=DENUNCIA)
     assert resposta.status_code == 404
+
+
+async def test_denunciar_sem_permissao(client, db, usuario_logado, monkeypatch):
+    entrar_no_grupo()
+    trocar(monkeypatch, service, "criar_denuncia", erro=ForbiddenException("nao pode"))
+    resposta = await client.post("/grupos/1/denuncias", json=DENUNCIA)
+    assert resposta.status_code == 403
