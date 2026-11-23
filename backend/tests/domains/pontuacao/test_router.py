@@ -51,3 +51,10 @@ async def test_ranking(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/pontuacao/ranking")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_extrato(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "meu_extrato", [])
+    resposta = await client.get("/pontuacao/extrato")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
