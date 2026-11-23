@@ -102,3 +102,14 @@ async def test_resolver_denuncia_inexistente(repo):
         await service.resolver_denuncia(
             AsyncMock(), 1, DenunciaUpdate(status="resolvida")
         )
+
+
+async def test_denuncia_ja_analisada_nao_muda_de_novo(repo):
+    repo.buscar.return_value = SimpleNamespace(status="rejeitada", resolvido_em=None)
+
+    with pytest.raises(BadRequestException):
+        await service.resolver_denuncia(
+            AsyncMock(), 1, DenunciaUpdate(status="resolvida")
+        )
+
+    repo.salvar.assert_not_called()
