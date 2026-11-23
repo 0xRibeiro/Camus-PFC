@@ -31,3 +31,11 @@ async def test_listar_denuncias_aluno_e_barrado(client, db, usuario_logado):
     usuario_logado.role = RoleUsuario.aluno
     resposta = await client.get("/admin/denuncias")
     assert resposta.status_code == 403
+
+
+async def test_listar_denuncias_admin(client, db, usuario_logado, monkeypatch):
+    usuario_logado.role = RoleUsuario.admin
+    trocar(monkeypatch, service, "listar_denuncias", [])
+    resposta = await client.get("/admin/denuncias")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
