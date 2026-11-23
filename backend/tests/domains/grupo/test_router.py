@@ -49,3 +49,8 @@ async def test_entrar_no_grupo(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "entrar_grupo", grupo_read())
     resposta = await client.post("/grupos/entrar", json={"convite": "123456"})
     assert resposta.status_code == 200
+
+
+async def test_entrar_no_grupo_sem_convite(client, db, usuario_logado):
+    resposta = await client.post("/grupos/entrar", json={})
+    assert resposta.status_code == 422
