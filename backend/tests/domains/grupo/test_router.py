@@ -126,3 +126,9 @@ async def test_excluir_grupo(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "excluir_grupo")
     resposta = await client.delete("/grupos/1")
     assert resposta.status_code == 204
+
+
+async def test_excluir_grupo_sem_ser_dono(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "excluir_grupo", erro=ForbiddenException("só o dono"))
+    resposta = await client.delete("/grupos/1")
+    assert resposta.status_code == 403
