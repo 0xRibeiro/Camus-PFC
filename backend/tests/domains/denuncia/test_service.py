@@ -61,3 +61,16 @@ async def test_denuncia_do_grupo_nasce_sem_conteudo_nem_titulo(repo):
     assert denuncia.motivo == "assedio"
     # o schema tira os espacos do comeco e do fim
     assert denuncia.descricao == "ofensas no grupo"
+
+
+async def test_denuncia_de_conteudo_guarda_o_titulo(repo):
+    repo.conteudo_pertence_ao_grupo.return_value = True
+    repo.buscar_pendente.return_value = None
+    repo.titulo_do_conteudo.return_value = "pH da agua"
+    data = DenunciaCreate(motivo="informacao_incorreta", id_conteudo=7)
+
+    denuncia = await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
+
+    assert denuncia.id_conteudo == 7
+    # se o conteudo for apagado depois, o titulo continua guardado aqui
+    assert denuncia.titulo_conteudo == "pH da agua"
