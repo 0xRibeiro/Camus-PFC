@@ -113,3 +113,15 @@ async def test_denuncia_ja_analisada_nao_muda_de_novo(repo):
         )
 
     repo.salvar.assert_not_called()
+
+
+async def test_resolver_denuncia_pendente_marca_status_e_data(repo):
+    repo.buscar.return_value = SimpleNamespace(status="pendente", resolvido_em=None)
+
+    denuncia = await service.resolver_denuncia(
+        AsyncMock(), 1, DenunciaUpdate(status="rejeitada")
+    )
+
+    assert denuncia.status == "rejeitada"
+    assert denuncia.resolvido_em is not None
+    repo.salvar.assert_awaited_once()
