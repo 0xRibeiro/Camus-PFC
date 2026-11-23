@@ -1,9 +1,14 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domains.aquario.model import Aquario, AquarioMembro
+from app.domains.aviso.model import Aviso
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
+from app.domains.denuncia.model import Denuncia
+from app.domains.grupo.model import Grupo, Participacao
+from app.domains.minigame.model import RodadaMinigame
 from app.domains.usuario.model import AcessoUsuario, Usuario
 
 
@@ -72,6 +77,20 @@ class UsuarioRepository:
         await self.db.commit()
         await self.db.refresh(user)  # recarrega pra pegar id/defaults do banco
         return user
+
+    # on cascade manual
+    # pontuacao, progresso, conquistas, aceite dos termos ficam.
+    async def apagar_vinculos(self, usuario_id: int) -> None:
+        # o banco apaga o resto do grupo/aquario pelo cascade deles (membros, trilhas, etc)
+        await self.db.execute(delete(Grupo).where(Grupo.id_dono == usuario_id))
+        await self.db.execute(delete(Aquario).where(Aquario.id_dono == usuario_id))
+
+        await self.db.execute(delete(Participacao).where(Participacao.id_usuario == usuario_id))
+        await self.db.execute(delete(AquarioMembro).where(AquarioMembro.id_usuario == usuario_id))
+        await self.db.execute(delete(Aviso).where(Aviso.id_usuario == usuario_id))
+        await self.db.execute(delete(Denuncia).where(Denuncia.id_denunciante == usuario_id))
+        await self.db.execute(delete(RodadaMinigame).where(RodadaMinigame.usuario_id == usuario_id))
+        await self.db.execute(delete(AcessoUsuario).where(AcessoUsuario.usuario_id == usuario_id))
 
 
     # esse metódo usa a tabela de associação para buscar todas as
