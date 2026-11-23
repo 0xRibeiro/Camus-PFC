@@ -93,3 +93,12 @@ async def test_listar_denuncias_repassa_o_filtro_de_status(repo):
 
     assert resultado == []
     repo.listar.assert_awaited_once_with("pendente")
+
+
+async def test_resolver_denuncia_inexistente(repo):
+    repo.buscar.return_value = None
+
+    with pytest.raises(NotFoundException):
+        await service.resolver_denuncia(
+            AsyncMock(), 1, DenunciaUpdate(status="resolvida")
+        )
