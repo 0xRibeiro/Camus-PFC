@@ -84,3 +84,12 @@ async def test_descricao_vazia_vira_nulo(repo):
     denuncia = await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
 
     assert denuncia.descricao is None
+
+
+async def test_listar_denuncias_repassa_o_filtro_de_status(repo):
+    repo.listar.return_value = []
+
+    resultado = await service.listar_denuncias(AsyncMock(), "pendente")
+
+    assert resultado == []
+    repo.listar.assert_awaited_once_with("pendente")
