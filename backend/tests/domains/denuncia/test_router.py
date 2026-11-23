@@ -80,3 +80,9 @@ async def test_denunciar_sucesso(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, service, "criar_denuncia", fake(DenunciaRead))
     resposta = await client.post("/grupos/1/denuncias", json=DENUNCIA)
     assert resposta.status_code == 201
+
+
+async def test_denunciar_grupo_inexistente(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, grupo_service, "buscar_grupo", erro=NotFoundException("sem grupo"))
+    resposta = await client.post("/grupos/99/denuncias", json=DENUNCIA)
+    assert resposta.status_code == 404
