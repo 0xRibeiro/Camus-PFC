@@ -60,3 +60,9 @@ async def test_buscar_conteudo_bloqueado(client, db, usuario_logado, monkeypatch
     trocar(monkeypatch, "buscar_conteudo", erro=ForbiddenException("bloqueado"))
     resposta = await client.get("/progresso/conteudos/2")
     assert resposta.status_code == 403
+
+
+async def test_concluir_conteudo(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "concluir_conteudo", fake(ConclusaoRead))
+    resposta = await client.post("/progresso/conteudos/1/concluir")
+    assert resposta.status_code == 200
