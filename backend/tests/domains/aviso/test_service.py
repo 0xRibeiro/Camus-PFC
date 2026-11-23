@@ -16,3 +16,10 @@ async def test_listar_avisos_busca_so_os_nao_lidos_do_usuario(repo):
 
     assert avisos == ["a", "b"]
     repo.listar_nao_lidos.assert_awaited_once_with(USUARIO.id)
+
+
+async def test_marcar_aviso_inexistente_da_404(repo):
+    repo.buscar.return_value = None
+
+    with pytest.raises(NotFoundException):
+        await service.marcar_como_lido(AsyncMock(), 1, USUARIO)
