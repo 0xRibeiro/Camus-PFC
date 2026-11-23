@@ -54,3 +54,9 @@ async def test_buscar_conteudo(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "buscar_conteudo", fake(ConteudoAlunoRead))
     resposta = await client.get("/progresso/conteudos/1")
     assert resposta.status_code == 200
+
+
+async def test_buscar_conteudo_bloqueado(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_conteudo", erro=ForbiddenException("bloqueado"))
+    resposta = await client.get("/progresso/conteudos/2")
+    assert resposta.status_code == 403
