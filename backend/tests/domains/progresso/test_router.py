@@ -72,3 +72,11 @@ async def test_concluir_conteudo_de_quiz(client, db, usuario_logado, monkeypatch
     trocar(monkeypatch, "concluir_conteudo", erro=BadRequestException("é quiz"))
     resposta = await client.post("/progresso/conteudos/1/concluir")
     assert resposta.status_code == 400
+
+
+async def test_responder_quiz(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "responder_quiz", fake(ResultadoQuizRead))
+    resposta = await client.post(
+        "/progresso/conteudos/1/responder", json={"respostas": {"1": 2}}
+    )
+    assert resposta.status_code == 200
