@@ -114,3 +114,9 @@ async def test_remover_membro(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "remover_membro")
     resposta = await client.delete("/grupos/1/membros/5")
     assert resposta.status_code == 204
+
+
+async def test_remover_membro_que_nao_participa(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "remover_membro", erro=NotFoundException("não participa"))
+    resposta = await client.delete("/grupos/1/membros/5")
+    assert resposta.status_code == 404
