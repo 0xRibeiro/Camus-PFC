@@ -1,4 +1,5 @@
-from contextlib import asynccontextmanager
+import asyncio
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
 from fastapi import Depends, FastAPI
@@ -12,6 +13,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.limite import limite_estourado, limiter
 from app.core.mqtt import mqtt
 from app.domains.aquario.router import router as aquario_router
+from app.domains.auditoria.limpeza import limpar_logs_antigos
 from app.domains.auditoria.router import router as auditoria_router
 from app.domains.aviso.router import router as aviso_router
 from app.domains.conquistas.router import conquista_router
@@ -56,7 +58,12 @@ async def lifespan(app: FastAPI):
     await seed_conquistas()
     # conecta no broker e roda em paralelo com a api
     await mqtt.mqtt_startup()
+    # limpeza dos logs de auditoria em segundo plano
+    limpeza = asyncio.create_task(limpar_logs_antigos())
     yield
+    limpeza.cancel()
+    with suppress(asyncio.CancelledError):
+        await limpeza
     await mqtt.mqtt_shutdown()
 
 

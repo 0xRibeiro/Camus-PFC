@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.auditoria.model import LogAuditoria
@@ -61,4 +61,12 @@ class AuditoriaRepository:
     # log escrito na mao, pra acao q n passa pelo trigger (tipo ver um email)
     async def registrar(self, log: LogAuditoria) -> None:
         self.db.add(log)
+        await self.db.commit()
+
+    # apaga os logs mais velhos q o limite de dias
+    async def apagar_antigos(self, dias: int) -> None:
+        limite = utc_sem_fuso(datetime.now(timezone.utc)) - timedelta(days=dias)
+        query = delete(LogAuditoria).where(LogAuditoria.criado_em < limite)
+
+        await self.db.execute(query)
         await self.db.commit()
