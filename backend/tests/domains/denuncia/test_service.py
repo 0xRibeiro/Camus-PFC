@@ -35,3 +35,13 @@ async def test_conteudo_de_outro_grupo_nao_pode_ser_denunciado(repo):
         await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
 
     repo.criar.assert_not_called()
+
+
+async def test_denuncia_repetida_enquanto_pendente_e_recusada(repo):
+    repo.buscar_pendente.return_value = SimpleNamespace(id=5)
+    data = DenunciaCreate(motivo="assedio")
+
+    with pytest.raises(DuplicateValueException):
+        await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
+
+    repo.criar.assert_not_called()
