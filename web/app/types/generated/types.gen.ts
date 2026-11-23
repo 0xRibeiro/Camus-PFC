@@ -3978,6 +3978,10 @@ export type ListarLogsAdminAuditoriaGetData = {
          * Ate
          */
         ate?: string | null;
+        /**
+         * Antigos Primeiro
+         */
+        antigos_primeiro?: boolean;
     };
     url: '/admin/auditoria';
 };

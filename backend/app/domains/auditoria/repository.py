@@ -26,6 +26,7 @@ class AuditoriaRepository:
         usuario_ids: list[int] | None = None,
         desde: datetime | None = None,
         ate: datetime | None = None,
+        antigos_primeiro: bool = False,
     ) -> list[tuple[LogAuditoria, str | None]]:
         # outerjoin pq log do sistema (sem usuario) tb aparece, ai o nome vem None
         query = select(LogAuditoria, Usuario.username).outerjoin(
@@ -50,7 +51,13 @@ class AuditoriaRepository:
         if ate is not None:
             query = query.where(LogAuditoria.criado_em < utc_sem_fuso(ate))
 
-        query = query.order_by(LogAuditoria.criado_em.desc()).limit(limite).offset(offset)
+        # padrao e o mais novo primeiro
+        if antigos_primeiro:
+            query = query.order_by(LogAuditoria.criado_em.asc())
+        else:
+            query = query.order_by(LogAuditoria.criado_em.desc())
+
+        query = query.limit(limite).offset(offset)
 
         resultado = await self.db.execute(query)
         logs = []
