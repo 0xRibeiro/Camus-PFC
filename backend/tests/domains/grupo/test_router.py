@@ -120,3 +120,9 @@ async def test_remover_membro_que_nao_participa(client, db, usuario_logado, monk
     trocar(monkeypatch, "remover_membro", erro=NotFoundException("não participa"))
     resposta = await client.delete("/grupos/1/membros/5")
     assert resposta.status_code == 404
+
+
+async def test_excluir_grupo(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "excluir_grupo")
+    resposta = await client.delete("/grupos/1")
+    assert resposta.status_code == 204
