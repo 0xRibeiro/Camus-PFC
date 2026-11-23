@@ -53,3 +53,9 @@ async def test_listar_denuncias_status_invalido(client, db, usuario_logado):
     usuario_logado.role = RoleUsuario.admin
     resposta = await client.get("/admin/denuncias?status=qualquer")
     assert resposta.status_code == 422
+
+
+async def test_resolver_denuncia_aluno_e_barrado(client, db, usuario_logado):
+    usuario_logado.role = RoleUsuario.aluno
+    resposta = await client.patch("/admin/denuncias/1", json={})
+    assert resposta.status_code == 403
