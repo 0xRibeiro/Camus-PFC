@@ -25,3 +25,13 @@ async def test_dono_nao_pode_denunciar_o_proprio_grupo(repo):
         await service.criar_denuncia(AsyncMock(), GRUPO, data, dono)
 
     repo.criar.assert_not_called()
+
+
+async def test_conteudo_de_outro_grupo_nao_pode_ser_denunciado(repo):
+    repo.conteudo_pertence_ao_grupo.return_value = False
+    data = DenunciaCreate(motivo="spam", id_conteudo=99)
+
+    with pytest.raises(NotFoundException):
+        await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
+
+    repo.criar.assert_not_called()
