@@ -23,3 +23,13 @@ async def test_marcar_aviso_inexistente_da_404(repo):
 
     with pytest.raises(NotFoundException):
         await service.marcar_como_lido(AsyncMock(), 1, USUARIO)
+
+
+async def test_aviso_de_outra_pessoa_tambem_da_404(repo):
+    # de outra pessoa responde igual a inexistente, pra nao vazar que o aviso existe
+    repo.buscar.return_value = SimpleNamespace(id_usuario=999, lido=False)
+
+    with pytest.raises(NotFoundException):
+        await service.marcar_como_lido(AsyncMock(), 1, USUARIO)
+
+    repo.salvar.assert_not_called()
