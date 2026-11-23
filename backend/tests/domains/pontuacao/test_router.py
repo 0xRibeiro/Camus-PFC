@@ -27,3 +27,10 @@ async def test_xp_por_dia_usa_7_dias_por_padrao(client, db, usuario_logado, monk
     resposta = await client.get("/pontuacao/xp/dias")
     assert resposta.status_code == 200
     assert mock.call_args.args[2] == 7
+
+
+async def test_xp_por_dia_aceita_outro_periodo(client, db, usuario_logado, monkeypatch):
+    mock = trocar(monkeypatch, "meu_xp_por_dia", [])
+    resposta = await client.get("/pontuacao/xp/dias?dias=30")
+    assert resposta.status_code == 200
+    assert mock.call_args.args[2] == 30
