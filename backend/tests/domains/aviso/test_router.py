@@ -22,3 +22,10 @@ async def test_listar_avisos_vazio(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/avisos")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_listar_avisos_com_itens(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "listar_avisos", [fake(AvisoRead), fake(AvisoRead)])
+    resposta = await client.get("/avisos")
+    assert resposta.status_code == 200
+    assert len(resposta.json()) == 2
