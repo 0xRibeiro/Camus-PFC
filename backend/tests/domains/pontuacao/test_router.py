@@ -20,3 +20,10 @@ async def test_meu_xp(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "meu_xp", fake(XpRead))
     resposta = await client.get("/pontuacao/xp")
     assert resposta.status_code == 200
+
+
+async def test_xp_por_dia_usa_7_dias_por_padrao(client, db, usuario_logado, monkeypatch):
+    mock = trocar(monkeypatch, "meu_xp_por_dia", [])
+    resposta = await client.get("/pontuacao/xp/dias")
+    assert resposta.status_code == 200
+    assert mock.call_args.args[2] == 7
