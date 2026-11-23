@@ -43,3 +43,8 @@ async def test_buscar_trilha_inexistente(client, db, usuario_logado, monkeypatch
     trocar(monkeypatch, "buscar_trilha", erro=NotFoundException("sem trilha"))
     resposta = await client.get("/progresso/trilhas/99")
     assert resposta.status_code == 404
+
+
+async def test_buscar_trilha_id_invalido(client, db, usuario_logado):
+    resposta = await client.get("/progresso/trilhas/abc")
+    assert resposta.status_code == 422
