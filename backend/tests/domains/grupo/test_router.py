@@ -78,3 +78,9 @@ async def test_buscar_grupo_de_outro(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "buscar_grupo", erro=ForbiddenException("não participa"))
     resposta = await client.get("/grupos/1")
     assert resposta.status_code == 403
+
+
+async def test_gerar_convite(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "gerar_convite", fake(ConviteRead))
+    resposta = await client.post("/grupos/1/convites")
+    assert resposta.status_code == 201
