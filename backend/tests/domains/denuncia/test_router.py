@@ -65,3 +65,11 @@ async def test_resolver_denuncia_sem_corpo_valido(client, db, usuario_logado):
     usuario_logado.role = RoleUsuario.admin
     resposta = await client.patch("/admin/denuncias/1", json={})
     assert resposta.status_code == 422
+
+
+async def test_denunciar_com_motivo_invalido(client, db, usuario_logado):
+    entrar_no_grupo()
+    resposta = await client.post(
+        "/grupos/1/denuncias", json={"motivo": "xyz", "descricao": "texto qualquer"}
+    )
+    assert resposta.status_code == 422
