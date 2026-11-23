@@ -84,3 +84,9 @@ async def test_gerar_convite(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "gerar_convite", fake(ConviteRead))
     resposta = await client.post("/grupos/1/convites")
     assert resposta.status_code == 201
+
+
+async def test_gerar_convite_sem_ser_dono(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "gerar_convite", erro=ForbiddenException("só o dono"))
+    resposta = await client.post("/grupos/1/convites")
+    assert resposta.status_code == 403
