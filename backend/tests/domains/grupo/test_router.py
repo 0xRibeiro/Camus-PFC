@@ -25,3 +25,8 @@ async def test_criar_grupo(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "criar_grupo", grupo_read())
     resposta = await client.post("/grupos", json={"nome": "Turma A"})
     assert resposta.status_code == 201
+
+
+async def test_criar_grupo_sem_nome(client, db, usuario_logado):
+    resposta = await client.post("/grupos", json={})
+    assert resposta.status_code == 422
