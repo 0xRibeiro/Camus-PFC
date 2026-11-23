@@ -87,3 +87,11 @@ async def test_responder_quiz_corpo_invalido(client, db, usuario_logado):
         "/progresso/conteudos/1/responder", json={"respostas": "x"}
     )
     assert resposta.status_code == 422
+
+
+async def test_responder_quiz_em_conteudo_que_nao_e_quiz(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "responder_quiz", erro=BadRequestException("só quiz"))
+    resposta = await client.post(
+        "/progresso/conteudos/1/responder", json={"respostas": {"1": 2}}
+    )
+    assert resposta.status_code == 400
