@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, false
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, false, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -23,7 +23,10 @@ class Grupo(Base):
 
     # suspensão com data de fim, fica vazio se o grupo não estiver suspenso
     suspenso_ate: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    
+
+    # a dashboard conta os grupos criados por aqui
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 
 class Participacao(Base):
     __tablename__ = "participacoes"
