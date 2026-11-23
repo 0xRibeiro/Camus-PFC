@@ -74,3 +74,13 @@ async def test_denuncia_de_conteudo_guarda_o_titulo(repo):
     assert denuncia.id_conteudo == 7
     # se o conteudo for apagado depois, o titulo continua guardado aqui
     assert denuncia.titulo_conteudo == "pH da agua"
+
+
+async def test_descricao_vazia_vira_nulo(repo):
+    repo.buscar_pendente.return_value = None
+    repo.titulo_do_conteudo.return_value = None
+    data = DenunciaCreate(motivo="outro", descricao="   ")
+
+    denuncia = await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
+
+    assert denuncia.descricao is None
