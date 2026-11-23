@@ -72,3 +72,9 @@ async def test_buscar_grupo_inexistente(client, db, usuario_logado, monkeypatch)
     trocar(monkeypatch, "buscar_grupo", erro=NotFoundException("sem grupo"))
     resposta = await client.get("/grupos/99")
     assert resposta.status_code == 404
+
+
+async def test_buscar_grupo_de_outro(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_grupo", erro=ForbiddenException("não participa"))
+    resposta = await client.get("/grupos/1")
+    assert resposta.status_code == 403
