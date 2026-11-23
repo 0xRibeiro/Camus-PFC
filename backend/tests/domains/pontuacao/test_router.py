@@ -44,3 +44,10 @@ async def test_xp_por_dia_zero_dias(client, db, usuario_logado):
 async def test_xp_por_dia_passou_do_limite(client, db, usuario_logado):
     resposta = await client.get("/pontuacao/xp/dias?dias=91")
     assert resposta.status_code == 422
+
+
+async def test_ranking(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "ranking", [])
+    resposta = await client.get("/pontuacao/ranking")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
