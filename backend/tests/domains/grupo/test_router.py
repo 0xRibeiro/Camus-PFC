@@ -36,3 +36,10 @@ async def test_criar_grupo_sem_permissao(client, db, usuario_logado, monkeypatch
     trocar(monkeypatch, "criar_grupo", erro=ForbiddenException("só aluno"))
     resposta = await client.post("/grupos", json={"nome": "Turma A"})
     assert resposta.status_code == 403
+
+
+async def test_listar_grupos(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "listar_grupos", [])
+    resposta = await client.get("/grupos")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
