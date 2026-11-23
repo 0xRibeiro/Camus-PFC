@@ -54,3 +54,9 @@ async def test_entrar_no_grupo(client, db, usuario_logado, monkeypatch):
 async def test_entrar_no_grupo_sem_convite(client, db, usuario_logado):
     resposta = await client.post("/grupos/entrar", json={})
     assert resposta.status_code == 422
+
+
+async def test_entrar_no_grupo_convite_expirado(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "entrar_grupo", erro=NotFoundException("expirou"))
+    resposta = await client.post("/grupos/entrar", json={"convite": "000000"})
+    assert resposta.status_code == 404
