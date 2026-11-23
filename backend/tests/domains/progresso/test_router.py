@@ -80,3 +80,10 @@ async def test_responder_quiz(client, db, usuario_logado, monkeypatch):
         "/progresso/conteudos/1/responder", json={"respostas": {"1": 2}}
     )
     assert resposta.status_code == 200
+
+
+async def test_responder_quiz_corpo_invalido(client, db, usuario_logado):
+    resposta = await client.post(
+        "/progresso/conteudos/1/responder", json={"respostas": "x"}
+    )
+    assert resposta.status_code == 422
