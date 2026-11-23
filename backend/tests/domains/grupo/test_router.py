@@ -108,3 +108,9 @@ async def test_dono_nao_pode_sair_do_grupo(client, db, usuario_logado, monkeypat
     trocar(monkeypatch, "sair_grupo", erro=ForbiddenException("dono exclui"))
     resposta = await client.delete("/grupos/1/membros/me")
     assert resposta.status_code == 403
+
+
+async def test_remover_membro(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "remover_membro")
+    resposta = await client.delete("/grupos/1/membros/5")
+    assert resposta.status_code == 204
