@@ -73,3 +73,10 @@ async def test_denunciar_com_motivo_invalido(client, db, usuario_logado):
         "/grupos/1/denuncias", json={"motivo": "xyz", "descricao": "texto qualquer"}
     )
     assert resposta.status_code == 422
+
+
+async def test_denunciar_sucesso(client, db, usuario_logado, monkeypatch):
+    entrar_no_grupo()
+    trocar(monkeypatch, service, "criar_denuncia", fake(DenunciaRead))
+    resposta = await client.post("/grupos/1/denuncias", json=DENUNCIA)
+    assert resposta.status_code == 201
