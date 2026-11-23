@@ -29,3 +29,9 @@ async def test_listar_avisos_com_itens(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/avisos")
     assert resposta.status_code == 200
     assert len(resposta.json()) == 2
+
+
+async def test_marcar_como_lido(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "marcar_como_lido", fake(AvisoRead))
+    resposta = await client.patch("/avisos/1/lido")
+    assert resposta.status_code == 200
