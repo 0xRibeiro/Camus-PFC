@@ -45,3 +45,19 @@ async def test_denuncia_repetida_enquanto_pendente_e_recusada(repo):
         await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
 
     repo.criar.assert_not_called()
+
+
+async def test_denuncia_do_grupo_nasce_sem_conteudo_nem_titulo(repo):
+    repo.buscar_pendente.return_value = None
+    repo.titulo_do_conteudo.return_value = None
+    data = DenunciaCreate(motivo="assedio", descricao="  ofensas no grupo  ")
+
+    denuncia = await service.criar_denuncia(AsyncMock(), GRUPO, data, MEMBRO)
+
+    assert denuncia.id_grupo == GRUPO.id
+    assert denuncia.id_denunciante == MEMBRO.id
+    assert denuncia.id_conteudo is None
+    assert denuncia.titulo_conteudo is None
+    assert denuncia.motivo == "assedio"
+    # o schema tira os espacos do comeco e do fim
+    assert denuncia.descricao == "ofensas no grupo"
