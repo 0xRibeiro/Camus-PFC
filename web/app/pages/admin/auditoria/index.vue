@@ -55,6 +55,17 @@
         </USelectMenu>
       </UFormField>
 
+      <!-- inverte a ordem, quem ordena e o back pra valer em todas as paginas -->
+      <UTooltip :text="antigosPrimeiro ? 'Mais antigos primeiro' : 'Mais novos primeiro'">
+        <UButton
+          :icon="antigosPrimeiro ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'"
+          aria-label="Inverter ordem"
+          color="neutral"
+          variant="outline"
+          @click="antigosPrimeiro = !antigosPrimeiro"
+        />
+      </UTooltip>
+
       <!-- busca de novo com os msm filtros e na msm pagina, pra ver o q entrou depois -->
       <UTooltip text="Atualizar">
         <UButton
@@ -195,17 +206,21 @@ watch(usuarioIds, (ids) => {
   usuariosEscolhidos.value = escolhidos
 })
 
-// ------- limpar: volta pro padrao (hoje, todas as entidades, todos os usuarios)
+// ------- ordem: por padrao o mais novo primeiro
+const antigosPrimeiro = ref(false)
+
+// ------- limpar: volta pro padrao (hoje, todas as entidades, todos os usuarios, mais novo primeiro)
 const filtrosAlterados = computed(() => {
   const { start, end } = periodo.value
   const soHoje = !!start && !!end && start.compare(hoje) === 0 && end.compare(hoje) === 0
-  return !soHoje || !!entidades.value.length || !!usuarioIds.value.length
+  return !soHoje || !!entidades.value.length || !!usuarioIds.value.length || antigosPrimeiro.value
 })
 
 function limparFiltros() {
   periodo.value = { start: hoje, end: hoje }
   entidades.value = []
   usuarioIds.value = []
+  antigosPrimeiro.value = false
 }
 
 // ------- busca dos logs
@@ -230,6 +245,7 @@ async function fetchLogs() {
       desde: inicioDoDia(start),
       // ate o comeco do dia seguinte, assim o ultimo dia entra inteiro
       ate: inicioDoDia(end.add({ days: 1 })),
+      antigos_primeiro: antigosPrimeiro.value,
     },
   })
 
@@ -239,7 +255,7 @@ async function fetchLogs() {
 onMounted(fetchLogs)
 
 // muda filtro -> volta pra pagina 1 e busca de novo
-watch([periodo, entidades, usuarioIds], () => {
+watch([periodo, entidades, usuarioIds, antigosPrimeiro], () => {
   pagina.value = 1
   fetchLogs()
 }, { deep: true })

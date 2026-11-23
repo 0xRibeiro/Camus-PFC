@@ -26,10 +26,13 @@ async def listar_logs(
     usuario_ids: list[int] | None = Query(default=None),
     desde: datetime | None = None,
     ate: datetime | None = None,
+    antigos_primeiro: bool = False,
     db: AsyncSession = Depends(get_async_session),
 ):
     repo = AuditoriaRepository(db)
-    resultado = await repo.listar(limite, offset, entidades, entidade_id, usuario_ids, desde, ate)
+    resultado = await repo.listar(
+        limite, offset, entidades, entidade_id, usuario_ids, desde, ate, antigos_primeiro
+    )
 
     logs = []
     for log, username in resultado:

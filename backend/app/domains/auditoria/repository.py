@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.auditoria.model import LogAuditoria
@@ -26,6 +26,7 @@ class AuditoriaRepository:
         usuario_ids: list[int] | None = None,
         desde: datetime | None = None,
         ate: datetime | None = None,
+        antigos_primeiro: bool = False,
     ) -> list[tuple[LogAuditoria, str | None]]:
         # outerjoin pq log do sistema (sem usuario) tb aparece, ai o nome vem None
         query = select(LogAuditoria, Usuario.username).outerjoin(
@@ -50,7 +51,13 @@ class AuditoriaRepository:
         if ate is not None:
             query = query.where(LogAuditoria.criado_em < utc_sem_fuso(ate))
 
-        query = query.order_by(LogAuditoria.criado_em.desc()).limit(limite).offset(offset)
+        # padrao e o mais novo primeiro
+        if antigos_primeiro:
+            query = query.order_by(LogAuditoria.criado_em.asc())
+        else:
+            query = query.order_by(LogAuditoria.criado_em.desc())
+
+        query = query.limit(limite).offset(offset)
 
         resultado = await self.db.execute(query)
         logs = []
@@ -61,4 +68,12 @@ class AuditoriaRepository:
     # log escrito na mao, pra acao q n passa pelo trigger (tipo ver um email)
     async def registrar(self, log: LogAuditoria) -> None:
         self.db.add(log)
+        await self.db.commit()
+
+    # apaga os logs mais velhos q o limite de dias
+    async def apagar_antigos(self, dias: int) -> None:
+        limite = utc_sem_fuso(datetime.now(timezone.utc)) - timedelta(days=dias)
+        query = delete(LogAuditoria).where(LogAuditoria.criado_em < limite)
+
+        await self.db.execute(query)
         await self.db.commit()

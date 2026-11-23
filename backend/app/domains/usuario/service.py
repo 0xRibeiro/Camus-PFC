@@ -391,4 +391,6 @@ async def deletar_usuario(db: AsyncSession, user: Usuario) -> None:
     user.is_active = False
     user.deletado_em = datetime.now(timezone.utc)
 
-    await UsuarioRepository(db).salvar(user)
+    repo = UsuarioRepository(db)
+    await repo.apagar_vinculos(user.id)
+    await repo.salvar(user)

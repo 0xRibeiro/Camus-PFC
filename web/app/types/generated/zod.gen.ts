@@ -1729,7 +1729,8 @@ export const zListarLogsAdminAuditoriaGetQuery = z.object({
     entidade_id: z.int().nullish(),
     usuario_ids: z.array(z.int()).nullish(),
     desde: z.iso.datetime().nullish(),
-    ate: z.iso.datetime().nullish()
+    ate: z.iso.datetime().nullish(),
+    antigos_primeiro: z.boolean().optional().default(false)
 });
 
 /**
