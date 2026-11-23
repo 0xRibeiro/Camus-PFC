@@ -37,3 +37,9 @@ async def test_buscar_trilha(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "buscar_trilha", fake(TrilhaAlunoRead))
     resposta = await client.get("/progresso/trilhas/1")
     assert resposta.status_code == 200
+
+
+async def test_buscar_trilha_inexistente(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_trilha", erro=NotFoundException("sem trilha"))
+    resposta = await client.get("/progresso/trilhas/99")
+    assert resposta.status_code == 404
