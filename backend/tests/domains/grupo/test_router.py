@@ -60,3 +60,9 @@ async def test_entrar_no_grupo_convite_expirado(client, db, usuario_logado, monk
     trocar(monkeypatch, "entrar_grupo", erro=NotFoundException("expirou"))
     resposta = await client.post("/grupos/entrar", json={"convite": "000000"})
     assert resposta.status_code == 404
+
+
+async def test_buscar_grupo(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_grupo", grupo_read())
+    resposta = await client.get("/grupos/1")
+    assert resposta.status_code == 200
