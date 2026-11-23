@@ -31,3 +31,9 @@ async def test_listar_trilhas(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/progresso/trilhas")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_buscar_trilha(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_trilha", fake(TrilhaAlunoRead))
+    resposta = await client.get("/progresso/trilhas/1")
+    assert resposta.status_code == 200
