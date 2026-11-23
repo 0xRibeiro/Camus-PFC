@@ -39,3 +39,11 @@ async def test_listar_denuncias_admin(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/admin/denuncias")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_listar_denuncias_filtra_por_status(client, db, usuario_logado, monkeypatch):
+    usuario_logado.role = RoleUsuario.admin
+    mock = trocar(monkeypatch, service, "listar_denuncias", [])
+    resposta = await client.get("/admin/denuncias?status=pendente")
+    assert resposta.status_code == 200
+    assert mock.call_args.args[1] == "pendente"
