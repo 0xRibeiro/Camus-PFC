@@ -33,3 +33,12 @@ async def test_aviso_de_outra_pessoa_tambem_da_404(repo):
         await service.marcar_como_lido(AsyncMock(), 1, USUARIO)
 
     repo.salvar.assert_not_called()
+
+
+async def test_marcar_como_lido_atualiza_o_aviso(repo):
+    repo.buscar.return_value = SimpleNamespace(id_usuario=USUARIO.id, lido=False)
+
+    aviso = await service.marcar_como_lido(AsyncMock(), 1, USUARIO)
+
+    assert aviso.lido is True
+    repo.salvar.assert_awaited_once()
