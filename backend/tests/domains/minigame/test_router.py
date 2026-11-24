@@ -35,3 +35,9 @@ async def test_nova_rodada(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "nova_rodada", fake(RodadaRead))
     resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas")
     assert resposta.status_code == 201
+
+
+async def test_nova_rodada_sem_peixes_cadastrados(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "nova_rodada", erro=NotFoundException("sem peixes"))
+    resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas")
+    assert resposta.status_code == 404
