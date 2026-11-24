@@ -54,3 +54,9 @@ async def test_desconectar_dispositivo(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "desconectar_dispositivo")
     resposta = await client.delete("/aquarios/1/dispositivo")
     assert resposta.status_code == 204
+
+
+async def test_desconectar_dispositivo_sem_ser_dono(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "desconectar_dispositivo", erro=ForbiddenException("só o dono"))
+    resposta = await client.delete("/aquarios/1/dispositivo")
+    assert resposta.status_code == 403
