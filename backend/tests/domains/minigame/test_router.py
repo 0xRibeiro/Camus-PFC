@@ -29,3 +29,9 @@ async def test_meus_recordes(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/minigames/recordes")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_nova_rodada(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "nova_rodada", fake(RodadaRead))
+    resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas")
+    assert resposta.status_code == 201
