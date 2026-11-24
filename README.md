@@ -1,6 +1,6 @@
 <!-- MODELO PROJETO EM ANDAMENTO -->
 <h1 align="center">
-  🐟 Camus - Em construção 🐟
+  🐟 Camus - Construido 🐟
 </h1>
 
 <!-- MODELO MENU DE NAVEGAÇÃO -->
