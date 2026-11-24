@@ -33,6 +33,11 @@ class Trilha(Base):
 
     is_active: Mapped[bool] = mapped_column(default=False) # estado de uma trilha
 
+    # a dashboard conta as trilhas criadas e marca o dia no calendario por aqui
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
 
 class Modulo(Base):
     __tablename__ = "modulos"
@@ -61,6 +66,11 @@ class Conteudo(Base):
     pontos: Mapped[int] = mapped_column(default=0)
 
     versao: Mapped[int] = mapped_column(default=1)
+
+    # quando a versao atual comecou, um trigger no banco troca qnd a versao sobe
+    versao_desde: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
     video_url: Mapped[str | None] = mapped_column(String(500))
 

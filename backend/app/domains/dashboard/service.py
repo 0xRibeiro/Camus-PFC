@@ -50,8 +50,8 @@ async def contar_linhas(repo: DashboardRepository, inicio: date, fim: date) -> d
     return {
         "alunos": await repo.contar_alunos_por_dia(inicio, fim),
         "dispositivos": await repo.contar_dispositivos_por_dia(inicio, fim),
-        "trilhas": await repo.contar_criados_por_dia("trilhas", inicio, fim),
-        "grupos": await repo.contar_criados_por_dia("grupos", inicio, fim),
+        "trilhas": await repo.contar_trilhas_por_dia(inicio, fim),
+        "grupos": await repo.contar_grupos_por_dia(inicio, fim),
     }
 
 
@@ -103,14 +103,6 @@ async def buscar_inicio_do_sistema(repo: DashboardRepository) -> date:
     if primeiro is None:
         return await repo.buscar_data_atual()
     return primeiro
-
-
-# sem log de criacao (coisa de antes da auditoria) vale o comeco do sistema
-async def buscar_dia_de_criacao(repo: DashboardRepository, entidade: str, entidade_id: int) -> date:
-    dia = await repo.buscar_dia_de_criacao(entidade, entidade_id)
-    if dia is None:
-        return await buscar_inicio_do_sistema(repo)
-    return dia
 
 
 async def obter_dashboard(db: AsyncSession, inicio: date | None, fim: date | None,
@@ -261,6 +253,9 @@ def montar_evolucao_trilha(atividade: set[tuple[int, date]], marcos: dict[int, t
 async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date | None,
     fim: date | None, agrupamento: Agrupamento) -> DashboardTrilhaRead:
     repo = DashboardRepository(db)
+    trilha = await repo.buscar_trilha(trilha_id)
+    if trilha is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trilha não encontrada")
     inicio, fim, inicio_anterior, fim_anterior = await resolver_periodo(repo, inicio, fim)
     lista_conteudos = await repo.listar_conteudos_da_trilha(trilha_id)
 
@@ -285,7 +280,7 @@ async def obter_dashboard_trilha(db: AsyncSession, trilha_id: int, inicio: date 
             contagens_anteriores, duracoes, marcos),
         engajamento=await montar_engajamento(repo, trilha_id, progresso, sum(terminaram.values())),
         funil=await montar_funil(repo, lista_conteudos),
-        inicio_total=await buscar_dia_de_criacao(repo, "trilhas", trilha_id),
+        inicio_total=dia_no_fuso(trilha.criado_em),
     )
 
 
@@ -477,18 +472,10 @@ async def obter_dashboard_conteudo(db: AsyncSession, conteudo_id: int, inicio: d
 
     questoes = await montar_questoes(repo, conteudo_id, no_periodo)
 
-    # a versao 1 nasce junto com o conteudo
-    criado_em = await buscar_dia_de_criacao(repo, "conteudos", conteudo_id)
-    versao_desde = None
-    if conteudo.versao > 1:
-        versao_desde = await repo.buscar_dia_da_versao(conteudo_id, conteudo.versao)
-    if versao_desde is None:
-        versao_desde = criado_em
-
     return DashboardConteudoRead(
-        inicio_total=criado_em,
+        inicio_total=dia_no_fuso(conteudo.criado_em),
         versao=conteudo.versao,
-        versao_desde=versao_desde,
+        versao_desde=dia_no_fuso(conteudo.versao_desde),
         titulo=conteudo.titulo,
         trilha_id=trilha_id,
         evolucao=evolucao,

@@ -3,7 +3,6 @@ from datetime import date, datetime
 from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domains.auditoria.model import AcaoAuditoria, LogAuditoria
 from app.domains.conquistas.model import Conquista, associacao_conquista_usuario
 from app.domains.dispositivo.model import Dispositivo
 from app.domains.grupo.model import Grupo, Participacao
@@ -11,8 +10,8 @@ from app.domains.progresso.model import ConclusaoConteudo, TentativaQuiz
 from app.domains.trilha.model import Alternativa, Conteudo, Modulo, Questao, Trilha
 from app.domains.usuario.model import RoleUsuario, Usuario
 
-# dia no fuso de sp, o log fica sem fuso
-DIA_DO_LOG = cast(func.timezone("America/Sao_Paulo", func.timezone("UTC", LogAuditoria.criado_em)), Date)
+# dia no fuso de sp
+DIA_DO_CADASTRO = cast(func.timezone("America/Sao_Paulo", Usuario.criado_em), Date)
 DIA_DA_CONCLUSAO = cast(func.timezone("America/Sao_Paulo", ConclusaoConteudo.concluido_em), Date)
 DIA_DA_TENTATIVA = cast(func.timezone("America/Sao_Paulo", TentativaQuiz.criado_em), Date)
 
@@ -45,34 +44,33 @@ class DashboardRepository:
         globais, de_grupo = resultado.one()
         return globais, de_grupo
 
-    # criacoes por dia pela auditoria, serve pra trilhas e grupos
-    async def contar_criados_por_dia(self, entidade: str, inicio: date, fim: date) -> dict[date, int]:
+    # criacoes por dia, serve pra trilhas e grupos
+    async def contar_criados_por_dia(self, criado_em, inicio: date, fim: date) -> dict[date, int]:
+        dia = cast(func.timezone("America/Sao_Paulo", criado_em), Date)
         consulta = (
-            select(DIA_DO_LOG, func.count())
-            .where(
-                LogAuditoria.entidade == entidade,
-                LogAuditoria.acao == AcaoAuditoria.create,
-                DIA_DO_LOG >= inicio,
-                DIA_DO_LOG <= fim,
-            )
-            .group_by(DIA_DO_LOG)
+            select(dia, func.count())
+            .where(dia >= inicio, dia <= fim)
+            .group_by(dia)
         )
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
 
-    # join pq log antigo tem outro formato de json
+    async def contar_trilhas_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
+        return await self.contar_criados_por_dia(Trilha.criado_em, inicio, fim)
+
+    async def contar_grupos_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
+        return await self.contar_criados_por_dia(Grupo.criado_em, inicio, fim)
+
+    # conta deletado tbm, a linha continua
     async def contar_alunos_por_dia(self, inicio: date, fim: date) -> dict[date, int]:
         consulta = (
-            select(DIA_DO_LOG, func.count())
-            .join(Usuario, Usuario.id == LogAuditoria.entidade_id)
+            select(DIA_DO_CADASTRO, func.count())
             .where(
-                LogAuditoria.entidade == "usuarios",
-                LogAuditoria.acao == AcaoAuditoria.create,
                 Usuario.role == RoleUsuario.aluno,
-                DIA_DO_LOG >= inicio,
-                DIA_DO_LOG <= fim,
+                DIA_DO_CADASTRO >= inicio,
+                DIA_DO_CADASTRO <= fim,
             )
-            .group_by(DIA_DO_LOG)
+            .group_by(DIA_DO_CADASTRO)
         )
         resultado = await self.db.execute(consulta)
         return montar_contagem(resultado.all())
@@ -269,29 +267,9 @@ class DashboardRepository:
         ))
         return set(concluiram.tuples().all()) | set(tentaram.tuples().all())
 
-    # dia em q a entidade foi criada, pela auditoria. None se n tiver log
-    async def buscar_dia_de_criacao(self, entidade: str, entidade_id: int) -> date | None:
-        consulta = select(func.min(DIA_DO_LOG)).where(
-            LogAuditoria.entidade == entidade,
-            LogAuditoria.entidade_id == entidade_id,
-            LogAuditoria.acao == AcaoAuditoria.create,
-        )
-        return await self.db.scalar(consulta)
-
-    # dia do update q mudou a versao do conteudo pra essa
-    async def buscar_dia_da_versao(self, conteudo_id: int, versao: int) -> date | None:
-        consulta = select(func.min(DIA_DO_LOG)).where(
-            LogAuditoria.entidade == "conteudos",
-            LogAuditoria.entidade_id == conteudo_id,
-            LogAuditoria.acao == AcaoAuditoria.update,
-            LogAuditoria.alteracoes["novo"]["versao"].astext == str(versao),
-            LogAuditoria.alteracoes["antigo"]["versao"].astext != str(versao),
-        )
-        return await self.db.scalar(consulta)
-
-    # 1o registro do sistema, é o comeco do todo o periodo no admin
+    # 1o cadastro do sistema (o admin do seed), é o comeco do todo o periodo no admin
     async def buscar_primeiro_dia(self) -> date | None:
-        return await self.db.scalar(select(func.min(DIA_DO_LOG)))
+        return await self.db.scalar(select(func.min(DIA_DO_CADASTRO)))
 
     # pegando a data direto do postgres pra garantir que seja a mesma pra todos os cálculos.
     async def buscar_data_atual(self) -> date:
