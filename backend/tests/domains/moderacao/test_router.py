@@ -52,3 +52,12 @@ async def test_suspender_grupo_motivo_curto(client, db, usuario_logado):
         "/admin/grupos/1/suspensao", json={"dias": 14, "motivo": "abc"}
     )
     assert resposta.status_code == 422
+
+
+async def test_suspender_grupo_sucesso(client, db, usuario_logado, monkeypatch):
+    usuario_logado.role = RoleUsuario.admin
+    trocar(monkeypatch, "suspender_grupo", grupo_read())
+    resposta = await client.post(
+        "/admin/grupos/1/suspensao", json={"dias": 30, **MOTIVO}
+    )
+    assert resposta.status_code == 200
