@@ -59,3 +59,10 @@ async def test_nova_rodada_mais_ou_menos_devolve_200(client, db, usuario_logado,
     trocar(monkeypatch, "nova_rodada_mais_ou_menos", fake(RodadaMaisOuMenosRead))
     resposta = await client.post("/minigames/meio-peixe-meio-fotografo/rodadas")
     assert resposta.status_code == 200
+
+
+async def test_responder_mais_ou_menos_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post(
+        "/minigames/meio-peixe-meio-fotografo/rodadas/1/resposta", json={}
+    )
+    assert resposta.status_code == 422
