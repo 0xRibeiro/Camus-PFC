@@ -74,3 +74,10 @@ async def test_excluir_grupo_sucesso(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "excluir_grupo")
     resposta = await client.request("DELETE", "/admin/grupos/1", json=MOTIVO)
     assert resposta.status_code == 204
+
+
+async def test_excluir_grupo_inexistente(client, db, usuario_logado, monkeypatch):
+    usuario_logado.role = RoleUsuario.admin
+    trocar(monkeypatch, "excluir_grupo", erro=NotFoundException("sem grupo"))
+    resposta = await client.request("DELETE", "/admin/grupos/99", json=MOTIVO)
+    assert resposta.status_code == 404
