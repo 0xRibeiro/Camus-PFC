@@ -83,3 +83,9 @@ async def test_listar_modulos_minutos_acima_do_limite(client, db, usuario_logado
 async def test_listar_modulos_agrupamento_invalido(client, db, usuario_logado):
     resposta = await client.get("/aquarios/1/modulos?agrupamento=semana")
     assert resposta.status_code == 422
+
+
+async def test_listar_modulos_aquario_inexistente(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "listar_modulos", erro=NotFoundException("sem aquário"))
+    resposta = await client.get("/aquarios/99/modulos")
+    assert resposta.status_code == 404
