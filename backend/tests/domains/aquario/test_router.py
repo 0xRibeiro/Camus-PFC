@@ -33,3 +33,8 @@ async def test_listar_aquarios_usa_o_usuario_logado(client, db, usuario_logado, 
 async def test_criar_aquario_sem_corpo(client, db, usuario_logado):
     resposta = await client.post("/aquarios", json={})
     assert resposta.status_code == 422
+
+
+async def test_entrar_com_codigo_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/aquarios/entrar-com-codigo", json={})
+    assert resposta.status_code == 422
