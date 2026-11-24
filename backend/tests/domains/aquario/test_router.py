@@ -118,3 +118,9 @@ async def test_sair_do_aquario(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "sair_do_aquario")
     resposta = await client.delete("/aquarios/1/sair")
     assert resposta.status_code == 204
+
+
+async def test_dono_nao_pode_sair_do_aquario(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "sair_do_aquario", erro=ForbiddenException("dono não sai"))
+    resposta = await client.delete("/aquarios/1/sair")
+    assert resposta.status_code == 403
