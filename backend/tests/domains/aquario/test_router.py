@@ -22,3 +22,9 @@ async def test_listar_aquarios(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/aquarios")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_listar_aquarios_usa_o_usuario_logado(client, db, usuario_logado, monkeypatch):
+    mock = trocar(monkeypatch, "listar_aquarios", [])
+    await client.get("/aquarios")
+    assert mock.call_args.args[1] == usuario_logado.id
