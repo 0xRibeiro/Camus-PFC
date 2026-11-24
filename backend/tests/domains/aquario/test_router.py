@@ -89,3 +89,8 @@ async def test_listar_modulos_aquario_inexistente(client, db, usuario_logado, mo
     trocar(monkeypatch, "listar_modulos", erro=NotFoundException("sem aquário"))
     resposta = await client.get("/aquarios/99/modulos")
     assert resposta.status_code == 404
+
+
+async def test_comandar_modulo_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/aquarios/1/modulos/abc123/comando", json={})
+    assert resposta.status_code == 422
