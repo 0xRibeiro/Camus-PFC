@@ -112,3 +112,9 @@ async def test_listar_membros(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "listar_membros", [])
     resposta = await client.get("/aquarios/1/membros")
     assert resposta.status_code == 200
+
+
+async def test_sair_do_aquario(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "sair_do_aquario")
+    resposta = await client.delete("/aquarios/1/sair")
+    assert resposta.status_code == 204
