@@ -166,3 +166,9 @@ async def test_editar_aquario_sem_ser_dono(client, db, usuario_logado, monkeypat
     trocar(monkeypatch, "editar_aquario", erro=ForbiddenException("só o dono"))
     resposta = await client.patch("/aquarios/1", json={"nome": "Novo nome"})
     assert resposta.status_code == 403
+
+
+async def test_buscar_aquario(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_aquario", fake(AquarioRead))
+    resposta = await client.get("/aquarios/1")
+    assert resposta.status_code == 200
