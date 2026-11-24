@@ -36,3 +36,11 @@ async def test_excluir_conteudo_aluno_e_barrado(client, db, usuario_logado):
     usuario_logado.role = RoleUsuario.aluno
     resposta = await client.request("DELETE", "/admin/grupos/1/conteudos/2", json=MOTIVO)
     assert resposta.status_code == 403
+
+
+async def test_suspender_grupo_prazo_invalido(client, db, usuario_logado):
+    usuario_logado.role = RoleUsuario.admin
+    resposta = await client.post(
+        "/admin/grupos/1/suspensao", json={"dias": 7, **MOTIVO}
+    )
+    assert resposta.status_code == 422
