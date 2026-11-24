@@ -43,3 +43,8 @@ async def test_entrar_com_codigo_sem_corpo(client, db, usuario_logado):
 async def test_entrar_com_convite_sem_corpo(client, db, usuario_logado):
     resposta = await client.post("/aquarios/entrar", json={})
     assert resposta.status_code == 422
+
+
+async def test_conectar_dispositivo_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/aquarios/1/dispositivo", json={})
+    assert resposta.status_code == 422
