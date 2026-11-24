@@ -53,3 +53,9 @@ async def test_responder_sucesso(client, db, usuario_logado, monkeypatch):
     corpo = fake(RespostaInput).model_dump(mode="json")
     resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas/1/resposta", json=corpo)
     assert resposta.status_code == 200
+
+
+async def test_nova_rodada_mais_ou_menos_devolve_200(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "nova_rodada_mais_ou_menos", fake(RodadaMaisOuMenosRead))
+    resposta = await client.post("/minigames/meio-peixe-meio-fotografo/rodadas")
+    assert resposta.status_code == 200
