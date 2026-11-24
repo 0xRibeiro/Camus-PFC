@@ -46,3 +46,10 @@ async def test_nova_rodada_sem_peixes_cadastrados(client, db, usuario_logado, mo
 async def test_responder_sem_corpo(client, db, usuario_logado):
     resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas/1/resposta", json={})
     assert resposta.status_code == 422
+
+
+async def test_responder_sucesso(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "responder", fake(ResultadoRead))
+    corpo = fake(RespostaInput).model_dump(mode="json")
+    resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas/1/resposta", json=corpo)
+    assert resposta.status_code == 200
