@@ -79,3 +79,11 @@ async def test_xp_zerado_fica_sem_posicao(client, db, repo, usuario_logado):
     resposta = await client.get("/pontuacao/xp")
     assert resposta.json()["posicao"] is None
     repo.contar_na_frente.assert_not_awaited()
+
+
+async def test_xp_de_admin_nao_tem_posicao(client, db, repo, usuario_logado):
+    usuario_logado.role = RoleUsuario.admin
+    repo.somar_xp.return_value = 50
+    resposta = await client.get("/pontuacao/xp")
+    assert resposta.json()["xp_total"] == 50
+    assert resposta.json()["posicao"] is None
