@@ -172,3 +172,9 @@ async def test_buscar_aquario(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "buscar_aquario", fake(AquarioRead))
     resposta = await client.get("/aquarios/1")
     assert resposta.status_code == 200
+
+
+async def test_buscar_aquario_inexistente(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "buscar_aquario", erro=NotFoundException("sem aquário"))
+    resposta = await client.get("/aquarios/99")
+    assert resposta.status_code == 404
