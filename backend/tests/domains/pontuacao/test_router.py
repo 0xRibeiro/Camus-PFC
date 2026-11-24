@@ -4,6 +4,9 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 
 from app.domains.pontuacao import service
 from app.domains.pontuacao.schema import XpRead
+from datetime import datetime
+from app.domains.usuario.model import RoleUsuario
+from tests.domains.usuario.factories import UsuarioFactory
 
 
 def fake(schema):
@@ -58,3 +61,13 @@ async def test_extrato(client, db, usuario_logado, monkeypatch):
     resposta = await client.get("/pontuacao/extrato")
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+async def test_xp_do_aluno_mostra_a_posicao(client, db, repo, usuario_logado):
+    usuario_logado.role = RoleUsuario.aluno
+    repo.somar_xp.return_value = 120
+    repo.contar_na_frente.return_value = 2
+    resposta = await client.get("/pontuacao/xp")
+    assert resposta.status_code == 200
+    assert resposta.json()["xp_total"] == 120
+    assert resposta.json()["posicao"] == 3
