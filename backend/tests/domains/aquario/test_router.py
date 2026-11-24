@@ -28,3 +28,8 @@ async def test_listar_aquarios_usa_o_usuario_logado(client, db, usuario_logado, 
     mock = trocar(monkeypatch, "listar_aquarios", [])
     await client.get("/aquarios")
     assert mock.call_args.args[1] == usuario_logado.id
+
+
+async def test_criar_aquario_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/aquarios", json={})
+    assert resposta.status_code == 422
