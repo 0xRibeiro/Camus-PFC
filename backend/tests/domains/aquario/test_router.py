@@ -60,3 +60,11 @@ async def test_desconectar_dispositivo_sem_ser_dono(client, db, usuario_logado, 
     trocar(monkeypatch, "desconectar_dispositivo", erro=ForbiddenException("só o dono"))
     resposta = await client.delete("/aquarios/1/dispositivo")
     assert resposta.status_code == 403
+
+
+async def test_listar_modulos_usa_valores_padrao(client, db, usuario_logado, monkeypatch):
+    mock = trocar(monkeypatch, "listar_modulos", [])
+    resposta = await client.get("/aquarios/1/modulos")
+    assert resposta.status_code == 200
+    assert mock.call_args.args[3] == 60
+    assert mock.call_args.args[6] == "auto"
