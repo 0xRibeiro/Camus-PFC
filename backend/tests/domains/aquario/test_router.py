@@ -178,3 +178,8 @@ async def test_buscar_aquario_inexistente(client, db, usuario_logado, monkeypatc
     trocar(monkeypatch, "buscar_aquario", erro=NotFoundException("sem aquário"))
     resposta = await client.get("/aquarios/99")
     assert resposta.status_code == 404
+
+
+async def test_buscar_aquario_id_invalido(client, db, usuario_logado):
+    resposta = await client.get("/aquarios/abc")
+    assert resposta.status_code == 422
