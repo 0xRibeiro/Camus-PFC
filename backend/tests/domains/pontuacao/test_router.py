@@ -96,3 +96,10 @@ async def test_xp_no_grupo_usa_o_escopo_do_grupo(client, db, repo, usuario_logad
     resposta = await client.get("/pontuacao/xp")
     assert resposta.json()["posicao"] is None
     assert repo.somar_xp.call_args.args[1] == 4
+
+
+async def test_xp_por_dia_preenche_os_dias_vazios_com_zero(client, db, repo, usuario_logado):
+    repo.somar_por_dia.return_value = {}
+    resposta = await client.get("/pontuacao/xp/dias?dias=3")
+    assert resposta.status_code == 200
+    assert [item["pontos"] for item in resposta.json()] == [0, 0, 0]
