@@ -61,3 +61,9 @@ async def test_suspender_grupo_sucesso(client, db, usuario_logado, monkeypatch):
         "/admin/grupos/1/suspensao", json={"dias": 30, **MOTIVO}
     )
     assert resposta.status_code == 200
+
+
+async def test_excluir_grupo_sem_motivo(client, db, usuario_logado):
+    usuario_logado.role = RoleUsuario.admin
+    resposta = await client.request("DELETE", "/admin/grupos/1", json={})
+    assert resposta.status_code == 422
