@@ -71,3 +71,11 @@ async def test_xp_do_aluno_mostra_a_posicao(client, db, repo, usuario_logado):
     assert resposta.status_code == 200
     assert resposta.json()["xp_total"] == 120
     assert resposta.json()["posicao"] == 3
+
+
+async def test_xp_zerado_fica_sem_posicao(client, db, repo, usuario_logado):
+    usuario_logado.role = RoleUsuario.aluno
+    repo.somar_xp.return_value = 0
+    resposta = await client.get("/pontuacao/xp")
+    assert resposta.json()["posicao"] is None
+    repo.contar_na_frente.assert_not_awaited()
