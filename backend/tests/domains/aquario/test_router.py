@@ -142,3 +142,9 @@ async def test_listar_peixes_aquario_inexistente(client, db, usuario_logado, mon
 async def test_cadastrar_peixe_sem_corpo(client, db, usuario_logado):
     resposta = await client.post("/aquarios/1/peixes", json={})
     assert resposta.status_code == 422
+
+
+async def test_remover_peixe(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "remover_peixe")
+    resposta = await client.delete("/aquarios/1/peixes/2")
+    assert resposta.status_code == 204
