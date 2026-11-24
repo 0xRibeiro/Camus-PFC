@@ -68,3 +68,8 @@ async def test_listar_modulos_usa_valores_padrao(client, db, usuario_logado, mon
     assert resposta.status_code == 200
     assert mock.call_args.args[3] == 60
     assert mock.call_args.args[6] == "auto"
+
+
+async def test_listar_modulos_minutos_zero(client, db, usuario_logado):
+    resposta = await client.get("/aquarios/1/modulos?minutos=0")
+    assert resposta.status_code == 422
