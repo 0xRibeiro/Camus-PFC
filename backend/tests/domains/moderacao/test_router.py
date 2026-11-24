@@ -44,3 +44,11 @@ async def test_suspender_grupo_prazo_invalido(client, db, usuario_logado):
         "/admin/grupos/1/suspensao", json={"dias": 7, **MOTIVO}
     )
     assert resposta.status_code == 422
+
+
+async def test_suspender_grupo_motivo_curto(client, db, usuario_logado):
+    usuario_logado.role = RoleUsuario.admin
+    resposta = await client.post(
+        "/admin/grupos/1/suspensao", json={"dias": 14, "motivo": "abc"}
+    )
+    assert resposta.status_code == 422
