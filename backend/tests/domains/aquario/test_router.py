@@ -137,3 +137,8 @@ async def test_listar_peixes_aquario_inexistente(client, db, usuario_logado, mon
     trocar(monkeypatch, "listar_peixes", erro=NotFoundException("sem aquário"))
     resposta = await client.get("/aquarios/99/peixes")
     assert resposta.status_code == 404
+
+
+async def test_cadastrar_peixe_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/aquarios/1/peixes", json={})
+    assert resposta.status_code == 422
