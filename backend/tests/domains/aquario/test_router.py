@@ -124,3 +124,10 @@ async def test_dono_nao_pode_sair_do_aquario(client, db, usuario_logado, monkeyp
     trocar(monkeypatch, "sair_do_aquario", erro=ForbiddenException("dono não sai"))
     resposta = await client.delete("/aquarios/1/sair")
     assert resposta.status_code == 403
+
+
+async def test_listar_peixes(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "listar_peixes", [])
+    resposta = await client.get("/aquarios/1/peixes")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
