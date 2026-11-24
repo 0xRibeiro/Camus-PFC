@@ -94,3 +94,9 @@ async def test_listar_modulos_aquario_inexistente(client, db, usuario_logado, mo
 async def test_comandar_modulo_sem_corpo(client, db, usuario_logado):
     resposta = await client.post("/aquarios/1/modulos/abc123/comando", json={})
     assert resposta.status_code == 422
+
+
+async def test_gerar_convite(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "gerar_convite", fake(ConviteAquarioRead))
+    resposta = await client.post("/aquarios/1/convites")
+    assert resposta.status_code == 201
