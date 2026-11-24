@@ -148,3 +148,9 @@ async def test_remover_peixe(client, db, usuario_logado, monkeypatch):
     trocar(monkeypatch, "remover_peixe")
     resposta = await client.delete("/aquarios/1/peixes/2")
     assert resposta.status_code == 204
+
+
+async def test_remover_peixe_inexistente(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "remover_peixe", erro=NotFoundException("sem peixe"))
+    resposta = await client.delete("/aquarios/1/peixes/99")
+    assert resposta.status_code == 404
