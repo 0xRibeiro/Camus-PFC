@@ -119,3 +119,12 @@ async def test_ranking_global_numera_as_posicoes(client, db, repo, usuario_logad
     assert resposta.status_code == 200
     assert [item["posicao"] for item in resposta.json()] == [1, 2]
     assert resposta.json()[0]["xp_total"] == 90
+
+
+async def test_ranking_no_grupo_nao_usa_o_limite_global(client, db, repo, usuario_logado):
+    db.info["grupo_id"] = 5
+    repo.listar_ranking_grupo.return_value = []
+    resposta = await client.get("/pontuacao/ranking")
+    assert resposta.status_code == 200
+    repo.listar_ranking_grupo.assert_awaited_once_with(5)
+    repo.listar_ranking.assert_not_awaited()
