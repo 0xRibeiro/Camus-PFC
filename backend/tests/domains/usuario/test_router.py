@@ -89,7 +89,7 @@ async def test_register_sem_aceitar_termos(client, repo):
     repo.salvar.assert_not_called()
 
 
-async def test_register_sucesso(client, repo):
+async def test_register_sucesso(client, repo, db):
     repo.buscar_por_username.return_value = None
     repo.buscar_por_email.return_value = None
     repo.salvar.return_value = UsuarioFactory.build()
