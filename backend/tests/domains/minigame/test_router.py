@@ -41,3 +41,8 @@ async def test_nova_rodada_sem_peixes_cadastrados(client, db, usuario_logado, mo
     trocar(monkeypatch, "nova_rodada", erro=NotFoundException("sem peixes"))
     resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas")
     assert resposta.status_code == 404
+
+
+async def test_responder_sem_corpo(client, db, usuario_logado):
+    resposta = await client.post("/minigames/quem-e-esse-peixe/rodadas/1/resposta", json={})
+    assert resposta.status_code == 422
