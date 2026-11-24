@@ -87,3 +87,12 @@ async def test_xp_de_admin_nao_tem_posicao(client, db, repo, usuario_logado):
     resposta = await client.get("/pontuacao/xp")
     assert resposta.json()["xp_total"] == 50
     assert resposta.json()["posicao"] is None
+
+
+async def test_xp_no_grupo_usa_o_escopo_do_grupo(client, db, repo, usuario_logado):
+    usuario_logado.role = RoleUsuario.aluno
+    db.info["grupo_id"] = 4
+    repo.somar_xp.return_value = 30
+    resposta = await client.get("/pontuacao/xp")
+    assert resposta.json()["posicao"] is None
+    assert repo.somar_xp.call_args.args[1] == 4
