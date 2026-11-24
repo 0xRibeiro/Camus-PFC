@@ -128,3 +128,12 @@ async def test_ranking_no_grupo_nao_usa_o_limite_global(client, db, repo, usuari
     assert resposta.status_code == 200
     repo.listar_ranking_grupo.assert_awaited_once_with(5)
     repo.listar_ranking.assert_not_awaited()
+
+
+async def test_extrato_vazio(client, db, repo, usuario_logado):
+    repo.listar_do_usuario.return_value = []
+    repo.listar_titulos_conteudos.return_value = {}
+    repo.listar_titulos_minigames.return_value = {}
+    resposta = await client.get("/pontuacao/extrato")
+    assert resposta.status_code == 200
+    assert resposta.json() == []
