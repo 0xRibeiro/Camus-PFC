@@ -110,3 +110,12 @@ async def test_xp_por_dia_soma_os_pontos_de_hoje(client, db, repo, usuario_logad
     repo.somar_por_dia.return_value = {hoje: 40}
     resposta = await client.get("/pontuacao/xp/dias?dias=3")
     assert resposta.json()[-1]["pontos"] == 40
+
+
+async def test_ranking_global_numera_as_posicoes(client, db, repo, usuario_logado):
+    primeiro, segundo = UsuarioFactory.build(), UsuarioFactory.build()
+    repo.listar_ranking.return_value = [(primeiro, 90), (segundo, 70)]
+    resposta = await client.get("/pontuacao/ranking")
+    assert resposta.status_code == 200
+    assert [item["posicao"] for item in resposta.json()] == [1, 2]
+    assert resposta.json()[0]["xp_total"] == 90
