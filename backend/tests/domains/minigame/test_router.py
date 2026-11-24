@@ -66,3 +66,12 @@ async def test_responder_mais_ou_menos_sem_corpo(client, db, usuario_logado):
         "/minigames/meio-peixe-meio-fotografo/rodadas/1/resposta", json={}
     )
     assert resposta.status_code == 422
+
+
+async def test_responder_mais_ou_menos_sucesso(client, db, usuario_logado, monkeypatch):
+    trocar(monkeypatch, "responder_mais_ou_menos", fake(ResultadoMaisOuMenosRead))
+    corpo = fake(PalpiteInput).model_dump(mode="json")
+    resposta = await client.post(
+        "/minigames/meio-peixe-meio-fotografo/rodadas/1/resposta", json=corpo
+    )
+    assert resposta.status_code == 200
