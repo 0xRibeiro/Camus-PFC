@@ -73,3 +73,8 @@ async def test_listar_modulos_usa_valores_padrao(client, db, usuario_logado, mon
 async def test_listar_modulos_minutos_zero(client, db, usuario_logado):
     resposta = await client.get("/aquarios/1/modulos?minutos=0")
     assert resposta.status_code == 422
+
+
+async def test_listar_modulos_minutos_acima_do_limite(client, db, usuario_logado):
+    resposta = await client.get("/aquarios/1/modulos?minutos=43201")
+    assert resposta.status_code == 422
